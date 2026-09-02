@@ -12,8 +12,9 @@ NousResearch hermes-agent v0.21.0 于 2026-09-02 23 时重装完成并验证（d
 - 代码：`%LOCALAPPDATA%\hermes\hermes-agent`（git checkout）；数据主目录 HERMES_HOME（用户环境变量）= `%LOCALAPPDATA%\hermes`；旧 `~\.hermes` 里 memories/sessions 为空、无有效数据，仅留作参考（其 config.yaml 含已失效的 4 个 hermes-studio MCP 条目，勿复制）。
 - 安装/更新必须走本地代理 `127.0.0.1:3067`：git 克隆与 uv 下载 Python 默认不走系统代理，需 export HTTP(S)_PROXY 后再跑 install.ps1 / hermes update；PowerShell 的 Invoke-WebRequest 走系统代理所以 ZIP 回退能成功，属误导性假象。
 - Hermes Studio（D:\hermes studio）已不存在，用户当时拒绝了 AppData 迁移；暂不装，CLI/TUI 即主用法。
+- 主模型已接 ZCode-Antigravity 桥（[[user-windows-environment]]）：config.yaml `model: default gemini-3.7-flash / provider custom / base_url http://127.0.0.1:18080/v1 / api_key 取桥接 config.yaml 的 api-keys`；2026-09-02 `hermes -z` 一次性提问真机验证通过。使用前提：cli-proxy-api.exe 桥接进程须在运行。可换模型：claude-sonnet-4-6、gemini-3.6-flash 等（`hermes model`）。auxiliary 仍走 Nous/OpenRouter 未配置，其警告无害。
 - Windows 上游已知 bug：shutdown_watchdog 用 asyncio.start_unix_server 每次启动抛非致命 AttributeError，等官方修。
-- 待办（用户手动）：`hermes setup` 或 `hermes auth` 配置主模型 API key（现 provider: auto 走 OpenRouter 端点但无 key，auxiliary 报 no Nous authentication / payment error 属预期）。
+- 桌面快捷方式「Hermes Agent.lnk」指向 %LOCALAPPDATA%\hermes\bin\hermes.exe（聊天 TUI），已建好。
 - 冒烟提示：网关就绪日志（Starting Hermes Gateway / Turn machinery warmed）写入 `%LOCALAPPDATA%\hermes\logs\gateway.log`，不进 stdout，验证时看文件别盯终端。
 
 **Why:** 安装两次失败均因 git/uv 不走系统代理，且坏了的旧 checkout 会被安装器整目录移走导致运行时丢失；记住这些可避免重复踩坑。
