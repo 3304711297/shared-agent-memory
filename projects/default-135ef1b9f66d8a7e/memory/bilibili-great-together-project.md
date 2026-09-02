@@ -215,3 +215,11 @@ AbortController 穿透 fetchLike / userscript 纯函数覆盖评估（拦截点/
 - 用户拍板常态=**仅 BewlyCat + mbgt 扩展（其余全禁）**；建议落地：面板自动停用条目由「自动停用：generic / 功能名」扩为完整说明——`describeAutoDisable` 纯函数（panel/model.ts，4 测试红→绿，全量 144/144）：generic=「识别到 BewlyCat/Ave Mujica 家族共存（探测窗口内无法细分具体是谁），按保守并集停用」、specific=识别到具体扩展；统一附「强制开启可能与对方界面冲突，不建议开启」
 - options 页真机确认 0.3.4 新文案生效（扩展重载后 showOptions 重开）
 - 面板「灰的没法改」澄清过：9 即时模块锁定=Plan 4 拍板的 document-start 平台约束（MV3 无法同步读设置），README 已载；6 deferred 可勾选=force-on
+
+## 2026-09-02 前端 UI 现代化重构与接口收口 ✓（main@3e4e7cd，CI 绿）
+
+- **UI 重构落地**：毛玻璃设计系统（CSS Tokens）、深浅自适应主题、iOS/Fluent 风格 Switch 滑动开关、2×2 拦截指标卡片、CDN 延迟微光标签、三 Tab 分页导航（模块/监控/备份），独立 options 页（居中卡片 680px）与浮层（380px 抽屉）布局解耦。
+- **两项遗留闭环**：
+  1. **`noReload` 接口与注释闭环**：`PanelApp` 增加 `noReload?: boolean` prop，options 页传入 `noReload: true` 自动隐藏页内刷新按钮，注释更新对齐。
+  2. **面板轮询节流**：在 2s 轮询循环中加入 `if (!document.hidden)` 守卫，页面切入后台或隐藏时自动暂停轮询读盘，节约 CPU。
+- 144/144 单测全过，双形态构建一致。
