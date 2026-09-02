@@ -226,8 +226,8 @@ AbortController 穿透 fetchLike / userscript 纯函数覆盖评估（拦截点/
 ## 2026-09-02 共存探测高精度指纹库与细粒度功能激活探测落地 ✓（main@874a7d6，CI 绿）
 
 - **身份指纹库大幅扩充（消除 generic 回退）**：
-  - BewlyCat：补充 `.bewly-design`、`[data-bewly-theme]`、`.bewly-dock`、`#bewly-app`、`.bewly-header` 等全页面常驻指纹。
-  - AveMujica：建立专属 `.ave-mujica`、`.theme-avemujica`、`.ave-dock`、`.ave-sidebar`、`#ave-mujica-app`、`[data-ave-theme]` 与独占字体样式表指纹。
+  - BewlyCat：补充 `.bewly-design`、`[data-bewly-theme]`、`.bewly-dock`、`#bewly-app`、`.bewly-header`、`a[href*="keleus/BewlyCat"]`、`logo-cat.svg` 等全页面常驻指纹。
+  - AveMujica：建立专属 `.ave-mujica`、`.theme-avemujica`、`.ave-dock`、`.ave-sidebar`、`#ave-mujica-app`、`[data-ave-theme]`、`a[href*="VentusUta"]`、`img[src*="bewly-ave-mujica-style-logo.svg"]` 与独占字体样式表（`ShangguSansSCVF-BewlyInternalResource`/`FrexSansGBVF`）指纹。
 - **细粒度功能激活探测（activeFeatures）**：
   - 新增 `probeActiveFeatures`：精准检测首页重构、全局字体替换、动态页改造（`momentsPage`）、播放器宽屏等是否真正被对方激活；
   - `resolveConflicts` 两级裁决：扩展在场但实测未激活的功能，MBGT 对应模块不再一刀切自动禁用，保持正常运行。
