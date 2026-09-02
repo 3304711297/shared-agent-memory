@@ -55,8 +55,9 @@ metadata:
   4. `smart-web-crawler`：带代理支持的轻量网页提取与 Markdown 转换（`crawl.py`）
   5. `chinese-copywriting`：中文技术排版规范与中英混排空格自动化（`pangu_format.py`）
   6. `semantic-release-pro`：语义化 Commit、SemVer 计算与 Changelog 生成规范
+- **ZCode 记忆持久化云端备份**：私有仓库 `https://github.com/3304711297/zcode-memories`（Private），本地 `~/.zcode/cli/memories/` 已初始化并关联推送；带 `backup-memories.cmd`，已建立"记忆变动自动静默备份"铁律机制。
 
-**Related:** [[adobe-mcp-authentication]] [[cross-repo-coverage-audit]]
+**Related:** [[adobe-mcp-authentication]] [[cross-repo-coverage-audit]] [[auto-backup-memories-to-github]]
 
 **2026-09-01 更新**：本地代理 3067 端口出现"监听但转发被重置"状态（curl --proxy 返回 000/Connection reset），同时直连 github.com 反而 200——代理可能切了 TUN/系统模式。git push 时先试直连（`git push`），直连失败再回退 `git -c http.proxy=...`，两种都要备着。
 **2026-09-02 更新**：接入 ZCode-Antigravity 本地桥（18080 端口），配置 gemini-3.1-flash-image 生图 Skill 及 5 个高质量日常开发 Skill（前端/README/爬虫/文案/发布）；全开源项目 README 现代化重构完成。
