@@ -223,4 +223,12 @@ AbortController 穿透 fetchLike / userscript 纯函数覆盖评估（拦截点/
   1. **`noReload` 接口与注释闭环**：`PanelApp` 增加 `noReload?: boolean` prop，options 页传入 `noReload: true` 自动隐藏页内刷新按钮，注释更新对齐。
   2. **面板轮询节流**：在 2s 轮询循环中加入 `if (!document.hidden)` 守卫，页面切入后台或隐藏时自动暂停轮询读盘，节约 CPU。
   - 轮询边界已知微特性：document.hidden 时维持 2s setTimeout 心跳，仅短路跳过 loadPanelData 存储读盘，前台切回即刻恢复；设计上保持极简，不额外挂载 visibilitychange 监听，符合轻量低侵入原则。
+## 2026-09-02 共存探测高精度指纹库与细粒度功能激活探测落地 ✓（main@874a7d6，CI 绿）
+
+- **身份指纹库大幅扩充（消除 generic 回退）**：
+  - BewlyCat：补充 `.bewly-design`、`[data-bewly-theme]`、`.bewly-dock`、`#bewly-app`、`.bewly-header` 等全页面常驻指纹。
+  - AveMujica：建立专属 `.ave-mujica`、`.theme-avemujica`、`.ave-dock`、`.ave-sidebar`、`#ave-mujica-app`、`[data-ave-theme]` 与独占字体样式表指纹。
+- **细粒度功能激活探测（activeFeatures）**：
+  - 新增 `probeActiveFeatures`：精准检测首页重构、全局字体替换、动态页改造（`momentsPage`）、播放器宽屏等是否真正被对方激活；
+  - `resolveConflicts` 两级裁决：扩展在场但实测未激活的功能，MBGT 对应模块不再一刀切自动禁用，保持正常运行。
 - 144/144 单测全过，双形态构建一致。
