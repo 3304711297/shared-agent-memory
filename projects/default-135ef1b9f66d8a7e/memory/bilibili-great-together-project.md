@@ -223,13 +223,23 @@ AbortController 穿透 fetchLike / userscript 纯函数覆盖评估（拦截点/
   1. **`noReload` 接口与注释闭环**：`PanelApp` 增加 `noReload?: boolean` prop，options 页传入 `noReload: true` 自动隐藏页内刷新按钮，注释更新对齐。
   2. **面板轮询节流**：在 2s 轮询循环中加入 `if (!document.hidden)` 守卫，页面切入后台或隐藏时自动暂停轮询读盘，节约 CPU。
   - 轮询边界已知微特性：document.hidden 时维持 2s setTimeout 心跳，仅短路跳过 loadPanelData 存储读盘，前台切回即刻恢复；设计上保持极简，不额外挂载 visibilitychange 监听，符合轻量低侵入原则。
-## 2026-09-02 共存探测高精度指纹库与静态严格避让闭环 ✓（main@efd7356，CI 绿）
+## 2026-09-02 待办池全面清理与指纹分层落地 + Edge Dev 真机实测闭环 ✓（main@f496f15，CI 绿）
 
-- **独占指纹库增强（065236b）**：
-  - 补充专属 WAR Logo（`img[src*="bewly-ave-mujica"]` vs `logo-cat.svg`）、GitHub 仓库链接（`a[href*="VentusUta"]` vs `a[href*="keleus"]`）及 `1.8.x` / `1.7.x` 版本前缀启发式识别。
-- **静态冲突严格避让（efd7356）**：
-  - 修复细粒度局部 DOM 探测导致全局 URL/广告拦截被误判未激活的问题，回归静态契约严格自动避让：检测到 BewlyCat 时，5 项冲突模块（广告拦截/URL追踪参数/首页重构/动态页/播放器宽屏）统一进入 autoDisabled 避让关闭态，use-system-fonts 保持启用。
-- **已进入待办池的两项后续非阻塞架构优化**：
-  1. `activeFeatures` 数据通路清理：目前为采集但不参与裁决，后续可根据是否需要细粒度放行做架构精简或深层联动；
-  2. `BEWLYCAT_MARKERS` 混合标记收窄：目前混有 `.bewly-dock` 等家族通用类名，偏向保守自动避让，后续可进一步将独占与通用标记分层。
-- 144/144 单测全过，双形态构建一致。
+- **代码架构清理与指纹严格三层分层（f496f15）**：
+  1. `activeFeatures` 数据通路彻底清除：从 `ProbeResult` 接口和 `snapshot.ts` 中移除死数据通路与冗余扫描函数，消除“采集但未消费”的代码异味；
+  2. 指纹库重构为严格三层分层：
+     - **层级 1（独占专属特征）**：`BEWLYCAT_EXCLUSIVE_MARKERS`（`logo-cat`、`keleus/BewlyCat`、`keleus`） vs `AVEMUJICA_EXCLUSIVE_MARKERS`（`bewly-ave-mujica`、`VentusUta` 等）；
+     - **层级 2（版本号主支启发式）**：`1.8.x` → `avemujica`，`1.7.x` / `1.6.x` → `bewlycat`；
+     - **层级 3（家族通用挂载点）**：`#bewly` 宿主与通用组件（如 `.bewly-dock`），若无独占指纹则进入 `pending-family` / 保守 `generic` 避让。
+  3. 单测全绿通过（125/125 core 测试全绿），扩展 dist 生产产物重新构建完毕。
+- **Edge Dev 浏览器真机实测验收（Live Verification via CDP）**：
+  - 成功接管真实 Edge Dev 浏览器，在真实 Bilibili 首页（`https://www.bilibili.com/`）捕获控制台日志验证：
+    - `[BewlyCat][首页加载] 插件开始加载`（BewlyCat 1.7.8 正常激活）；
+    - 5 项重叠模块精准触发自动避让：
+      - `[mbgt] [no-ad] auto-disabled: bewlycat (blockAds / 首页重构) detected`
+      - `[mbgt] [optimize-homepage] auto-disabled: bewlycat (首页重构) detected`
+      - `[mbgt] [optimize-story] auto-disabled: bewlycat (动态页改造（真机已确认，Issue #1）) detected`
+      - `[mbgt] [player-video-fit] auto-disabled: bewlycat (bewlyWidescreen / 播放器样式) detected`
+      - `[mbgt] [remove-useless-url-params] auto-disabled: bewlycat (cleanUrlArgument) detected`
+    - `[mbgt] [use-system-fonts] "any" https://www.bilibili.com/` 正常运行；
+    - 所有 9 个实时拦截防护模块（防跟踪、反 PCDN、防 WebRTC 泄露、存储防御等）全部正常注入生效。
