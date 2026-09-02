@@ -1,3 +1,4 @@
+- [Auto Backup Memories to GitHub](auto-backup-memories-to-github.md) — 记忆文件变动或新增后必须自动静默提交并推送到私有仓库 zcode-memories（无需询问用户）
 - [Adobe MCP Authentication](adobe-mcp-authentication.md) — Adobe for creativity MCP server requires OAuth authentication; 403 errors indicate missing Authorization headers
 - [Five Repo Task Book v42](five-repo-task-book-v42.md) — 五仓库任务书 v4.2（15 条）**全部完成推送、五仓 CI 全绿**；tweak 已发 **v0.2.21**（tag-only 流程三步+包内版本注入实测）；脚本猫更新检测人工验收通过；含 BOM/mkdocs-tags/lock 提锁契约与待用户拍板事项（orc dependabot.yml 等）
 - [Bilibili Great Together Project](bilibili-great-together-project.md) — make-bilibili-great-together：**v0.3.2 双形态就绪；用户日常已切换=仅 BewlyCat+mbgt 扩展（0.3.2）启用、脚本及其他全禁**（旧「userscript 启用」作废）；bump 后扩展 dist 需本地重建+developerPrivate.reload；卡片「错误」=playinfo WARN 非故障；铁律：钩子读被 mock 全局走闭包原引用
