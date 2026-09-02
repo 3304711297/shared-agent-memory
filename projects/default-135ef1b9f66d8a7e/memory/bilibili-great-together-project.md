@@ -223,12 +223,13 @@ AbortController 穿透 fetchLike / userscript 纯函数覆盖评估（拦截点/
   1. **`noReload` 接口与注释闭环**：`PanelApp` 增加 `noReload?: boolean` prop，options 页传入 `noReload: true` 自动隐藏页内刷新按钮，注释更新对齐。
   2. **面板轮询节流**：在 2s 轮询循环中加入 `if (!document.hidden)` 守卫，页面切入后台或隐藏时自动暂停轮询读盘，节约 CPU。
   - 轮询边界已知微特性：document.hidden 时维持 2s setTimeout 心跳，仅短路跳过 loadPanelData 存储读盘，前台切回即刻恢复；设计上保持极简，不额外挂载 visibilitychange 监听，符合轻量低侵入原则。
-## 2026-09-02 共存探测高精度指纹库与细粒度功能激活探测落地 ✓（main@874a7d6，CI 绿）
+## 2026-09-02 共存探测高精度指纹库与静态严格避让闭环 ✓（main@efd7356，CI 绿）
 
-- **身份指纹库大幅扩充（消除 generic 回退）**：
-  - BewlyCat：补充 `.bewly-design`、`[data-bewly-theme]`、`.bewly-dock`、`#bewly-app`、`.bewly-header`、`a[href*="keleus/BewlyCat"]`、`logo-cat.svg` 等全页面常驻指纹。
-  - AveMujica：建立专属 `.ave-mujica`、`.theme-avemujica`、`.ave-dock`、`.ave-sidebar`、`#ave-mujica-app`、`[data-ave-theme]`、`a[href*="VentusUta"]`、`img[src*="bewly-ave-mujica-style-logo.svg"]` 与独占字体样式表（`ShangguSansSCVF-BewlyInternalResource`/`FrexSansGBVF`）指纹。
-- **细粒度功能激活探测（activeFeatures）**：
-  - 新增 `probeActiveFeatures`：精准检测首页重构、全局字体替换、动态页改造（`momentsPage`）、播放器宽屏等是否真正被对方激活；
-  - `resolveConflicts` 两级裁决：扩展在场但实测未激活的功能，MBGT 对应模块不再一刀切自动禁用，保持正常运行。
+- **独占指纹库增强（065236b）**：
+  - 补充专属 WAR Logo（`img[src*="bewly-ave-mujica"]` vs `logo-cat.svg`）、GitHub 仓库链接（`a[href*="VentusUta"]` vs `a[href*="keleus"]`）及 `1.8.x` / `1.7.x` 版本前缀启发式识别。
+- **静态冲突严格避让（efd7356）**：
+  - 修复细粒度局部 DOM 探测导致全局 URL/广告拦截被误判未激活的问题，回归静态契约严格自动避让：检测到 BewlyCat 时，5 项冲突模块（广告拦截/URL追踪参数/首页重构/动态页/播放器宽屏）统一进入 autoDisabled 避让关闭态，use-system-fonts 保持启用。
+- **已进入待办池的两项后续非阻塞架构优化**：
+  1. `activeFeatures` 数据通路清理：目前为采集但不参与裁决，后续可根据是否需要细粒度放行做架构精简或深层联动；
+  2. `BEWLYCAT_MARKERS` 混合标记收窄：目前混有 `.bewly-dock` 等家族通用类名，偏向保守自动避让，后续可进一步将独占与通用标记分层。
 - 144/144 单测全过，双形态构建一致。
