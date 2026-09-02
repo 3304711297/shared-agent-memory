@@ -1,0 +1,35 @@
+---
+name: three-project-audit-2026-08-28
+description: 2026-08-28 对 tweak/ysk/openrouter 三项目并行只读审查的发现清单与基线状态
+metadata:
+  node_type: memory
+  type: project
+  originSessionId: sess_14cc29b5-4aab-4dae-b74e-d936bfc745dd
+---
+
+2026-08-28 三项目并行只读审查（三个 Explore 代理）。基线：三仓 0 0 clean（tweak 893b3a2=v0.2.20、ysk 9b1e212、orc 25f1f2c v1.1.2），CI 全绿，tag-only 发版生效，orc 上游（datou1996 bf48c04 v1.5.22）无新版本、cron 健康当日仍跑。**未修复前，以下发现仍然有效：**
+
+**tweak（最高优先）：** ① VersionConsistency 测试 CI 中永远 skip——ci.yml test 任务 checkout 无 `fetch-depth: 0`（浅克隆无 tag），测试遇无 tag 即 Set-ItResult -Skipped；② MPO/Service/NVMe 三模块 Ensure/Restore 缺往返测试（tests/ 仅 SecurityMitigation/Defender/Registry/VBS/TestMode 有）；③ Service.ps1 服务清单与 Backup.Service.ps1 $script:serviceManagedNames 双源手抄，失配时恢复 throw；④ CodeCoverage 目标仅 15% 且不入门禁；⑤ docs/README.md 模块清单过时（写 6+2 个，实际 Modules/ 19 文件）；⑥ POWER-PLAN-SOURCE.md:61 仍写激活 kirby（实际 95e6f64 起导入后强制改名 ultimate-performance）；⑦ Defender 模块删除类操作不设 rebootRequired；⑧ Bcd Part3/4 汇总缺 SKIP 计数；⑨ upload-artifact 固定 SHA 触发 Node20 弃用告警。已排除疑点：无 TODO/FIXME、无双计数器问题、lock=ysk HEAD 一致、版本常量=0.2.20 一致。
+
+**ysk（最高优先）：** ① 31 处 2026-08-21 核查基线仍未复核——25 处已加「（本次未重新核验）」免责标注，5 个文件 front matter `verified_on: 2026-08-21` 会在线上 aside 显示过期基线；近期标注仅 项目导航 3 处 08-25 + 1 处 08-23，其余 0。② DP-HDMI 文「HDMI 2.2 设备尚未上市」疑似过时（规范发布已一年半），无待重核标记；NVCleanstall「当前最新 v1.19.0」等时点声明同类。③ docs/README.md 两张导航表漏「AI工具」分类（13/14，实际 14 分类，Edge CDP 文章不可见）。④ front matter 采用率仅 5/69；⑤ check_front_matter.py 不校验 nav/index 覆盖（③即此后果）；⑥ lychee 排除 24 域名≈45+ 链接脱离自动检查且无人工复核台账；⑦ 无 dependabot.yml。已确认：nav 与磁盘 69 文件一一对应、deploy 已发布验证 artifact（非重新构建）、分类 index 无孤儿、站点 200 含 9b1e212。
+
+**openrouter-chinese（最高优先）：** ① upstream.state.json 损坏→loadState 回退 buildNumber:1→重算时版本从 1.1.2 倒退 1.1.1，脚本管理器不再提示更新；② check-upstream.mjs main().catch 一律 exit(0)+workflow `|| code=$?` 兜底→检查器自身 bug 时 CI 永绿无人察觉；③ React 重渲染删旧价格文本节点后孤儿标记残留→同页双份 ≈¥（rescanAll 无孤儿回收，应校验前驱节点仍匹配 USD_PRICE_RE）；④ Node fetch 无超时（curl 回退有 30s）。中优先：workflow 无 timeout-minutes、actions 用 @v4 未固定 SHA；双价文本只标第一个价（正则非 global）；手动汇率存 NaN 时静默用默认 7.2；缺 @noframes；check-upstream/build 零测试。**教训：不要本地跑 check-upstream.mjs 验证（会改 sources/），只读比对用 raw SHA-256。**
+
+**2026-08-28 当日修复进度（均已推送并 CI 全绿）：**
+- **orc `6185742`（v1.2.2，OUR_BASE 1.2）**：①状态文件缺失/损坏拒绝以默认 buildNumber 重建（parseStateText 纯函数+UnexpectedError）；②退出码 20=仓库自身异常，upstream-sync 对非 0/10 码 fail；③rescanAll 前 pruneOrphanMarks 回收孤儿标记（前驱须仍匹配价格文本）；④fetch 加 AbortSignal.timeout(30s)；main() 加 isMain 守卫（import 不再触发网络）；测试 30→46。未修（P2）：workflow 无 timeout-minutes/actions 未固定 SHA、双价只标第一个、手动汇率 NaN 静默、@noframes、check-upstream 无 tag/Release。
+- **ysk `0898ae6`**：首页两表补 AI工具 分类（13→14）；DP-HDMI 2026-08-28 重核并改 verified_on——结论：**Ultra96 认证线 2025Q3 已上市、CES2026 仅原型机、满带宽整机预计 2027**，"设备尚未上市"改为精确表述。未修：31 处基线复核、NVCleanstall 等时点声明、check_front_matter 加 nav/index 校验、lychee 排除域台账、dependabot。
+- **tweak `09e44a7`（lock=0898ae6，三审计资料两提交间零改动故 44/44 延续）**：ci.yml test 加 fetch-depth:0（CI 实测 100/100、0 skipped，VersionConsistency 真正执行）；新增 ModuleRoundTrip.Tests.ps1 8 项（MPO 真 HKCU 往返；NVMe 桩 .cmd 验证 BeforeState→/enable|/reset 且手工 Present=false 备份避免任何 HKLM 写入——**Ensure-NvmeBackup 必须显式传 -Guid**，否则空 GUID 快照与 schema 默认 GUID 不一致必挂；Service mock CIM/Set-Service，delayed-auto 真走 sc.exe 失败关闭）；VbsBackup Feature 快照改封闭 mock（原真实 DISM 查询拖 130 秒）；docs/README 模块清单、POWER-PLAN-SOURCE/README kirby 改名说明已修。未修：服务清单双源、Coverage 目标 15%、Defender rebootRequired、Bcd SKIP 计数、upload-artifact Node20 告警。
+- **环境新发现（2026-08-29 收窄并已修复）**：DISM COM"没有注册类"**仅限 pwsh 7**——5.1 实测正常、系统本体未损坏。根因：pwsh 无法加载 .NET Framework 版 DISM 程序集，隐式兼容层代理 COM 激活失败；`-SkipEditionCheck` 进程内直载也失败，**`-UseWindowsPowerShell` 可用**。已写入 `Documents/PowerShell/profile.ps1`（新建）显式导入修复；代价=每会话多一个隐藏 compat powershell（用户实测 profile 加载共 512ms）+ DISM 输出为反序列化对象；tweak 启动器 `-NoProfile` 不受影响（已回归 VBS 测试 8/8）。**补充（同日）：兼容加载会在每次 pwsh 启动时刷固定 WARNING（"Module DISM is loaded in Windows PowerShell using WinPSCompatSession"），走警告流，`-ErrorAction SilentlyContinue` 压不住，必须用 `$WarningPreference='SilentlyContinue'` 包住导入再恢复**——已在 profile.ps1 落实并验证；用户确认保留该 profile 不注释。
+- 环境：Bash 沙箱会拦 raw.githubusercontent/DNS（curl 000/exit 6），git push 不受影响；Test-CrossRepoCoverage 本地因网络抖动跑不了时，若 ysk 两提交间审计三资料零改动则结果可延续，CI 为权威验证。
+
+**2026-08-29 第三批：31 处 2026-08-21 基线逐篇复核完成（ysk `5355e6c`，其后 lychee bilibili 412 排除至 `95e6b32`；tweak lock 终点 `b905950` 后链式提锁至 ysk 95e6b32）。** 方法：五个分类并行代理逐篇复核——执行参考/映射类对照 tweak b905950 源码逐项 grep，时效声明走 WebSearch/官方文档，实机记录类核内部一致性；**"只改日期"被禁止**，每条标注必须注明依据。约 13 处实质勘误（核心模式：`cd95802` 后源码新增统一快照与恢复入口，多篇"无自动备份恢复"表述失效——CPU-001~005/HAGS/Prefetcher/NTFS 8.3/BOOT-003/004/006/SECURITY-002；SECURITY-001 子项编号按当前菜单修为 1→3→内层 2/3；Defender SYSTEM 自动重试已不存在改为 [FAIL]+手动提权；超频两篇 tRAS 漏计+heredoc 残留清除）。BIOS/验机/网络/Steam 零勘误。"本次未重新核验"清零；剩余 7 处 08-21 均为合理历史表述（README 规范示例、历史快照声明、重核注里的"上次基线"）。3 篇 front matter verified_on 更新至 08-29。**bilibili 对 CI 返回 412（反爬），www.bilibili.com+b23.tv 已入 lychee 排除+台账。**至此 2026-08-28 审计清单全部收口，无遗留。后续新增内容时注意：新文章须同时登记 docs/README 导航表+分类索引（校验器已拦截），引用易封锁站点（tomshardware/techcommunity/asus/digitalfoundry/game-console/bilibili/reddit 等）直接照台账机制建档。
+**2026-08-29 第二批修复（用户"继续"后执行，全部推送且 CI 绿）：**
+- **orc `85a0bf6` + tag `v1.2.2`（首个追溯 tag）**：双价文本逐个标注（USD_PRICE_RE_GLOBAL + annotateWithUsdAll 维护连续标记串，价格数变化增删）；pruneOrphanMarks 支持标记链（链内节点前驱为标记即保留，链头失锚逐次自愈）；手动汇率存量 NaN/超范围回退默认值+initRate 无效手动值回退自动；@noframes；两 workflow 加 timeout-minutes:10 并固定 SHA（checkout 11bd7190 v4.2.2 / setup-node 49933ea5 v4.4.0）；测试 52/52。
+- **ysk `02dd8e9` → 403 排除链 → `2861255`**：check_front_matter 新增 nav 覆盖+分类索引覆盖双向检查（可拦首页漏分类；纯资源目录如 stylesheets/ 跳过；单测 10→16）；DLSS 文实质重核——DLSS 4.5(2026-01) 引入预设 L 且 App 以 Recommended 取代 Latest，多数档位推荐仍指 K（表格/设置节/核查记录已更新）；NVCleanstall v1.19.0 复核仍最新+截至标注；lychee-excluded-domains.md 台账建档（28+5 域名）。**重大事件：2026-08-29 跨站点批量封锁潮**——tomshardware→techcommunity.microsoft→asus→digitalfoundry→cn.game-console 依次对 CI runner 403，分 5 个提交逐个加入 lychee exclude 并登记台账（封锁间歇性：asus 只在 CI 报、digitalfoundry 只在本地报；本地枚举用 `lychee --format json docs` 看 error_map）。新增 .github/dependabot.yml。
+- **tweak `008ad81` → `b905950`**：服务清单单一事实源（三分组唯一定义于 Backup.Service.ps1、managed names 并集派生，Service.ps1 改引用，契约测试 37 项断言）；CodeCoverage 门禁 15%→50%（实测 54.3%，测量法：Pester CodeCoverage 出 JaCoCo XML 后累加 INSTRUCTION counter）；Defender 五类删除/停止操作补 rebootRequired；Bcd Part3/4 汇总补 SKIP 行；upload-artifact v4→**v6.0.0**（b7c566a7；v5 默认仍 Node20，v6 才真正解决告警）；dependabot.yml；Pester 102/102。lock 已提至 2861255。
+- **教训**：①Pester 测试里 sed -i 用单引号包 '$PWD' 会创建字面 $PWD 目录+把 coverage-local.xml 提交进库（已 amend 清理）；②本地跑 lychee 枚举 403 要非沙箱+HTTPS_PROXY；③批量 403 潮下 link-check 修复=exclude+台账双写，每轮 CI 只暴露下一个域。
+- 剩余：31 处基线逐篇复核（最大遗留）；orc 零散小项（upstream.state.json schema 漂移注释等已不重要）。
+
+代理会话可续：tweak=agent_02049401-8149-4f27-b03b-665c8cfbb185、ysk=agent_7e518bfd-9749-4e56-8978-4b2f6d744a2c、orc=agent_45c80d09-5f32-4f32-b2d6-4d7879c72dd7。
+
+[[desktop-projects-tweak-youshouldknow]] [[project-security-audit-2026-08-25]] [[openrouter-chinese-plus-project]] [[youshouldknow-doc-details]]
