@@ -18,6 +18,7 @@ NousResearch hermes-agent v0.21.0 于 2026-09-02 23 时重装完成并验证（d
 - ~~桌面快捷方式指 CLI~~（已改为 GUI，见上条）。
 - **浏览器控制（2026-09-03 定案）**：hermes 挂载 ZCode 同款 chrome-devtools MCP 驱动**日常 Edge**——config.yaml `mcp_servers.chrome-devtools: command cmd + args [/c, npx, -y, chrome-devtools-mcp@1.7.0, --autoConnect, --user-data-dir=<Edge Dev User Data>]`，真机验证通过（开 example.com 取标题）。Windows 下 MCP 命令用 `cmd`+`/c` 包装最稳。每个 Edge 会话浏览器内可能需点一次「允许」。**勿走 CDP 端口路线**：Chromium 136+ 对默认配置目录硬禁 --remote-debugging-port，HKCU/HKLM 的 RemoteDebuggingAllowed 与 DevToolsRemoteDebuggingAllowed=1 均解不开（已实测勿重试；策略残留注册表无害）；Edge 快捷方式补丁已还原；browser.use_real_profile 路线已弃。
 - 冒烟提示：网关就绪日志（Starting Hermes Gateway / Turn machinery warmed）写入 `%LOCALAPPDATA%\hermes\logs\gateway.log`，不进 stdout，验证时看文件别盯终端。
+- **Edge 起不来=锁占用排查法（2026-09-03 实战）**：hermes 测试中断曾遗留 ①孤儿 chrome-devtools-mcp node 进程群、②无头 Playwright Chromium（进程名 chrome.exe、带真实 Edge User Data，Get-Process msedge 扫不到！）占住 `Edge Dev\User Data\lockfile` → Edge 静默秒退无窗口。修复：杀 ms-playwright/chrome-devtools-mcp 相关进程 → 删 lockfile 与 DevToolsActivePort → 重启 Edge。定位占用者用 handle.exe（live.sysinternals.com 下载，已存 D:\temp\handle.exe）。
 
 **Why:** 安装两次失败均因 git/uv 不走系统代理，且坏了的旧 checkout 会被安装器整目录移走导致运行时丢失；记住这些可避免重复踩坑。
 **How to apply:** 任何 hermes 安装/更新/克隆 GitHub 的命令前先 export 代理变量；检查 hermes 状态看 logs\gateway.log 与 gateway_state.json（进程核对 tasklist）。相关：[[user-windows-environment]]
