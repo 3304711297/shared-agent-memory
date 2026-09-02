@@ -24,3 +24,4 @@
 - [HuggingFace Chinese Plus Project](huggingface-chinese-plus-project.md) — 桌面 huggingface-chinese 汉化脚本项目；引擎原创 GPL-3.0 + izhadu 词库自动同步；v1.0.1 已发布待真机冒烟
 - [SteamDB Chinese Plus Project](steamdb-chinese-plus-project.md) — 桌面 steamdb-chinese 汉化脚本项目；接续停更 SteamDB_CN；词库真源 Chr233/GM_Scripts(AGPL-3.0)；v1.0.1 已发布+真机冒烟通过
 - [Bilibili Enhancement Tools](bilibili-enhancement-tools.md) — B站增强三件套调研：SukkaW 反跟踪油猴脚本（安全可装）+ BewlyCat(功能向) vs AveMujica(外观向) 二选一，B站2026-01推荐API需BewlyCat≥1.5.6；源码级重叠四块+脚本独有清单+共存关模块建议
+- [Hermes Agent Install](hermes-agent-install.md) — hermes-agent v0.21.0 重装完成（2026-09-02）：git/uv 必须走 127.0.0.1:3067 代理、HERMES_HOME=LocalAppData、Studio 已弃、待用户 hermes setup 配 key
