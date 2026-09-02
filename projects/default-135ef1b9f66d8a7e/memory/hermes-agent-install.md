@@ -16,6 +16,7 @@ NousResearch hermes-agent v0.21.0 于 2026-09-02 23 时重装完成并验证（d
 - **用户偏好 GUI 而非 TUI/CLI，桌面端界面语言已于 2026-09-02 切换为简体中文**：官方 Electron 桌面端已构建并跑通——`hermes desktop` 首跑自动 npm 构建（需代理环境变量），产物稳定路径 `hermes-agent\apps\desktop\release\win-unpacked\Hermes.exe`；桌面快捷方式已改指此 exe（原 CLI 版启动方式作废）。`hermes dashboard` 是浏览器版配置管理页，`hermes serve` 是其无头后端。
 - Windows 上游已知 bug：shutdown_watchdog 用 asyncio.start_unix_server 每次启动抛非致命 AttributeError，等官方修。
 - ~~桌面快捷方式指 CLI~~（已改为 GUI，见上条）。
+- **浏览器控制（2026-09-03 定案）**：hermes 挂载 ZCode 同款 chrome-devtools MCP 驱动**日常 Edge**——config.yaml `mcp_servers.chrome-devtools: command cmd + args [/c, npx, -y, chrome-devtools-mcp@1.7.0, --autoConnect, --user-data-dir=<Edge Dev User Data>]`，真机验证通过（开 example.com 取标题）。Windows 下 MCP 命令用 `cmd`+`/c` 包装最稳。每个 Edge 会话浏览器内可能需点一次「允许」。**勿走 CDP 端口路线**：Chromium 136+ 对默认配置目录硬禁 --remote-debugging-port，HKCU/HKLM 的 RemoteDebuggingAllowed 与 DevToolsRemoteDebuggingAllowed=1 均解不开（已实测勿重试；策略残留注册表无害）；Edge 快捷方式补丁已还原；browser.use_real_profile 路线已弃。
 - 冒烟提示：网关就绪日志（Starting Hermes Gateway / Turn machinery warmed）写入 `%LOCALAPPDATA%\hermes\logs\gateway.log`，不进 stdout，验证时看文件别盯终端。
 
 **Why:** 安装两次失败均因 git/uv 不走系统代理，且坏了的旧 checkout 会被安装器整目录移走导致运行时丢失；记住这些可避免重复踩坑。
