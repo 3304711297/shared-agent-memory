@@ -222,4 +222,5 @@ AbortController 穿透 fetchLike / userscript 纯函数覆盖评估（拦截点/
 - **两项遗留闭环**：
   1. **`noReload` 接口与注释闭环**：`PanelApp` 增加 `noReload?: boolean` prop，options 页传入 `noReload: true` 自动隐藏页内刷新按钮，注释更新对齐。
   2. **面板轮询节流**：在 2s 轮询循环中加入 `if (!document.hidden)` 守卫，页面切入后台或隐藏时自动暂停轮询读盘，节约 CPU。
+  - 轮询边界已知微特性：document.hidden 时维持 2s setTimeout 心跳，仅短路跳过 loadPanelData 存储读盘，前台切回即刻恢复；设计上保持极简，不额外挂载 visibilitychange 监听，符合轻量低侵入原则。
 - 144/144 单测全过，双形态构建一致。
