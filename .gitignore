@@ -15,6 +15,10 @@
 !plugins/**
 !desktop-plugins/
 !desktop-plugins/**
+!scripts/
+!scripts/**
+!.github/
+!.github/**
 
 # 忽略临时缓存与构建产物
 __pycache__/
