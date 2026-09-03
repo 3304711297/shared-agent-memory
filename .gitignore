@@ -2,6 +2,7 @@
 *
 
 # 仅跟踪记忆目录与核心设定
+!README.md
 !memories/
 !memories/**
 !SOUL.md
