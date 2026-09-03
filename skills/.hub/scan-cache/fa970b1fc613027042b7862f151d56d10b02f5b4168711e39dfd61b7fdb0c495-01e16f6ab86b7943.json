@@ -1,0 +1,144 @@
+{
+  "source": "official",
+  "source_url": "official/mlops/models/segment-anything-model",
+  "bundle_hash": "sha256:fa970b1fc613027042b7862f151d56d10b02f5b4168711e39dfd61b7fdb0c495",
+  "scanner_version": "skills-guard-v2",
+  "verdict": "caution",
+  "trust_level": "builtin",
+  "findings": [
+    {
+      "pattern_id": "html_comment_injection",
+      "severity": "high",
+      "category": "injection",
+      "file": "SKILL.md",
+      "line": 138,
+      "match": "<!-- ascii-guard-ignore -->",
+      "description": "hidden instructions in HTML comments"
+    },
+    {
+      "pattern_id": "html_comment_injection",
+      "severity": "high",
+      "category": "injection",
+      "file": "SKILL.md",
+      "line": 149,
+      "match": "<!-- ascii-guard-ignore-end -->",
+      "description": "hidden instructions in HTML comments"
+    },
+    {
+      "pattern_id": "unpinned_pip_install",
+      "severity": "medium",
+      "category": "supply_chain",
+      "file": "SKILL.md",
+      "line": 49,
+      "match": "pip install git+https://github.com/facebookresearch/segment-anything.git",
+      "description": "pip install without version pinning"
+    },
+    {
+      "pattern_id": "unpinned_pip_install",
+      "severity": "medium",
+      "category": "supply_chain",
+      "file": "SKILL.md",
+      "line": 52,
+      "match": "pip install opencv-python pycocotools matplotlib",
+      "description": "pip install without version pinning"
+    },
+    {
+      "pattern_id": "unpinned_pip_install",
+      "severity": "medium",
+      "category": "supply_chain",
+      "file": "SKILL.md",
+      "line": 55,
+      "match": "pip install transformers",
+      "description": "pip install without version pinning"
+    },
+    {
+      "pattern_id": "unpinned_pip_install",
+      "severity": "medium",
+      "category": "supply_chain",
+      "file": "references\\advanced-usage.md",
+      "line": 10,
+      "match": "pip install git+https://github.com/facebookresearch/segment-anything-2.git",
+      "description": "pip install without version pinning"
+    },
+    {
+      "pattern_id": "unpinned_pip_install",
+      "severity": "medium",
+      "category": "supply_chain",
+      "file": "references\\advanced-usage.md",
+      "line": 52,
+      "match": "pip install groundingdino-py",
+      "description": "pip install without version pinning"
+    },
+    {
+      "pattern_id": "unpinned_pip_install",
+      "severity": "medium",
+      "category": "supply_chain",
+      "file": "references\\advanced-usage.md",
+      "line": 53,
+      "match": "pip install git+https://github.com/facebookresearch/segment-anything.git",
+      "description": "pip install without version pinning"
+    },
+    {
+      "pattern_id": "unpinned_pip_install",
+      "severity": "medium",
+      "category": "supply_chain",
+      "file": "references\\troubleshooting.md",
+      "line": 17,
+      "match": "pip install torch torchvision --index-url https://download.pytorch.org/whl/cu121",
+      "description": "pip install without version pinning"
+    },
+    {
+      "pattern_id": "unpinned_pip_install",
+      "severity": "medium",
+      "category": "supply_chain",
+      "file": "references\\troubleshooting.md",
+      "line": 31,
+      "match": "pip install git+https://github.com/facebookresearch/segment-anything.git",
+      "description": "pip install without version pinning"
+    },
+    {
+      "pattern_id": "unpinned_pip_install",
+      "severity": "medium",
+      "category": "supply_chain",
+      "file": "references\\troubleshooting.md",
+      "line": 36,
+      "match": "pip install -e .",
+      "description": "pip install without version pinning"
+    },
+    {
+      "pattern_id": "unpinned_pip_install",
+      "severity": "medium",
+      "category": "supply_chain",
+      "file": "references\\troubleshooting.md",
+      "line": 49,
+      "match": "pip install opencv-python pycocotools matplotlib onnxruntime onnx",
+      "description": "pip install without version pinning"
+    },
+    {
+      "pattern_id": "unpinned_pip_install",
+      "severity": "medium",
+      "category": "supply_chain",
+      "file": "references\\troubleshooting.md",
+      "line": 52,
+      "match": "pip install pycocotools-windows",
+      "description": "pip install without version pinning"
+    },
+    {
+      "pattern_id": "git_clone",
+      "severity": "medium",
+      "category": "supply_chain",
+      "file": "references\\troubleshooting.md",
+      "line": 34,
+      "match": "git clone https://github.com/facebookresearch/segment-anything.git",
+      "description": "clones a git repository at runtime"
+    }
+  ],
+  "rules": [
+    "git_clone",
+    "html_comment_injection",
+    "unpinned_pip_install"
+  ],
+  "scanned_at": "2026-09-03T14:00:15.844803+00:00",
+  "summary": "segment-anything-model: caution \u2014 14 finding(s) in injection, supply_chain",
+  "fresh": true
+}

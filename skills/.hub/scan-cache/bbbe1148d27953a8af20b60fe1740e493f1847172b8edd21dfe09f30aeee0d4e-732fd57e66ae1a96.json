@@ -1,0 +1,61 @@
+{
+  "source": "official",
+  "source_url": "official/mlops/research/dspy",
+  "bundle_hash": "sha256:bbbe1148d27953a8af20b60fe1740e493f1847172b8edd21dfe09f30aeee0d4e",
+  "scanner_version": "skills-guard-v2",
+  "verdict": "safe",
+  "trust_level": "builtin",
+  "findings": [
+    {
+      "pattern_id": "unpinned_pip_install",
+      "severity": "medium",
+      "category": "supply_chain",
+      "file": "SKILL.md",
+      "line": 33,
+      "match": "pip install dspy",
+      "description": "pip install without version pinning"
+    },
+    {
+      "pattern_id": "unpinned_pip_install",
+      "severity": "medium",
+      "category": "supply_chain",
+      "file": "SKILL.md",
+      "line": 36,
+      "match": "pip install git+https://github.com/stanfordnlp/dspy.git",
+      "description": "pip install without version pinning"
+    },
+    {
+      "pattern_id": "unpinned_pip_install",
+      "severity": "medium",
+      "category": "supply_chain",
+      "file": "SKILL.md",
+      "line": 39,
+      "match": "pip install dspy[openai]        # OpenAI",
+      "description": "pip install without version pinning"
+    },
+    {
+      "pattern_id": "unpinned_pip_install",
+      "severity": "medium",
+      "category": "supply_chain",
+      "file": "SKILL.md",
+      "line": 40,
+      "match": "pip install dspy[anthropic]     # Anthropic Claude",
+      "description": "pip install without version pinning"
+    },
+    {
+      "pattern_id": "unpinned_pip_install",
+      "severity": "medium",
+      "category": "supply_chain",
+      "file": "SKILL.md",
+      "line": 41,
+      "match": "pip install dspy[all]           # All providers",
+      "description": "pip install without version pinning"
+    }
+  ],
+  "rules": [
+    "unpinned_pip_install"
+  ],
+  "scanned_at": "2026-09-03T14:00:13.039991+00:00",
+  "summary": "dspy: safe \u2014 5 finding(s) in supply_chain",
+  "fresh": true
+}
