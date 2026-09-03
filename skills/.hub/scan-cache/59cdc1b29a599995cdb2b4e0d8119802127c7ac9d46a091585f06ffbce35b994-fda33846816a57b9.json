@@ -1,0 +1,13 @@
+{
+  "source": "official",
+  "source_url": "official/creative/draw-your-font",
+  "bundle_hash": "sha256:59cdc1b29a599995cdb2b4e0d8119802127c7ac9d46a091585f06ffbce35b994",
+  "scanner_version": "skills-guard-v2",
+  "verdict": "safe",
+  "trust_level": "builtin",
+  "findings": [],
+  "rules": [],
+  "scanned_at": "2026-09-03T13:49:39.584363+00:00",
+  "summary": "draw-your-font: clean scan, no threats detected",
+  "fresh": true
+}
