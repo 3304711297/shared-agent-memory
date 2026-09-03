@@ -239,6 +239,21 @@
     "use_count": 0,
     "view_count": 0
   },
+  "har-derived-api-client": {
+    "archived_at": null,
+    "created_at": "2026-09-03T13:38:26.957695+00:00",
+    "created_by": "installed",
+    "last_patched_at": null,
+    "last_reused_patch_generation": 0,
+    "last_used_at": null,
+    "last_viewed_at": null,
+    "patch_count": 0,
+    "patch_generation": 0,
+    "pinned": false,
+    "state": "active",
+    "use_count": 0,
+    "view_count": 0
+  },
   "hermes-agent": {
     "archived_at": null,
     "created_at": "2026-09-03T06:24:54.107080+00:00",
@@ -314,6 +329,21 @@
     "use_count": 0,
     "view_count": 0
   },
+  "pinggy-tunnel": {
+    "archived_at": null,
+    "created_at": "2026-09-03T13:38:27.841905+00:00",
+    "created_by": "installed",
+    "last_patched_at": null,
+    "last_reused_patch_generation": 0,
+    "last_used_at": null,
+    "last_viewed_at": null,
+    "patch_count": 0,
+    "patch_generation": 0,
+    "pinned": false,
+    "state": "active",
+    "use_count": 0,
+    "view_count": 0
+  },
   "publish-site": {
     "archived_at": null,
     "created_at": "2026-09-03T13:34:13.679210+00:00",
@@ -365,14 +395,29 @@
     "created_by": null,
     "last_patched_at": null,
     "last_reused_patch_generation": 0,
-    "last_used_at": "2026-09-03T13:31:01.997937+00:00",
-    "last_viewed_at": "2026-09-03T13:31:01.995935+00:00",
+    "last_used_at": "2026-09-03T13:37:09.921972+00:00",
+    "last_viewed_at": "2026-09-03T13:37:09.919470+00:00",
     "patch_count": 0,
     "patch_generation": 0,
     "pinned": false,
     "state": "active",
-    "use_count": 17,
-    "view_count": 17
+    "use_count": 18,
+    "view_count": 18
+  },
+  "sketch": {
+    "archived_at": null,
+    "created_at": "2026-09-03T13:38:28.703115+00:00",
+    "created_by": "installed",
+    "last_patched_at": null,
+    "last_reused_patch_generation": 0,
+    "last_used_at": null,
+    "last_viewed_at": null,
+    "patch_count": 0,
+    "patch_generation": 0,
+    "pinned": false,
+    "state": "active",
+    "use_count": 0,
+    "view_count": 0
   },
   "smart-web-crawler": {
     "archived_at": null,
