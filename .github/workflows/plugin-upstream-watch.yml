@@ -1,0 +1,53 @@
+name: Plugin Upstream Watcher
+
+on:
+  schedule:
+    # 每周一、三、五 UTC 02:00 (北京时间 10:00) 运行
+    - cron: '0 2 * * 1,3,5'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  check-upstream:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: hermes
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Check plugin upstream updates
+        id: check
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python scripts/check-plugin-upstream.py --report
+
+      - name: Create or update GitHub Issue
+        if: steps.check.outputs.has_updates == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TITLE="🔔 [Upstream] 检测到核心插件有上游更新 (${{ steps.check.outputs.update_count }} 项)"
+          
+          # 检查是否已存在同名或打有 upstream-watch 标签的未关闭 Issue
+          EXISTING_ISSUE=$(gh issue list --state open --label "upstream-watch" --json number --jq '.[0].number')
+          
+          if [ -n "$EXISTING_ISSUE" ]; then
+            echo "发现已存在的未关闭 Issue #$EXISTING_ISSUE，正在追加最新更新状态..."
+            gh issue comment "$EXISTING_ISSUE" --body-file upstream-report.md
+          else
+            echo "创建新 Issue..."
+            gh issue create \
+              --title "$TITLE" \
+              --body-file upstream-report.md \
+              --label "upstream-watch"
+          fi
