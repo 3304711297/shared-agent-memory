@@ -53,6 +53,18 @@
 
 ---
 
+## 🛡️ 技能分类去重与权责分工（Superpowers vs Software-Development）
+
+在技能库演进中，曾存在 `requesting-code-review`、`systematic-debugging`、`test-driven-development` 跨分类同名冲突及二级目录嵌套问题。仓库已彻底完成清理与边界划分（Commit `cddb3d5`）：
+
+1. **`skills/superpowers/`（流程规范与方法论体系）**：
+   - 专注 Agent 思考与开发纪律（需求对齐 `brainstorming`、方案拆解 `writing-plans`、TDD 红绿循环 `test-driven-development`、根因排错 `systematic-debugging`、代码审查 `requesting-code-review`、完工证据链 `verification-before-completion` 等）。
+2. **`skills/software-development/`（工程工具与语言调试体系）**：
+   - 专注底层工具与语言级排障（GitHub CLI `github`、Python DAP 断点调试 `python-debugpy`、Node.js CDP 调试 `node-inspect-debugger`、语法结构搜索 `ast-grep`、代码架构图 `code-wiki`、QA 巡检 `dogfood` 等）。
+3. **分工原则**：任务开始时由 `superpowers` 引导流程门禁；实施、排错与交互时调用 `software-development` 具体工程工具，两者权责清晰、零重叠、互不冲突。
+
+---
+
 ## 🧩 4 大核心插件详解 (`plugins/`)
 
 本仓库独立管理并跟踪 4 大核心插件资产：
