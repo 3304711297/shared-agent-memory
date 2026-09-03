@@ -76,6 +76,13 @@
 | **`serena`** | `plugins/serena/` | **语义代码分析与安全重构**<br>基于 AST 与符号引用的语义级代码检索、跨文件重命名、声明跳转与语法诊断。 | `mcp__serena__find_symbol`<br>`mcp__serena__rename_symbol`<br>`mcp__serena__get_diagnostics_for_file` |
 | **`superpowers`** | `plugins/superpowers/` | **Superpowers 代理工程框架**<br>提供 Superpowers 规范套件、全局流程门禁（TDD、Plan、Review）、跨平台适配与上下文注入机制。 | Superpowers 核心工作流引擎与拦截门禁 |
 
+### 🔒 本地定制配置保护机制（严禁盲目直接覆盖）
+本地插件针对 **Windows 11 系统环境** 与 **静默化调用** 进行了定制，上游同步时受到受控保护：
+- **`serena`**：受保护配置（`plugin.yaml`, `.mcp.json`）包含静默参数 `--enable-web-dashboard false --open-web-dashboard false --enable-gui-log-window false` 及 Windows `cmd /c uvx` 启动命令，防止调用时弹出 GUI 窗口或浏览器；
+- **`context7` / `desktop-commander`**：受保护配置包含 Windows 下 `cmd /c npx` 启动前缀与路径适配；
+- **`superpowers`**：受保护配置包含去重后的单层技能索引；
+- **更新策略**：GitHub Actions 仅在检测到上游新版本时创建 Issue 并提供 Compare Diff，**严禁盲目全量覆盖**；更新时仅同步源码与上层技能，严格保留受保护的本地定制配置文件。
+
 ---
 
 ## 📂 资产目录全景
