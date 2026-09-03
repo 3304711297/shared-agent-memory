@@ -8,9 +8,11 @@
 !SOUL.md
 !.gitignore
 
-# 跟踪技能
+# 跟踪技能与桌面插件
 !skills/
 !skills/**
+!desktop-plugins/
+!desktop-plugins/**
 
 # 严禁跟踪敏感文件与运行时数据
 .env*
