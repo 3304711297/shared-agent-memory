@@ -251,4 +251,7 @@ AbortController 穿透 fetchLike / userscript 纯函数覆盖评估（拦截点/
 - **Dependabot 5 笔 PR 全量处置完毕（PR #3, #4, #5, #6, #7）**：
   - PR #4 (`actions/checkout` v4 → v7) 经 CI 验证后直接 squash merge；
   - PR #3 (`eslint` 10.9.1)、#5 (`adm-zip` 0.6.0)、#6 (`@rollup/plugin-node-resolve` 16.0.3)、#7 (`@types/node` 26.4.1) 统一并入 `main`（commit `8acaf89`），本地及 GitHub Actions CI 143/143 测试与构建全部跑绿，4 笔 PR 分支已清理收口。
+- **Version Release 工作流幂等跳过缓存路径报错修复（02950b1，Actions 全绿）**：
+  - 根因：原 `version-release.yml` 在单 Job 内通过 `if: skip == 'false'` 阻止后续构建步骤，但在 Post Job 阶段 `actions/setup-node` 会无条件尝试保存 `cache: pnpm` 目录，因未执行 pnpm 该路径不存在抛出 `Path Validation Error` 导致工作流失败红叉。
+  - 修复：重构为 `check`（轻量判决 3s）与 `release`（条件执行 `needs.check.outputs.skip == 'false'`）双 Job 架构。无版本变更时 release Job 被标准跳过，工作流保持 100% 成功绿标。
 
