@@ -1584,6 +1584,171 @@
       },
       "installed_at": "2026-09-03T13:34:18.007260+00:00",
       "updated_at": "2026-09-03T13:34:18.007260+00:00"
+    },
+    "har-derived-api-client": {
+      "source": "official",
+      "identifier": "official/web-development/har-derived-api-client",
+      "trust_level": "builtin",
+      "scan_verdict": "safe",
+      "content_hash": "sha256:06031a403abe9e9b",
+      "install_path": "web-development/har-derived-api-client",
+      "files": [
+        "SKILL.md",
+        "scripts\\har_capture.py",
+        "scripts\\har_capture_cdp.py",
+        "scripts\\har_to_client.py"
+      ],
+      "metadata": {},
+      "scan_provenance": {
+        "source": "official",
+        "source_url": "official/web-development/har-derived-api-client",
+        "bundle_hash": "sha256:06031a403abe9e9bffe25e33de0cf0f29285d6d763ef4cf39b7b4a3e29bb4dae",
+        "scanner_version": "skills-guard-v2",
+        "verdict": "safe",
+        "trust_level": "builtin",
+        "findings": [
+          {
+            "pattern_id": "unpinned_pip_install",
+            "severity": "medium",
+            "category": "supply_chain",
+            "file": "SKILL.md",
+            "line": 44,
+            "match": "- `pip install playwright` then `playwright install chromium`",
+            "description": "pip install without version pinning"
+          }
+        ],
+        "rules": [
+          "unpinned_pip_install"
+        ],
+        "scanned_at": "2026-09-03T13:38:26.945680+00:00",
+        "summary": "har-derived-api-client: safe — 1 finding(s) in supply_chain",
+        "fresh": true
+      },
+      "installed_at": "2026-09-03T13:38:26.955683+00:00",
+      "updated_at": "2026-09-03T13:38:26.955683+00:00"
+    },
+    "pinggy-tunnel": {
+      "source": "official",
+      "identifier": "official/devops/pinggy-tunnel",
+      "trust_level": "builtin",
+      "scan_verdict": "dangerous",
+      "content_hash": "sha256:929ec657a84d8dc3",
+      "install_path": "devops/pinggy-tunnel",
+      "files": [
+        "SKILL.md"
+      ],
+      "metadata": {},
+      "scan_provenance": {
+        "source": "official",
+        "source_url": "official/devops/pinggy-tunnel",
+        "bundle_hash": "sha256:929ec657a84d8dc357038ecfdeda45fe65801d16d5698446d0cbb3aee436970d",
+        "scanner_version": "skills-guard-v2",
+        "verdict": "dangerous",
+        "trust_level": "builtin",
+        "findings": [
+          {
+            "pattern_id": "env_exfil_curl",
+            "severity": "critical",
+            "category": "exfiltration",
+            "file": "SKILL.md",
+            "line": 268,
+            "match": "curl -s \"$URL/api/tags\" -H \"Authorization: Bearer $TOKEN\" | head",
+            "description": "curl command interpolating secret environment variable"
+          },
+          {
+            "pattern_id": "tunnel_service",
+            "severity": "high",
+            "category": "network",
+            "file": "SKILL.md",
+            "line": 25,
+            "match": "- The host has SSH but no `cloudflared` / `ngrok` binary, and installing one would be overkill",
+            "description": "uses tunneling service for external access"
+          },
+          {
+            "pattern_id": "tunnel_service",
+            "severity": "high",
+            "category": "network",
+            "file": "SKILL.md",
+            "line": 27,
+            "match": "If the host already has `cloudflared` configured, prefer the `cloudflared-quick-tunnel` skill — Cloudflare quick tunn...",
+            "description": "uses tunneling service for external access"
+          },
+          {
+            "pattern_id": "tunnel_service",
+            "severity": "high",
+            "category": "network",
+            "file": "SKILL.md",
+            "line": 174,
+            "match": "- **`process(action='log')` may miss SSH banner output.** Pinggy prints the URLs and then the SSH session goes intera...",
+            "description": "uses tunneling service for external access"
+          },
+          {
+            "pattern_id": "hardcoded_ip_port",
+            "severity": "medium",
+            "category": "network",
+            "file": "SKILL.md",
+            "line": 78,
+            "match": "curl -sI http://127.0.0.1:8000/ | head -1",
+            "description": "hardcoded IP address with port"
+          },
+          {
+            "pattern_id": "hardcoded_ip_port",
+            "severity": "medium",
+            "category": "network",
+            "file": "SKILL.md",
+            "line": 255,
+            "match": "# Pre-req: the model server is already running on 127.0.0.1:11434 (Ollama default)",
+            "description": "hardcoded IP address with port"
+          },
+          {
+            "pattern_id": "backtick_subshell",
+            "severity": "medium",
+            "category": "execution",
+            "file": "SKILL.md",
+            "line": 223,
+            "match": "Hand `$URL` to the service that needs to call you. Teardown: `kill $(cat /tmp/webhook-server.pid) $(cat /tmp/webhook-...",
+            "description": "backtick string with command substitution"
+          }
+        ],
+        "rules": [
+          "backtick_subshell",
+          "env_exfil_curl",
+          "hardcoded_ip_port",
+          "tunnel_service"
+        ],
+        "scanned_at": "2026-09-03T13:38:27.828902+00:00",
+        "summary": "pinggy-tunnel: dangerous — 7 finding(s) in execution, exfiltration, network",
+        "fresh": true
+      },
+      "installed_at": "2026-09-03T13:38:27.838904+00:00",
+      "updated_at": "2026-09-03T13:38:27.838904+00:00"
+    },
+    "sketch": {
+      "source": "official",
+      "identifier": "official/creative/sketch",
+      "trust_level": "builtin",
+      "scan_verdict": "safe",
+      "content_hash": "sha256:bea886ff483216bf",
+      "install_path": "creative/sketch",
+      "files": [
+        "SKILL.md"
+      ],
+      "metadata": {},
+      "scan_provenance": {
+        "source": "official",
+        "source_url": "official/creative/sketch",
+        "bundle_hash": "sha256:bea886ff483216bffc3d91ec7ad281053c57a8c66b77d715d0456190301fe399",
+        "scanner_version": "skills-guard-v2",
+        "verdict": "safe",
+        "trust_level": "builtin",
+        "findings": [],
+        "rules": [],
+        "scanned_at": "2026-09-03T13:38:28.690613+00:00",
+        "summary": "sketch: clean scan, no threats detected",
+        "fresh": true
+      },
+      "installed_at": "2026-09-03T13:38:28.700115+00:00",
+      "updated_at": "2026-09-03T13:38:28.700115+00:00"
     }
   }
 }

@@ -1,0 +1,13 @@
+{
+  "source": "official",
+  "source_url": "official/creative/sketch",
+  "bundle_hash": "sha256:bea886ff483216bffc3d91ec7ad281053c57a8c66b77d715d0456190301fe399",
+  "scanner_version": "skills-guard-v2",
+  "verdict": "safe",
+  "trust_level": "builtin",
+  "findings": [],
+  "rules": [],
+  "scanned_at": "2026-09-03T13:38:28.690613+00:00",
+  "summary": "sketch: clean scan, no threats detected",
+  "fresh": true
+}
