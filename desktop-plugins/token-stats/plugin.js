@@ -1,11 +1,11 @@
 /**
  * Hermes Desktop Plugin: token-stats
- * 智能区分【单轮即时 Token/速率】与【整场会话累计】，对齐 Antigravity 网关统计口径。
+ * 智能监控当前会话 Token 用量、实时生成速率，并与 ZCode Antigravity 额度系统直连同步（5h 额度 / 周额度 / 单轮输出 / 真实速率）。
  */
 
 import { cn, haptic, host, Tip, useValue } from '@hermes/plugin-sdk'
 import { jsx, jsxs } from 'react/jsx-runtime'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 const ID = 'token-stats'
 
@@ -28,45 +28,102 @@ function TokenStatsChip() {
   const contextUsed = usage?.context_used ?? null
   const contextMax = usage?.context_max ?? null
   const contextPct = usage?.context_percent != null ? Math.round(usage.context_percent) : null
-  const tps = usage?.avg_tps ? Math.round(usage.avg_tps) : null
-  const cacheHit = usage?.cache_hit_pct != null ? Math.round(usage.cache_hit_pct) : null
+  const hermesTps = usage?.avg_tps ? Math.round(usage.avg_tps) : null
 
-  // 跟踪单轮增量 (Last Turn Output)
-  const prevOutputRef = useRef(sessionOutput)
-  const prevCallsRef = useRef(calls)
-  const [lastTurnOutput, setLastTurnOutput] = useState(0)
+  // Antigravity 实时额度与度量状态
+  const [antigravityData, setAntigravityData] = useState({
+    quota5h: null,
+    quotaWeekly: null,
+    recentOutput: null,
+    recentSpeed: null,
+    recentReasoning: null,
+    lastUpdate: null,
+    plan: 'Google AI Pro',
+    account: ''
+  })
 
+  // 定时从本地 Antigravity 缓存文件拉取最新额度与度量
   useEffect(() => {
-    if (calls > prevCallsRef.current) {
-      const delta = Math.max(0, sessionOutput - prevOutputRef.current)
-      if (delta > 0) {
-        setLastTurnOutput(delta)
-      }
-      prevOutputRef.current = sessionOutput
-      prevCallsRef.current = calls
-    } else if (calls === 0 || sessionOutput < prevOutputRef.current) {
-      prevOutputRef.current = sessionOutput
-      prevCallsRef.current = calls
-      setLastTurnOutput(0)
-    }
-  }, [calls, sessionOutput])
+    let timer = null
 
-  const displayTurnOutput = lastTurnOutput > 0 ? lastTurnOutput : (calls === 1 ? sessionOutput : null)
+    const fetchAntigravityStats = async () => {
+      try {
+        const res = await host.request('system.read_file', {
+          path: 'C:/Users/VOS-User/AppData/Local/ZCodeAntigravity/quota-cache.json'
+        }).catch(() => null)
+
+        const metricsRes = await host.request('system.read_file', {
+          path: 'C:/Users/VOS-User/AppData/Local/ZCodeAntigravity/usage-metrics.json'
+        }).catch(() => null)
+
+        let quotaInfo = {}
+        if (res && res.content) {
+          const quota = JSON.parse(res.content)
+          const acc = quota?.accounts?.[0]
+          const geminiGroup = acc?.groups?.find(g => g.name.includes('Gemini'))
+          const b5h = geminiGroup?.buckets?.find(b => b.window === '5h')
+          const bWeekly = geminiGroup?.buckets?.find(b => b.window === 'weekly')
+
+          quotaInfo = {
+            quota5h: b5h?.remainingPercent != null ? Math.round(b5h.remainingPercent) : null,
+            quotaWeekly: bWeekly?.remainingPercent != null ? Math.round(bWeekly.remainingPercent) : null,
+            plan: acc?.plan || 'Google AI Pro',
+            account: acc?.account || ''
+          }
+        }
+
+        let metricsInfo = {}
+        if (metricsRes && metricsRes.content) {
+          const metrics = JSON.parse(metricsRes.content)
+          const samples = metrics?.samples || []
+          if (samples.length > 0) {
+            const last = samples[samples.length - 1]
+            metricsInfo = {
+              recentOutput: last?.outputTokens ?? null,
+              recentSpeed: last?.outputTokensPerSecond ? Math.round(last.outputTokensPerSecond) : null,
+              recentReasoning: last?.reasoningTokens ?? 0,
+              lastUpdate: last?.timestamp ? new Date(last.timestamp).toLocaleTimeString() : null
+            }
+          }
+        }
+
+        setAntigravityData(prev => ({
+          ...prev,
+          ...quotaInfo,
+          ...metricsInfo
+        }))
+      } catch (e) {
+        // 容错降级
+      }
+    }
+
+    fetchAntigravityStats()
+    timer = setInterval(fetchAntigravityStats, 5000) // 每 5 秒轮询一次 Antigravity 本地数据
+    return () => clearInterval(timer)
+  }, [])
+
+  const displayOutput = antigravityData.recentOutput != null ? antigravityData.recentOutput : (sessionOutput > 0 ? sessionOutput : null)
+  const displaySpeed = antigravityData.recentSpeed != null ? antigravityData.recentSpeed : hermesTps
 
   const tipLines = [
-    `📊 【${model || 'Gemini 3.7 Flash'}】用量统计`,
+    `📊 【${model || 'Gemini 3.7 Flash'}】实时监控看板`,
     `────────────────────────`,
-    `⚡ 【当前单轮 (Last Turn)】`,
-    displayTurnOutput != null ? `  • 本轮输出 (Recent Output): ${displayTurnOutput.toLocaleString()} tok` : null,
-    contextUsed != null ? `  • 本轮输入上下文 (Prompt): ${contextUsed.toLocaleString()} tok` : null,
-    tps ? `  • 推理速率 (Throughput): ~${tps} tok/s` : null,
+    `🔋 【Antigravity 剩余额度】`,
+    antigravityData.quota5h != null ? `  • 5 小时剩余额度: ${antigravityData.quota5h}%` : `  • 5 小时剩余额度: 监控中`,
+    antigravityData.quotaWeekly != null ? `  • 本周剩余额度: ${antigravityData.quotaWeekly}%` : `  • 本周剩余额度: 监控中`,
+    antigravityData.plan ? `  • 账号类型: ${antigravityData.plan} (${antigravityData.account || '已连接'})` : null,
+    `────────────────────────`,
+    `⚡ 【当轮请求 (Last Turn)】`,
+    displayOutput != null ? `  • 最近输出 (Recent Output): ${displayOutput} tok` : null,
+    antigravityData.recentReasoning ? `  • 思考推理 (Reasoning): ${antigravityData.recentReasoning} tok` : null,
+    displaySpeed ? `  • 有效吞吐 (Throughput): ~${displaySpeed} tok/s` : null,
+    contextUsed != null ? `  • 当轮上下文 (Prompt): ${contextUsed.toLocaleString()} tok` : null,
     `────────────────────────`,
     `📦 【会话累计 (Session Total)】`,
     `  • 累计输入: ${sessionInput.toLocaleString()} tok`,
     `  • 累计输出: ${sessionOutput.toLocaleString()} tok`,
     `  • 累计总计: ${sessionTotal.toLocaleString()} tok`,
     contextMax != null ? `  • 上下文窗口: ${contextUsed ? contextUsed.toLocaleString() : 0} / ${formatNum(contextMax)} (${contextPct || 0}%)` : null,
-    cacheHit != null ? `  • 提示词缓存命中率: ${cacheHit}%` : null,
     `  • 交互轮次: ${calls} 次`
   ].filter(Boolean).join('\n')
 
@@ -83,37 +140,36 @@ function TokenStatsChip() {
         haptic?.('tap')
         host.notify({
           kind: 'info',
-          message: displayTurnOutput
-            ? `当轮输出: ${displayTurnOutput} tok | 速率: ~${tps || 0} tok/s | 累计: ${formatNum(sessionTotal)} tok`
-            : `会话总计: ${formatNum(sessionTotal)} tok | 轮次: ${calls}`
+          message: `Antigravity 5h额度: ${antigravityData.quota5h ?? '--'}% | 周额度: ${antigravityData.quotaWeekly ?? '--'}% | 当轮输出: ${displayOutput ?? '--'} tok | 速率: ~${displaySpeed ?? '--'} tok/s`
         })
       },
       children: [
+        // 额度电池指示
         jsx('span', {
-          className: 'opacity-80',
-          children: '⚡'
+          className: 'text-emerald-500 font-semibold',
+          children: antigravityData.quota5h != null ? `🔋${antigravityData.quota5h}%` : '🔋'
         }),
         jsxs('span', {
           className: 'flex items-center gap-1.5',
           children: [
-            // 当轮输出优先显示（类似 Antigravity 的 Recent Output）
-            displayTurnOutput != null ? jsxs('span', {
+            // 当轮输出
+            displayOutput != null ? jsxs('span', {
               className: 'font-semibold text-(--foreground)',
               children: [
-                jsx('span', { className: 'text-(--ui-text-tertiary) font-normal mr-0.5', children: 'Turn:' }),
-                displayTurnOutput,
-                ' tok'
+                jsx('span', { className: 'text-(--ui-text-tertiary) font-normal mr-0.5', children: 'Out:' }),
+                displayOutput,
+                't'
               ]
             }) : null,
-            // 吞吐速率
-            tps ? jsxs('span', {
+            // 实时速率
+            displaySpeed ? jsxs('span', {
               className: 'text-(--ui-accent) font-semibold',
-              children: [tps, ' t/s']
+              children: [displaySpeed, 't/s']
             }) : null,
-            // 上下文占用
-            contextUsed != null ? jsxs('span', {
+            // 周额度小标
+            antigravityData.quotaWeekly != null ? jsxs('span', {
               className: 'text-(--ui-text-quaternary)',
-              children: ['[Ctx: ', formatNum(contextUsed), ']']
+              children: ['[W:', antigravityData.quotaWeekly, '%]']
             }) : null
           ]
         })
@@ -124,7 +180,7 @@ function TokenStatsChip() {
 
 export default {
   id: ID,
-  name: 'Token & Usage Stats',
+  name: 'Token & Antigravity Stats',
   register(ctx) {
     ctx.register({
       id: 'chip',
