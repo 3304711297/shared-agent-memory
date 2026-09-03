@@ -3,8 +3,7 @@
 
 # 仅跟踪记忆目录与核心设定
 !memories/
-!memories/MEMORY.md
-!memories/USER.md
+!memories/**
 !SOUL.md
 !.gitignore
 
