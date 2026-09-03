@@ -1,0 +1,20 @@
+name: serena
+version: 1.7.1
+description: Semantic code analysis MCP server providing intelligent code understanding, refactoring suggestions, and codebase exploration
+author: oraios
+mcp_servers:
+  serena:
+    command: cmd
+    args:
+      - /c
+      - uvx
+      - --from
+      - serena-agent
+      - serena
+      - start-mcp-server
+      - --enable-web-dashboard
+      - "false"
+      - --open-web-dashboard
+      - "false"
+      - --enable-gui-log-window
+      - "false"

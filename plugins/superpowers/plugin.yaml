@@ -1,0 +1,19 @@
+name: superpowers
+version: 6.3.0
+description: Core skills library for coding agents (TDD, debugging, planning, and review)
+author: obra
+skills:
+  - ./skills/brainstorming
+  - ./skills/executing-plans
+  - ./skills/writing-plans
+  - ./skills/systematic-debugging
+  - ./skills/test-driven-development
+  - ./skills/subagent-driven-development
+  - ./skills/verification-before-completion
+  - ./skills/finishing-a-development-branch
+  - ./skills/using-git-worktrees
+  - ./skills/using-superpowers
+  - ./skills/writing-skills
+  - ./skills/dispatching-parallel-agents
+  - ./skills/receiving-code-review
+  - ./skills/requesting-code-review
