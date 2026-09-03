@@ -1,0 +1,34 @@
+{
+  "source": "official",
+  "source_url": "official/creative/excalidraw",
+  "bundle_hash": "sha256:359112274e8262e0e751e4bc12be16a9ce5b31f651d0947fd0d15e64a3bf3842",
+  "scanner_version": "skills-guard-v2",
+  "verdict": "safe",
+  "trust_level": "builtin",
+  "findings": [
+    {
+      "pattern_id": "unpinned_pip_install",
+      "severity": "medium",
+      "category": "supply_chain",
+      "file": "SKILL.md",
+      "line": 57,
+      "match": "This uploads to excalidraw.com (no account needed) and prints a shareable URL. Requires the `cryptography` pip packag...",
+      "description": "pip install without version pinning"
+    },
+    {
+      "pattern_id": "unpinned_pip_install",
+      "severity": "medium",
+      "category": "supply_chain",
+      "file": "scripts\\upload.py",
+      "line": 32,
+      "match": "print(\"Install it with: pip install cryptography\")",
+      "description": "pip install without version pinning"
+    }
+  ],
+  "rules": [
+    "unpinned_pip_install"
+  ],
+  "scanned_at": "2026-09-03T13:34:09.359026+00:00",
+  "summary": "excalidraw: safe \u2014 2 finding(s) in supply_chain",
+  "fresh": true
+}

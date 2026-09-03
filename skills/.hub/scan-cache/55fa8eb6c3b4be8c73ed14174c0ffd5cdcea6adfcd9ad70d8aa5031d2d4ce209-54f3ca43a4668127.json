@@ -1,0 +1,25 @@
+{
+  "source": "official",
+  "source_url": "official/mlops/models/huggingface-hub",
+  "bundle_hash": "sha256:55fa8eb6c3b4be8c73ed14174c0ffd5cdcea6adfcd9ad70d8aa5031d2d4ce209",
+  "scanner_version": "skills-guard-v2",
+  "verdict": "dangerous",
+  "trust_level": "builtin",
+  "findings": [
+    {
+      "pattern_id": "curl_pipe_shell",
+      "severity": "critical",
+      "category": "supply_chain",
+      "file": "SKILL.md",
+      "line": 18,
+      "match": "*   **Installation:** `curl -LsSf https://hf.co/cli/install.sh | bash -s`",
+      "description": "curl piped to shell (download-and-execute)"
+    }
+  ],
+  "rules": [
+    "curl_pipe_shell"
+  ],
+  "scanned_at": "2026-09-03T13:34:15.364119+00:00",
+  "summary": "huggingface-hub: dangerous \u2014 1 finding(s) in supply_chain",
+  "fresh": true
+}
