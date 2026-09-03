@@ -1,3 +1,4 @@
+- [Hermes Skills and MCP Optimization 2026-09-03](hermes-skills-and-mcp-optimization-2026-09-03.md) — 2026-09-03 技能库深度清理去重、41 项免费开源核心技能安装与 Whisper small 偏好对齐全景记录
 - [Auto Backup Memories to GitHub](auto-backup-memories-to-github.md) — 记忆文件变动或新增后必须自动静默提交并推送到私有仓库 shared-agent-memory（严禁等待用户提醒，无需询问用户）
 - [Adobe MCP Authentication](adobe-mcp-authentication.md) — Adobe for creativity MCP server requires OAuth authentication; 403 errors indicate missing Authorization headers
 - [Five Repo Task Book v42](five-repo-task-book-v42.md) — 五仓库任务书 v4.2（15 条）**全部完成推送、五仓 CI 全绿**；tweak 已发 **v0.2.21**（tag-only 流程三步+包内版本注入实测）；脚本猫更新检测人工验收通过；含 BOM/mkdocs-tags/lock 提锁契约与待用户拍板事项（orc dependabot.yml 等）
