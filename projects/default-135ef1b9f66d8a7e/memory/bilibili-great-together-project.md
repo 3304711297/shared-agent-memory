@@ -243,3 +243,8 @@ AbortController 穿透 fetchLike / userscript 纯函数覆盖评估（拦截点/
       - `[mbgt] [remove-useless-url-params] auto-disabled: bewlycat (cleanUrlArgument) detected`
     - `[mbgt] [use-system-fonts] "any" https://www.bilibili.com/` 正常运行；
     - 所有 9 个实时拦截防护模块（防跟踪、反 PCDN、防 WebRTC 泄露、存储防御等）全部正常注入生效。
+
+## 2026-09-03 上游同步看门处置与自动执行拍板
+
+- **Issue #8（上游 SukkaW 提交 19ac3ae 评估）**：逐条比对确认移植基线已完整包含全部 7 个提交涉及的功能改动与重构，无须 cherry-pick，已在 Issue 留言说明并正式关闭。
+- **用户拍板铁律（自动执行）**：后续对于上游同步看门（`upstream-watch`）及常规评估类 GitHub Issue，完成比对评估并确认无须改动（或已完成必要移植/测试）后，**直接自动在 GitHub 上留言并关闭 Issue，无需每次额外询问确认**。
