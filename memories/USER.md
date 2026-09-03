@@ -9,3 +9,5 @@ User communicates in Chinese; reply in Chinese by default.
 用户偏好：关于 Skills 安装与管理，优先通过 Hermes 官方技能机制（桌面侧边栏一键点击安装或 `hermes skills install`），严禁擅自用 pip/npm 替代原生技能安装。筛选技能时偏好 100% 免费开源、无付费 API/订阅且无功能冲突的上位技能；语音转录场景（Whisper）明确偏好使用 small 模型。处理复杂任务优先调用技能与专业 MCP 工具。
 §
 持有 Google 个人 Pro 订阅（非企业/开发者付费 AI Studio）；偏好高响应速度模型，主力模型使用本地 ZCode Antigravity 桥接的 Gemini 3.7 Flash（Ultra 思考模式）。
+§
+用户偏好：高度认可并要求在面对复杂或特定领域任务时，严格优先通过相关 Skills（如 superpowers 流程规范、领域专业技能）引导思考和执行全过程。
