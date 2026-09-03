@@ -21,7 +21,7 @@ NousResearch hermes-agent v0.21.0 于 2026-09-02 23 时重装完成并验证（d
 - 冒烟提示：网关就绪日志（Starting Hermes Gateway / Turn machinery warmed）写入 `%LOCALAPPDATA%\hermes\logs\gateway.log`，不进 stdout，验证时看文件别盯终端。
 - **Edge 起不来=锁占用排查法（2026-09-03 实战）**：hermes 测试中断曾遗留 ①孤儿 chrome-devtools-mcp node 进程群、②无头 Playwright Chromium（进程名 chrome.exe、带真实 Edge User Data，Get-Process msedge 扫不到！）占住 `Edge Dev\User Data\lockfile` → Edge 静默秒退无窗口。修复：杀 ms-playwright/chrome-devtools-mcp 相关进程 → 删 lockfile 与 DevToolsActivePort → 重启 Edge。定位占用者用 handle.exe（live.sysinternals.com 下载，已存 D:\temp\handle.exe）。
 - **ZCode 插件与 MCP 全量生态打通（2026-09-03）**：
-  - MCP 4 项全启用（`chrome-devtools`, `desktop-commander`, `serena`, `context7`）；其中 serena 已注入静默无弹窗参数。
+  - Hermes 原生智能体插件（`%LOCALAPPDATA%\hermes\plugins\`）规范化接入：`desktop-commander`, `superpowers`, `serena`, `context7` 4 个插件全部就绪且由 Hermes 插件系统集中管理生命周期（GUI「插件」设置页直接可视化控制）。
   - Skills 结构化分类管理（`superpowers` 11 项、`zcode-custom` 7 项；移除冗余散装 github 技能，直接使用 Hermes 内置全功能 `software-development/github` 技能）。Hermes 与 ZCode 完全共享同等工具与方法论能力。
 
 **Why:** 安装两次失败均因 git/uv 不走系统代理，且坏了的旧 checkout 会被安装器整目录移走导致运行时丢失；记住这些可避免重复踩坑。
