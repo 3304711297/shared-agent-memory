@@ -9,11 +9,11 @@ metadata:
 
 用户铁律要求：**记忆库采用 GitHub 多分支隔离备份模式，有变动时自动静默提交并推送到对应分支**。
 
-- 远程仓库：`https://github.com/3304711297/zcode-memories.git`
+- 远程仓库：`https://github.com/3304711297/shared-agent-memory.git`
 - **ZCode 专属分支**：`zcode`（本地目录 `C:\Users\VOS-User\.zcode\cli\memories\`）
-  - 触发条件：修改或新增 `.zcode` 记忆文件后，执行 `cd "C:/Users/VOS-User/.zcode/cli/memories" && git add . && git commit -m "backup: 自动备份最新记忆" && git push`
+  - 触发条件：修改或新增 `.zcode` 记忆文件后，执行 `git -C "C:/Users/VOS-User/.zcode/cli/memories" -c http.proxy=http://127.0.0.1:3067 add . && git -C "C:/Users/VOS-User/.zcode/cli/memories" commit -m "backup: 自动备份最新记忆" && git -C "C:/Users/VOS-User/.zcode/cli/memories" -c http.proxy=http://127.0.0.1:3067 push origin zcode`
 - **Hermes 专属分支**：`hermes`（本地目录 `C:\Users\VOS-User\AppData\Local\hermes\`）
-  - 触发条件：修改或新增 Hermes 记忆/技能后，执行 `cd "C:/Users/VOS-User/AppData/Local/hermes" && git add . && git commit -m "backup: 自动备份 hermes 记忆与配置" && git push`
+  - 触发条件：修改或新增 Hermes 记忆/技能/配置后，执行 `git -C "C:/Users/VOS-User/AppData/Local/hermes" -c http.proxy=http://127.0.0.1:3067 add . && git -C "C:/Users/VOS-User/AppData/Local/hermes" commit -m "backup: 自动备份 hermes 记忆与配置" && git -C "C:/Users/VOS-User/AppData/Local/hermes" -c http.proxy=http://127.0.0.1:3067 push origin hermes`
   - 安全铁律：`.gitignore` 严格白名单过滤，严禁推送 `.env*`、`auth.json`、`*.db`、`*.log`、`sessions/` 等敏感与临时数据。
 
 **Why:** 隔离两个 Agent 的记忆与配置演化，避免在同一个分支发生 Git 树合并冲突或互相覆盖。
