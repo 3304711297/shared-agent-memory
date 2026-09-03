@@ -35,6 +35,10 @@ metadata:
   2. ysk 升级后按严格契约自动提升 tweak 的 `knowledge.lock.json` 至 `b0bd3be`，所有仓库 CI 全绿。
   3. **tweak 发布包缺失 scripts 修复**：用户实测从 GitHub 下载 `tweakbyjie-v0.2.21.zip` 报错缺少 `scripts/preflight.ps1`。根因 `.github/workflows/ci.yml` 的 zip 打包命令漏掉了 `scripts` 目录；已修复 `ci.yml` 并向 main 提交推送 `f07e0fc`，同时本地重新打包含 `scripts/preflight.ps1` 的 zip 并用 `gh release upload --clobber` 重新覆盖 GitHub 上 `v0.2.21` 的 Release 资产。
   4. **DISM 进程锁定目录坑**：运行 tweak 菜单 10 查询虚拟化状态时，`Get-WindowsOptionalFeature` 会在后台拉起 `DismHost.exe` 继承运行目录为 CWD 并不立即退出，导致资源管理器删除运行目录报"文件夹正在使用"；需 kill 掉该 `DismHost.exe` 即可释放。
+- 2026-09-03 新增三篇 AI 工具/软件技巧文章并双仓闭环：
+  1. ysk 新增三篇实战文章：`AI浏览器自动化扩展禁用陷阱与数据恢复.md`、`hermes-agent-Windows部署与本地模型桥接实战.md`、`Windows命令行工具代理行为差异速查.md`。
+  2. 修复外链并自动重新生成覆盖矩阵，front-matter-check 与 lychee link-check 均通过，CI 全绿（commit `2548e34`）。
+  3. tweak 严格提升 `knowledge.lock.json` 至 `2548e34c17...`，Coverage 44/44/44 全绿（commit `0ff1080`），自动发版 CI 全绿。
 **How to apply:** 后续检查只对比 tweak 和 youshouldknow，忽略 KYE；路径固定为 Desktop 下，以 0 0 + working tree clean 为同步判定；新增分类需同步 README 与 mkdocs.yml nav；Pages 状态以 gh-pages 分支存在 + API source 配置为准；本地 Pester 版本不匹配不判为代码故障。
 
 [[tweak-modularization-plan]] [[youshouldknow-modular-linkage]] [[youshouldknow-doc-details]] [[pow-file-traceability]]
