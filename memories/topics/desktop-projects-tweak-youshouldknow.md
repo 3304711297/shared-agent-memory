@@ -39,6 +39,10 @@ metadata:
   1. ysk 新增三篇实战文章：`AI浏览器自动化扩展禁用陷阱与数据恢复.md`、`hermes-agent-Windows部署与本地模型桥接实战.md`、`Windows命令行工具代理行为差异速查.md`。
   2. 修复外链并自动重新生成覆盖矩阵，front-matter-check 与 lychee link-check 均通过，CI 全绿（commit `2548e34`）。
   3. tweak 严格提升 `knowledge.lock.json` 至 `2548e34c17...`，Coverage 44/44/44 全绿（commit `0ff1080`），自动发版 CI 全绿。
+- 2026-09-03 评估并吸收 Kiwi-Tweaks 2.0 精华（QoS DSCP 46 数据包优先）与双仓上游看门闭环：
+  1. **`tweakbyjie` 落地 Part 12**：新增 `Modules/GameQos.ps1` 与 `Modules/Backup.GameQos.ps1`，为 CS2/Valorant/Apex/COD/LoL 等竞技网游注入 DSCP 46 加速转发标记；通过 `tests/GameQos.Tests.ps1` 单元测试验证（Pester 113 项全过，commit `1711920`）。
+  2. **`youshouldknow` 落地深度科普**：新增 `docs/网络通信/Windows游戏网络QoS策略与DSCP原理.md`，剖析 DiffServ/802.1p 队列映射与 TCP CUBIC 原理，mkdocs strict 构建全绿（commit `e418d66`）。
+  3. **Kiwi-Tweaks 上游看门 CI 上线**：两仓均配置 `.github/workflows/upstream-watch.yml` 与 `tools/check-upstream.py`，每周一定期巡检 `contactkiwitweaks-stack/Kiwi-Tweaks`，发现新提交时自动开启 Issue 提醒评估。
 **How to apply:** 后续检查只对比 tweak 和 youshouldknow，忽略 KYE；路径固定为 Desktop 下，以 0 0 + working tree clean 为同步判定；新增分类需同步 README 与 mkdocs.yml nav；Pages 状态以 gh-pages 分支存在 + API source 配置为准；本地 Pester 版本不匹配不判为代码故障。
 
 [[tweak-modularization-plan]] [[youshouldknow-modular-linkage]] [[youshouldknow-doc-details]] [[pow-file-traceability]]
