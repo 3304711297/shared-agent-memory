@@ -248,3 +248,7 @@ AbortController 穿透 fetchLike / userscript 纯函数覆盖评估（拦截点/
 
 - **Issue #8（上游 SukkaW 提交 19ac3ae 评估）**：逐条比对确认移植基线已完整包含全部 7 个提交涉及的功能改动与重构，无须 cherry-pick，已在 Issue 留言说明并正式关闭。
 - **用户拍板铁律（自动执行）**：后续对于上游同步看门（`upstream-watch`）及常规评估类 GitHub Issue，完成比对评估并确认无须改动（或已完成必要移植/测试）后，**直接自动在 GitHub 上留言并关闭 Issue，无需每次额外询问确认**。
+- **Dependabot 5 笔 PR 全量处置完毕（PR #3, #4, #5, #6, #7）**：
+  - PR #4 (`actions/checkout` v4 → v7) 经 CI 验证后直接 squash merge；
+  - PR #3 (`eslint` 10.9.1)、#5 (`adm-zip` 0.6.0)、#6 (`@rollup/plugin-node-resolve` 16.0.3)、#7 (`@types/node` 26.4.1) 统一并入 `main`（commit `8acaf89`），本地及 GitHub Actions CI 143/143 测试与构建全部跑绿，4 笔 PR 分支已清理收口。
+
