@@ -1749,6 +1749,2115 @@
       },
       "installed_at": "2026-09-03T13:38:28.700115+00:00",
       "updated_at": "2026-09-03T13:38:28.700115+00:00"
+    },
+    "agent-merge-conflict-arbiter": {
+      "source": "official",
+      "identifier": "official/autonomous-ai-agents/agent-merge-conflict-arbiter",
+      "trust_level": "builtin",
+      "scan_verdict": "safe",
+      "content_hash": "sha256:c708cdd11f94e914",
+      "install_path": "autonomous-ai-agents/agent-merge-conflict-arbiter",
+      "files": [
+        "SKILL.md"
+      ],
+      "metadata": {},
+      "scan_provenance": {
+        "source": "official",
+        "source_url": "official/autonomous-ai-agents/agent-merge-conflict-arbiter",
+        "bundle_hash": "sha256:c708cdd11f94e914d74d1cdb8e08af1791aa5fef0336d3ef07956b18846547ea",
+        "scanner_version": "skills-guard-v2",
+        "verdict": "safe",
+        "trust_level": "builtin",
+        "findings": [],
+        "rules": [],
+        "scanned_at": "2026-09-03T13:49:35.632069+00:00",
+        "summary": "agent-merge-conflict-arbiter: clean scan, no threats detected",
+        "fresh": true
+      },
+      "installed_at": "2026-09-03T13:49:35.641576+00:00",
+      "updated_at": "2026-09-03T13:49:35.641576+00:00"
+    },
+    "comfyui": {
+      "source": "official",
+      "identifier": "official/creative/comfyui",
+      "trust_level": "builtin",
+      "scan_verdict": "dangerous",
+      "content_hash": "sha256:f5174b0074ce3a74",
+      "install_path": "creative/comfyui",
+      "files": [
+        "SKILL.md",
+        "references\\official-cli.md",
+        "references\\rest-api.md",
+        "references\\template-integrity.md",
+        "references\\workflow-format.md",
+        "scripts\\auto_fix_deps.py",
+        "scripts\\check_deps.py",
+        "scripts\\comfyui_setup.sh",
+        "scripts\\extract_schema.py",
+        "scripts\\fetch_logs.py",
+        "scripts\\hardware_check.py",
+        "scripts\\health_check.py",
+        "scripts\\run_batch.py",
+        "scripts\\run_workflow.py",
+        "scripts\\ws_monitor.py",
+        "scripts\\_common.py",
+        "tests\\conftest.py",
+        "tests\\pytest.ini",
+        "tests\\README.md",
+        "tests\\test_check_deps.py",
+        "tests\\test_cloud_integration.py",
+        "tests\\test_common.py",
+        "tests\\test_extract_schema.py",
+        "tests\\test_run_workflow.py",
+        "workflows\\animatediff_video.json",
+        "workflows\\flux_dev_txt2img.json",
+        "workflows\\README.md",
+        "workflows\\sd15_txt2img.json",
+        "workflows\\sdxl_img2img.json",
+        "workflows\\sdxl_inpaint.json",
+        "workflows\\sdxl_txt2img.json",
+        "workflows\\upscale_4x.json",
+        "workflows\\wan_video_t2v.json"
+      ],
+      "metadata": {},
+      "scan_provenance": {
+        "source": "official",
+        "source_url": "official/creative/comfyui",
+        "bundle_hash": "sha256:f5174b0074ce3a74c26a1a9a08a2f9706cc085680c9ae14e694573b9f0d4a6ed",
+        "scanner_version": "skills-guard-v2",
+        "verdict": "dangerous",
+        "trust_level": "builtin",
+        "findings": [
+          {
+            "pattern_id": "hardcoded_ip_port",
+            "severity": "medium",
+            "category": "network",
+            "file": "SKILL.md",
+            "line": 108,
+            "match": "curl -s http://127.0.0.1:8188/system_stats 2>/dev/null && echo \"server: running\"",
+            "description": "hardcoded IP address with port"
+          },
+          {
+            "pattern_id": "hardcoded_ip_port",
+            "severity": "medium",
+            "category": "network",
+            "file": "SKILL.md",
+            "line": 152,
+            "match": "# Local (defaults to http://127.0.0.1:8188)",
+            "description": "hardcoded IP address with port"
+          },
+          {
+            "pattern_id": "hardcoded_ip_port",
+            "severity": "medium",
+            "category": "network",
+            "file": "SKILL.md",
+            "line": 406,
+            "match": "curl -s http://127.0.0.1:8188/system_stats      # health check",
+            "description": "hardcoded IP address with port"
+          },
+          {
+            "pattern_id": "hardcoded_ip_port",
+            "severity": "medium",
+            "category": "network",
+            "file": "SKILL.md",
+            "line": 504,
+            "match": "curl -X POST \"http://127.0.0.1:8188/upload/image\" \\",
+            "description": "hardcoded IP address with port"
+          },
+          {
+            "pattern_id": "hardcoded_ip_port",
+            "severity": "medium",
+            "category": "network",
+            "file": "SKILL.md",
+            "line": 539,
+            "match": "curl -s http://127.0.0.1:8188/queue | python -m json.tool",
+            "description": "hardcoded IP address with port"
+          },
+          {
+            "pattern_id": "hardcoded_ip_port",
+            "severity": "medium",
+            "category": "network",
+            "file": "SKILL.md",
+            "line": 540,
+            "match": "curl -X POST http://127.0.0.1:8188/queue -d '{\"clear\": true}'    # cancel pending",
+            "description": "hardcoded IP address with port"
+          },
+          {
+            "pattern_id": "hardcoded_ip_port",
+            "severity": "medium",
+            "category": "network",
+            "file": "SKILL.md",
+            "line": 541,
+            "match": "curl -X POST http://127.0.0.1:8188/interrupt                      # cancel running",
+            "description": "hardcoded IP address with port"
+          },
+          {
+            "pattern_id": "hardcoded_ip_port",
+            "severity": "medium",
+            "category": "network",
+            "file": "SKILL.md",
+            "line": 542,
+            "match": "curl -X POST http://127.0.0.1:8188/free \\",
+            "description": "hardcoded IP address with port"
+          },
+          {
+            "pattern_id": "hardcoded_ip_port",
+            "severity": "medium",
+            "category": "network",
+            "file": "SKILL.md",
+            "line": 559,
+            "match": "`curl http://127.0.0.1:8188/system_stats`.",
+            "description": "hardcoded IP address with port"
+          },
+          {
+            "pattern_id": "curl_pipe_python",
+            "severity": "critical",
+            "category": "supply_chain",
+            "file": "SKILL.md",
+            "line": 539,
+            "match": "curl -s http://127.0.0.1:8188/queue | python -m json.tool",
+            "description": "curl piped to Python interpreter"
+          },
+          {
+            "pattern_id": "unpinned_pip_install",
+            "severity": "medium",
+            "category": "supply_chain",
+            "file": "SKILL.md",
+            "line": 166,
+            "match": "# Real-time progress via WebSocket (requires `pip install websocket-client`)",
+            "description": "pip install without version pinning"
+          },
+          {
+            "pattern_id": "unpinned_pip_install",
+            "severity": "medium",
+            "category": "supply_chain",
+            "file": "SKILL.md",
+            "line": 380,
+            "match": "pip install --user comfy-cli",
+            "description": "pip install without version pinning"
+          },
+          {
+            "pattern_id": "unpinned_pip_install",
+            "severity": "medium",
+            "category": "supply_chain",
+            "file": "SKILL.md",
+            "line": 420,
+            "match": "pip install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cu130",
+            "description": "pip install without version pinning"
+          },
+          {
+            "pattern_id": "git_clone",
+            "severity": "medium",
+            "category": "supply_chain",
+            "file": "SKILL.md",
+            "line": 418,
+            "match": "git clone https://github.com/comfyanonymous/ComfyUI.git",
+            "description": "clones a git repository at runtime"
+          },
+          {
+            "pattern_id": "unpinned_pip_install",
+            "severity": "medium",
+            "category": "supply_chain",
+            "file": "references\\official-cli.md",
+            "line": 13,
+            "match": "pip install --user comfy-cli      # fallback",
+            "description": "pip install without version pinning"
+          },
+          {
+            "pattern_id": "hardcoded_ip_port",
+            "severity": "medium",
+            "category": "network",
+            "file": "references\\rest-api.md",
+            "line": 11,
+            "match": "| Base URL | `http://127.0.0.1:8188` | `https://cloud.comfy.org` |",
+            "description": "hardcoded IP address with port"
+          },
+          {
+            "pattern_id": "hardcoded_ip_port",
+            "severity": "medium",
+            "category": "network",
+            "file": "references\\rest-api.md",
+            "line": 55,
+            "match": "curl -X POST \"http://127.0.0.1:8188/prompt\" \\",
+            "description": "hardcoded IP address with port"
+          },
+          {
+            "pattern_id": "hardcoded_ip_port",
+            "severity": "medium",
+            "category": "network",
+            "file": "references\\rest-api.md",
+            "line": 103,
+            "match": "curl -s \"http://127.0.0.1:8188/history\"          # all",
+            "description": "hardcoded IP address with port"
+          },
+          {
+            "pattern_id": "hardcoded_ip_port",
+            "severity": "medium",
+            "category": "network",
+            "file": "references\\rest-api.md",
+            "line": 104,
+            "match": "curl -s \"http://127.0.0.1:8188/history/{id}\"     # one prompt_id",
+            "description": "hardcoded IP address with port"
+          },
+          {
+            "pattern_id": "hardcoded_ip_port",
+            "severity": "medium",
+            "category": "network",
+            "file": "references\\rest-api.md",
+            "line": 129,
+            "match": "curl -s \"http://127.0.0.1:8188/view?filename=ComfyUI_00001_.png&subfolder=&type=output\" \\",
+            "description": "hardcoded IP address with port"
+          },
+          {
+            "pattern_id": "hardcoded_ip_port",
+            "severity": "medium",
+            "category": "network",
+            "file": "references\\rest-api.md",
+            "line": 147,
+            "match": "wscat -c \"ws://127.0.0.1:8188/ws?clientId=MY-UUID\"",
+            "description": "hardcoded IP address with port"
+          },
+          {
+            "pattern_id": "hardcoded_ip_port",
+            "severity": "medium",
+            "category": "network",
+            "file": "references\\rest-api.md",
+            "line": 187,
+            "match": "curl -X POST \"http://127.0.0.1:8188/upload/image\" \\",
+            "description": "hardcoded IP address with port"
+          },
+          {
+            "pattern_id": "hardcoded_ip_port",
+            "severity": "medium",
+            "category": "network",
+            "file": "references\\rest-api.md",
+            "line": 192,
+            "match": "curl -X POST \"http://127.0.0.1:8188/upload/mask\" \\",
+            "description": "hardcoded IP address with port"
+          },
+          {
+            "pattern_id": "hardcoded_ip_port",
+            "severity": "medium",
+            "category": "network",
+            "file": "references\\rest-api.md",
+            "line": 203,
+            "match": "curl -s \"http://127.0.0.1:8188/object_info\" | python3 -m json.tool",
+            "description": "hardcoded IP address with port"
+          },
+          {
+            "pattern_id": "hardcoded_ip_port",
+            "severity": "medium",
+            "category": "network",
+            "file": "references\\rest-api.md",
+            "line": 206,
+            "match": "curl -s \"http://127.0.0.1:8188/object_info/KSampler\"",
+            "description": "hardcoded IP address with port"
+          },
+          {
+            "pattern_id": "hardcoded_ip_port",
+            "severity": "medium",
+            "category": "network",
+            "file": "references\\rest-api.md",
+            "line": 209,
+            "match": "curl -s \"http://127.0.0.1:8188/models/checkpoints\"",
+            "description": "hardcoded IP address with port"
+          },
+          {
+            "pattern_id": "hardcoded_ip_port",
+            "severity": "medium",
+            "category": "network",
+            "file": "references\\rest-api.md",
+            "line": 210,
+            "match": "curl -s \"http://127.0.0.1:8188/models/loras\"",
+            "description": "hardcoded IP address with port"
+          },
+          {
+            "pattern_id": "hardcoded_ip_port",
+            "severity": "medium",
+            "category": "network",
+            "file": "references\\rest-api.md",
+            "line": 221,
+            "match": "curl -s \"http://127.0.0.1:8188/queue\"",
+            "description": "hardcoded IP address with port"
+          },
+          {
+            "pattern_id": "hardcoded_ip_port",
+            "severity": "medium",
+            "category": "network",
+            "file": "references\\rest-api.md",
+            "line": 224,
+            "match": "curl -X POST \"http://127.0.0.1:8188/queue\" \\",
+            "description": "hardcoded IP address with port"
+          },
+          {
+            "pattern_id": "hardcoded_ip_port",
+            "severity": "medium",
+            "category": "network",
+            "file": "references\\rest-api.md",
+            "line": 229,
+            "match": "curl -X POST \"http://127.0.0.1:8188/queue\" \\",
+            "description": "hardcoded IP address with port"
+          },
+          {
+            "pattern_id": "hardcoded_ip_port",
+            "severity": "medium",
+            "category": "network",
+            "file": "references\\rest-api.md",
+            "line": 234,
+            "match": "curl -X POST \"http://127.0.0.1:8188/interrupt\"",
+            "description": "hardcoded IP address with port"
+          },
+          {
+            "pattern_id": "hardcoded_ip_port",
+            "severity": "medium",
+            "category": "network",
+            "file": "references\\rest-api.md",
+            "line": 241,
+            "match": "curl -s \"http://127.0.0.1:8188/system_stats\"",
+            "description": "hardcoded IP address with port"
+          },
+          {
+            "pattern_id": "hardcoded_ip_port",
+            "severity": "medium",
+            "category": "network",
+            "file": "references\\rest-api.md",
+            "line": 244,
+            "match": "curl -X POST \"http://127.0.0.1:8188/free\" \\",
+            "description": "hardcoded IP address with port"
+          },
+          {
+            "pattern_id": "hardcoded_ip_port",
+            "severity": "medium",
+            "category": "network",
+            "file": "references\\rest-api.md",
+            "line": 256,
+            "match": "curl -X POST \"http://127.0.0.1:8188/manager/queue/install\" \\",
+            "description": "hardcoded IP address with port"
+          },
+          {
+            "pattern_id": "hardcoded_ip_port",
+            "severity": "medium",
+            "category": "network",
+            "file": "references\\rest-api.md",
+            "line": 261,
+            "match": "curl -s \"http://127.0.0.1:8188/manager/queue/status\"",
+            "description": "hardcoded IP address with port"
+          },
+          {
+            "pattern_id": "hardcoded_ip_port",
+            "severity": "medium",
+            "category": "network",
+            "file": "references\\rest-api.md",
+            "line": 264,
+            "match": "curl -X POST \"http://127.0.0.1:8188/manager/queue/install_model\" \\",
+            "description": "hardcoded IP address with port"
+          },
+          {
+            "pattern_id": "curl_pipe_python",
+            "severity": "critical",
+            "category": "supply_chain",
+            "file": "references\\rest-api.md",
+            "line": 203,
+            "match": "curl -s \"http://127.0.0.1:8188/object_info\" | python3 -m json.tool",
+            "description": "curl piped to Python interpreter"
+          },
+          {
+            "pattern_id": "python_subprocess",
+            "severity": "medium",
+            "category": "execution",
+            "file": "scripts\\auto_fix_deps.py",
+            "line": 54,
+            "match": "proc = subprocess.run(cmd, capture_output=True, text=True, encoding='utf-8', errors='replace', check=False)",
+            "description": "Python subprocess execution"
+          },
+          {
+            "pattern_id": "unpinned_pip_install",
+            "severity": "medium",
+            "category": "supply_chain",
+            "file": "scripts\\auto_fix_deps.py",
+            "line": 129,
+            "match": "\"reason\": \"comfy-cli not on PATH; install with `pip install comfy-cli` or `pipx install comfy-cli`\",",
+            "description": "pip install without version pinning"
+          },
+          {
+            "pattern_id": "echo_pipe_exec",
+            "severity": "critical",
+            "category": "obfuscation",
+            "file": "scripts\\comfyui_setup.sh",
+            "line": 117,
+            "match": "VERDICT=\"$(echo \"$HW_JSON\" | python3 -c 'import sys,json; print(json.load(sys.stdin).get(\"verdict\",\"\"))')\"",
+            "description": "echo piped to interpreter for execution"
+          },
+          {
+            "pattern_id": "echo_pipe_exec",
+            "severity": "critical",
+            "category": "obfuscation",
+            "file": "scripts\\comfyui_setup.sh",
+            "line": 118,
+            "match": "FLAG=\"$(echo \"$HW_JSON\"   | python3 -c 'import sys,json; print(json.load(sys.stdin).get(\"comfy_cli_flag\") or \"\")')\"",
+            "description": "echo piped to interpreter for execution"
+          },
+          {
+            "pattern_id": "curl_pipe_python",
+            "severity": "critical",
+            "category": "supply_chain",
+            "file": "scripts\\comfyui_setup.sh",
+            "line": 238,
+            "match": "curl -fsS \"http://127.0.0.1:$PORT/system_stats\" | python3 -m json.tool 2>/dev/null || true",
+            "description": "curl piped to Python interpreter"
+          },
+          {
+            "pattern_id": "curl_pipe_python",
+            "severity": "critical",
+            "category": "supply_chain",
+            "file": "scripts\\comfyui_setup.sh",
+            "line": 260,
+            "match": "curl -fsS \"http://127.0.0.1:$PORT/system_stats\" | python3 -m json.tool 2>/dev/null || true",
+            "description": "curl piped to Python interpreter"
+          },
+          {
+            "pattern_id": "unpinned_pip_install",
+            "severity": "medium",
+            "category": "supply_chain",
+            "file": "scripts\\comfyui_setup.sh",
+            "line": 171,
+            "match": "log \"Neither pipx nor uvx found. Falling back to pip install --user…\"",
+            "description": "pip install without version pinning"
+          },
+          {
+            "pattern_id": "unpinned_pip_install",
+            "severity": "medium",
+            "category": "supply_chain",
+            "file": "scripts\\comfyui_setup.sh",
+            "line": 173,
+            "match": "if ! pip install --user comfy-cli >>\"$LOG_FILE\" 2>&1; then",
+            "description": "pip install without version pinning"
+          },
+          {
+            "pattern_id": "unpinned_pip_install",
+            "severity": "medium",
+            "category": "supply_chain",
+            "file": "scripts\\comfyui_setup.sh",
+            "line": 175,
+            "match": "log \"pip install --user failed. Retrying with --break-system-packages…\"",
+            "description": "pip install without version pinning"
+          },
+          {
+            "pattern_id": "unpinned_pip_install",
+            "severity": "medium",
+            "category": "supply_chain",
+            "file": "scripts\\comfyui_setup.sh",
+            "line": 176,
+            "match": "pip install --user --break-system-packages comfy-cli >>\"$LOG_FILE\" 2>&1 || {",
+            "description": "pip install without version pinning"
+          },
+          {
+            "pattern_id": "python_subprocess",
+            "severity": "medium",
+            "category": "execution",
+            "file": "scripts\\hardware_check.py",
+            "line": 56,
+            "match": "out = subprocess.run(",
+            "description": "Python subprocess execution"
+          },
+          {
+            "pattern_id": "unpinned_pip_install",
+            "severity": "medium",
+            "category": "supply_chain",
+            "file": "scripts\\health_check.py",
+            "line": 42,
+            "match": "\"hint\": \"Install with: pipx install comfy-cli (or `pip install comfy-cli`)\",",
+            "description": "pip install without version pinning"
+          },
+          {
+            "pattern_id": "unpinned_pip_install",
+            "severity": "medium",
+            "category": "supply_chain",
+            "file": "scripts\\ws_monitor.py",
+            "line": 130,
+            "match": "\"install\": \"pip install websocket-client\",",
+            "description": "pip install without version pinning"
+          },
+          {
+            "pattern_id": "hardcoded_ip_port",
+            "severity": "medium",
+            "category": "network",
+            "file": "scripts\\_common.py",
+            "line": 43,
+            "match": "DEFAULT_LOCAL_HOST = \"http://127.0.0.1:8188\"",
+            "description": "hardcoded IP address with port"
+          },
+          {
+            "pattern_id": "unpinned_pip_install",
+            "severity": "medium",
+            "category": "supply_chain",
+            "file": "scripts\\_common.py",
+            "line": 463,
+            "match": "\"Install with: pip install requests\"",
+            "description": "pip install without version pinning"
+          },
+          {
+            "pattern_id": "python_environ_get_secret",
+            "severity": "medium",
+            "category": "exfiltration",
+            "file": "tests\\conftest.py",
+            "line": 54,
+            "match": "return os.environ.get(\"COMFY_CLOUD_API_KEY\")",
+            "description": "reads secret via os.environ.get() (normal API-key access; informational)"
+          },
+          {
+            "pattern_id": "python_environ_get_secret",
+            "severity": "medium",
+            "category": "exfiltration",
+            "file": "tests\\conftest.py",
+            "line": 59,
+            "match": "if os.environ.get(\"COMFY_CLOUD_API_KEY\"):",
+            "description": "reads secret via os.environ.get() (normal API-key access; informational)"
+          },
+          {
+            "pattern_id": "hardcoded_ip_port",
+            "severity": "medium",
+            "category": "network",
+            "file": "tests\\test_common.py",
+            "line": 42,
+            "match": "assert is_cloud_host(\"http://127.0.0.1:8188\") is False",
+            "description": "hardcoded IP address with port"
+          },
+          {
+            "pattern_id": "hardcoded_ip_port",
+            "severity": "medium",
+            "category": "network",
+            "file": "tests\\test_common.py",
+            "line": 49,
+            "match": "assert is_cloud_host(\"127.0.0.1:8188\") is False",
+            "description": "hardcoded IP address with port"
+          },
+          {
+            "pattern_id": "hardcoded_ip_port",
+            "severity": "medium",
+            "category": "network",
+            "file": "tests\\test_common.py",
+            "line": 72,
+            "match": "assert resolve_url(\"http://127.0.0.1:8188\", \"/prompt\") == \"http://127.0.0.1:8188/prompt\"",
+            "description": "hardcoded IP address with port"
+          },
+          {
+            "pattern_id": "hardcoded_ip_port",
+            "severity": "medium",
+            "category": "network",
+            "file": "tests\\test_common.py",
+            "line": 88,
+            "match": "assert resolve_url(\"http://127.0.0.1:8188/\", \"/prompt\") == \"http://127.0.0.1:8188/prompt\"",
+            "description": "hardcoded IP address with port"
+          },
+          {
+            "pattern_id": "system_passwd_access",
+            "severity": "critical",
+            "category": "traversal",
+            "file": "tests\\test_common.py",
+            "line": 251,
+            "match": "safe_path_join(tmp_path, \"/etc/passwd\")",
+            "description": "references system password files"
+          },
+          {
+            "pattern_id": "hardcoded_ip_port",
+            "severity": "medium",
+            "category": "network",
+            "file": "tests\\test_run_workflow.py",
+            "line": 180,
+            "match": "assert r.host == \"http://127.0.0.1:8188\"",
+            "description": "hardcoded IP address with port"
+          },
+          {
+            "pattern_id": "hardcoded_ip_port",
+            "severity": "medium",
+            "category": "network",
+            "file": "tests\\test_run_workflow.py",
+            "line": 200,
+            "match": "assert url == \"http://127.0.0.1:8188/prompt\"",
+            "description": "hardcoded IP address with port"
+          }
+        ],
+        "rules": [
+          "curl_pipe_python",
+          "echo_pipe_exec",
+          "git_clone",
+          "hardcoded_ip_port",
+          "python_environ_get_secret",
+          "python_subprocess",
+          "system_passwd_access",
+          "unpinned_pip_install"
+        ],
+        "scanned_at": "2026-09-03T13:49:36.907140+00:00",
+        "summary": "comfyui: dangerous — 61 finding(s) in execution, exfiltration, network, obfuscation, supply_chain, traversal",
+        "fresh": true
+      },
+      "installed_at": "2026-09-03T13:49:36.927651+00:00",
+      "updated_at": "2026-09-03T13:49:36.927651+00:00"
+    },
+    "audiocraft-audio-generation": {
+      "source": "official",
+      "identifier": "official/creative/audiocraft-audio-generation",
+      "trust_level": "builtin",
+      "scan_verdict": "caution",
+      "content_hash": "sha256:e2d3f3d11082f9da",
+      "install_path": "creative/audiocraft-audio-generation",
+      "files": [
+        "SKILL.md",
+        "references\\advanced-usage.md",
+        "references\\troubleshooting.md"
+      ],
+      "metadata": {},
+      "scan_provenance": {
+        "source": "official",
+        "source_url": "official/creative/audiocraft-audio-generation",
+        "bundle_hash": "sha256:e2d3f3d11082f9dae9d283b282d9625a9eb06c7f315af28aa0616e0a9dd83d93",
+        "scanner_version": "skills-guard-v2",
+        "verdict": "caution",
+        "trust_level": "builtin",
+        "findings": [
+          {
+            "pattern_id": "unpinned_pip_install",
+            "severity": "medium",
+            "category": "supply_chain",
+            "file": "SKILL.md",
+            "line": 50,
+            "match": "pip install audiocraft",
+            "description": "pip install without version pinning"
+          },
+          {
+            "pattern_id": "unpinned_pip_install",
+            "severity": "medium",
+            "category": "supply_chain",
+            "file": "SKILL.md",
+            "line": 53,
+            "match": "pip install git+https://github.com/facebookresearch/audiocraft.git",
+            "description": "pip install without version pinning"
+          },
+          {
+            "pattern_id": "unpinned_pip_install",
+            "severity": "medium",
+            "category": "supply_chain",
+            "file": "SKILL.md",
+            "line": 56,
+            "match": "pip install transformers torch torchaudio",
+            "description": "pip install without version pinning"
+          },
+          {
+            "pattern_id": "unpinned_pip_install",
+            "severity": "medium",
+            "category": "supply_chain",
+            "file": "references\\advanced-usage.md",
+            "line": 71,
+            "match": "pip install dora-search",
+            "description": "pip install without version pinning"
+          },
+          {
+            "pattern_id": "git_clone",
+            "severity": "medium",
+            "category": "supply_chain",
+            "file": "references\\advanced-usage.md",
+            "line": 74,
+            "match": "git clone https://github.com/facebookresearch/audiocraft.git",
+            "description": "clones a git repository at runtime"
+          },
+          {
+            "pattern_id": "python_os_environ",
+            "severity": "high",
+            "category": "exfiltration",
+            "file": "references\\troubleshooting.md",
+            "line": 71,
+            "match": "os.environ[\"AUDIOCRAFT_USE_XFORMERS\"] = \"0\"",
+            "description": "accesses os.environ outside comments/docstrings (potential env dump)"
+          },
+          {
+            "pattern_id": "python_os_environ",
+            "severity": "high",
+            "category": "exfiltration",
+            "file": "references\\troubleshooting.md",
+            "line": 108,
+            "match": "os.environ[\"AUDIOCRAFT_CACHE_DIR\"] = \"/path/to/cache\"",
+            "description": "accesses os.environ outside comments/docstrings (potential env dump)"
+          },
+          {
+            "pattern_id": "python_os_environ",
+            "severity": "high",
+            "category": "exfiltration",
+            "file": "references\\troubleshooting.md",
+            "line": 111,
+            "match": "os.environ[\"HF_HOME\"] = \"/path/to/hf_cache\"",
+            "description": "accesses os.environ outside comments/docstrings (potential env dump)"
+          },
+          {
+            "pattern_id": "unpinned_pip_install",
+            "severity": "medium",
+            "category": "supply_chain",
+            "file": "references\\troubleshooting.md",
+            "line": 12,
+            "match": "pip install audiocraft",
+            "description": "pip install without version pinning"
+          },
+          {
+            "pattern_id": "unpinned_pip_install",
+            "severity": "medium",
+            "category": "supply_chain",
+            "file": "references\\troubleshooting.md",
+            "line": 15,
+            "match": "pip install git+https://github.com/facebookresearch/audiocraft.git",
+            "description": "pip install without version pinning"
+          },
+          {
+            "pattern_id": "unpinned_pip_install",
+            "severity": "medium",
+            "category": "supply_chain",
+            "file": "references\\troubleshooting.md",
+            "line": 51,
+            "match": "pip install torch torchaudio --index-url https://download.pytorch.org/whl/cu121",
+            "description": "pip install without version pinning"
+          },
+          {
+            "pattern_id": "unpinned_pip_install",
+            "severity": "medium",
+            "category": "supply_chain",
+            "file": "references\\troubleshooting.md",
+            "line": 54,
+            "match": "pip install torch torchaudio --index-url https://download.pytorch.org/whl/cu118",
+            "description": "pip install without version pinning"
+          },
+          {
+            "pattern_id": "unpinned_pip_install",
+            "severity": "medium",
+            "category": "supply_chain",
+            "file": "references\\troubleshooting.md",
+            "line": 64,
+            "match": "pip install xformers",
+            "description": "pip install without version pinning"
+          },
+          {
+            "pattern_id": "unpinned_pip_install",
+            "severity": "medium",
+            "category": "supply_chain",
+            "file": "references\\troubleshooting.md",
+            "line": 484,
+            "match": "| `No module named 'audiocraft'` | Not installed | `pip install audiocraft` |",
+            "description": "pip install without version pinning"
+          },
+          {
+            "pattern_id": "sudo_usage",
+            "severity": "high",
+            "category": "privilege_escalation",
+            "file": "references\\troubleshooting.md",
+            "line": 28,
+            "match": "sudo apt-get install ffmpeg",
+            "description": "uses sudo (privilege escalation)"
+          }
+        ],
+        "rules": [
+          "git_clone",
+          "python_os_environ",
+          "sudo_usage",
+          "unpinned_pip_install"
+        ],
+        "scanned_at": "2026-09-03T13:49:37.850396+00:00",
+        "summary": "audiocraft-audio-generation: caution — 15 finding(s) in exfiltration, privilege_escalation, supply_chain",
+        "fresh": true
+      },
+      "installed_at": "2026-09-03T13:49:37.862399+00:00",
+      "updated_at": "2026-09-03T13:49:37.862399+00:00"
+    },
+    "tldraw-offline": {
+      "source": "official",
+      "identifier": "official/creative/tldraw-offline",
+      "trust_level": "builtin",
+      "scan_verdict": "dangerous",
+      "content_hash": "sha256:d832275ac88b0dca",
+      "install_path": "creative/tldraw-offline",
+      "files": [
+        "SKILL.md",
+        "scripts\\counter.js",
+        "scripts\\main.js",
+        "scripts\\validate_shapes.mjs"
+      ],
+      "metadata": {},
+      "scan_provenance": {
+        "source": "official",
+        "source_url": "official/creative/tldraw-offline",
+        "bundle_hash": "sha256:d832275ac88b0dca65129e28e9dee73290fd14a2f32950fa1a2b5de8a06d6764",
+        "scanner_version": "skills-guard-v2",
+        "verdict": "dangerous",
+        "trust_level": "builtin",
+        "findings": [
+          {
+            "pattern_id": "env_exfil_curl",
+            "severity": "critical",
+            "category": "exfiltration",
+            "file": "SKILL.md",
+            "line": 87,
+            "match": "curl -s \"$BASE/api/doc/$DOC/script-status\" -H \"Authorization: Bearer $TOKEN\"",
+            "description": "curl command interpolating secret environment variable"
+          },
+          {
+            "pattern_id": "backtick_subshell",
+            "severity": "medium",
+            "category": "execution",
+            "file": "SKILL.md",
+            "line": 55,
+            "match": "`PORT=$(jq -r .port <server.json>); TOKEN=$(jq -r .token <server.json>)`.",
+            "description": "backtick string with command substitution"
+          }
+        ],
+        "rules": [
+          "backtick_subshell",
+          "env_exfil_curl"
+        ],
+        "scanned_at": "2026-09-03T13:49:38.732130+00:00",
+        "summary": "tldraw-offline: dangerous — 2 finding(s) in execution, exfiltration",
+        "fresh": true
+      },
+      "installed_at": "2026-09-03T13:49:38.743632+00:00",
+      "updated_at": "2026-09-03T13:49:38.743632+00:00"
+    },
+    "draw-your-font": {
+      "source": "official",
+      "identifier": "official/creative/draw-your-font",
+      "trust_level": "builtin",
+      "scan_verdict": "safe",
+      "content_hash": "sha256:59cdc1b29a599995",
+      "install_path": "creative/draw-your-font",
+      "files": [
+        "SKILL.md",
+        "references\\troubleshooting.md"
+      ],
+      "metadata": {},
+      "scan_provenance": {
+        "source": "official",
+        "source_url": "official/creative/draw-your-font",
+        "bundle_hash": "sha256:59cdc1b29a599995cdb2b4e0d8119802127c7ac9d46a091585f06ffbce35b994",
+        "scanner_version": "skills-guard-v2",
+        "verdict": "safe",
+        "trust_level": "builtin",
+        "findings": [],
+        "rules": [],
+        "scanned_at": "2026-09-03T13:49:39.584363+00:00",
+        "summary": "draw-your-font: clean scan, no threats detected",
+        "fresh": true
+      },
+      "installed_at": "2026-09-03T13:49:39.594866+00:00",
+      "updated_at": "2026-09-03T13:49:39.594866+00:00"
+    },
+    "ascii-art": {
+      "source": "official",
+      "identifier": "official/creative/ascii-art",
+      "trust_level": "builtin",
+      "scan_verdict": "caution",
+      "content_hash": "sha256:29e23c2fdb90e5ab",
+      "install_path": "creative/ascii-art",
+      "files": [
+        "SKILL.md"
+      ],
+      "metadata": {},
+      "scan_provenance": {
+        "source": "official",
+        "source_url": "official/creative/ascii-art",
+        "bundle_hash": "sha256:29e23c2fdb90e5abfbaa49b9438c57710a30ceadc2e67a9366a637819e7557c5",
+        "scanner_version": "skills-guard-v2",
+        "verdict": "caution",
+        "trust_level": "builtin",
+        "findings": [
+          {
+            "pattern_id": "unpinned_pip_install",
+            "severity": "medium",
+            "category": "supply_chain",
+            "file": "SKILL.md",
+            "line": 27,
+            "match": "pip install pyfiglet --break-system-packages -q",
+            "description": "pip install without version pinning"
+          },
+          {
+            "pattern_id": "sudo_usage",
+            "severity": "high",
+            "category": "privilege_escalation",
+            "file": "SKILL.md",
+            "line": 92,
+            "match": "sudo apt install cowsay -y    # Debian/Ubuntu",
+            "description": "uses sudo (privilege escalation)"
+          },
+          {
+            "pattern_id": "sudo_usage",
+            "severity": "high",
+            "category": "privilege_escalation",
+            "file": "SKILL.md",
+            "line": 136,
+            "match": "sudo apt install boxes -y    # Debian/Ubuntu",
+            "description": "uses sudo (privilege escalation)"
+          },
+          {
+            "pattern_id": "sudo_usage",
+            "severity": "high",
+            "category": "privilege_escalation",
+            "file": "SKILL.md",
+            "line": 171,
+            "match": "sudo apt install toilet toilet-fonts -y    # Debian/Ubuntu",
+            "description": "uses sudo (privilege escalation)"
+          },
+          {
+            "pattern_id": "sudo_usage",
+            "severity": "high",
+            "category": "privilege_escalation",
+            "file": "SKILL.md",
+            "line": 202,
+            "match": "sudo snap install ascii-image-converter",
+            "description": "uses sudo (privilege escalation)"
+          },
+          {
+            "pattern_id": "sudo_usage",
+            "severity": "high",
+            "category": "privilege_escalation",
+            "file": "SKILL.md",
+            "line": 219,
+            "match": "sudo apt install jp2a -y",
+            "description": "uses sudo (privilege escalation)"
+          }
+        ],
+        "rules": [
+          "sudo_usage",
+          "unpinned_pip_install"
+        ],
+        "scanned_at": "2026-09-03T13:49:40.457131+00:00",
+        "summary": "ascii-art: caution — 6 finding(s) in privilege_escalation, supply_chain",
+        "fresh": true
+      },
+      "installed_at": "2026-09-03T13:49:40.467134+00:00",
+      "updated_at": "2026-09-03T13:49:40.467134+00:00"
+    },
+    "pixel-art": {
+      "source": "official",
+      "identifier": "official/creative/pixel-art",
+      "trust_level": "builtin",
+      "scan_verdict": "safe",
+      "content_hash": "sha256:37cb6e0295ed909f",
+      "install_path": "creative/pixel-art",
+      "files": [
+        "ATTRIBUTION.md",
+        "SKILL.md",
+        "references\\palettes.md",
+        "scripts\\palettes.py",
+        "scripts\\pixel_art.py",
+        "scripts\\pixel_art_video.py",
+        "scripts\\__init__.py"
+      ],
+      "metadata": {},
+      "scan_provenance": {
+        "source": "official",
+        "source_url": "official/creative/pixel-art",
+        "bundle_hash": "sha256:37cb6e0295ed909f064f1ef98d9c0fb54029ea47dd04744ef511259a189444a6",
+        "scanner_version": "skills-guard-v2",
+        "verdict": "safe",
+        "trust_level": "builtin",
+        "findings": [
+          {
+            "pattern_id": "python_subprocess",
+            "severity": "medium",
+            "category": "execution",
+            "file": "ATTRIBUTION.md",
+            "line": 31,
+            "match": "- `ffmpeg` invocation switched from `os.system` to `subprocess.run(check=True)`",
+            "description": "Python subprocess execution"
+          },
+          {
+            "pattern_id": "unpinned_pip_install",
+            "severity": "medium",
+            "category": "supply_chain",
+            "file": "SKILL.md",
+            "line": 192,
+            "match": "- Pillow (`pip install Pillow`)",
+            "description": "pip install without version pinning"
+          },
+          {
+            "pattern_id": "python_subprocess",
+            "severity": "medium",
+            "category": "execution",
+            "file": "scripts\\pixel_art_video.py",
+            "line": 297,
+            "match": "subprocess.run(",
+            "description": "Python subprocess execution"
+          },
+          {
+            "pattern_id": "python_subprocess",
+            "severity": "medium",
+            "category": "execution",
+            "file": "scripts\\pixel_art_video.py",
+            "line": 309,
+            "match": "subprocess.run(",
+            "description": "Python subprocess execution"
+          }
+        ],
+        "rules": [
+          "python_subprocess",
+          "unpinned_pip_install"
+        ],
+        "scanned_at": "2026-09-03T13:49:41.367941+00:00",
+        "summary": "pixel-art: safe — 4 finding(s) in execution, supply_chain",
+        "fresh": true
+      },
+      "installed_at": "2026-09-03T13:49:41.378443+00:00",
+      "updated_at": "2026-09-03T13:49:41.378443+00:00"
+    },
+    "meme-generation": {
+      "source": "official",
+      "identifier": "official/creative/meme-generation",
+      "trust_level": "builtin",
+      "scan_verdict": "safe",
+      "content_hash": "sha256:34098ad84fa80b76",
+      "install_path": "creative/meme-generation",
+      "files": [
+        "EXAMPLES.md",
+        "SKILL.md",
+        "scripts\\generate_meme.py",
+        "scripts\\templates.json"
+      ],
+      "metadata": {},
+      "scan_provenance": {
+        "source": "official",
+        "source_url": "official/creative/meme-generation",
+        "bundle_hash": "sha256:34098ad84fa80b76c80b6867dee12fbfa6a27e287c18d36bbcc239ac5328f56c",
+        "scanner_version": "skills-guard-v2",
+        "verdict": "safe",
+        "trust_level": "builtin",
+        "findings": [],
+        "rules": [],
+        "scanned_at": "2026-09-03T13:49:42.278290+00:00",
+        "summary": "meme-generation: clean scan, no threats detected",
+        "fresh": true
+      },
+      "installed_at": "2026-09-03T13:49:42.288792+00:00",
+      "updated_at": "2026-09-03T13:49:42.288792+00:00"
+    },
+    "cloudflare-temporary-deploy": {
+      "source": "official",
+      "identifier": "official/web-development/cloudflare-temporary-deploy",
+      "trust_level": "builtin",
+      "scan_verdict": "safe",
+      "content_hash": "sha256:03bf406afa4a4882",
+      "install_path": "web-development/cloudflare-temporary-deploy",
+      "files": [
+        "SKILL.md",
+        "scripts\\parse_deploy_output.py"
+      ],
+      "metadata": {},
+      "scan_provenance": {
+        "source": "official",
+        "source_url": "official/web-development/cloudflare-temporary-deploy",
+        "bundle_hash": "sha256:03bf406afa4a48820b0b7fd9624b66376d544ee169c28119151eb63a334b189b",
+        "scanner_version": "skills-guard-v2",
+        "verdict": "safe",
+        "trust_level": "builtin",
+        "findings": [],
+        "rules": [],
+        "scanned_at": "2026-09-03T13:49:43.135938+00:00",
+        "summary": "cloudflare-temporary-deploy: clean scan, no threats detected",
+        "fresh": true
+      },
+      "installed_at": "2026-09-03T13:49:43.146439+00:00",
+      "updated_at": "2026-09-03T13:49:43.146439+00:00"
+    },
+    "setup-wizard-generator": {
+      "source": "official",
+      "identifier": "official/devops/setup-wizard-generator",
+      "trust_level": "builtin",
+      "scan_verdict": "safe",
+      "content_hash": "sha256:1f057be30bb5b07f",
+      "install_path": "devops/setup-wizard-generator",
+      "files": [
+        "SKILL.md",
+        "templates\\template.sh"
+      ],
+      "metadata": {},
+      "scan_provenance": {
+        "source": "official",
+        "source_url": "official/devops/setup-wizard-generator",
+        "bundle_hash": "sha256:1f057be30bb5b07fc881a8607ae86ef323a8fb3054992df18eed605fcd76afa3",
+        "scanner_version": "skills-guard-v2",
+        "verdict": "safe",
+        "trust_level": "builtin",
+        "findings": [],
+        "rules": [],
+        "scanned_at": "2026-09-03T13:49:43.989662+00:00",
+        "summary": "setup-wizard-generator: clean scan, no threats detected",
+        "fresh": true
+      },
+      "installed_at": "2026-09-03T13:49:43.999164+00:00",
+      "updated_at": "2026-09-03T13:49:43.999164+00:00"
+    },
+    "searxng-search": {
+      "source": "official",
+      "identifier": "official/research/searxng-search",
+      "trust_level": "builtin",
+      "scan_verdict": "safe",
+      "content_hash": "sha256:fc4a0fec5244ad6a",
+      "install_path": "research/searxng-search",
+      "files": [
+        "SKILL.md",
+        "scripts\\searxng.sh"
+      ],
+      "metadata": {},
+      "scan_provenance": {
+        "source": "official",
+        "source_url": "official/research/searxng-search",
+        "bundle_hash": "sha256:fc4a0fec5244ad6a8c7b3869765e906acea398ae7f84c1f5ce55668574b2d23c",
+        "scanner_version": "skills-guard-v2",
+        "verdict": "safe",
+        "trust_level": "builtin",
+        "findings": [
+          {
+            "pattern_id": "unpinned_pip_install",
+            "severity": "medium",
+            "category": "supply_chain",
+            "file": "SKILL.md",
+            "line": 143,
+            "match": "pip install searxng",
+            "description": "pip install without version pinning"
+          }
+        ],
+        "rules": [
+          "unpinned_pip_install"
+        ],
+        "scanned_at": "2026-09-03T13:49:44.833871+00:00",
+        "summary": "searxng-search: safe — 1 finding(s) in supply_chain",
+        "fresh": true
+      },
+      "installed_at": "2026-09-03T13:49:44.843873+00:00",
+      "updated_at": "2026-09-03T13:49:44.843873+00:00"
+    },
+    "qmd": {
+      "source": "official",
+      "identifier": "official/research/qmd",
+      "trust_level": "builtin",
+      "scan_verdict": "caution",
+      "content_hash": "sha256:6996fa3a93773a2b",
+      "install_path": "research/qmd",
+      "files": [
+        "SKILL.md"
+      ],
+      "metadata": {},
+      "scan_provenance": {
+        "source": "official",
+        "source_url": "official/research/qmd",
+        "bundle_hash": "sha256:6996fa3a93773a2b28b08a3685769528688327217f0e9214072dcd147e08adc4",
+        "scanner_version": "skills-guard-v2",
+        "verdict": "caution",
+        "trust_level": "builtin",
+        "findings": [
+          {
+            "pattern_id": "systemd_service",
+            "severity": "medium",
+            "category": "persistence",
+            "file": "SKILL.md",
+            "line": 309,
+            "match": "cat > ~/.config/systemd/user/qmd-daemon.service << 'EOF'",
+            "description": "references or enables systemd service"
+          },
+          {
+            "pattern_id": "macos_launchd",
+            "severity": "medium",
+            "category": "persistence",
+            "file": "SKILL.md",
+            "line": 274,
+            "match": "cat > ~/Library/LaunchAgents/com.qmd.daemon.plist << 'EOF'",
+            "description": "macOS launch agent/daemon persistence"
+          },
+          {
+            "pattern_id": "macos_launchd",
+            "severity": "medium",
+            "category": "persistence",
+            "file": "SKILL.md",
+            "line": 301,
+            "match": "launchctl load ~/Library/LaunchAgents/com.qmd.daemon.plist",
+            "description": "macOS launch agent/daemon persistence"
+          },
+          {
+            "pattern_id": "unpinned_npm_install",
+            "severity": "medium",
+            "category": "supply_chain",
+            "file": "SKILL.md",
+            "line": 61,
+            "match": "npm install -g @tobilu/qmd",
+            "description": "npm install without version pinning"
+          },
+          {
+            "pattern_id": "sudo_usage",
+            "severity": "high",
+            "category": "privilege_escalation",
+            "file": "SKILL.md",
+            "line": 44,
+            "match": "curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -",
+            "description": "uses sudo (privilege escalation)"
+          },
+          {
+            "pattern_id": "sudo_usage",
+            "severity": "high",
+            "category": "privilege_escalation",
+            "file": "SKILL.md",
+            "line": 45,
+            "match": "sudo apt-get install -y nodejs",
+            "description": "uses sudo (privilege escalation)"
+          },
+          {
+            "pattern_id": "hermes_config_ref",
+            "severity": "low",
+            "category": "persistence",
+            "file": "SKILL.md",
+            "line": 229,
+            "match": "Add to `~/.hermes/config.yaml`:",
+            "description": "references Hermes configuration files (informational; only modification intent is scored)"
+          }
+        ],
+        "rules": [
+          "hermes_config_ref",
+          "macos_launchd",
+          "sudo_usage",
+          "systemd_service",
+          "unpinned_npm_install"
+        ],
+        "scanned_at": "2026-09-03T13:49:45.695879+00:00",
+        "summary": "qmd: caution — 7 finding(s) in persistence, privilege_escalation, supply_chain",
+        "fresh": true
+      },
+      "installed_at": "2026-09-03T13:49:45.706381+00:00",
+      "updated_at": "2026-09-03T13:49:45.706381+00:00"
+    },
+    "blogwatcher": {
+      "source": "official",
+      "identifier": "official/research/blogwatcher",
+      "trust_level": "builtin",
+      "scan_verdict": "safe",
+      "content_hash": "sha256:2af3a517dcc52f93",
+      "install_path": "research/blogwatcher",
+      "files": [
+        "SKILL.md"
+      ],
+      "metadata": {},
+      "scan_provenance": {
+        "source": "official",
+        "source_url": "official/research/blogwatcher",
+        "bundle_hash": "sha256:2af3a517dcc52f93569004ef28ea5521d8c83d230998b7a74b9ad7067378c0e5",
+        "scanner_version": "skills-guard-v2",
+        "verdict": "safe",
+        "trust_level": "builtin",
+        "findings": [],
+        "rules": [],
+        "scanned_at": "2026-09-03T13:49:46.534578+00:00",
+        "summary": "blogwatcher: clean scan, no threats detected",
+        "fresh": true
+      },
+      "installed_at": "2026-09-03T13:49:46.544079+00:00",
+      "updated_at": "2026-09-03T13:49:46.544079+00:00"
+    },
+    "gitnexus-explorer": {
+      "source": "official",
+      "identifier": "official/research/gitnexus-explorer",
+      "trust_level": "builtin",
+      "scan_verdict": "caution",
+      "content_hash": "sha256:17e956c0532cd46d",
+      "install_path": "research/gitnexus-explorer",
+      "files": [
+        "SKILL.md",
+        "scripts\\proxy.mjs"
+      ],
+      "metadata": {},
+      "scan_provenance": {
+        "source": "official",
+        "source_url": "official/research/gitnexus-explorer",
+        "bundle_hash": "sha256:17e956c0532cd46d62ef43b50ab34bdfdae3620c08776360533c9717369eae34",
+        "scanner_version": "skills-guard-v2",
+        "verdict": "caution",
+        "trust_level": "builtin",
+        "findings": [
+          {
+            "pattern_id": "tunnel_service",
+            "severity": "high",
+            "category": "network",
+            "file": "SKILL.md",
+            "line": 29,
+            "match": "- **cloudflared** — for tunneling (auto-installed to ~/.local/bin if missing)",
+            "description": "uses tunneling service for external access"
+          },
+          {
+            "pattern_id": "tunnel_service",
+            "severity": "high",
+            "category": "network",
+            "file": "SKILL.md",
+            "line": 161,
+            "match": "# Install cloudflared if needed (no sudo)",
+            "description": "uses tunneling service for external access"
+          },
+          {
+            "pattern_id": "tunnel_service",
+            "severity": "high",
+            "category": "network",
+            "file": "SKILL.md",
+            "line": 162,
+            "match": "if ! command -v cloudflared &>/dev/null; then",
+            "description": "uses tunneling service for external access"
+          },
+          {
+            "pattern_id": "tunnel_service",
+            "severity": "high",
+            "category": "network",
+            "file": "SKILL.md",
+            "line": 164,
+            "match": "curl -sL https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 \\",
+            "description": "uses tunneling service for external access"
+          },
+          {
+            "pattern_id": "tunnel_service",
+            "severity": "high",
+            "category": "network",
+            "file": "SKILL.md",
+            "line": 165,
+            "match": "-o ~/.local/bin/cloudflared",
+            "description": "uses tunneling service for external access"
+          },
+          {
+            "pattern_id": "tunnel_service",
+            "severity": "high",
+            "category": "network",
+            "file": "SKILL.md",
+            "line": 166,
+            "match": "chmod +x ~/.local/bin/cloudflared",
+            "description": "uses tunneling service for external access"
+          },
+          {
+            "pattern_id": "tunnel_service",
+            "severity": "high",
+            "category": "network",
+            "file": "SKILL.md",
+            "line": 171,
+            "match": "cloudflared tunnel --config /dev/null --url http://localhost:8888 --no-autoupdate --protocol http2",
+            "description": "uses tunneling service for external access"
+          },
+          {
+            "pattern_id": "tunnel_service",
+            "severity": "high",
+            "category": "network",
+            "file": "SKILL.md",
+            "line": 183,
+            "match": "pkill -f cloudflared",
+            "description": "uses tunneling service for external access"
+          },
+          {
+            "pattern_id": "tunnel_service",
+            "severity": "high",
+            "category": "network",
+            "file": "SKILL.md",
+            "line": 193,
+            "match": "- **`--config /dev/null` is required for cloudflared** if the user has an existing",
+            "description": "uses tunneling service for external access"
+          },
+          {
+            "pattern_id": "tunnel_service",
+            "severity": "high",
+            "category": "network",
+            "file": "SKILL.md",
+            "line": 194,
+            "match": "named tunnel config at `~/.cloudflared/config.yml`. Without it, the catch-all",
+            "description": "uses tunneling service for external access"
+          },
+          {
+            "pattern_id": "unpinned_npm_install",
+            "severity": "medium",
+            "category": "supply_chain",
+            "file": "SKILL.md",
+            "line": 46,
+            "match": "cd \"$GITNEXUS_DIR/gitnexus-shared\" && npm install && npm run build",
+            "description": "npm install without version pinning"
+          },
+          {
+            "pattern_id": "git_clone",
+            "severity": "medium",
+            "category": "supply_chain",
+            "file": "SKILL.md",
+            "line": 45,
+            "match": "git clone https://github.com/abhigyanpatwari/GitNexus.git \"$GITNEXUS_DIR\"",
+            "description": "clones a git repository at runtime"
+          },
+          {
+            "pattern_id": "sudo_usage",
+            "severity": "high",
+            "category": "privilege_escalation",
+            "file": "SKILL.md",
+            "line": 97,
+            "match": "no sudo, no nginx.",
+            "description": "uses sudo (privilege escalation)"
+          },
+          {
+            "pattern_id": "sudo_usage",
+            "severity": "high",
+            "category": "privilege_escalation",
+            "file": "SKILL.md",
+            "line": 161,
+            "match": "# Install cloudflared if needed (no sudo)",
+            "description": "uses sudo (privilege escalation)"
+          },
+          {
+            "pattern_id": "agent_config_ref",
+            "severity": "low",
+            "category": "persistence",
+            "file": "SKILL.md",
+            "line": 201,
+            "match": "- **The web UI does NOT create `.claude/` or `CLAUDE.md`.** Those are created by",
+            "description": "references agent config files (informational; only modification intent is scored)"
+          }
+        ],
+        "rules": [
+          "agent_config_ref",
+          "git_clone",
+          "sudo_usage",
+          "tunnel_service",
+          "unpinned_npm_install"
+        ],
+        "scanned_at": "2026-09-03T13:49:47.406275+00:00",
+        "summary": "gitnexus-explorer: caution — 15 finding(s) in network, persistence, privilege_escalation, supply_chain",
+        "fresh": true
+      },
+      "installed_at": "2026-09-03T13:49:47.418277+00:00",
+      "updated_at": "2026-09-03T13:49:47.418277+00:00"
+    },
+    "osint-investigation": {
+      "source": "official",
+      "identifier": "official/research/osint-investigation",
+      "trust_level": "builtin",
+      "scan_verdict": "safe",
+      "content_hash": "sha256:19ed015801f3b010",
+      "install_path": "research/osint-investigation",
+      "files": [
+        "SKILL.md",
+        "references\\sources\\courtlistener.md",
+        "references\\sources\\gdelt.md",
+        "references\\sources\\icij-offshore.md",
+        "references\\sources\\nyc-acris.md",
+        "references\\sources\\ofac-sdn.md",
+        "references\\sources\\opencorporates.md",
+        "references\\sources\\sec-edgar.md",
+        "references\\sources\\senate-ld.md",
+        "references\\sources\\usaspending.md",
+        "references\\sources\\wayback.md",
+        "references\\sources\\wikipedia.md",
+        "scripts\\build_findings.py",
+        "scripts\\entity_resolution.py",
+        "scripts\\fetch_courtlistener.py",
+        "scripts\\fetch_gdelt.py",
+        "scripts\\fetch_icij_offshore.py",
+        "scripts\\fetch_nyc_acris.py",
+        "scripts\\fetch_ofac_sdn.py",
+        "scripts\\fetch_opencorporates.py",
+        "scripts\\fetch_sec_edgar.py",
+        "scripts\\fetch_senate_ld.py",
+        "scripts\\fetch_usaspending.py",
+        "scripts\\fetch_wayback.py",
+        "scripts\\fetch_wikipedia.py",
+        "scripts\\timing_analysis.py",
+        "scripts\\_http.py",
+        "scripts\\_normalize.py",
+        "templates\\source-template.md"
+      ],
+      "metadata": {},
+      "scan_provenance": {
+        "source": "official",
+        "source_url": "official/research/osint-investigation",
+        "bundle_hash": "sha256:19ed015801f3b01052305690d67f6d4f7b70f78610de4b4c7b703f857feb4b41",
+        "scanner_version": "skills-guard-v2",
+        "verdict": "safe",
+        "trust_level": "builtin",
+        "findings": [
+          {
+            "pattern_id": "python_environ_get_secret",
+            "severity": "medium",
+            "category": "exfiltration",
+            "file": "scripts\\fetch_courtlistener.py",
+            "line": 130,
+            "match": "p.add_argument(\"--token\", default=os.environ.get(\"COURTLISTENER_TOKEN\"))",
+            "description": "reads secret via os.environ.get() (normal API-key access; informational)"
+          },
+          {
+            "pattern_id": "python_environ_get_secret",
+            "severity": "medium",
+            "category": "exfiltration",
+            "file": "scripts\\fetch_opencorporates.py",
+            "line": 176,
+            "match": "p.add_argument(\"--token\", default=os.environ.get(\"OPENCORPORATES_API_TOKEN\"))",
+            "description": "reads secret via os.environ.get() (normal API-key access; informational)"
+          },
+          {
+            "pattern_id": "python_environ_get_secret",
+            "severity": "medium",
+            "category": "exfiltration",
+            "file": "scripts\\fetch_senate_ld.py",
+            "line": 127,
+            "match": "p.add_argument(\"--token\", default=os.environ.get(\"SENATE_LDA_TOKEN\"))",
+            "description": "reads secret via os.environ.get() (normal API-key access; informational)"
+          }
+        ],
+        "rules": [
+          "python_environ_get_secret"
+        ],
+        "scanned_at": "2026-09-03T13:49:48.476566+00:00",
+        "summary": "osint-investigation: safe — 3 finding(s) in exfiltration",
+        "fresh": true
+      },
+      "installed_at": "2026-09-03T13:49:48.490070+00:00",
+      "updated_at": "2026-09-03T13:49:48.490070+00:00"
+    },
+    "oss-forensics": {
+      "source": "official",
+      "identifier": "official/security/oss-forensics",
+      "trust_level": "builtin",
+      "scan_verdict": "dangerous",
+      "content_hash": "sha256:bd1175e44da64edb",
+      "install_path": "security/oss-forensics",
+      "files": [
+        "SKILL.md",
+        "references\\evidence-types.md",
+        "references\\github-archive-guide.md",
+        "references\\investigation-templates.md",
+        "references\\recovery-techniques.md",
+        "scripts\\evidence-store.py",
+        "templates\\forensic-report.md",
+        "templates\\malicious-package-report.md"
+      ],
+      "metadata": {},
+      "scan_provenance": {
+        "source": "official",
+        "source_url": "official/security/oss-forensics",
+        "bundle_hash": "sha256:bd1175e44da64edbfb48375029881c9d0f2a70636be39e194bba612fd969294d",
+        "scanner_version": "skills-guard-v2",
+        "verdict": "dangerous",
+        "trust_level": "builtin",
+        "findings": [
+          {
+            "pattern_id": "git_clone",
+            "severity": "medium",
+            "category": "supply_chain",
+            "file": "SKILL.md",
+            "line": 126,
+            "match": "git clone https://github.com/OWNER/REPO.git target_repo && cd target_repo",
+            "description": "clones a git repository at runtime"
+          },
+          {
+            "pattern_id": "curl_pipe_python",
+            "severity": "critical",
+            "category": "supply_chain",
+            "file": "references\\recovery-techniques.md",
+            "line": 89,
+            "match": "curl -s \"https://web.archive.org/cdx/search/cdx?url=github.com/OWNER/REPO/issues/NUMBER&output=json&limit=50&fl=times...",
+            "description": "curl piped to Python interpreter"
+          },
+          {
+            "pattern_id": "curl_pipe_python",
+            "severity": "critical",
+            "category": "supply_chain",
+            "file": "references\\recovery-techniques.md",
+            "line": 97,
+            "match": "curl -s \"https://web.archive.org/cdx/search/cdx?url=github.com/OWNER/REPO*&output=json&from=20240101&to=20240201&limi...",
+            "description": "curl piped to Python interpreter"
+          },
+          {
+            "pattern_id": "curl_pipe_python",
+            "severity": "critical",
+            "category": "supply_chain",
+            "file": "references\\recovery-techniques.md",
+            "line": 130,
+            "match": "curl -s \"https://api.github.com/repos/OWNER/REPO/contents/path/to/file.py?ref=SHA\" | python3 -c \"",
+            "description": "curl piped to Python interpreter"
+          },
+          {
+            "pattern_id": "ssh_dir_access",
+            "severity": "high",
+            "category": "exfiltration",
+            "file": "templates\\malicious-package-report.md",
+            "line": 17,
+            "match": "- **Exfiltrated Data Types**: [Environment variables, ~/.ssh/id_rsa, /etc/shadow, etc.]",
+            "description": "references user SSH directory"
+          },
+          {
+            "pattern_id": "system_passwd_access",
+            "severity": "critical",
+            "category": "traversal",
+            "file": "templates\\malicious-package-report.md",
+            "line": 17,
+            "match": "- **Exfiltrated Data Types**: [Environment variables, ~/.ssh/id_rsa, /etc/shadow, etc.]",
+            "description": "references system password files"
+          }
+        ],
+        "rules": [
+          "curl_pipe_python",
+          "git_clone",
+          "ssh_dir_access",
+          "system_passwd_access"
+        ],
+        "scanned_at": "2026-09-03T13:49:49.419316+00:00",
+        "summary": "oss-forensics: dangerous — 6 finding(s) in exfiltration, supply_chain, traversal",
+        "fresh": true
+      },
+      "installed_at": "2026-09-03T13:49:49.431320+00:00",
+      "updated_at": "2026-09-03T13:49:49.431320+00:00"
+    },
+    "sherlock": {
+      "source": "official",
+      "identifier": "official/security/sherlock",
+      "trust_level": "builtin",
+      "scan_verdict": "safe",
+      "content_hash": "sha256:b07092f85a8ada17",
+      "install_path": "security/sherlock",
+      "files": [
+        "SKILL.md"
+      ],
+      "metadata": {},
+      "scan_provenance": {
+        "source": "official",
+        "source_url": "official/security/sherlock",
+        "bundle_hash": "sha256:b07092f85a8ada172b400faba29b722f8b81f6807562984d20c4adc9f515ab6f",
+        "scanner_version": "skills-guard-v2",
+        "verdict": "safe",
+        "trust_level": "builtin",
+        "findings": [
+          {
+            "pattern_id": "unpinned_pip_install",
+            "severity": "medium",
+            "category": "supply_chain",
+            "file": "SKILL.md",
+            "line": 29,
+            "match": "- Sherlock CLI installed: `pipx install sherlock-project` or `pip install sherlock-project`",
+            "description": "pip install without version pinning"
+          },
+          {
+            "pattern_id": "unpinned_pip_install",
+            "severity": "medium",
+            "category": "supply_chain",
+            "file": "SKILL.md",
+            "line": 44,
+            "match": "- Offer to install: `pipx install sherlock-project` (recommended) or `pip install sherlock-project`",
+            "description": "pip install without version pinning"
+          },
+          {
+            "pattern_id": "unpinned_pip_install",
+            "severity": "medium",
+            "category": "supply_chain",
+            "file": "SKILL.md",
+            "line": 138,
+            "match": "pip install sherlock-project",
+            "description": "pip install without version pinning"
+          },
+          {
+            "pattern_id": "docker_pull",
+            "severity": "medium",
+            "category": "supply_chain",
+            "file": "SKILL.md",
+            "line": 143,
+            "match": "docker pull sherlock/sherlock",
+            "description": "pulls a Docker image at runtime"
+          }
+        ],
+        "rules": [
+          "docker_pull",
+          "unpinned_pip_install"
+        ],
+        "scanned_at": "2026-09-03T13:49:50.286797+00:00",
+        "summary": "sherlock: safe — 4 finding(s) in supply_chain",
+        "fresh": true
+      },
+      "installed_at": "2026-09-03T13:49:50.296299+00:00",
+      "updated_at": "2026-09-03T13:49:50.296299+00:00"
+    },
+    "web-pentest": {
+      "source": "official",
+      "identifier": "official/security/web-pentest",
+      "trust_level": "builtin",
+      "scan_verdict": "dangerous",
+      "content_hash": "sha256:8d55b966851096db",
+      "install_path": "security/web-pentest",
+      "files": [
+        "SKILL.md",
+        "references\\bypass-techniques.md",
+        "references\\exploitation-techniques.md",
+        "references\\scope-enforcement.md",
+        "references\\vuln-taxonomy.md",
+        "scripts\\recon-scan.sh",
+        "templates\\authorization.md",
+        "templates\\exploitation-queue.json",
+        "templates\\pentest-report.md"
+      ],
+      "metadata": {},
+      "scan_provenance": {
+        "source": "official",
+        "source_url": "official/security/web-pentest",
+        "bundle_hash": "sha256:8d55b966851096dbc10bff20604b2fd80a5f696beebf20de11cec7e2967aa7dd",
+        "scanner_version": "skills-guard-v2",
+        "verdict": "dangerous",
+        "trust_level": "builtin",
+        "findings": [
+          {
+            "pattern_id": "format_filesystem",
+            "severity": "critical",
+            "category": "destructive",
+            "file": "SKILL.md",
+            "line": 71,
+            "match": "filesystem-write SSTI, command injection with `rm`/`shutdown`/`mkfs`,",
+            "description": "formats a filesystem"
+          },
+          {
+            "pattern_id": "exfil_service",
+            "severity": "high",
+            "category": "network",
+            "file": "SKILL.md",
+            "line": 247,
+            "match": "webhook.site for sensitive engagements — exfil paths).",
+            "description": "references known data exfiltration/webhook testing service"
+          },
+          {
+            "pattern_id": "python_os_system",
+            "severity": "high",
+            "category": "execution",
+            "file": "SKILL.md",
+            "line": 146,
+            "match": "2. **Inventory sinks** — every `execute(`, `os.system(`, `eval(`,",
+            "description": "os.system() — unguarded shell execution"
+          },
+          {
+            "pattern_id": "hermes_config_ref",
+            "severity": "low",
+            "category": "persistence",
+            "file": "SKILL.md",
+            "line": 85,
+            "match": "in `~/.hermes/config.yaml` for the session.",
+            "description": "references Hermes configuration files (informational; only modification intent is scored)"
+          },
+          {
+            "pattern_id": "eval_string",
+            "severity": "high",
+            "category": "obfuscation",
+            "file": "references\\bypass-techniques.md",
+            "line": 64,
+            "match": "- `onerror=eval('alert(1)')` → `onerror=eval(name)` + set",
+            "description": "eval() with string argument"
+          },
+          {
+            "pattern_id": "backtick_subshell",
+            "severity": "medium",
+            "category": "execution",
+            "file": "references\\bypass-techniques.md",
+            "line": 30,
+            "match": "- Substitution: `$(sleep 5)`, `` `sleep 5` ``",
+            "description": "backtick string with command substitution"
+          },
+          {
+            "pattern_id": "backtick_subshell",
+            "severity": "medium",
+            "category": "execution",
+            "file": "references\\bypass-techniques.md",
+            "line": 35,
+            "match": "- Encoding: `bash<<<$(base64 -d <<< c2xlZXAgNQo=)`",
+            "description": "backtick string with command substitution"
+          },
+          {
+            "pattern_id": "path_traversal_deep",
+            "severity": "high",
+            "category": "traversal",
+            "file": "references\\bypass-techniques.md",
+            "line": 44,
+            "match": "- Null byte (older platforms): `../../../etc/passwd%00.png`",
+            "description": "deep relative path traversal (3+ levels up)"
+          },
+          {
+            "pattern_id": "path_traversal",
+            "severity": "medium",
+            "category": "traversal",
+            "file": "references\\bypass-techniques.md",
+            "line": 44,
+            "match": "- Null byte (older platforms): `../../../etc/passwd%00.png`",
+            "description": "relative path traversal (2+ levels up)"
+          },
+          {
+            "pattern_id": "path_traversal",
+            "severity": "medium",
+            "category": "traversal",
+            "file": "references\\bypass-techniques.md",
+            "line": 50,
+            "match": "- Try ending the path early: `../../etc/passwd%00`",
+            "description": "relative path traversal (2+ levels up)"
+          },
+          {
+            "pattern_id": "system_passwd_access",
+            "severity": "critical",
+            "category": "traversal",
+            "file": "references\\bypass-techniques.md",
+            "line": 44,
+            "match": "- Null byte (older platforms): `../../../etc/passwd%00.png`",
+            "description": "references system password files"
+          },
+          {
+            "pattern_id": "system_passwd_access",
+            "severity": "critical",
+            "category": "traversal",
+            "file": "references\\bypass-techniques.md",
+            "line": 46,
+            "match": "- Absolute path: `/etc/passwd` (skips traversal entirely)",
+            "description": "references system password files"
+          },
+          {
+            "pattern_id": "system_passwd_access",
+            "severity": "critical",
+            "category": "traversal",
+            "file": "references\\bypass-techniques.md",
+            "line": 50,
+            "match": "- Try ending the path early: `../../etc/passwd%00`",
+            "description": "references system password files"
+          },
+          {
+            "pattern_id": "hardcoded_ip_port",
+            "severity": "medium",
+            "category": "network",
+            "file": "references\\exploitation-techniques.md",
+            "line": 165,
+            "match": "- Internal recon (operator OK + scope): `http://127.0.0.1:6379/`,",
+            "description": "hardcoded IP address with port"
+          },
+          {
+            "pattern_id": "hardcoded_ip_port",
+            "severity": "medium",
+            "category": "network",
+            "file": "references\\exploitation-techniques.md",
+            "line": 166,
+            "match": "`http://127.0.0.1:9200/`, `http://[::1]:80/`",
+            "description": "hardcoded IP address with port"
+          },
+          {
+            "pattern_id": "python_subprocess",
+            "severity": "medium",
+            "category": "execution",
+            "file": "references\\exploitation-techniques.md",
+            "line": 199,
+            "match": "- argv-list subprocess invocation (Python `subprocess.run([...])`",
+            "description": "Python subprocess execution"
+          },
+          {
+            "pattern_id": "backtick_subshell",
+            "severity": "medium",
+            "category": "execution",
+            "file": "references\\exploitation-techniques.md",
+            "line": 28,
+            "match": "- Linux: `; sleep 5` or `$(sleep 5)` or `` `sleep 5` ``",
+            "description": "backtick string with command substitution"
+          },
+          {
+            "pattern_id": "backtick_subshell",
+            "severity": "medium",
+            "category": "execution",
+            "file": "references\\exploitation-techniques.md",
+            "line": 30,
+            "match": "- If output is reflected: `; echo HERMESPENTEST-$(id)`",
+            "description": "backtick string with command substitution"
+          },
+          {
+            "pattern_id": "path_traversal_deep",
+            "severity": "high",
+            "category": "traversal",
+            "file": "references\\exploitation-techniques.md",
+            "line": 36,
+            "match": "Witness: `../../../../etc/passwd` (Linux) or `..\\..\\..\\..\\windows\\win.ini` (Windows).",
+            "description": "deep relative path traversal (3+ levels up)"
+          },
+          {
+            "pattern_id": "path_traversal",
+            "severity": "medium",
+            "category": "traversal",
+            "file": "references\\exploitation-techniques.md",
+            "line": 36,
+            "match": "Witness: `../../../../etc/passwd` (Linux) or `..\\..\\..\\..\\windows\\win.ini` (Windows).",
+            "description": "relative path traversal (2+ levels up)"
+          },
+          {
+            "pattern_id": "system_passwd_access",
+            "severity": "critical",
+            "category": "traversal",
+            "file": "references\\exploitation-techniques.md",
+            "line": 36,
+            "match": "Witness: `../../../../etc/passwd` (Linux) or `..\\..\\..\\..\\windows\\win.ini` (Windows).",
+            "description": "references system password files"
+          },
+          {
+            "pattern_id": "python_subprocess",
+            "severity": "medium",
+            "category": "execution",
+            "file": "references\\vuln-taxonomy.md",
+            "line": 19,
+            "match": "| `CMD-argument` | `subprocess.run([\"ls\", v])` | argv list (never shell=True) |",
+            "description": "Python subprocess execution"
+          },
+          {
+            "pattern_id": "python_os_system",
+            "severity": "high",
+            "category": "execution",
+            "file": "references\\vuln-taxonomy.md",
+            "line": 20,
+            "match": "| `CMD-shell` | `os.system(\"ls \" + v)` | DON'T — refactor to argv list |",
+            "description": "os.system() — unguarded shell execution"
+          },
+          {
+            "pattern_id": "dns_exfil",
+            "severity": "critical",
+            "category": "exfiltration",
+            "file": "scripts\\recon-scan.sh",
+            "line": 46,
+            "match": "echo \"Could not parse host from URL: $TARGET_URL\" >&2",
+            "description": "DNS lookup with variable interpolation (possible DNS exfiltration)"
+          },
+          {
+            "pattern_id": "dns_exfil",
+            "severity": "critical",
+            "category": "exfiltration",
+            "file": "scripts\\recon-scan.sh",
+            "line": 81,
+            "match": "echo \"Host '$HOST' is NOT in $SCOPE_FILE. Refusing to scan.\" >&2",
+            "description": "DNS lookup with variable interpolation (possible DNS exfiltration)"
+          },
+          {
+            "pattern_id": "dns_exfil",
+            "severity": "critical",
+            "category": "exfiltration",
+            "file": "scripts\\recon-scan.sh",
+            "line": 88,
+            "match": "echo \"[recon-scan] target=$TARGET_URL host=$HOST ts=$TS\"",
+            "description": "DNS lookup with variable interpolation (possible DNS exfiltration)"
+          },
+          {
+            "pattern_id": "hardcoded_ip_port",
+            "severity": "medium",
+            "category": "network",
+            "file": "scripts\\recon-scan.sh",
+            "line": 8,
+            "match": "#   recon-scan.sh engagement-20260525-031415 http://127.0.0.1:9119",
+            "description": "hardcoded IP address with port"
+          }
+        ],
+        "rules": [
+          "backtick_subshell",
+          "dns_exfil",
+          "eval_string",
+          "exfil_service",
+          "format_filesystem",
+          "hardcoded_ip_port",
+          "hermes_config_ref",
+          "path_traversal",
+          "path_traversal_deep",
+          "python_os_system",
+          "python_subprocess",
+          "system_passwd_access"
+        ],
+        "scanned_at": "2026-09-03T13:49:51.202563+00:00",
+        "summary": "web-pentest: dangerous — 27 finding(s) in destructive, execution, exfiltration, network, obfuscation, persistence, traversal",
+        "fresh": true
+      },
+      "installed_at": "2026-09-03T13:49:51.217567+00:00",
+      "updated_at": "2026-09-03T13:49:51.217567+00:00"
+    },
+    "memento-flashcards": {
+      "source": "official",
+      "identifier": "official/productivity/memento-flashcards",
+      "trust_level": "builtin",
+      "scan_verdict": "safe",
+      "content_hash": "sha256:ce78b6936b341d0e",
+      "install_path": "productivity/memento-flashcards",
+      "files": [
+        "SKILL.md",
+        "scripts\\memento_cards.py",
+        "scripts\\youtube_quiz.py"
+      ],
+      "metadata": {},
+      "scan_provenance": {
+        "source": "official",
+        "source_url": "official/productivity/memento-flashcards",
+        "bundle_hash": "sha256:ce78b6936b341d0ee7bdb4ec6a11c03e8b76c2bccd42dec583d38ecae8904118",
+        "scanner_version": "skills-guard-v2",
+        "verdict": "safe",
+        "trust_level": "builtin",
+        "findings": [
+          {
+            "pattern_id": "unpinned_pip_install",
+            "severity": "medium",
+            "category": "supply_chain",
+            "file": "SKILL.md",
+            "line": 207,
+            "match": "pip install youtube-transcript-api",
+            "description": "pip install without version pinning"
+          },
+          {
+            "pattern_id": "unpinned_pip_install",
+            "severity": "medium",
+            "category": "supply_chain",
+            "file": "SKILL.md",
+            "line": 298,
+            "match": "- **Optional dependency** — `youtube_quiz.py` needs `youtube-transcript-api`; if missing, tell the user to run `pip i...",
+            "description": "pip install without version pinning"
+          },
+          {
+            "pattern_id": "unpinned_pip_install",
+            "severity": "medium",
+            "category": "supply_chain",
+            "file": "scripts\\youtube_quiz.py",
+            "line": 35,
+            "match": "\"message\": \"Run: pip install youtube-transcript-api\",",
+            "description": "pip install without version pinning"
+          }
+        ],
+        "rules": [
+          "unpinned_pip_install"
+        ],
+        "scanned_at": "2026-09-03T13:49:52.087779+00:00",
+        "summary": "memento-flashcards: safe — 3 finding(s) in supply_chain",
+        "fresh": true
+      },
+      "installed_at": "2026-09-03T13:49:52.098280+00:00",
+      "updated_at": "2026-09-03T13:49:52.098280+00:00"
+    },
+    "mcporter": {
+      "source": "official",
+      "identifier": "official/mcp/mcporter",
+      "trust_level": "builtin",
+      "scan_verdict": "safe",
+      "content_hash": "sha256:d8960ac556a78c87",
+      "install_path": "mcp/mcporter",
+      "files": [
+        "SKILL.md"
+      ],
+      "metadata": {},
+      "scan_provenance": {
+        "source": "official",
+        "source_url": "official/mcp/mcporter",
+        "bundle_hash": "sha256:d8960ac556a78c873698c6d43c172e41e0e3ef377d0c5fbb82959967af9ab580",
+        "scanner_version": "skills-guard-v2",
+        "verdict": "safe",
+        "trust_level": "builtin",
+        "findings": [
+          {
+            "pattern_id": "unpinned_npm_install",
+            "severity": "medium",
+            "category": "supply_chain",
+            "file": "SKILL.md",
+            "line": 28,
+            "match": "npm install -g mcporter",
+            "description": "npm install without version pinning"
+          }
+        ],
+        "rules": [
+          "unpinned_npm_install"
+        ],
+        "scanned_at": "2026-09-03T13:49:52.964714+00:00",
+        "summary": "mcporter: safe — 1 finding(s) in supply_chain",
+        "fresh": true
+      },
+      "installed_at": "2026-09-03T13:49:52.974215+00:00",
+      "updated_at": "2026-09-03T13:49:52.974215+00:00"
     }
   }
 }

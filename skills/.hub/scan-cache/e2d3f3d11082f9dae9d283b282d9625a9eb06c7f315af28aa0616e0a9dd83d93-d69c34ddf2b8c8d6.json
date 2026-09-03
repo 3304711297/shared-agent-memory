@@ -1,0 +1,154 @@
+{
+  "source": "official",
+  "source_url": "official/creative/audiocraft-audio-generation",
+  "bundle_hash": "sha256:e2d3f3d11082f9dae9d283b282d9625a9eb06c7f315af28aa0616e0a9dd83d93",
+  "scanner_version": "skills-guard-v2",
+  "verdict": "caution",
+  "trust_level": "builtin",
+  "findings": [
+    {
+      "pattern_id": "unpinned_pip_install",
+      "severity": "medium",
+      "category": "supply_chain",
+      "file": "SKILL.md",
+      "line": 50,
+      "match": "pip install audiocraft",
+      "description": "pip install without version pinning"
+    },
+    {
+      "pattern_id": "unpinned_pip_install",
+      "severity": "medium",
+      "category": "supply_chain",
+      "file": "SKILL.md",
+      "line": 53,
+      "match": "pip install git+https://github.com/facebookresearch/audiocraft.git",
+      "description": "pip install without version pinning"
+    },
+    {
+      "pattern_id": "unpinned_pip_install",
+      "severity": "medium",
+      "category": "supply_chain",
+      "file": "SKILL.md",
+      "line": 56,
+      "match": "pip install transformers torch torchaudio",
+      "description": "pip install without version pinning"
+    },
+    {
+      "pattern_id": "unpinned_pip_install",
+      "severity": "medium",
+      "category": "supply_chain",
+      "file": "references\\advanced-usage.md",
+      "line": 71,
+      "match": "pip install dora-search",
+      "description": "pip install without version pinning"
+    },
+    {
+      "pattern_id": "git_clone",
+      "severity": "medium",
+      "category": "supply_chain",
+      "file": "references\\advanced-usage.md",
+      "line": 74,
+      "match": "git clone https://github.com/facebookresearch/audiocraft.git",
+      "description": "clones a git repository at runtime"
+    },
+    {
+      "pattern_id": "python_os_environ",
+      "severity": "high",
+      "category": "exfiltration",
+      "file": "references\\troubleshooting.md",
+      "line": 71,
+      "match": "os.environ[\"AUDIOCRAFT_USE_XFORMERS\"] = \"0\"",
+      "description": "accesses os.environ outside comments/docstrings (potential env dump)"
+    },
+    {
+      "pattern_id": "python_os_environ",
+      "severity": "high",
+      "category": "exfiltration",
+      "file": "references\\troubleshooting.md",
+      "line": 108,
+      "match": "os.environ[\"AUDIOCRAFT_CACHE_DIR\"] = \"/path/to/cache\"",
+      "description": "accesses os.environ outside comments/docstrings (potential env dump)"
+    },
+    {
+      "pattern_id": "python_os_environ",
+      "severity": "high",
+      "category": "exfiltration",
+      "file": "references\\troubleshooting.md",
+      "line": 111,
+      "match": "os.environ[\"HF_HOME\"] = \"/path/to/hf_cache\"",
+      "description": "accesses os.environ outside comments/docstrings (potential env dump)"
+    },
+    {
+      "pattern_id": "unpinned_pip_install",
+      "severity": "medium",
+      "category": "supply_chain",
+      "file": "references\\troubleshooting.md",
+      "line": 12,
+      "match": "pip install audiocraft",
+      "description": "pip install without version pinning"
+    },
+    {
+      "pattern_id": "unpinned_pip_install",
+      "severity": "medium",
+      "category": "supply_chain",
+      "file": "references\\troubleshooting.md",
+      "line": 15,
+      "match": "pip install git+https://github.com/facebookresearch/audiocraft.git",
+      "description": "pip install without version pinning"
+    },
+    {
+      "pattern_id": "unpinned_pip_install",
+      "severity": "medium",
+      "category": "supply_chain",
+      "file": "references\\troubleshooting.md",
+      "line": 51,
+      "match": "pip install torch torchaudio --index-url https://download.pytorch.org/whl/cu121",
+      "description": "pip install without version pinning"
+    },
+    {
+      "pattern_id": "unpinned_pip_install",
+      "severity": "medium",
+      "category": "supply_chain",
+      "file": "references\\troubleshooting.md",
+      "line": 54,
+      "match": "pip install torch torchaudio --index-url https://download.pytorch.org/whl/cu118",
+      "description": "pip install without version pinning"
+    },
+    {
+      "pattern_id": "unpinned_pip_install",
+      "severity": "medium",
+      "category": "supply_chain",
+      "file": "references\\troubleshooting.md",
+      "line": 64,
+      "match": "pip install xformers",
+      "description": "pip install without version pinning"
+    },
+    {
+      "pattern_id": "unpinned_pip_install",
+      "severity": "medium",
+      "category": "supply_chain",
+      "file": "references\\troubleshooting.md",
+      "line": 484,
+      "match": "| `No module named 'audiocraft'` | Not installed | `pip install audiocraft` |",
+      "description": "pip install without version pinning"
+    },
+    {
+      "pattern_id": "sudo_usage",
+      "severity": "high",
+      "category": "privilege_escalation",
+      "file": "references\\troubleshooting.md",
+      "line": 28,
+      "match": "sudo apt-get install ffmpeg",
+      "description": "uses sudo (privilege escalation)"
+    }
+  ],
+  "rules": [
+    "git_clone",
+    "python_os_environ",
+    "sudo_usage",
+    "unpinned_pip_install"
+  ],
+  "scanned_at": "2026-09-03T13:49:37.850396+00:00",
+  "summary": "audiocraft-audio-generation: caution \u2014 15 finding(s) in exfiltration, privilege_escalation, supply_chain",
+  "fresh": true
+}

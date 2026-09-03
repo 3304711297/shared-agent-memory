@@ -1,0 +1,71 @@
+{
+  "source": "official",
+  "source_url": "official/creative/ascii-art",
+  "bundle_hash": "sha256:29e23c2fdb90e5abfbaa49b9438c57710a30ceadc2e67a9366a637819e7557c5",
+  "scanner_version": "skills-guard-v2",
+  "verdict": "caution",
+  "trust_level": "builtin",
+  "findings": [
+    {
+      "pattern_id": "unpinned_pip_install",
+      "severity": "medium",
+      "category": "supply_chain",
+      "file": "SKILL.md",
+      "line": 27,
+      "match": "pip install pyfiglet --break-system-packages -q",
+      "description": "pip install without version pinning"
+    },
+    {
+      "pattern_id": "sudo_usage",
+      "severity": "high",
+      "category": "privilege_escalation",
+      "file": "SKILL.md",
+      "line": 92,
+      "match": "sudo apt install cowsay -y    # Debian/Ubuntu",
+      "description": "uses sudo (privilege escalation)"
+    },
+    {
+      "pattern_id": "sudo_usage",
+      "severity": "high",
+      "category": "privilege_escalation",
+      "file": "SKILL.md",
+      "line": 136,
+      "match": "sudo apt install boxes -y    # Debian/Ubuntu",
+      "description": "uses sudo (privilege escalation)"
+    },
+    {
+      "pattern_id": "sudo_usage",
+      "severity": "high",
+      "category": "privilege_escalation",
+      "file": "SKILL.md",
+      "line": 171,
+      "match": "sudo apt install toilet toilet-fonts -y    # Debian/Ubuntu",
+      "description": "uses sudo (privilege escalation)"
+    },
+    {
+      "pattern_id": "sudo_usage",
+      "severity": "high",
+      "category": "privilege_escalation",
+      "file": "SKILL.md",
+      "line": 202,
+      "match": "sudo snap install ascii-image-converter",
+      "description": "uses sudo (privilege escalation)"
+    },
+    {
+      "pattern_id": "sudo_usage",
+      "severity": "high",
+      "category": "privilege_escalation",
+      "file": "SKILL.md",
+      "line": 219,
+      "match": "sudo apt install jp2a -y",
+      "description": "uses sudo (privilege escalation)"
+    }
+  ],
+  "rules": [
+    "sudo_usage",
+    "unpinned_pip_install"
+  ],
+  "scanned_at": "2026-09-03T13:49:40.457131+00:00",
+  "summary": "ascii-art: caution \u2014 6 finding(s) in privilege_escalation, supply_chain",
+  "fresh": true
+}
