@@ -1,0 +1,267 @@
+{
+  "source": "official",
+  "source_url": "official/software-development/ast-grep",
+  "bundle_hash": "sha256:253f76e069be5d8e512fc63e96564983ced90d7fb9e7817dc85d217680ef2212",
+  "scanner_version": "skills-guard-v2",
+  "verdict": "dangerous",
+  "trust_level": "builtin",
+  "findings": [
+    {
+      "pattern_id": "unpinned_pip_install",
+      "severity": "medium",
+      "category": "supply_chain",
+      "file": "install.sh",
+      "line": 149,
+      "match": "log \"trying: $PIP install --user ast-grep-cli\"",
+      "description": "pip install without version pinning"
+    },
+    {
+      "pattern_id": "unpinned_pip_install",
+      "severity": "medium",
+      "category": "supply_chain",
+      "file": "install.sh",
+      "line": 150,
+      "match": "$PIP install --user ast-grep-cli && return 0 || return 1",
+      "description": "pip install without version pinning"
+    },
+    {
+      "pattern_id": "unpinned_pip_install",
+      "severity": "medium",
+      "category": "supply_chain",
+      "file": "install.sh",
+      "line": 284,
+      "match": "err \"  pip install ast-grep-cli              # any OS with Python\"",
+      "description": "pip install without version pinning"
+    },
+    {
+      "pattern_id": "unpinned_npm_install",
+      "severity": "medium",
+      "category": "supply_chain",
+      "file": "install.sh",
+      "line": 126,
+      "match": "log \"trying: npm install -g @ast-grep/cli\"",
+      "description": "npm install without version pinning"
+    },
+    {
+      "pattern_id": "unpinned_npm_install",
+      "severity": "medium",
+      "category": "supply_chain",
+      "file": "install.sh",
+      "line": 127,
+      "match": "npm install -g @ast-grep/cli && return 0 || return 1",
+      "description": "npm install without version pinning"
+    },
+    {
+      "pattern_id": "unpinned_npm_install",
+      "severity": "medium",
+      "category": "supply_chain",
+      "file": "install.sh",
+      "line": 282,
+      "match": "err \"  npm install -g @ast-grep/cli          # any OS with Node\"",
+      "description": "npm install without version pinning"
+    },
+    {
+      "pattern_id": "shell_rc_mod",
+      "severity": "medium",
+      "category": "persistence",
+      "file": "references\\cli.md",
+      "line": 196,
+      "match": "sg completions bash >> ~/.bashrc",
+      "description": "references shell startup file"
+    },
+    {
+      "pattern_id": "dump_all_env",
+      "severity": "high",
+      "category": "exfiltration",
+      "file": "references\\install.md",
+      "line": 73,
+      "match": "| **pip** | `pip install ast-grep-cli` | Works in any Python venv | Needs Python 3.8+ |",
+      "description": "dumps all environment variables"
+    },
+    {
+      "pattern_id": "shell_rc_mod",
+      "severity": "medium",
+      "category": "persistence",
+      "file": "references\\install.md",
+      "line": 44,
+      "match": "> 2. Add an alias: `alias sg=ast-grep` in your `~/.bashrc` / `~/.zshrc`.",
+      "description": "references shell startup file"
+    },
+    {
+      "pattern_id": "unpinned_pip_install",
+      "severity": "medium",
+      "category": "supply_chain",
+      "file": "references\\install.md",
+      "line": 31,
+      "match": "pip install ast-grep-cli",
+      "description": "pip install without version pinning"
+    },
+    {
+      "pattern_id": "unpinned_pip_install",
+      "severity": "medium",
+      "category": "supply_chain",
+      "file": "references\\install.md",
+      "line": 73,
+      "match": "| **pip** | `pip install ast-grep-cli` | Works in any Python venv | Needs Python 3.8+ |",
+      "description": "pip install without version pinning"
+    },
+    {
+      "pattern_id": "unpinned_npm_install",
+      "severity": "medium",
+      "category": "supply_chain",
+      "file": "references\\install.md",
+      "line": 21,
+      "match": "npm install -g @ast-grep/cli           # if you have Node already",
+      "description": "npm install without version pinning"
+    },
+    {
+      "pattern_id": "unpinned_npm_install",
+      "severity": "medium",
+      "category": "supply_chain",
+      "file": "references\\install.md",
+      "line": 29,
+      "match": "npm install -g @ast-grep/cli",
+      "description": "npm install without version pinning"
+    },
+    {
+      "pattern_id": "unpinned_npm_install",
+      "severity": "medium",
+      "category": "supply_chain",
+      "file": "references\\install.md",
+      "line": 54,
+      "match": "npm install -g @ast-grep/cli           # any OS with Node",
+      "description": "npm install without version pinning"
+    },
+    {
+      "pattern_id": "unpinned_npm_install",
+      "severity": "medium",
+      "category": "supply_chain",
+      "file": "references\\install.md",
+      "line": 70,
+      "match": "| **npm** | `npm install -g @ast-grep/cli` | Fast, prebuilt platform binaries | Needs Node 18+ |",
+      "description": "npm install without version pinning"
+    },
+    {
+      "pattern_id": "git_clone",
+      "severity": "medium",
+      "category": "supply_chain",
+      "file": "references\\install.md",
+      "line": 115,
+      "match": "git clone https://github.com/ast-grep/ast-grep.git",
+      "description": "clones a git repository at runtime"
+    },
+    {
+      "pattern_id": "sudo_usage",
+      "severity": "high",
+      "category": "privilege_escalation",
+      "file": "references\\install.md",
+      "line": 20,
+      "match": "sudo port install ast-grep             # MacPorts",
+      "description": "uses sudo (privilege escalation)"
+    },
+    {
+      "pattern_id": "sudo_usage",
+      "severity": "high",
+      "category": "privilege_escalation",
+      "file": "references\\install.md",
+      "line": 101,
+      "match": "sudo mv /tmp/ast-grep/ast-grep /usr/local/bin/sg",
+      "description": "uses sudo (privilege escalation)"
+    },
+    {
+      "pattern_id": "sudo_usage",
+      "severity": "high",
+      "category": "privilege_escalation",
+      "file": "references\\install.md",
+      "line": 102,
+      "match": "sudo chmod +x /usr/local/bin/sg",
+      "description": "uses sudo (privilege escalation)"
+    },
+    {
+      "pattern_id": "sudo_usage",
+      "severity": "high",
+      "category": "privilege_escalation",
+      "file": "references\\install.md",
+      "line": 108,
+      "match": "The skill's `install.sh` does steps 1-3 automatically and drops the binary in `<skill_root>/bin/sg` so you can use it...",
+      "description": "uses sudo (privilege escalation)"
+    },
+    {
+      "pattern_id": "dns_exfil",
+      "severity": "critical",
+      "category": "exfiltration",
+      "file": "references\\sgconfig.md",
+      "line": 147,
+      "match": "- `expandoChar` (optional): character to substitute for `$` in patterns when the host language uses `$` syntactically...",
+      "description": "DNS lookup with variable interpolation (possible DNS exfiltration)"
+    },
+    {
+      "pattern_id": "path_traversal",
+      "severity": "medium",
+      "category": "traversal",
+      "file": "references\\sgconfig.md",
+      "line": 192,
+      "match": "- ../../shared-rules",
+      "description": "relative path traversal (2+ levels up)"
+    },
+    {
+      "pattern_id": "python_subprocess",
+      "severity": "medium",
+      "category": "execution",
+      "file": "scripts\\ast_grep_helper.py",
+      "line": 177,
+      "match": "out = subprocess.run(",
+      "description": "Python subprocess execution"
+    },
+    {
+      "pattern_id": "python_subprocess",
+      "severity": "medium",
+      "category": "execution",
+      "file": "scripts\\ast_grep_helper.py",
+      "line": 394,
+      "match": "return subprocess.run(",
+      "description": "Python subprocess execution"
+    },
+    {
+      "pattern_id": "python_subprocess",
+      "severity": "medium",
+      "category": "execution",
+      "file": "scripts\\ast_grep_helper.py",
+      "line": 608,
+      "match": "return subprocess.run(cmd).returncode",
+      "description": "Python subprocess execution"
+    },
+    {
+      "pattern_id": "unpinned_pip_install",
+      "severity": "medium",
+      "category": "supply_chain",
+      "file": "scripts\\ast_grep_helper.py",
+      "line": 277,
+      "match": "err(\"  pip install ast-grep-cli                   # any OS with Python\")",
+      "description": "pip install without version pinning"
+    },
+    {
+      "pattern_id": "unpinned_npm_install",
+      "severity": "medium",
+      "category": "supply_chain",
+      "file": "scripts\\ast_grep_helper.py",
+      "line": 275,
+      "match": "err(\"  npm install -g @ast-grep/cli               # any OS with Node\")",
+      "description": "npm install without version pinning"
+    }
+  ],
+  "rules": [
+    "dns_exfil",
+    "dump_all_env",
+    "git_clone",
+    "path_traversal",
+    "python_subprocess",
+    "shell_rc_mod",
+    "sudo_usage",
+    "unpinned_npm_install",
+    "unpinned_pip_install"
+  ],
+  "scanned_at": "2026-09-03T13:28:54.302101+00:00",
+  "summary": "ast-grep: dangerous \u2014 27 finding(s) in execution, exfiltration, persistence, privilege_escalation, supply_chain, traversal",
+  "fresh": true
+}

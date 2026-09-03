@@ -1,1 +1,779 @@
-{"version": 1, "installed": {}}
+{
+  "version": 1,
+  "installed": {
+    "ast-grep": {
+      "source": "official",
+      "identifier": "official/software-development/ast-grep",
+      "trust_level": "builtin",
+      "scan_verdict": "dangerous",
+      "content_hash": "sha256:253f76e069be5d8e",
+      "install_path": "software-development/ast-grep",
+      "files": [
+        "install.ps1",
+        "install.sh",
+        "LICENSE",
+        "SKILL.md",
+        "references\\cli.md",
+        "references\\install.md",
+        "references\\patterns.md",
+        "references\\pitfalls.md",
+        "references\\recipes.md",
+        "references\\sgconfig.md",
+        "references\\yaml-rules.md",
+        "scripts\\ast_grep_helper.py",
+        "tests\\smoke.ps1",
+        "tests\\smoke.sh"
+      ],
+      "metadata": {},
+      "scan_provenance": {
+        "source": "official",
+        "source_url": "official/software-development/ast-grep",
+        "bundle_hash": "sha256:253f76e069be5d8e512fc63e96564983ced90d7fb9e7817dc85d217680ef2212",
+        "scanner_version": "skills-guard-v2",
+        "verdict": "dangerous",
+        "trust_level": "builtin",
+        "findings": [
+          {
+            "pattern_id": "unpinned_pip_install",
+            "severity": "medium",
+            "category": "supply_chain",
+            "file": "install.sh",
+            "line": 149,
+            "match": "log \"trying: $PIP install --user ast-grep-cli\"",
+            "description": "pip install without version pinning"
+          },
+          {
+            "pattern_id": "unpinned_pip_install",
+            "severity": "medium",
+            "category": "supply_chain",
+            "file": "install.sh",
+            "line": 150,
+            "match": "$PIP install --user ast-grep-cli && return 0 || return 1",
+            "description": "pip install without version pinning"
+          },
+          {
+            "pattern_id": "unpinned_pip_install",
+            "severity": "medium",
+            "category": "supply_chain",
+            "file": "install.sh",
+            "line": 284,
+            "match": "err \"  pip install ast-grep-cli              # any OS with Python\"",
+            "description": "pip install without version pinning"
+          },
+          {
+            "pattern_id": "unpinned_npm_install",
+            "severity": "medium",
+            "category": "supply_chain",
+            "file": "install.sh",
+            "line": 126,
+            "match": "log \"trying: npm install -g @ast-grep/cli\"",
+            "description": "npm install without version pinning"
+          },
+          {
+            "pattern_id": "unpinned_npm_install",
+            "severity": "medium",
+            "category": "supply_chain",
+            "file": "install.sh",
+            "line": 127,
+            "match": "npm install -g @ast-grep/cli && return 0 || return 1",
+            "description": "npm install without version pinning"
+          },
+          {
+            "pattern_id": "unpinned_npm_install",
+            "severity": "medium",
+            "category": "supply_chain",
+            "file": "install.sh",
+            "line": 282,
+            "match": "err \"  npm install -g @ast-grep/cli          # any OS with Node\"",
+            "description": "npm install without version pinning"
+          },
+          {
+            "pattern_id": "shell_rc_mod",
+            "severity": "medium",
+            "category": "persistence",
+            "file": "references\\cli.md",
+            "line": 196,
+            "match": "sg completions bash >> ~/.bashrc",
+            "description": "references shell startup file"
+          },
+          {
+            "pattern_id": "dump_all_env",
+            "severity": "high",
+            "category": "exfiltration",
+            "file": "references\\install.md",
+            "line": 73,
+            "match": "| **pip** | `pip install ast-grep-cli` | Works in any Python venv | Needs Python 3.8+ |",
+            "description": "dumps all environment variables"
+          },
+          {
+            "pattern_id": "shell_rc_mod",
+            "severity": "medium",
+            "category": "persistence",
+            "file": "references\\install.md",
+            "line": 44,
+            "match": "> 2. Add an alias: `alias sg=ast-grep` in your `~/.bashrc` / `~/.zshrc`.",
+            "description": "references shell startup file"
+          },
+          {
+            "pattern_id": "unpinned_pip_install",
+            "severity": "medium",
+            "category": "supply_chain",
+            "file": "references\\install.md",
+            "line": 31,
+            "match": "pip install ast-grep-cli",
+            "description": "pip install without version pinning"
+          },
+          {
+            "pattern_id": "unpinned_pip_install",
+            "severity": "medium",
+            "category": "supply_chain",
+            "file": "references\\install.md",
+            "line": 73,
+            "match": "| **pip** | `pip install ast-grep-cli` | Works in any Python venv | Needs Python 3.8+ |",
+            "description": "pip install without version pinning"
+          },
+          {
+            "pattern_id": "unpinned_npm_install",
+            "severity": "medium",
+            "category": "supply_chain",
+            "file": "references\\install.md",
+            "line": 21,
+            "match": "npm install -g @ast-grep/cli           # if you have Node already",
+            "description": "npm install without version pinning"
+          },
+          {
+            "pattern_id": "unpinned_npm_install",
+            "severity": "medium",
+            "category": "supply_chain",
+            "file": "references\\install.md",
+            "line": 29,
+            "match": "npm install -g @ast-grep/cli",
+            "description": "npm install without version pinning"
+          },
+          {
+            "pattern_id": "unpinned_npm_install",
+            "severity": "medium",
+            "category": "supply_chain",
+            "file": "references\\install.md",
+            "line": 54,
+            "match": "npm install -g @ast-grep/cli           # any OS with Node",
+            "description": "npm install without version pinning"
+          },
+          {
+            "pattern_id": "unpinned_npm_install",
+            "severity": "medium",
+            "category": "supply_chain",
+            "file": "references\\install.md",
+            "line": 70,
+            "match": "| **npm** | `npm install -g @ast-grep/cli` | Fast, prebuilt platform binaries | Needs Node 18+ |",
+            "description": "npm install without version pinning"
+          },
+          {
+            "pattern_id": "git_clone",
+            "severity": "medium",
+            "category": "supply_chain",
+            "file": "references\\install.md",
+            "line": 115,
+            "match": "git clone https://github.com/ast-grep/ast-grep.git",
+            "description": "clones a git repository at runtime"
+          },
+          {
+            "pattern_id": "sudo_usage",
+            "severity": "high",
+            "category": "privilege_escalation",
+            "file": "references\\install.md",
+            "line": 20,
+            "match": "sudo port install ast-grep             # MacPorts",
+            "description": "uses sudo (privilege escalation)"
+          },
+          {
+            "pattern_id": "sudo_usage",
+            "severity": "high",
+            "category": "privilege_escalation",
+            "file": "references\\install.md",
+            "line": 101,
+            "match": "sudo mv /tmp/ast-grep/ast-grep /usr/local/bin/sg",
+            "description": "uses sudo (privilege escalation)"
+          },
+          {
+            "pattern_id": "sudo_usage",
+            "severity": "high",
+            "category": "privilege_escalation",
+            "file": "references\\install.md",
+            "line": 102,
+            "match": "sudo chmod +x /usr/local/bin/sg",
+            "description": "uses sudo (privilege escalation)"
+          },
+          {
+            "pattern_id": "sudo_usage",
+            "severity": "high",
+            "category": "privilege_escalation",
+            "file": "references\\install.md",
+            "line": 108,
+            "match": "The skill's `install.sh` does steps 1-3 automatically and drops the binary in `<skill_root>/bin/sg` so you can use it...",
+            "description": "uses sudo (privilege escalation)"
+          },
+          {
+            "pattern_id": "dns_exfil",
+            "severity": "critical",
+            "category": "exfiltration",
+            "file": "references\\sgconfig.md",
+            "line": 147,
+            "match": "- `expandoChar` (optional): character to substitute for `$` in patterns when the host language uses `$` syntactically...",
+            "description": "DNS lookup with variable interpolation (possible DNS exfiltration)"
+          },
+          {
+            "pattern_id": "path_traversal",
+            "severity": "medium",
+            "category": "traversal",
+            "file": "references\\sgconfig.md",
+            "line": 192,
+            "match": "- ../../shared-rules",
+            "description": "relative path traversal (2+ levels up)"
+          },
+          {
+            "pattern_id": "python_subprocess",
+            "severity": "medium",
+            "category": "execution",
+            "file": "scripts\\ast_grep_helper.py",
+            "line": 177,
+            "match": "out = subprocess.run(",
+            "description": "Python subprocess execution"
+          },
+          {
+            "pattern_id": "python_subprocess",
+            "severity": "medium",
+            "category": "execution",
+            "file": "scripts\\ast_grep_helper.py",
+            "line": 394,
+            "match": "return subprocess.run(",
+            "description": "Python subprocess execution"
+          },
+          {
+            "pattern_id": "python_subprocess",
+            "severity": "medium",
+            "category": "execution",
+            "file": "scripts\\ast_grep_helper.py",
+            "line": 608,
+            "match": "return subprocess.run(cmd).returncode",
+            "description": "Python subprocess execution"
+          },
+          {
+            "pattern_id": "unpinned_pip_install",
+            "severity": "medium",
+            "category": "supply_chain",
+            "file": "scripts\\ast_grep_helper.py",
+            "line": 277,
+            "match": "err(\"  pip install ast-grep-cli                   # any OS with Python\")",
+            "description": "pip install without version pinning"
+          },
+          {
+            "pattern_id": "unpinned_npm_install",
+            "severity": "medium",
+            "category": "supply_chain",
+            "file": "scripts\\ast_grep_helper.py",
+            "line": 275,
+            "match": "err(\"  npm install -g @ast-grep/cli               # any OS with Node\")",
+            "description": "npm install without version pinning"
+          }
+        ],
+        "rules": [
+          "dns_exfil",
+          "dump_all_env",
+          "git_clone",
+          "path_traversal",
+          "python_subprocess",
+          "shell_rc_mod",
+          "sudo_usage",
+          "unpinned_npm_install",
+          "unpinned_pip_install"
+        ],
+        "scanned_at": "2026-09-03T13:28:54.302101+00:00",
+        "summary": "ast-grep: dangerous — 27 finding(s) in execution, exfiltration, persistence, privilege_escalation, supply_chain, traversal",
+        "fresh": false
+      },
+      "installed_at": "2026-09-03T13:28:59.763133+00:00",
+      "updated_at": "2026-09-03T13:28:59.763133+00:00"
+    },
+    "code-wiki": {
+      "source": "official",
+      "identifier": "official/software-development/code-wiki",
+      "trust_level": "builtin",
+      "scan_verdict": "safe",
+      "content_hash": "sha256:2e06c1bd5a903431",
+      "install_path": "software-development/code-wiki",
+      "files": [
+        "SKILL.md",
+        "templates\\architecture.md",
+        "templates\\getting-started.md",
+        "templates\\module.md",
+        "templates\\README.md"
+      ],
+      "metadata": {},
+      "scan_provenance": {
+        "source": "official",
+        "source_url": "official/software-development/code-wiki",
+        "bundle_hash": "sha256:2e06c1bd5a903431e8c6ce70075cebb7a4ed124b338eed0fda7806b386181ae1",
+        "scanner_version": "skills-guard-v2",
+        "verdict": "safe",
+        "trust_level": "builtin",
+        "findings": [
+          {
+            "pattern_id": "git_clone",
+            "severity": "medium",
+            "category": "supply_chain",
+            "file": "SKILL.md",
+            "line": 47,
+            "match": "| 1 | Resolve target — local cwd, given path, or `git clone --depth 50 <url>` to a temp dir |",
+            "description": "clones a git repository at runtime"
+          },
+          {
+            "pattern_id": "git_clone",
+            "severity": "medium",
+            "category": "supply_chain",
+            "file": "SKILL.md",
+            "line": 68,
+            "match": "git clone --depth 50 <url> \"$WIKI_TMP/repo\"",
+            "description": "clones a git repository at runtime"
+          }
+        ],
+        "rules": [
+          "git_clone"
+        ],
+        "scanned_at": "2026-09-03T13:29:00.619842+00:00",
+        "summary": "code-wiki: safe — 2 finding(s) in supply_chain",
+        "fresh": true
+      },
+      "installed_at": "2026-09-03T13:29:00.630344+00:00",
+      "updated_at": "2026-09-03T13:29:00.630344+00:00"
+    },
+    "baoyu-comic": {
+      "source": "official",
+      "identifier": "official/creative/baoyu-comic",
+      "trust_level": "builtin",
+      "scan_verdict": "safe",
+      "content_hash": "sha256:4378c8ba82fd3649",
+      "install_path": "creative/baoyu-comic",
+      "files": [
+        "PORT_NOTES.md",
+        "SKILL.md",
+        "references\\analysis-framework.md",
+        "references\\auto-selection.md",
+        "references\\base-prompt.md",
+        "references\\character-template.md",
+        "references\\ohmsha-guide.md",
+        "references\\partial-workflows.md",
+        "references\\storyboard-template.md",
+        "references\\workflow.md",
+        "references\\art-styles\\chalk.md",
+        "references\\art-styles\\ink-brush.md",
+        "references\\art-styles\\ligne-claire.md",
+        "references\\art-styles\\manga.md",
+        "references\\art-styles\\minimalist.md",
+        "references\\art-styles\\realistic.md",
+        "references\\layouts\\cinematic.md",
+        "references\\layouts\\dense.md",
+        "references\\layouts\\four-panel.md",
+        "references\\layouts\\mixed.md",
+        "references\\layouts\\splash.md",
+        "references\\layouts\\standard.md",
+        "references\\layouts\\webtoon.md",
+        "references\\presets\\concept-story.md",
+        "references\\presets\\four-panel.md",
+        "references\\presets\\ohmsha.md",
+        "references\\presets\\shoujo.md",
+        "references\\presets\\wuxia.md",
+        "references\\tones\\action.md",
+        "references\\tones\\dramatic.md",
+        "references\\tones\\energetic.md",
+        "references\\tones\\neutral.md",
+        "references\\tones\\romantic.md",
+        "references\\tones\\vintage.md",
+        "references\\tones\\warm.md"
+      ],
+      "metadata": {},
+      "scan_provenance": {
+        "source": "official",
+        "source_url": "official/creative/baoyu-comic",
+        "bundle_hash": "sha256:4378c8ba82fd3649709c75da4310c79bf9d616b0a10063257a17be8902084e06",
+        "scanner_version": "skills-guard-v2",
+        "verdict": "safe",
+        "trust_level": "builtin",
+        "findings": [],
+        "rules": [],
+        "scanned_at": "2026-09-03T13:29:01.643594+00:00",
+        "summary": "baoyu-comic: clean scan, no threats detected",
+        "fresh": true
+      },
+      "installed_at": "2026-09-03T13:29:01.657099+00:00",
+      "updated_at": "2026-09-03T13:29:01.657099+00:00"
+    },
+    "baoyu-article-illustrator": {
+      "source": "official",
+      "identifier": "official/creative/baoyu-article-illustrator",
+      "trust_level": "builtin",
+      "scan_verdict": "safe",
+      "content_hash": "sha256:15694c74d4ec835e",
+      "install_path": "creative/baoyu-article-illustrator",
+      "files": [
+        "PORT_NOTES.md",
+        "SKILL.md",
+        "prompts\\system.md",
+        "references\\prompt-construction.md",
+        "references\\style-presets.md",
+        "references\\styles.md",
+        "references\\usage.md",
+        "references\\workflow.md",
+        "references\\palettes\\macaron.md",
+        "references\\palettes\\mono-ink.md",
+        "references\\palettes\\neon.md",
+        "references\\palettes\\warm.md",
+        "references\\styles\\blueprint.md",
+        "references\\styles\\chalkboard.md",
+        "references\\styles\\editorial.md",
+        "references\\styles\\elegant.md",
+        "references\\styles\\fantasy-animation.md",
+        "references\\styles\\flat-doodle.md",
+        "references\\styles\\flat.md",
+        "references\\styles\\ink-notes.md",
+        "references\\styles\\intuition-machine.md",
+        "references\\styles\\minimal.md",
+        "references\\styles\\nature.md",
+        "references\\styles\\notion.md",
+        "references\\styles\\pixel-art.md",
+        "references\\styles\\playful.md",
+        "references\\styles\\retro.md",
+        "references\\styles\\scientific.md",
+        "references\\styles\\screen-print.md",
+        "references\\styles\\sketch-notes.md",
+        "references\\styles\\sketch.md",
+        "references\\styles\\vector-illustration.md",
+        "references\\styles\\vintage.md",
+        "references\\styles\\warm.md",
+        "references\\styles\\watercolor.md"
+      ],
+      "metadata": {},
+      "scan_provenance": {
+        "source": "official",
+        "source_url": "official/creative/baoyu-article-illustrator",
+        "bundle_hash": "sha256:15694c74d4ec835eee2f5b4f47e74d56148803376cd54b7dea7d7ac212a32124",
+        "scanner_version": "skills-guard-v2",
+        "verdict": "safe",
+        "trust_level": "builtin",
+        "findings": [],
+        "rules": [],
+        "scanned_at": "2026-09-03T13:29:02.655272+00:00",
+        "summary": "baoyu-article-illustrator: clean scan, no threats detected",
+        "fresh": true
+      },
+      "installed_at": "2026-09-03T13:29:02.666274+00:00",
+      "updated_at": "2026-09-03T13:29:02.666274+00:00"
+    },
+    "duckduckgo-search": {
+      "source": "official",
+      "identifier": "official/research/duckduckgo-search",
+      "trust_level": "builtin",
+      "scan_verdict": "safe",
+      "content_hash": "sha256:6c569cf10b19693a",
+      "install_path": "research/duckduckgo-search",
+      "files": [
+        "SKILL.md",
+        "scripts\\duckduckgo.sh"
+      ],
+      "metadata": {},
+      "scan_provenance": {
+        "source": "official",
+        "source_url": "official/research/duckduckgo-search",
+        "bundle_hash": "sha256:6c569cf10b19693ab4619c88c66c3816a1fe3224b458bb19b8dd121cd302bc57",
+        "scanner_version": "skills-guard-v2",
+        "verdict": "safe",
+        "trust_level": "builtin",
+        "findings": [
+          {
+            "pattern_id": "unpinned_pip_install",
+            "severity": "medium",
+            "category": "supply_chain",
+            "file": "SKILL.md",
+            "line": 47,
+            "match": "pip install ddgs",
+            "description": "pip install without version pinning"
+          },
+          {
+            "pattern_id": "unpinned_pip_install",
+            "severity": "medium",
+            "category": "supply_chain",
+            "file": "SKILL.md",
+            "line": 232,
+            "match": "- **Package name**: The package is `ddgs` (previously `duckduckgo-search`). Install with `pip install ddgs`.",
+            "description": "pip install without version pinning"
+          },
+          {
+            "pattern_id": "unpinned_pip_install",
+            "severity": "medium",
+            "category": "supply_chain",
+            "file": "scripts\\duckduckgo.sh",
+            "line": 18,
+            "match": "echo \"Requires: pip install ddgs\"",
+            "description": "pip install without version pinning"
+          },
+          {
+            "pattern_id": "unpinned_pip_install",
+            "severity": "medium",
+            "category": "supply_chain",
+            "file": "scripts\\duckduckgo.sh",
+            "line": 24,
+            "match": "echo \"Error: ddgs not found. Install with: pip install ddgs\"",
+            "description": "pip install without version pinning"
+          }
+        ],
+        "rules": [
+          "unpinned_pip_install"
+        ],
+        "scanned_at": "2026-09-03T13:29:03.513860+00:00",
+        "summary": "duckduckgo-search: safe — 4 finding(s) in supply_chain",
+        "fresh": true
+      },
+      "installed_at": "2026-09-03T13:29:03.523361+00:00",
+      "updated_at": "2026-09-03T13:29:03.523361+00:00"
+    },
+    "scrapling": {
+      "source": "official",
+      "identifier": "official/research/scrapling",
+      "trust_level": "builtin",
+      "scan_verdict": "safe",
+      "content_hash": "sha256:d06bfeedf53d6285",
+      "install_path": "research/scrapling",
+      "files": [
+        "SKILL.md"
+      ],
+      "metadata": {},
+      "scan_provenance": {
+        "source": "official",
+        "source_url": "official/research/scrapling",
+        "bundle_hash": "sha256:d06bfeedf53d62850b438f46a733c8bade1e9323a6b4dae13a56541a1324dcd8",
+        "scanner_version": "skills-guard-v2",
+        "verdict": "safe",
+        "trust_level": "builtin",
+        "findings": [
+          {
+            "pattern_id": "unpinned_pip_install",
+            "severity": "medium",
+            "category": "supply_chain",
+            "file": "SKILL.md",
+            "line": 34,
+            "match": "pip install \"scrapling[all]\"",
+            "description": "pip install without version pinning"
+          },
+          {
+            "pattern_id": "unpinned_pip_install",
+            "severity": "medium",
+            "category": "supply_chain",
+            "file": "SKILL.md",
+            "line": 40,
+            "match": "pip install scrapling",
+            "description": "pip install without version pinning"
+          },
+          {
+            "pattern_id": "unpinned_pip_install",
+            "severity": "medium",
+            "category": "supply_chain",
+            "file": "SKILL.md",
+            "line": 45,
+            "match": "pip install \"scrapling[fetchers]\"",
+            "description": "pip install without version pinning"
+          },
+          {
+            "pattern_id": "unpinned_pip_install",
+            "severity": "medium",
+            "category": "supply_chain",
+            "file": "SKILL.md",
+            "line": 331,
+            "match": "- **Browser install required**: run `scrapling install` after pip install -- without it, `DynamicFetcher` and `Stealt...",
+            "description": "pip install without version pinning"
+          },
+          {
+            "pattern_id": "remote_fetch",
+            "severity": "medium",
+            "category": "supply_chain",
+            "file": "SKILL.md",
+            "line": 77,
+            "match": "scrapling extract fetch 'https://example.com' output.md \\",
+            "description": "fetches remote resource at runtime"
+          },
+          {
+            "pattern_id": "remote_fetch",
+            "severity": "medium",
+            "category": "supply_chain",
+            "file": "SKILL.md",
+            "line": 86,
+            "match": "scrapling extract stealthy-fetch 'https://protected-site.com' output.html \\",
+            "description": "fetches remote resource at runtime"
+          },
+          {
+            "pattern_id": "remote_fetch",
+            "severity": "medium",
+            "category": "supply_chain",
+            "file": "SKILL.md",
+            "line": 154,
+            "match": "page = DynamicFetcher.fetch('https://example.com', headless=True)",
+            "description": "fetches remote resource at runtime"
+          },
+          {
+            "pattern_id": "remote_fetch",
+            "severity": "medium",
+            "category": "supply_chain",
+            "file": "SKILL.md",
+            "line": 176,
+            "match": "page = session.fetch('https://example.com')",
+            "description": "fetches remote resource at runtime"
+          },
+          {
+            "pattern_id": "remote_fetch",
+            "severity": "medium",
+            "category": "supply_chain",
+            "file": "SKILL.md",
+            "line": 192,
+            "match": "page = DynamicFetcher.fetch('https://example.com', page_action=scroll_and_click)",
+            "description": "fetches remote resource at runtime"
+          },
+          {
+            "pattern_id": "remote_fetch",
+            "severity": "medium",
+            "category": "supply_chain",
+            "file": "SKILL.md",
+            "line": 219,
+            "match": "page1 = session.fetch('https://protected-site.com/page1')",
+            "description": "fetches remote resource at runtime"
+          },
+          {
+            "pattern_id": "remote_fetch",
+            "severity": "medium",
+            "category": "supply_chain",
+            "file": "SKILL.md",
+            "line": 220,
+            "match": "page2 = session.fetch('https://protected-site.com/page2')",
+            "description": "fetches remote resource at runtime"
+          }
+        ],
+        "rules": [
+          "remote_fetch",
+          "unpinned_pip_install"
+        ],
+        "scanned_at": "2026-09-03T13:29:04.365590+00:00",
+        "summary": "scrapling: safe — 11 finding(s) in supply_chain",
+        "fresh": true
+      },
+      "installed_at": "2026-09-03T13:29:04.376092+00:00",
+      "updated_at": "2026-09-03T13:29:04.376092+00:00"
+    },
+    "docker-management": {
+      "source": "official",
+      "identifier": "official/devops/docker-management",
+      "trust_level": "builtin",
+      "scan_verdict": "dangerous",
+      "content_hash": "sha256:2929e0dd20148d74",
+      "install_path": "devops/docker-management",
+      "files": [
+        "SKILL.md"
+      ],
+      "metadata": {},
+      "scan_provenance": {
+        "source": "official",
+        "source_url": "official/devops/docker-management",
+        "bundle_hash": "sha256:2929e0dd20148d74851b6cd78aa8eef74a91482c3204dc1fbb382b8d64312dc5",
+        "scanner_version": "skills-guard-v2",
+        "verdict": "dangerous",
+        "trust_level": "builtin",
+        "findings": [
+          {
+            "pattern_id": "dns_exfil",
+            "severity": "critical",
+            "category": "exfiltration",
+            "file": "SKILL.md",
+            "line": 256,
+            "match": "| Permission denied on volume | UID/GID mismatch host vs container | Use `--user $(id -u):$(id -g)` or fix permissions |",
+            "description": "DNS lookup with variable interpolation (possible DNS exfiltration)"
+          },
+          {
+            "pattern_id": "backtick_subshell",
+            "severity": "medium",
+            "category": "execution",
+            "file": "SKILL.md",
+            "line": 256,
+            "match": "| Permission denied on volume | UID/GID mismatch host vs container | Use `--user $(id -u):$(id -g)` or fix permissions |",
+            "description": "backtick string with command substitution"
+          },
+          {
+            "pattern_id": "docker_pull",
+            "severity": "medium",
+            "category": "supply_chain",
+            "file": "SKILL.md",
+            "line": 133,
+            "match": "docker pull node:20-alpine",
+            "description": "pulls a Docker image at runtime"
+          },
+          {
+            "pattern_id": "sudo_usage",
+            "severity": "high",
+            "category": "privilege_escalation",
+            "file": "SKILL.md",
+            "line": 32,
+            "match": "- User added to the `docker` group (or use `sudo`)",
+            "description": "uses sudo (privilege escalation)"
+          }
+        ],
+        "rules": [
+          "backtick_subshell",
+          "dns_exfil",
+          "docker_pull",
+          "sudo_usage"
+        ],
+        "scanned_at": "2026-09-03T13:29:05.216346+00:00",
+        "summary": "docker-management: dangerous — 4 finding(s) in execution, exfiltration, privilege_escalation, supply_chain",
+        "fresh": true
+      },
+      "installed_at": "2026-09-03T13:29:05.226850+00:00",
+      "updated_at": "2026-09-03T13:29:05.226850+00:00"
+    },
+    "antigravity-cli": {
+      "source": "official",
+      "identifier": "official/autonomous-ai-agents/antigravity-cli",
+      "trust_level": "builtin",
+      "scan_verdict": "dangerous",
+      "content_hash": "sha256:7c5c9609254e7d2f",
+      "install_path": "autonomous-ai-agents/antigravity-cli",
+      "files": [
+        "SKILL.md",
+        "references\\cli-docs.md"
+      ],
+      "metadata": {},
+      "scan_provenance": {
+        "source": "official",
+        "source_url": "official/autonomous-ai-agents/antigravity-cli",
+        "bundle_hash": "sha256:7c5c9609254e7d2f077791f1a51340f4ade522ca9459a2fc06b38f8fbd457e90",
+        "scanner_version": "skills-guard-v2",
+        "verdict": "dangerous",
+        "trust_level": "builtin",
+        "findings": [
+          {
+            "pattern_id": "curl_pipe_shell",
+            "severity": "critical",
+            "category": "supply_chain",
+            "file": "references\\cli-docs.md",
+            "line": 9,
+            "match": "- macOS/Linux: `curl -fsSL https://antigravity.google/cli/install.sh | bash`",
+            "description": "curl piped to shell (download-and-execute)"
+          }
+        ],
+        "rules": [
+          "curl_pipe_shell"
+        ],
+        "scanned_at": "2026-09-03T13:29:06.077599+00:00",
+        "summary": "antigravity-cli: dangerous — 1 finding(s) in supply_chain",
+        "fresh": true
+      },
+      "installed_at": "2026-09-03T13:29:06.087101+00:00",
+      "updated_at": "2026-09-03T13:29:06.087101+00:00"
+    }
+  }
+}
