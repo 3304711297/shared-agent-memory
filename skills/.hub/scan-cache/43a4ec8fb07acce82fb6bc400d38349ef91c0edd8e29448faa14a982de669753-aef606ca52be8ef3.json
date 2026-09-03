@@ -1,0 +1,119 @@
+{
+  "source": "official",
+  "source_url": "official/mlops/inference/llama-cpp",
+  "bundle_hash": "sha256:43a4ec8fb07acce82fb6bc400d38349ef91c0edd8e29448faa14a982de669753",
+  "scanner_version": "skills-guard-v2",
+  "verdict": "caution",
+  "trust_level": "builtin",
+  "findings": [
+    {
+      "pattern_id": "unpinned_pip_install",
+      "severity": "medium",
+      "category": "supply_chain",
+      "file": "SKILL.md",
+      "line": 110,
+      "match": "`pip install llama-cpp-python` (CUDA: `CMAKE_ARGS=\"-DGGML_CUDA=on\" pip install llama-cpp-python --force-reinstall --n...",
+      "description": "pip install without version pinning"
+    },
+    {
+      "pattern_id": "git_clone",
+      "severity": "medium",
+      "category": "supply_chain",
+      "file": "SKILL.md",
+      "line": 69,
+      "match": "git clone https://github.com/ggml-org/llama.cpp",
+      "description": "clones a git repository at runtime"
+    },
+    {
+      "pattern_id": "python_os_environ",
+      "severity": "high",
+      "category": "exfiltration",
+      "file": "references\\advanced-usage.md",
+      "line": 470,
+      "match": "os.environ[\"CUDA_VISIBLE_DEVICES\"] = \"0,1\"",
+      "description": "accesses os.environ outside comments/docstrings (potential env dump)"
+    },
+    {
+      "pattern_id": "python_subprocess",
+      "severity": "medium",
+      "category": "execution",
+      "file": "references\\advanced-usage.md",
+      "line": 165,
+      "match": "result = subprocess.run(",
+      "description": "Python subprocess execution"
+    },
+    {
+      "pattern_id": "git_clone",
+      "severity": "medium",
+      "category": "supply_chain",
+      "file": "references\\server.md",
+      "line": 82,
+      "match": "RUN git clone https://github.com/ggerganov/llama.cpp",
+      "description": "clones a git repository at runtime"
+    },
+    {
+      "pattern_id": "unpinned_pip_install",
+      "severity": "medium",
+      "category": "supply_chain",
+      "file": "references\\troubleshooting.md",
+      "line": 37,
+      "match": "pip install cmake scikit-build-core",
+      "description": "pip install without version pinning"
+    },
+    {
+      "pattern_id": "unpinned_pip_install",
+      "severity": "medium",
+      "category": "supply_chain",
+      "file": "references\\troubleshooting.md",
+      "line": 40,
+      "match": "CMAKE_ARGS=\"-DGGML_CUDA=on\" pip install llama-cpp-python --force-reinstall --no-cache-dir",
+      "description": "pip install without version pinning"
+    },
+    {
+      "pattern_id": "unpinned_pip_install",
+      "severity": "medium",
+      "category": "supply_chain",
+      "file": "references\\troubleshooting.md",
+      "line": 43,
+      "match": "CMAKE_ARGS=\"-DGGML_METAL=on\" pip install llama-cpp-python --force-reinstall --no-cache-dir",
+      "description": "pip install without version pinning"
+    },
+    {
+      "pattern_id": "unpinned_pip_install",
+      "severity": "medium",
+      "category": "supply_chain",
+      "file": "references\\troubleshooting.md",
+      "line": 55,
+      "match": "CUDACXX=/usr/local/cuda/bin/nvcc CMAKE_ARGS=\"-DGGML_CUDA=on\" pip install llama-cpp-python",
+      "description": "pip install without version pinning"
+    },
+    {
+      "pattern_id": "unpinned_pip_install",
+      "severity": "medium",
+      "category": "supply_chain",
+      "file": "references\\troubleshooting.md",
+      "line": 367,
+      "match": "CMAKE_ARGS=\"-DGGML_METAL=on\" pip install llama-cpp-python --force-reinstall",
+      "description": "pip install without version pinning"
+    },
+    {
+      "pattern_id": "sudo_usage",
+      "severity": "high",
+      "category": "privilege_escalation",
+      "file": "references\\troubleshooting.md",
+      "line": 22,
+      "match": "sudo apt install nvidia-cuda-toolkit",
+      "description": "uses sudo (privilege escalation)"
+    }
+  ],
+  "rules": [
+    "git_clone",
+    "python_os_environ",
+    "python_subprocess",
+    "sudo_usage",
+    "unpinned_pip_install"
+  ],
+  "scanned_at": "2026-09-03T13:34:16.286329+00:00",
+  "summary": "llama-cpp: caution \u2014 11 finding(s) in execution, exfiltration, privilege_escalation, supply_chain",
+  "fresh": true
+}

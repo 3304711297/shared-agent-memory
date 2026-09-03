@@ -1,0 +1,25 @@
+{
+  "source": "official",
+  "source_url": "official/devops/watchers",
+  "bundle_hash": "sha256:bb92ebdc4f387bf140f75a8f2f7140538101ba9574bf5b332d440cac4a44be3b",
+  "scanner_version": "skills-guard-v2",
+  "verdict": "safe",
+  "trust_level": "builtin",
+  "findings": [
+    {
+      "pattern_id": "python_environ_get_secret",
+      "severity": "medium",
+      "category": "exfiltration",
+      "file": "scripts\\watch_github.py",
+      "line": 118,
+      "match": "token = os.environ.get(\"GITHUB_TOKEN\") or os.environ.get(\"GH_TOKEN\")",
+      "description": "reads secret via os.environ.get() (normal API-key access; informational)"
+    }
+  ],
+  "rules": [
+    "python_environ_get_secret"
+  ],
+  "scanned_at": "2026-09-03T13:34:12.816299+00:00",
+  "summary": "watchers: safe \u2014 1 finding(s) in exfiltration",
+  "fresh": true
+}

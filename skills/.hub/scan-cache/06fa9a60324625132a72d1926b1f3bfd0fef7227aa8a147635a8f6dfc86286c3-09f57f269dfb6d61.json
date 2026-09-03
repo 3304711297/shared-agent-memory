@@ -1,0 +1,13 @@
+{
+  "source": "official",
+  "source_url": "official/research/domain-intel",
+  "bundle_hash": "sha256:06fa9a60324625132a72d1926b1f3bfd0fef7227aa8a147635a8f6dfc86286c3",
+  "scanner_version": "skills-guard-v2",
+  "verdict": "safe",
+  "trust_level": "builtin",
+  "findings": [],
+  "rules": [],
+  "scanned_at": "2026-09-03T13:34:17.997258+00:00",
+  "summary": "domain-intel: clean scan, no threats detected",
+  "fresh": true
+}
