@@ -1,0 +1,32 @@
+- [Auto Backup Memories to GitHub](auto-backup-memories-to-github.md) — 记忆文件变动或新增后必须自动静默提交并推送到私有仓库 shared-agent-memory（严禁等待用户提醒，无需询问用户）
+- [Adobe MCP Authentication](adobe-mcp-authentication.md) — Adobe for creativity MCP server requires OAuth authentication; 403 errors indicate missing Authorization headers
+- [Five Repo Task Book v42](five-repo-task-book-v42.md) — 五仓库任务书 v4.2（15 条）**全部完成推送、五仓 CI 全绿**；tweak 已发 **v0.2.21**（tag-only 流程三步+包内版本注入实测）；脚本猫更新检测人工验收通过；含 BOM/mkdocs-tags/lock 提锁契约与待用户拍板事项（orc dependabot.yml 等）
+- [Bilibili Great Together Project](bilibili-great-together-project.md) — make-bilibili-great-together：**v0.3.2 双形态就绪；用户日常已切换=仅 BewlyCat+mbgt 扩展（0.3.2）启用、脚本及其他全禁**（旧「userscript 启用」作废）；bump 后扩展 dist 需本地重建+developerPrivate.reload；卡片「错误」=playinfo WARN 非故障；铁律：钩子读被 mock 全局走闭包原引用
+- [User Windows Environment](user-windows-environment.md) — Windows 环境：本地代理 127.0.0.1:3067、gh 账号 3304711297、PS 5.1/7 双版本规则、浏览器是 Edge Dev、ZCode-Antigravity 桥接(18080端口，gemini-3.7-flash主控+gemini-3.1-flash-image生图Skill已跑通)
+- [Edge Dev CDP MCP Setup](edge-dev-cdp-mcp-setup.md) — 最终方案：edge://inspect 开关（持久化）+ 每浏览器会话点一次「允许」+ MCP autoConnect；工具超时=弹窗在等点；根因 zh_CN default_locale 被 Edge 153 拒 → 空降助手+青柠+小黑盒(better-XiaoHeiHe v1.2)三个解压版统一在 D:\extensions\（manifest 已 key 固定 ID + locale 改 en，无自动更新）；勿装 Tampermonkey；用户拍板只接管原封不动日常 Edge；反馈闭环：微软×2 + issue#316 + issue k1m0206/better-XiaoHeiHe#13 + B站私信（毛布斯只此一条，勿再发）
+- [Answer Every User Question](answer-every-user-question.md) — 用户逐条追踪问题，漏答或括号带过会被反复追问；回复前自查每个问题都有成段明确回答
+- [Desktop Commander Overview](desktop-commander-overview.md) — DC 与内置工具重叠高，仅四类场景必选它：大数据 REPL 分析/长跑进程盯日志/SSH 持久会话/超大目录流式搜索；一次性命令用内置即可
+- [Superpowers Usage](superpowers-usage.md) — 开发纪律套件（TDD/计划/验证），编码项目时按其流程走；运维型工作不触发，勿卸
+- [Desktop Projects Tweak Youshouldknow](desktop-projects-tweak-youshouldknow.md) — 桌面两个项目位置、GitHub 同步关系、最新提交与 lock 过期风险
+- [Chinese Commit Messages](user-pref-chinese-commits.md) — 提交信息中文偏好
+- [POW File Traceability](pow-file-traceability.md) — 电源计划文件哈希与来源可追溯性
+- [Tweak Modularization Plan](tweak-modularization-plan.md) — 单文件模块化已完成第一阶段（Loader + 7 Modules，81+2121行）
+- [Youshouldknow Modular Linkage](youshouldknow-modular-linkage.md) — 历史行号迁移及仍残留裸 :NNN 快照的审计结论
+- [Project Security Audit 2026-08-25](project-security-audit-2026-08-25.md) — 两项目高权限操作、恢复链路、CI 与跨仓库 lock 隐患；代码/供应链/文档/发布已收尾（tag-only 发版+自动 notes+CHANGELOG 已删），用户不用虚拟化功能
+- [Evidence Before Absence Claims](evidence-before-absence-claims.md) — 用户质疑"是否改了我系统"时先只读取证（PSReadLine 历史在 %APPDATA% 路径），绝不凭意图下绝对结论，错说主动收回
+- [Pester 6 Mock Pitfalls](pester6-mock-pitfalls.md) — Pester 6 命令 mock 三坑：param 条件分支不可靠改适配器注入、捕获列表用闭包变量勿用 $script:、$args 匹配要含完整路径
+- [Youshouldknow Doc Details](youshouldknow-doc-details.md) — 薄页重定向、分类索引补齐、主文加厚与显式导航；部署门禁 needs [build, link-check] 已收紧
+- [Cross-Repo Coverage Audit](cross-repo-coverage-audit.md) — Coverage 审计契约（逐份与 manifest 完全一致）；2026-08-25 审计器升级 AST 函数校验+菜单/Loader 契约，lock 严格同步策略已拍板（ysk 任何 main 提交都需提锁）
+- [GitHub Stars Organization](github-stars-organization.md) — GitHub 星标 495 个与 13 个 Lists 的分类整理任务
+- [OpenRouter Chinese Scripts Comparison](openrouter-chinese-scripts-comparison.md) — 三个 OpenRouter 汉化脚本对比与 datou1996+LynnGuo666 共存配置
+- [OpenRouter Chinese Plus Project](openrouter-chinese-plus-project.md) — 桌面 openrouter-chinese 三合一脚本项目；用户用 ScriptCat；React 拆分价格节点 DOM 特性；两轮工程复审已全部修复（30 项单测含伪 DOM 生命周期/退出码驱动重建/ourBase 统一/v1.1 SPA 路由清理）
+- [Three Project Audit 2026-08-28](three-project-audit-2026-08-28.md) — 三项目并行审查发现清单（tweak VersionConsistency CI 永远 skip/三模块缺往返测试；ysk 31 处旧基线未复核/首页漏 AI工具分类；orc 状态文件损坏会版本倒退/检查器异常被吞 CI 永绿），未修复前此清单仍有效
+- [HuggingFace Chinese Plus Project](huggingface-chinese-plus-project.md) — 桌面 huggingface-chinese 汉化脚本项目；引擎原创 GPL-3.0 + izhadu 词库自动同步；v1.0.1 已发布待真机冒烟
+- [SteamDB Chinese Plus Project](steamdb-chinese-plus-project.md) — 桌面 steamdb-chinese 汉化脚本项目；接续停更 SteamDB_CN；词库真源 Chr233/GM_Scripts(AGPL-3.0)；v1.0.1 已发布+真机冒烟通过
+- [Bilibili Enhancement Tools](bilibili-enhancement-tools.md) — B站增强三件套调研：SukkaW 反跟踪油猴脚本（安全可装）+ BewlyCat(功能向) vs AveMujica(外观向) 二选一，B站2026-01推荐API需BewlyCat≥1.5.6；源码级重叠四块+脚本独有清单+共存关模块建议
+- [Hermes Agent Install](hermes-agent-install.md) — hermes-agent v0.21.0 重装完成（2026-09-02）：git/uv 必须走 127.0.0.1:3067 代理、HERMES_HOME=LocalAppData、Studio 已弃、待用户 hermes setup 配 key
+- [Hermes Shared Memory](hermes-shared-memory.md) — hermes 通过 zcode-shared-memory skill 直接读写本记忆库；hermes 写入不提交 git，由 ZCode 负责推送
+- [Bilibili Video Transcription Pipeline](bilibili-video-transcription-pipeline.md) — B站视频→逐字稿管线（直连API防412+ffmpeg whisper small+误听对照表），脚本在 bios_knowledge/
+- [Youshouldknow BIOS Knowledge Series](youshouldknow-bios-knowledge-series.md) — ysk 新增 BIOS 选项科普系列 21 篇（2026-09-02，逐篇附出处）；gen-matrix 平台排序缺陷已修；ysk 新增页面必须重跑 gen-matrix.py
+- [Serena MCP Silent Config](serena-mcp-silent-config.md) — Serena 插件静默配置（禁用 Web Dashboard 与 GUI 日志弹窗，离线快速启动）
+- [Multi Branch Memory Backup](multi-branch-memory-backup.md) — 双 Agent 记忆多分支隔离备份规则：ZCode 推送 zcode 分支，Hermes 推送 hermes 分支

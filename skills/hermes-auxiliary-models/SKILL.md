@@ -74,13 +74,12 @@ credentials. Each auxiliary task resolves its own `provider` + `model`:
   (`unknown provider for model probe-xyz-123`), routing follows the
   config value verbatim and the problem is the value, not the
   plumbing. Restore the working model immediately after.
-- `hermes auth add` reads the key from the TTY, not stdin — piping via
-  `echo |` / `printf |` hangs at the prompt. For non-interactive adds
-  use the documented flag instead:
-  `hermes auth add <provider> --type api-key --api-key '<KEY>'.
-  `hermes auth add` without a PTY hangs with no output; always use
-  `pty=true` + poll for interactive flows, and kill it if it blocks on
-  a prompt the user cannot satisfy.
+- `hermes auth add` reads from the TTY when flags are omitted. For non-interactive adds,
+  ALWAYS provide both `--label` and `--api-key` (omitting `--label` triggers an interactive prompt and causes `EOFError` in headless subshells):
+  `hermes auth add <provider> --label "<LABEL>" --api-key "<KEY>"`
+  When running interactive OAuth/prompts, use `pty=true` + poll.
 - Never print or re-echo secrets seen in config (`api_key` values).
   Redact key/token/secret fields when inspecting `auth.json`.
-- See `references/vision-401-case.md` for a full worked example.
+- See `references/vision-401-case.md` for a full worked example of 401 keyless recovery.
+- See `references/provider-quirks-gemini-and-opencode-free.md` for Google AI Studio location restrictions, Antigravity OAuth bridge, and OpenCode Free relay 429 patterns.
+- See `references/local-custom-provider-gui-registration.md` for registering local custom providers/proxies (e.g. WorkBuddy/CodeBuddy `8787`, Antigravity `18080`) into Hermes Desktop GUI picker and CLI model aliases.
