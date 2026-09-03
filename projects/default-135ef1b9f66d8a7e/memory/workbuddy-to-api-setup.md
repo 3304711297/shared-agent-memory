@@ -1,6 +1,6 @@
 ---
 name: workbuddy-to-api-setup
-description: 本地部署的 workbuddy_to_api 桥接服务（将 D:\workbuddy 的模型转换为 OpenAI/Anthropic 兼容 API）
+description: 本地部署的 WorkBuddy 模型桥接服务与 Hermes Agent 接入配置（支持 hy4-preview、glm-5.3、kimi-k3 等模型）
 metadata:
   node_type: memory
   type: project
@@ -8,23 +8,26 @@ metadata:
 ---
 
 ## 项目与服务概况
-- **仓库位置**：`D:\ai coding\workbuddy_to_api`（源于 `https://github.com/yxxawa/workbuddy_to_api`）
-- **WorkBuddy 客户端安装路径**：`D:\workbuddy\WorkBuddy.exe`
-- **CLI 核心脚本**：`D:\workbuddy\resources\app.asar.unpacked\cli\bin\codebuddy`
-- **本地配置文件**：`D:\ai coding\workbuddy_to_api\.env`
+- **WorkBuddy 客户端路径**：`D:\workbuddy\WorkBuddy.exe`
+- **CLI 核心与配置**：`D:\workbuddy\resources\app.asar.unpacked\cli\product.json`
+- **桌面端登录凭据位置**：`%LOCALAPPDATA%\CodeBuddyExtension\Data\Public\auth\workbuddy-desktop.info`
 
-## API 服务参数
-- **监听端口**：`http://127.0.0.1:3000`
-- **OpenAI 兼容 Base URL**：`http://127.0.0.1:3000/v1`
-- **Anthropic 兼容 Base URL**：`http://127.0.0.1:3000`
-- **API Key**：`local`
-- **支持模型**：共 49 个模型，包括 `auto`（智能推荐）、`glm-5.3`、`kimi-k3-1`、`minimax-m3`、`deepseek-v4-pro`、`glm-5v-turbo` 等。
-- **管理面板**：`http://127.0.0.1:3000/admin`（输入 API Key `local` 解锁，支持签到、额度查看、倍率表与调用日志）。
+## 桥接方案 1：Hermes 专用直连适配器（codebuddy2openai，8787 端口）
+- **代码目录**：`C:\Users\VOS-User\AppData\Local\hermes\codebuddy2openai`
+- **监听端点**：`http://127.0.0.1:8787/v1`（OpenAI 兼容协议，原生支持 Tool Calling / 流式 SSE）
+- **核心原理**：直接读取本地登录态凭据透传至腾讯后端 `copilot.tencent.com/v2/chat/completions`，无需付费版 Web API Key。
+- **启动脚本**：
+  - 后台静默启动：`C:\Users\VOS-User\AppData\Local\hermes\codebuddy2openai\start_silent.vbs`
+  - 终端运行脚本：`C:\Users\VOS-User\AppData\Local\hermes\codebuddy2openai\start_workbuddy_proxy.bat`
+- **Hermes 接入状态**：
+  - `custom_providers` 已注册 `WorkBuddy (127.0.0.1:8787)`
+  - 模型别名：`/model workbuddy`（自动）、`/model hy4-preview` / `/model hy4`（混元4代）、`/model hy3`、`/model workbuddy-glm53`、`/model workbuddy-kimi3` 等。
+- **已实测验证可用模型（15个）**：`auto`、`hy4-preview`、`hy3`、`glm-5.3`、`glm-5.3-flash`、`glm-5.2`、`glm-5.1`、`glm-5v-turbo`、`kimi-k3`、`kimi-k2.7`、`kimi-k2.6`、`kimi-k2.5`、`deepseek-v4-pro`、`deepseek-v4-flash`、`minimax-m3`。
 
-## 服务控制命令
-- **后台启动**：`cd "D:\ai coding\workbuddy_to_api"; python .\workbuddy_to_api.py --background`
-- **查看状态**：`cd "D:\ai coding\workbuddy_to_api"; python .\workbuddy_to_api.py --status`
-- **停止服务**：`cd "D:\ai coding\workbuddy_to_api"; python .\workbuddy_to_api.py --stop --api-key local`
+## 桥接方案 2：通用代理（workbuddy_to_api，3000 端口）
+- **仓库位置**：`D:\ai coding\workbuddy_to_api`
+- **监听端口**：`http://127.0.0.1:3000/v1`（OpenAI）、`http://127.0.0.1:3000`（Anthropic）
+- **管理面板**：`http://127.0.0.1:3000/admin`（Key: `local`）
 
-**Why:** 用户希望在 ZCode 及各种 AI 编程工具中无缝使用 WorkBuddy 的模型能力。
-**How to apply:** 只要用户需要使用 WorkBuddy 模型，确保后台服务在 3000 端口运行，客户端填入 `http://127.0.0.1:3000/v1`，API Key 填 `local`，模型填 `auto` 即可。
+**Why:** 用户希望在 Hermes Agent 及 ZCode 等多工具中无缝复用 WorkBuddy 订阅的大模型与编程能力。
+**How to apply:** 在 Hermes 中直接使用 `/model hy4-preview` 或切换至 `WORKBUDDY (127.0.0.1:8787)` 分组；确保 `converter.py` 后台进程运行（开机可执行 `start_silent.vbs`）。
