@@ -8,11 +8,20 @@
 !SOUL.md
 !.gitignore
 
-# 跟踪技能与桌面插件
+# 跟踪技能与插件库
 !skills/
 !skills/**
+!plugins/
+!plugins/**
 !desktop-plugins/
 !desktop-plugins/**
+
+# 忽略临时缓存与构建产物
+__pycache__/
+*.pyc
+node_modules/
+.pytest_cache/
+.coverage
 
 # 严禁跟踪敏感文件与运行时数据
 .env*

@@ -1,0 +1,17 @@
+{
+  "serena": {
+    "command": "uvx",
+    "args": [
+      "--from",
+      "serena-agent",
+      "serena",
+      "start-mcp-server",
+      "--enable-web-dashboard",
+      "false",
+      "--open-web-dashboard",
+      "false",
+      "--enable-gui-log-window",
+      "false"
+    ]
+  }
+}

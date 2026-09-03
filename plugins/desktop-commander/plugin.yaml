@@ -1,0 +1,19 @@
+name: desktop-commander
+version: 0.2.0
+description: MCP server for terminal commands, process management, and file operations across text files, code, PDF, DOCX, Excel
+author: Desktop Commander
+skills:
+  - ./skills/terminal
+  - ./skills/ai-tools-setup
+  - ./skills/computer-health-check
+  - ./skills/desktop-commander-overview
+  - ./skills/knowledge-base
+  - ./skills/obsidian-vault
+mcp_servers:
+  desktop-commander:
+    command: cmd
+    args:
+      - /c
+      - npx
+      - -y
+      - "@wonderwhy-er/desktop-commander@latest"
