@@ -1,0 +1,1 @@
+Hermes default 档案已统一为聊天模型：model.default=muse-spark-1.3-contributor-free、model.provider=opencode-free（model.base_url 已 unset，走 provider 自带），新会话默认即此。图片解析仍只能走 auxiliary.vision=custom:local+gemini-3.7-flash：opencode-free 是 keyless 中继，vision 调用链发出的 bearer 被其中继 401 拒绝（muse-spark 与 laguna-s-2.1-free 均实测 401），本地代理 13 个模型里也没有 muse-spark，故 vision 无法统一。

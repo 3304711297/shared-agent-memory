@@ -1,0 +1,1 @@
+User communicates in Chinese; reply in Chinese by default.

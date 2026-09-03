@@ -1,0 +1,27 @@
+# 默认忽略所有
+*
+
+# 仅跟踪记忆目录与核心设定
+!memories/
+!memories/MEMORY.md
+!memories/USER.md
+!SOUL.md
+!.gitignore
+
+# 跟踪技能
+!skills/
+!skills/**
+
+# 严禁跟踪敏感文件与运行时数据
+.env*
+auth.json
+*.lock
+*.db*
+*.log
+audio_cache/
+cache/
+logs/
+sessions/
+tmp/
+hermes-agent/
+profiles/
