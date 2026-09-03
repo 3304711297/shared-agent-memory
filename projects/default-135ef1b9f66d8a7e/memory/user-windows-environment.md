@@ -48,6 +48,12 @@ metadata:
 - 用户通过 **ZCode-Antigravity**（Hhz0823/ZCode-Antigravity）接入 Gemini / Claude 等模型
 - 桥接进程：`cli-proxy-api.exe`，本地监听 `http://127.0.0.1:18080`，配置文件位于 `C:\Users\VOS-User\AppData\Local\ZCodeAntigravity\config.yaml`（API key 在 `api-keys:` 列表）
 - 提供模型：`gemini-3.7-flash`（主控对话）、`gemini-3.1-flash-image`（图像生成/Nano Banana 2）、`gemini-web-search`、`claude-sonnet-4-6` 等
+- **模型配置（2026-09-03）**：
+  - 桥接端已恢复为官方标准模型映射（不进行 3.8 借壳映射）：
+    - `gemini-3.7-flash` -> `gemini-3.7-flash-high`
+    - `gemini-3.6-flash` -> `gemini-3.6-flash-high`
+    - `gemini-web-search` -> `gemini-3.1-flash-lite`
+  - ZCode 与桥接端模型列表保持一致干净。
 - **用户全局 Skills**（位于 `C:\Users\VOS-User\.zcode\skills\`）：
   1. `gemini-image-gen`：请求本地 `http://127.0.0.1:18080/v1/chat/completions` 调用 `gemini-3.1-flash-image` 生图并保存至 `generated_images/`
   2. `frontend-design`：现代高审美 UI 设计规范（Tailwind / 现代排版）
@@ -57,7 +63,11 @@ metadata:
   6. `semantic-release-pro`：语义化 Commit、SemVer 计算与 Changelog 生成规范
 - **ZCode 记忆持久化云端备份**：私有仓库 `https://github.com/3304711297/zcode-memories`（Private），本地 `~/.zcode/cli/memories/` 已初始化并关联推送；带 `backup-memories.cmd`，已建立"记忆变动自动静默备份"铁律机制。
 
-**Related:** [[adobe-mcp-authentication]] [[cross-repo-coverage-audit]] [[auto-backup-memories-to-github]]
+## WorkBuddy 模型桥接
+- **WorkBuddy 客户端**：安装在 `D:\workbuddy\WorkBuddy.exe`，CLI 脚本在 `D:\workbuddy\resources\app.asar.unpacked\cli\bin\codebuddy`。
+- **workbuddy_to_api 桥接服务**：部署在 `D:\ai coding\workbuddy_to_api`，本地监听 `http://127.0.0.1:3000`（OpenAI: `/v1`，Anthropic: `/`，API Key: `local`），支持 49 个模型（默认 `auto`）。
+
+**Related:** [[adobe-mcp-authentication]] [[cross-repo-coverage-audit]] [[auto-backup-memories-to-github]] [[workbuddy-to-api-setup]]
 
 **2026-09-01 更新**：本地代理 3067 端口出现"监听但转发被重置"状态（curl --proxy 返回 000/Connection reset），同时直连 github.com 反而 200——代理可能切了 TUN/系统模式。git push 时先试直连（`git push`），直连失败再回退 `git -c http.proxy=...`，两种都要备着。
 **2026-09-02 更新**：接入 ZCode-Antigravity 本地桥（18080 端口），配置 gemini-3.1-flash-image 生图 Skill 及 5 个高质量日常开发 Skill（前端/README/爬虫/文案/发布）；全开源项目 README 现代化重构完成。
