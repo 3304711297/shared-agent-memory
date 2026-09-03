@@ -269,9 +269,39 @@
     "use_count": 0,
     "view_count": 0
   },
+  "dspy": {
+    "archived_at": null,
+    "created_at": "2026-09-03T14:00:13.059995+00:00",
+    "created_by": "installed",
+    "last_patched_at": null,
+    "last_reused_patch_generation": 0,
+    "last_used_at": null,
+    "last_viewed_at": null,
+    "patch_count": 0,
+    "patch_generation": 0,
+    "pinned": false,
+    "state": "active",
+    "use_count": 0,
+    "view_count": 0
+  },
   "duckduckgo-search": {
     "archived_at": null,
     "created_at": "2026-09-03T13:29:03.525862+00:00",
+    "created_by": "installed",
+    "last_patched_at": null,
+    "last_reused_patch_generation": 0,
+    "last_used_at": null,
+    "last_viewed_at": null,
+    "patch_count": 0,
+    "patch_generation": 0,
+    "pinned": false,
+    "state": "active",
+    "use_count": 0,
+    "view_count": 0
+  },
+  "evaluating-llms-harness": {
+    "archived_at": null,
+    "created_at": "2026-09-03T14:00:14.918050+00:00",
     "created_by": "installed",
     "last_patched_at": null,
     "last_reused_patch_generation": 0,
@@ -419,6 +449,21 @@
     "use_count": 0,
     "view_count": 0
   },
+  "huggingface-tokenizers": {
+    "archived_at": null,
+    "created_at": "2026-09-03T14:00:17.744304+00:00",
+    "created_by": "installed",
+    "last_patched_at": null,
+    "last_reused_patch_generation": 0,
+    "last_used_at": null,
+    "last_viewed_at": null,
+    "patch_count": 0,
+    "patch_generation": 0,
+    "pinned": false,
+    "state": "active",
+    "use_count": 0,
+    "view_count": 0
+  },
   "inspecting-hermes-desktop-dom": {
     "archived_at": null,
     "created_at": "2026-09-03T08:24:24.142282+00:00",
@@ -433,6 +478,21 @@
     "state": "active",
     "use_count": 1,
     "view_count": 1
+  },
+  "instructor": {
+    "archived_at": null,
+    "created_at": "2026-09-03T14:00:12.090904+00:00",
+    "created_by": "installed",
+    "last_patched_at": null,
+    "last_reused_patch_generation": 0,
+    "last_used_at": null,
+    "last_viewed_at": null,
+    "patch_count": 0,
+    "patch_generation": 0,
+    "pinned": false,
+    "state": "active",
+    "use_count": 0,
+    "view_count": 0
   },
   "llama-cpp": {
     "archived_at": null,
@@ -482,6 +542,21 @@
   "memento-flashcards": {
     "archived_at": null,
     "created_at": "2026-09-03T13:49:52.102280+00:00",
+    "created_by": "installed",
+    "last_patched_at": null,
+    "last_reused_patch_generation": 0,
+    "last_used_at": null,
+    "last_viewed_at": null,
+    "patch_count": 0,
+    "patch_generation": 0,
+    "pinned": false,
+    "state": "active",
+    "use_count": 0,
+    "view_count": 0
+  },
+  "nemo-curator": {
+    "archived_at": null,
+    "created_at": "2026-09-03T14:00:16.763038+00:00",
     "created_by": "installed",
     "last_patched_at": null,
     "last_reused_patch_generation": 0,
@@ -569,6 +644,21 @@
     "use_count": 0,
     "view_count": 0
   },
+  "qdrant": {
+    "archived_at": null,
+    "created_at": "2026-09-03T14:00:13.976296+00:00",
+    "created_by": "installed",
+    "last_patched_at": null,
+    "last_reused_patch_generation": 0,
+    "last_used_at": null,
+    "last_viewed_at": null,
+    "patch_count": 0,
+    "patch_generation": 0,
+    "pinned": false,
+    "state": "active",
+    "use_count": 0,
+    "view_count": 0
+  },
   "qmd": {
     "archived_at": null,
     "created_at": "2026-09-03T13:49:45.709381+00:00",
@@ -629,6 +719,36 @@
     "use_count": 0,
     "view_count": 0
   },
+  "segment-anything-model": {
+    "archived_at": null,
+    "created_at": "2026-09-03T14:00:15.865308+00:00",
+    "created_by": "installed",
+    "last_patched_at": null,
+    "last_reused_patch_generation": 0,
+    "last_used_at": null,
+    "last_viewed_at": null,
+    "patch_count": 0,
+    "patch_generation": 0,
+    "pinned": false,
+    "state": "active",
+    "use_count": 0,
+    "view_count": 0
+  },
+  "serving-llms-vllm": {
+    "archived_at": null,
+    "created_at": "2026-09-03T14:00:11.187192+00:00",
+    "created_by": "installed",
+    "last_patched_at": null,
+    "last_reused_patch_generation": 0,
+    "last_used_at": null,
+    "last_viewed_at": null,
+    "patch_count": 0,
+    "patch_generation": 0,
+    "pinned": false,
+    "state": "active",
+    "use_count": 0,
+    "view_count": 0
+  },
   "setup-wizard-generator": {
     "archived_at": null,
     "created_at": "2026-09-03T13:49:44.002164+00:00",
@@ -650,14 +770,14 @@
     "created_by": null,
     "last_patched_at": null,
     "last_reused_patch_generation": 0,
-    "last_used_at": "2026-09-03T13:43:11.820331+00:00",
-    "last_viewed_at": "2026-09-03T13:43:11.818331+00:00",
+    "last_used_at": "2026-09-03T13:52:16.043039+00:00",
+    "last_viewed_at": "2026-09-03T13:52:16.041038+00:00",
     "patch_count": 0,
     "patch_generation": 0,
     "pinned": false,
     "state": "active",
-    "use_count": 19,
-    "view_count": 19
+    "use_count": 20,
+    "view_count": 20
   },
   "sherlock": {
     "archived_at": null,
@@ -707,6 +827,21 @@
   "tldraw-offline": {
     "archived_at": null,
     "created_at": "2026-09-03T13:49:38.747133+00:00",
+    "created_by": "installed",
+    "last_patched_at": null,
+    "last_reused_patch_generation": 0,
+    "last_used_at": null,
+    "last_viewed_at": null,
+    "patch_count": 0,
+    "patch_generation": 0,
+    "pinned": false,
+    "state": "active",
+    "use_count": 0,
+    "view_count": 0
+  },
+  "unsloth": {
+    "archived_at": null,
+    "created_at": "2026-09-03T14:00:10.274948+00:00",
     "created_by": "installed",
     "last_patched_at": null,
     "last_reused_patch_generation": 0,
