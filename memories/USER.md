@@ -11,3 +11,5 @@ User communicates in Chinese; reply in Chinese by default.
 持有 Google 个人 Pro 订阅（非企业/开发者付费 AI Studio）；偏好高响应速度模型，主力模型使用本地 ZCode Antigravity 桥接的 Gemini 3.7 Flash（Ultra 思考模式）。
 §
 用户偏好：高度认可并要求在面对复杂或特定领域任务时，严格优先通过相关 Skills（如 superpowers 流程规范、领域专业技能）引导思考和执行全过程。
+§
+用户铁律：面对不确定的技术细节、版本状态、命令参数或未完全验证的信息，必须严格优先联网检索（web_search/web_extract/API/官方文档）核实确凿事实，严禁主观凭空臆测或输出未经实证的内容。
