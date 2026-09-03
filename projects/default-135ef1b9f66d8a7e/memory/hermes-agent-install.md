@@ -23,6 +23,10 @@ NousResearch hermes-agent v0.21.0 于 2026-09-02 23 时重装完成并验证（d
 - **ZCode 插件与 MCP 全量生态打通（2026-09-03）**：
   - Hermes 原生智能体插件（`%LOCALAPPDATA%\hermes\plugins\`）规范化接入：`desktop-commander`, `superpowers`, `serena`, `context7` 4 个插件全部就绪且由 Hermes 插件系统集中管理生命周期（GUI「插件」设置页直接可视化控制）。
   - Skills 结构化分类管理（`superpowers` 11 项、`zcode-custom` 7 项；移除冗余散装 github 技能，直接使用 Hermes 内置全功能 `software-development/github` 技能）。Hermes 与 ZCode 完全共享同等工具与方法论能力。
+- **Hermes 检查更新网络代理与 Schannel 报错修复（2026-09-03）**：
+  - 现象：Hermes GUI 弹窗「无法检查更新，请检查网络连接后重试」或 `schannel: server closed abruptly`。
+  - 根因：Windows Schannel 通过本地 HTTP 代理握手易重置 + Git 全局/仓库未绑定代理 + 用户环境变量缺失。
+  - 修复：①`git config --global http.sslBackend openssl`（切换 OpenSSL 后端防 TLS RST）；②`hermes-agent` 仓库配置 `http.proxy http://127.0.0.1:3067`；③设置 Windows 用户环境变量 `HTTP(S)_PROXY=http://127.0.0.1:3067`。实测 `hermes update --check` 100% 成功。
 
 **Why:** 安装两次失败均因 git/uv 不走系统代理，且坏了的旧 checkout 会被安装器整目录移走导致运行时丢失；记住这些可避免重复踩坑。
 **How to apply:** 任何 hermes 安装/更新/克隆 GitHub 的命令前先 export 代理变量；检查 hermes 状态看 logs\gateway.log 与 gateway_state.json（进程核对 tasklist）。相关：[[user-windows-environment]]
