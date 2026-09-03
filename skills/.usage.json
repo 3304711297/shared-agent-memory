@@ -50,14 +50,14 @@
     "created_by": null,
     "last_patched_at": null,
     "last_reused_patch_generation": 0,
-    "last_used_at": "2026-09-03T13:03:33.903286+00:00",
-    "last_viewed_at": "2026-09-03T13:03:33.901286+00:00",
+    "last_used_at": "2026-09-03T13:10:58.962573+00:00",
+    "last_viewed_at": "2026-09-03T13:10:58.960573+00:00",
     "patch_count": 0,
     "patch_generation": 0,
     "pinned": false,
     "state": "active",
-    "use_count": 15,
-    "view_count": 15
+    "use_count": 17,
+    "view_count": 17
   },
   "hermes-auxiliary-models": {
     "archived_at": null,
@@ -95,14 +95,14 @@
     "created_by": null,
     "last_patched_at": null,
     "last_reused_patch_generation": 0,
-    "last_used_at": "2026-09-03T13:00:54.683943+00:00",
-    "last_viewed_at": "2026-09-03T13:00:54.682442+00:00",
+    "last_used_at": "2026-09-03T13:21:27.949461+00:00",
+    "last_viewed_at": "2026-09-03T13:21:27.947461+00:00",
     "patch_count": 0,
     "patch_generation": 0,
     "pinned": false,
     "state": "active",
-    "use_count": 13,
-    "view_count": 13
+    "use_count": 15,
+    "view_count": 15
   },
   "smart-web-crawler": {
     "archived_at": null,
