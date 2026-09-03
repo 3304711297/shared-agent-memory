@@ -1,3 +1,4 @@
+- [Plugin Custom Config Protection](plugin-custom-config-protection.md) — 本地核心插件 Windows 环境适配（cmd /c 启动命令）与 Serena 静默参数配置保护规范，严禁上游直接覆盖
 - [Superpowers and Software Development Separation](superpowers-and-software-development-separation.md) — Superpowers（方法论与流程门禁）与 Software-Development（工程工具与语言调试）技能分类的同名冲突历史（Commit cddb3d5 清理重复项与嵌套）及权责分工规范
 - [Hermes Skills and MCP Optimization 2026-09-03](hermes-skills-and-mcp-optimization-2026-09-03.md) — 2026-09-03 技能库深度清理去重、41 项免费开源核心技能安装与 Whisper small 偏好对齐全景记录
 - [Auto Backup Memories to GitHub](auto-backup-memories-to-github.md) — 记忆文件变动或新增后必须自动静默提交并推送到私有仓库 shared-agent-memory（严禁等待用户提醒，无需询问用户）
