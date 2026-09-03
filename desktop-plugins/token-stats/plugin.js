@@ -1,10 +1,11 @@
 /**
  * Hermes Desktop Plugin: token-stats
- * 实时监控当前会话的输入/输出 Token、上下文用量、平均速率 (t/s) 及 API 统计。
+ * 智能区分【单轮即时 Token/速率】与【整场会话累计】，对齐 Antigravity 网关统计口径。
  */
 
 import { cn, haptic, host, Tip, useValue } from '@hermes/plugin-sdk'
 import { jsx, jsxs } from 'react/jsx-runtime'
+import { useEffect, useRef, useState } from 'react'
 
 const ID = 'token-stats'
 
@@ -20,29 +21,57 @@ function TokenStatsChip() {
   const busy = useValue(host.state.busy)
   const model = useValue(host.state.model)
 
-  const input = usage?.input ?? 0
-  const output = usage?.output ?? 0
-  const total = usage?.total ?? (input + output)
   const calls = usage?.calls ?? 0
-  const tps = usage?.avg_tps ? Math.round(usage.avg_tps) : null
+  const sessionInput = usage?.input ?? 0
+  const sessionOutput = usage?.output ?? 0
+  const sessionTotal = usage?.total ?? (sessionInput + sessionOutput)
   const contextUsed = usage?.context_used ?? null
   const contextMax = usage?.context_max ?? null
   const contextPct = usage?.context_percent != null ? Math.round(usage.context_percent) : null
+  const tps = usage?.avg_tps ? Math.round(usage.avg_tps) : null
   const cacheHit = usage?.cache_hit_pct != null ? Math.round(usage.cache_hit_pct) : null
 
-  const tipText = [
-    `📊 会话 Token 统计 [${model || '默认模型'}]`,
-    `📥 输入 (Prompt): ${input.toLocaleString()} tokens`,
-    `📤 输出 (Completion): ${output.toLocaleString()} tokens`,
-    `🔄 总计 (Total): ${total.toLocaleString()} tokens`,
-    contextUsed != null && contextMax != null ? `🧠 上下文用量: ${contextUsed.toLocaleString()} / ${contextMax.toLocaleString()} (${contextPct}%)` : null,
-    tps ? `⚡ 响应速率: ~${tps} tokens/s` : null,
-    cacheHit ? `⚡ 提示词缓存命中: ${cacheHit}%` : null,
-    `📞 交互轮次 (API Calls): ${calls} 次`
+  // 跟踪单轮增量 (Last Turn Output)
+  const prevOutputRef = useRef(sessionOutput)
+  const prevCallsRef = useRef(calls)
+  const [lastTurnOutput, setLastTurnOutput] = useState(0)
+
+  useEffect(() => {
+    if (calls > prevCallsRef.current) {
+      const delta = Math.max(0, sessionOutput - prevOutputRef.current)
+      if (delta > 0) {
+        setLastTurnOutput(delta)
+      }
+      prevOutputRef.current = sessionOutput
+      prevCallsRef.current = calls
+    } else if (calls === 0 || sessionOutput < prevOutputRef.current) {
+      prevOutputRef.current = sessionOutput
+      prevCallsRef.current = calls
+      setLastTurnOutput(0)
+    }
+  }, [calls, sessionOutput])
+
+  const displayTurnOutput = lastTurnOutput > 0 ? lastTurnOutput : (calls === 1 ? sessionOutput : null)
+
+  const tipLines = [
+    `📊 【${model || 'Gemini 3.7 Flash'}】用量统计`,
+    `────────────────────────`,
+    `⚡ 【当前单轮 (Last Turn)】`,
+    displayTurnOutput != null ? `  • 本轮输出 (Recent Output): ${displayTurnOutput.toLocaleString()} tok` : null,
+    contextUsed != null ? `  • 本轮输入上下文 (Prompt): ${contextUsed.toLocaleString()} tok` : null,
+    tps ? `  • 推理速率 (Throughput): ~${tps} tok/s` : null,
+    `────────────────────────`,
+    `📦 【会话累计 (Session Total)】`,
+    `  • 累计输入: ${sessionInput.toLocaleString()} tok`,
+    `  • 累计输出: ${sessionOutput.toLocaleString()} tok`,
+    `  • 累计总计: ${sessionTotal.toLocaleString()} tok`,
+    contextMax != null ? `  • 上下文窗口: ${contextUsed ? contextUsed.toLocaleString() : 0} / ${formatNum(contextMax)} (${contextPct || 0}%)` : null,
+    cacheHit != null ? `  • 提示词缓存命中率: ${cacheHit}%` : null,
+    `  • 交互轮次: ${calls} 次`
   ].filter(Boolean).join('\n')
 
   return jsx(Tip, {
-    label: tipText,
+    label: tipLines,
     children: jsxs('button', {
       className: cn(
         'inline-flex h-full items-center gap-1.5 px-2 text-[0.6875rem] font-mono transition-colors select-none',
@@ -54,28 +83,37 @@ function TokenStatsChip() {
         haptic?.('tap')
         host.notify({
           kind: 'info',
-          message: `当前会话: 输入 ${input.toLocaleString()} | 输出 ${output.toLocaleString()} | 总计 ${total.toLocaleString()} tokens${tps ? ` | ~${tps} t/s` : ''}`
+          message: displayTurnOutput
+            ? `当轮输出: ${displayTurnOutput} tok | 速率: ~${tps || 0} tok/s | 累计: ${formatNum(sessionTotal)} tok`
+            : `会话总计: ${formatNum(sessionTotal)} tok | 轮次: ${calls}`
         })
       },
       children: [
         jsx('span', {
-          className: 'opacity-70',
-          children: '🪙'
+          className: 'opacity-80',
+          children: '⚡'
         }),
         jsxs('span', {
-          className: 'flex items-center gap-1',
+          className: 'flex items-center gap-1.5',
           children: [
-            jsx('span', { className: 'text-(--ui-text-tertiary)', children: 'In:' }),
-            jsx('span', { className: 'font-semibold', children: formatNum(input) }),
-            jsx('span', { className: 'text-(--ui-text-tertiary)', children: 'Out:' }),
-            jsx('span', { className: 'font-semibold', children: formatNum(output) }),
-            tps ? jsxs('span', {
-              className: 'text-(--ui-accent) ml-0.5',
-              children: [tps, 't/s']
+            // 当轮输出优先显示（类似 Antigravity 的 Recent Output）
+            displayTurnOutput != null ? jsxs('span', {
+              className: 'font-semibold text-(--foreground)',
+              children: [
+                jsx('span', { className: 'text-(--ui-text-tertiary) font-normal mr-0.5', children: 'Turn:' }),
+                displayTurnOutput,
+                ' tok'
+              ]
             }) : null,
-            contextPct != null ? jsxs('span', {
-              className: 'text-(--ui-text-quaternary) ml-0.5',
-              children: ['(', contextPct, '%)']
+            // 吞吐速率
+            tps ? jsxs('span', {
+              className: 'text-(--ui-accent) font-semibold',
+              children: [tps, ' t/s']
+            }) : null,
+            // 上下文占用
+            contextUsed != null ? jsxs('span', {
+              className: 'text-(--ui-text-quaternary)',
+              children: ['[Ctx: ', formatNum(contextUsed), ']']
             }) : null
           ]
         })
