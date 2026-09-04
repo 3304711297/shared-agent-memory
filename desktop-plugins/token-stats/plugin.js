@@ -1,10 +1,20 @@
 /**
  * Hermes Desktop Plugin: antigravity-quota
- * 实时监控 Google / Antigravity 官方配额及重置倒计时（5h 重置点 / 每周完全刷新时间）。
- * 已全面升级适配 EasyCLIProxyAPI 架构，通过本地微服务直连 Google 官方配额 API。
+ * 现代化极简奢华 UI 看板：实时监控 Google / Antigravity 官方配额及精确重置倒计时。
+ * 遵循 Hermes 设计规范与现代前端美学标准，彻底消除锯齿文本与生硬折行。
  */
 
-import { cn, haptic, host, Tip, useValue } from '@hermes/plugin-sdk'
+import {
+  cn,
+  haptic,
+  host,
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+  Separator,
+  Tip,
+  useValue,
+} from '@hermes/plugin-sdk'
 import { jsx, jsxs } from 'react/jsx-runtime'
 import { useEffect, useState } from 'react'
 
@@ -25,112 +35,310 @@ function formatResetTime(isoString) {
     const remainHours = hours % 24
 
     if (days > 0) {
-      return `${days}天 ${remainHours}小时后 (${new Date(isoString).toLocaleDateString([], { month: '2-digit', day: '2-digit' })} ${new Date(isoString).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })})`
+      const dt = new Date(isoString)
+      const m = String(dt.getMonth() + 1).padStart(2, '0')
+      const d = String(dt.getDate()).padStart(2, '0')
+      const hm = dt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      return `${days}天 ${remainHours}小时后 (${m}/${d} ${hm})`
     }
     if (hours > 0) {
-      return `${hours}小时 ${minutes}分钟后 (${new Date(isoString).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })})`
+      const hm = new Date(isoString).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      return `${hours}小时 ${minutes}分钟后 (${hm})`
     }
-    return `${minutes}分钟后 (${new Date(isoString).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })})`
+    const hm = new Date(isoString).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    return `${minutes}分钟后 (${hm})`
   } catch {
     return isoString
   }
 }
 
+function getProgressColor(pct) {
+  if (pct >= 50) return 'bg-emerald-500'
+  if (pct >= 20) return 'bg-amber-500'
+  return 'bg-rose-500'
+}
+
+function getTextColor(pct) {
+  if (pct >= 50) return 'text-emerald-400'
+  if (pct >= 20) return 'text-amber-400'
+  return 'text-rose-400'
+}
+
 function AntigravityQuotaChip() {
   const busy = useValue(host.state.busy)
+  const [open, setOpen] = useState(false)
+  const [refreshing, setRefreshing] = useState(false)
 
   const [quotaData, setQuotaData] = useState({
     quota5h: 100,
     quotaWeekly: 43,
     reset5h: null,
     resetWeekly: null,
-    source: 'Google 官方直连 (EasyCLIProxyAPI)',
+    source: 'Google 官方直连',
     plan: 'Google AI Pro',
     account: 'jimygod114514@gmail.com',
     claude5h: 100,
     claudeWeekly: 100,
   })
 
-  useEffect(() => {
-    let timer = null
-
-    const fetchLiveQuota = async () => {
-      try {
-        const res = await fetch('http://127.0.0.1:18088/quota')
-        if (res.ok) {
-          const data = await res.json()
-          if (data && data.status === 'ok') {
-            setQuotaData({
-              quota5h: data.quota5h != null ? Math.round(data.quota5h) : 100,
-              quotaWeekly: data.quotaWeekly != null ? Math.round(data.quotaWeekly) : 100,
-              reset5h: data.reset5h,
-              resetWeekly: data.resetWeekly,
-              source: data.source || 'Google 官方直连 (EasyCLIProxyAPI)',
-              plan: data.plan || 'Google AI Pro',
-              account: data.account || 'jimygod114514@gmail.com',
-              claude5h: data.claudeQuota5h != null ? Math.round(data.claudeQuota5h) : 100,
-              claudeWeekly: data.claudeQuotaWeekly != null ? Math.round(data.claudeQuotaWeekly) : 100,
-            })
-          }
+  const fetchLiveQuota = async () => {
+    try {
+      setRefreshing(true)
+      const res = await fetch('http://127.0.0.1:18088/quota')
+      if (res.ok) {
+        const data = await res.json()
+        if (data && data.status === 'ok') {
+          setQuotaData({
+            quota5h: data.quota5h != null ? Math.round(data.quota5h) : 100,
+            quotaWeekly: data.quotaWeekly != null ? Math.round(data.quotaWeekly) : 100,
+            reset5h: data.reset5h,
+            resetWeekly: data.resetWeekly,
+            source: data.source || 'Google 官方直连 (EasyCLIProxyAPI)',
+            plan: data.plan || 'Google AI Pro',
+            account: data.account || 'jimygod114514@gmail.com',
+            claude5h: data.claudeQuota5h != null ? Math.round(data.claudeQuota5h) : 100,
+            claudeWeekly: data.claudeQuotaWeekly != null ? Math.round(data.claudeQuotaWeekly) : 100,
+          })
         }
-      } catch (err) {
-        // 本地服务短时重试中，保持上次已知数值
       }
+    } catch {
+      // 保持当前已知数值
+    } finally {
+      setTimeout(() => setRefreshing(false), 600)
     }
+  }
 
+  useEffect(() => {
     fetchLiveQuota()
-    timer = setInterval(fetchLiveQuota, 10000)
+    const timer = setInterval(fetchLiveQuota, 10000)
     return () => clearInterval(timer)
   }, [])
 
-  const tipLines = [
-    `🔋 【Google 官方实时额度看板】`,
-    `────────────────────────`,
-    `• Gemini 5h 剩余额度: ${quotaData.quota5h}%`,
-    `  ⏳ 5h 重置倒计时: ${formatResetTime(quotaData.reset5h)}`,
-    ``,
-    `• Gemini 本周剩余额度: ${quotaData.quotaWeekly}%`,
-    `  ⏳ 本周完全刷新: ${formatResetTime(quotaData.resetWeekly)}`,
-    quotaData.claude5h != null ? [
-      ``,
-      `• 3P (Claude/GPT) 5h: ${quotaData.claude5h}%`,
-      `• 3P (Claude/GPT) 周: ${quotaData.claudeWeekly}%`
-    ].join('\n') : null,
-    `────────────────────────`,
-    `• 账号类型: ${quotaData.plan}`,
-    `• 授权账号: ${quotaData.account}`,
-    `• 数据通道: ${quotaData.source}`,
-    `────────────────────────`,
-    `💡 提示: 上下文容量、速率及缓存命中率已由 Hermes 原生状态栏托管。`
-  ].filter(Boolean).join('\n')
-
-  return jsx(Tip, {
-    label: tipLines,
-    children: jsxs('button', {
-      className: cn(
-        'inline-flex h-full items-center gap-1.5 px-2 text-[0.6875rem] font-mono transition-colors select-none',
-        'text-(--ui-text-secondary) hover:bg-(--chrome-action-hover) hover:text-(--foreground)',
-        busy && 'text-(--ui-accent) animate-pulse'
-      ),
-      type: 'button',
-      onClick: () => {
-        haptic?.('tap')
-        host.notify({
-          kind: 'info',
-          message: `Gemini 5h额度: ${quotaData.quota5h}% (重置: ${formatResetTime(quotaData.reset5h)}) | 周额度: ${quotaData.quotaWeekly}% | 账号: ${quotaData.account}`
-        })
-      },
-      children: [
-        jsx('span', {
-          className: 'text-emerald-500 font-semibold',
-          children: `🔋 5h:${quotaData.quota5h}%`
+  return jsxs(Popover, {
+    open,
+    onOpenChange: setOpen,
+    children: [
+      jsx(Tip, {
+        label: `Google 官方配额 · 5h: ${quotaData.quota5h}% | 周: ${quotaData.quotaWeekly}% (点击展开)`,
+        children: jsx(PopoverTrigger, {
+          asChild: true,
+          children: jsxs('button', {
+            className: cn(
+              'inline-flex h-full items-center gap-1.5 px-2 text-[0.6875rem] font-mono transition-colors select-none cursor-pointer',
+              'text-(--ui-text-secondary) hover:bg-(--chrome-action-hover) hover:text-(--foreground)',
+              busy && 'text-(--ui-accent) animate-pulse',
+              open && 'bg-(--chrome-action-hover) text-(--foreground)'
+            ),
+            type: 'button',
+            onClick: () => haptic?.('tap'),
+            children: [
+              jsx('span', {
+                className: cn('font-semibold', getTextColor(quotaData.quota5h)),
+                children: `🔋 5h:${quotaData.quota5h}%`,
+              }),
+              jsxs('span', {
+                className: 'text-(--ui-text-tertiary)',
+                children: ['周:', quotaData.quotaWeekly, '%'],
+              }),
+            ],
+          }),
         }),
-        jsxs('span', {
-          className: 'text-(--ui-text-secondary)',
-          children: ['周:', quotaData.quotaWeekly, '%']
-        })
-      ]
-    })
+      }),
+
+      jsxs(PopoverContent, {
+        align: 'end',
+        side: 'top',
+        sideOffset: 8,
+        className: cn(
+          'w-84 p-4 rounded-xl border border-(--ui-stroke-secondary) bg-(--ui-bg-elevated) shadow-2xl backdrop-blur-xl',
+          'text-(--foreground) font-sans select-none flex flex-col gap-3.5 z-50'
+        ),
+        children: [
+          // 标题行
+          jsxs('div', {
+            className: 'flex items-center justify-between',
+            children: [
+              jsxs('div', {
+                className: 'flex items-center gap-2',
+                children: [
+                  jsx('div', {
+                    className:
+                      'w-2 h-2 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/50 animate-pulse',
+                  }),
+                  jsx('span', {
+                    className: 'text-xs font-semibold tracking-wide text-(--ui-text-primary)',
+                    children: 'Google 官方配额看板',
+                  }),
+                ],
+              }),
+              jsxs('div', {
+                className: 'flex items-center gap-1.5',
+                children: [
+                  jsx('span', {
+                    className:
+                      'px-1.5 py-0.5 text-[0.625rem] font-medium rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20',
+                    children: 'Pro 订阅',
+                  }),
+                  jsx('button', {
+                    type: 'button',
+                    onClick: () => {
+                      haptic?.('tap')
+                      fetchLiveQuota()
+                    },
+                    title: '刷新配额',
+                    className: cn(
+                      'p-1 text-[0.6875rem] text-(--ui-text-tertiary) hover:text-(--foreground) rounded-md transition-all',
+                      'hover:bg-(--chrome-action-hover) cursor-pointer',
+                      refreshing && 'animate-spin text-emerald-400'
+                    ),
+                    children: '🔄',
+                  }),
+                ],
+              }),
+            ],
+          }),
+
+          // 账号信息卡
+          jsxs('div', {
+            className:
+              'px-2.5 py-1.5 rounded-lg bg-black/20 border border-white/5 flex items-center justify-between text-[0.6875rem]',
+            children: [
+              jsx('span', {
+                className: 'text-(--ui-text-tertiary) truncate max-w-48',
+                children: quotaData.account,
+              }),
+              jsx('span', {
+                className: 'text-[0.625rem] text-emerald-400/90 font-mono',
+                children: '● EasyCLIProxy 直连',
+              }),
+            ],
+          }),
+
+          // 配额核心指标区
+          jsxs('div', {
+            className: 'flex flex-col gap-3 py-1',
+            children: [
+              // 5 小时额度条
+              jsxs('div', {
+                className: 'flex flex-col gap-1.5',
+                children: [
+                  jsxs('div', {
+                    className: 'flex items-center justify-between text-xs',
+                    children: [
+                      jsx('span', {
+                        className: 'text-(--ui-text-secondary) font-medium',
+                        children: 'Gemini 5h 滚动额度',
+                      }),
+                      jsxs('span', {
+                        className: cn('font-mono font-semibold', getTextColor(quotaData.quota5h)),
+                        children: [quotaData.quota5h, '%'],
+                      }),
+                    ],
+                  }),
+                  jsx('div', {
+                    className: 'h-1.5 w-full rounded-full bg-white/10 overflow-hidden',
+                    children: jsx('div', {
+                      className: cn(
+                        'h-full rounded-full transition-all duration-500',
+                        getProgressColor(quotaData.quota5h)
+                      ),
+                      style: { width: `${Math.min(100, Math.max(0, quotaData.quota5h))}%` },
+                    }),
+                  }),
+                  jsxs('div', {
+                    className: 'flex items-center justify-between text-[0.6875rem] text-(--ui-text-tertiary)',
+                    children: [
+                      jsx('span', { children: '⏳ 重置倒计时' }),
+                      jsx('span', {
+                        className: 'font-mono text-zinc-300',
+                        children: formatResetTime(quotaData.reset5h),
+                      }),
+                    ],
+                  }),
+                ],
+              }),
+
+              jsx(Separator, { className: 'bg-white/5 my-0.5' }),
+
+              // 周额度条
+              jsxs('div', {
+                className: 'flex flex-col gap-1.5',
+                children: [
+                  jsxs('div', {
+                    className: 'flex items-center justify-between text-xs',
+                    children: [
+                      jsx('span', {
+                        className: 'text-(--ui-text-secondary) font-medium',
+                        children: 'Gemini 本周总配额',
+                      }),
+                      jsxs('span', {
+                        className: cn('font-mono font-semibold', getTextColor(quotaData.quotaWeekly)),
+                        children: [quotaData.quotaWeekly, '%'],
+                      }),
+                    ],
+                  }),
+                  jsx('div', {
+                    className: 'h-1.5 w-full rounded-full bg-white/10 overflow-hidden',
+                    children: jsx('div', {
+                      className: cn(
+                        'h-full rounded-full transition-all duration-500',
+                        getProgressColor(quotaData.quotaWeekly)
+                      ),
+                      style: { width: `${Math.min(100, Math.max(0, quotaData.quotaWeekly))}%` },
+                    }),
+                  }),
+                  jsxs('div', {
+                    className: 'flex items-center justify-between text-[0.6875rem] text-(--ui-text-tertiary)',
+                    children: [
+                      jsx('span', { children: '⏳ 完全刷新' }),
+                      jsx('span', {
+                        className: 'font-mono text-zinc-300',
+                        children: formatResetTime(quotaData.resetWeekly),
+                      }),
+                    ],
+                  }),
+                ],
+              }),
+
+              // 第三方模型池 (Claude / GPT)
+              quotaData.claude5h != null &&
+                jsxs('div', {
+                  className:
+                    'mt-1 p-2 rounded-lg bg-white/5 border border-white/5 flex items-center justify-between text-[0.6875rem]',
+                  children: [
+                    jsx('span', {
+                      className: 'text-(--ui-text-secondary)',
+                      children: '3P (Claude/GPT) 协同池',
+                    }),
+                    jsxs('div', {
+                      className: 'flex items-center gap-2 font-mono',
+                      children: [
+                        jsxs('span', {
+                          className: 'text-emerald-400',
+                          children: ['5h:', quotaData.claude5h, '%'],
+                        }),
+                        jsx('span', { className: 'text-white/20', children: '|' }),
+                        jsxs('span', {
+                          className: 'text-emerald-400',
+                          children: ['周:', quotaData.claudeWeekly, '%'],
+                        }),
+                      ],
+                    }),
+                  ],
+                }),
+            ],
+          }),
+
+          jsx(Separator, { className: 'bg-white/5' }),
+
+          // 底部提示
+          jsx('div', {
+            className: 'text-[0.625rem] text-(--ui-text-tertiary) leading-tight',
+            children: '💡 提示：会话上下文容量、生成速率与缓存命中率已由 Hermes 原生状态栏托管。',
+          }),
+        ],
+      }),
+    ],
   })
 }
 
@@ -142,7 +350,7 @@ export default {
       id: 'chip',
       area: 'statusBar.right',
       order: 10,
-      render: () => jsx(AntigravityQuotaChip, {})
+      render: () => jsx(AntigravityQuotaChip, {}),
     })
-  }
+  },
 }
