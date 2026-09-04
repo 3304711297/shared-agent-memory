@@ -48,3 +48,27 @@ metadata:
 ### 3. 永久防再犯军规
 1. **彻底关闭 `browser.use_real_profile`**：设为 `false`，严禁任何自动化工具触碰或快照真实用户 Edge 数据目录。
 2. **抓取网页工具铁律**：严禁调用任何会启动独立 Chromium 窗口的 `browser_exec`，一律使用 `smart-web-crawler`（静态直连）或通过 `chrome-devtools` MCP 挂载到用户已有的 `DevToolsActivePort` 会话。
+
+---
+
+## 三、 ZCode 接入 Gemini 模型与 EasyCLIProxyAPI 客户端检测适配（2026-09-04）
+
+### 1. EasyCLIProxyAPI "未检测到客户端 / 无法启动" 根因与修复
+- **现象**：在 EasyCLIProxyAPI 桌面控制台「智能体配置」中选中 ZCode 时，提示黄色警告「只检测到配置文件，未检测到客户端」，右下角按钮显示「无法启动」。
+- **根因**：EasyCLIProxyAPI 在 Windows 上按固定规范路径探查客户端安装位置（`%LOCALAPPDATA%\Programs\ZCode\ZCode.exe` 与 `%ProgramFiles%\ZCode\ZCode.exe`），而用户的 ZCode 实际安装在 `D:\zcode\ZCode.exe`。
+- **解决**：建立目录联接（Junction）：
+  - `mklink /J "C:\Users\VOS-User\AppData\Local\Programs\ZCode" "D:\zcode"`
+  - `mklink /J "C:\Program Files\ZCode" "D:\zcode"`
+  使 EasyCLIProxyAPI 原生探查器能够直接定位并拉起 ZCode。
+
+### 2. ZCode Gemini 3.8 / 3.7 / 3.6 / 3.1 矩阵接入
+- **网关就绪**：本地 EasyCLIProxyAPI 核心（监听 `127.0.0.1:18080`）原生支持 Anthropic Messages 协议（`/v1/messages`），实测 `gemini-3.8-flash`（带 thinking 思考链）、`gemini-3.7-flash`、`gemini-3.1-pro-low` 均稳定返回 200 OK。
+- **配置持久化**：
+  - 更新全局配置 `C:\Users\VOS-User\.zcode\v2\config.json` 与工作区配置 `D:\ai coding\.zcode\v2\config.json`。
+  - 在 `zcode-antigravity-local`（Google 提供商）中注入：
+    - `gemini-3.8-flash`（优先级 200，支持思维链）
+    - `gemini-3.7-flash`（优先级 201）
+    - `gemini-3.6-flash`（优先级 202）
+    - `gemini-3.1-pro-low`（优先级 203）
+    - `gemini-web-search`（优先级 204）
+  - 在 `model-provider-display-order.json` 中将 `zcode-antigravity-local` 置顶，确保在 ZCode 的模型下拉列表中直接展示并可供选择。
