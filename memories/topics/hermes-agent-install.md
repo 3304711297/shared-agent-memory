@@ -19,6 +19,10 @@ NousResearch hermes-agent v0.21.0 于 2026-09-02 23 时重装完成并验证（d
 - ~~桌面快捷方式指 CLI~~（已改为 GUI，见上条）。
 - **浏览器控制（2026-09-03 定案）**：hermes 挂载 ZCode 同款 chrome-devtools MCP 驱动**日常 Edge**——config.yaml `mcp_servers.chrome-devtools: command cmd + args [/c, npx, -y, chrome-devtools-mcp@1.7.0, --autoConnect, --user-data-dir=<Edge Dev User Data>]`，真机验证通过（开 example.com 取标题）。Windows 下 MCP 命令用 `cmd`+`/c` 包装最稳。每个 Edge 会话浏览器内可能需点一次「允许」。**勿走 CDP 端口路线**：Chromium 136+ 对默认配置目录硬禁 --remote-debugging-port，HKCU/HKLM 的 RemoteDebuggingAllowed 与 DevToolsRemoteDebuggingAllowed=1 均解不开（已实测勿重试；策略残留注册表无害）；Edge 快捷方式补丁已还原；browser.use_real_profile 路线已弃。
 - 冒烟提示：网关就绪日志（Starting Hermes Gateway / Turn machinery warmed）写入 `%LOCALAPPDATA%\hermes\logs\gateway.log`，不进 stdout，验证时看文件别盯终端。
+- **配额监控微服务 (token-stats plugin)**：
+  - 本地微服务由 `desktop-plugins\token-stats\fetch_quota.py --serve` 驱动，监听 `127.0.0.1:18088/quota`；
+  - 若在桌面端看到「刷新配额失败：本地微服务未响应」报错，说明 18088 端口的 Python 微服务意外退出或端口挂起；
+  - 启动方式：通过 `service\quota_service.vbs` 静默后台拉起，或以 `pythonw.exe fetch_quota.py --serve` 启动。
 - **Edge 起不来=锁占用排查法（2026-09-03 实战）**：hermes 测试中断曾遗留 ①孤儿 chrome-devtools-mcp node 进程群、②无头 Playwright Chromium（进程名 chrome.exe、带真实 Edge User Data，Get-Process msedge 扫不到！）占住 `Edge Dev\User Data\lockfile` → Edge 静默秒退无窗口。修复：杀 ms-playwright/chrome-devtools-mcp 相关进程 → 删 lockfile 与 DevToolsActivePort → 重启 Edge。定位占用者用 handle.exe（live.sysinternals.com 下载，已存 D:\temp\handle.exe）。
 - **ZCode 插件与 MCP 全量生态打通（2026-09-03）**：
   - Hermes 原生智能体插件（`%LOCALAPPDATA%\hermes\plugins\`）规范化接入：`desktop-commander`, `superpowers`, `serena`, `context7` 4 个插件全部就绪且由 Hermes 插件系统集中管理生命周期（GUI「插件」设置页直接可视化控制）。
