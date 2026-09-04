@@ -113,4 +113,36 @@ metadata:
   - 标签与语法冒号（`5h:`、`周:`）弱化为次级灰色；
   - 核心百分比数值采用等宽加粗高亮与健康度动态着色（绿色/黄色/红色），大幅提升快速扫视效率。
 
+---
+
+## 六、 Hermes 与 ZCode 接入 Gemini 3.8/3.7 实战配置与 7 大避坑速查
+
+### 1. Hermes Agent 接入配置 (`~/.hermes/config.yaml`)
+- **协议**：OpenAI 兼容协议 (`api_mode: chat_completions`)；
+- **核心项**：
+  - `model.default: gemini-3.8-flash`
+  - `model.provider: cpa-gui`
+  - `model.base_url: http://127.0.0.1:18080/v1`
+  - `auxiliary.vision.model: gemini-3.8-flash`（配合 `cpa-gui`）
+  - `agent.reasoning_effort: ultra`
+  - `browser.use_real_profile: false`（防日常 Edge 扩展清空）
+  - `browser.allow_private_urls: true`（支持本地与内网网页调试）
+
+### 2. ZCode 客户端接入配置 (`~/.zcode/v2/config.json`)
+- **协议**：Anthropic Messages 协议 (`kind: "anthropic"`)；
+- **核心项**：
+  - `provider["zcode-antigravity-local"]`: `name: "Google"`, `baseURL: "http://127.0.0.1:18080"`, `apiKey: "wY5Xr4HVPT3BZivioFX2L_3XhXdFfU8QBjT_Ff4xGJ0"`；
+  - 模型字典：`gemini-3.8-flash` (优先级 200), `gemini-3.7-flash` (201), `gemini-3.1-pro-low` (203), `gemini-web-search` (204)；
+  - 置顶：在 `~/.zcode/v2/model-provider-display-order.json` 中将 `"zcode-antigravity-local"` 排在首位。
+
+### 3. 全流程避坑速查（7 大血泪教训）
+1. **裸构建丢凭据**：严禁本地裸 `go build` 覆盖官方二进制，发布期 ldflags 丢失会导致 500 后变 503 `auth_unavailable`；
+2. **客户端探查失败**：EasyCLIProxyAPI 固定探查系统盘路径，D 盘安装需建立 NTFS 目录联接（`mklink /J`）；
+3. **模型列表重复**：清理旧网关 `Local (127.0.0.1:18080)`，统一保留单实例 `cpa-gui`；
+4. **扩展注册表被清**：Hermes 开启 `browser.use_real_profile: true` 会在退出时写回无扩展配置，必须设为 `false`；
+5. **配额查询端点隔离**：Antigravity 专有配额必须请求 `daily-cloudcode-pa.googleapis.com`，而非通用 `cloudcode-pa`；
+6. **管理端口 IP 封禁**：严禁拿普通 API Key 轮询 `/v0/management/`，触发防爆破后本地 IP 会被封禁 30 分钟；
+7. **刷新交互假死感**：后端增加 `?force=1` 穿透防抖缓存，前端配备矢量旋转 Spinner、`✓ 已刷新` 胶囊变形与 Toast 弹窗反馈。
+
+
 
