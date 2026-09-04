@@ -2,13 +2,13 @@
   "status": "ok",
   "account": "jimygod114514@gmail.com",
   "plan": "Google AI Pro",
-  "quota5h": 73.5,
+  "quota5h": 64.9,
   "reset5h": "2026-09-04T11:03:50Z",
-  "quotaWeekly": 86.6,
+  "quotaWeekly": 85.2,
   "resetWeekly": "2026-09-11T01:03:50Z",
   "claudeQuota5h": 100,
   "claudeQuotaWeekly": 100,
   "source": "Google 官方直连 (EasyCLIProxyAPI)",
-  "updatedAt": "2026-09-04T06:42:10Z",
-  "updatedAtLocal": "14:42:10"
+  "updatedAt": "2026-09-04T06:53:08Z",
+  "updatedAtLocal": "14:53:08"
 }
