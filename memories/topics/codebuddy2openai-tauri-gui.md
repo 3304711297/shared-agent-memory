@@ -19,17 +19,20 @@ metadata:
 3. **内嵌资产与积分看板**：
    - 彻底将积分进度与资源包明细收拢至当前账号卡片内部，彻底消除多账号重叠与视觉污染。
    - 登录 Tab 纯粹专注扫码/手机验证码登录，不混入无关积分卡。
-4. **Agent 一键配置与修复**：
-   - 一键检测与写入 Hermes Agent：已将首选路径固定为真正的 `C:\Users\VOS-User\AppData\Local\hermes\config.yaml`（已配置 WorkBuddy 供应商与 7 个模型别名，状态正常显示为「已接入配置」绿色徽章）。
-   - 一键检测与写入 ZCode：自动在 `cli/config.json` 与 `v2/config.json` 注入 15 个模型。
-5. **内嵌 Debug 与运行日志查看器 (核心新增)**：
-   - **完全告别外部黑框**：后端服务（FastAPI/Uvicorn/Converter）的标准输出与错误流自动重定向至本地 `%LOCALAPPDATA%\codebuddy2openai\proxy_stdout.log`；
-   - **左侧独立「实时日志」Tab**：内置深色终端风格的代码阅读器，支持每 2 秒自动同步追加最新日志、支持手动「刷新日志」与「一键清空日志」，启动、请求流与报错信息在客户端内一目了然。
+4. **全量 27+ 模型矩阵与深度参数定制 (核心新增)**：
+   - **云端全量同步**：直连 WorkBuddy 官方后端 `/v2/enterprises/personal/models`，自动拉取包含 `glm-5.3`、`glm-5.3-flash`、`hy4-preview`、`hy3-x`、`kimi-k3-1`、`minimax-m3`、`deepseek-v4-pro` 等全量 28 个可用模型；
+   - **官方倍率显式展示**：每一项清晰显示官方计费倍率（如 `x0.06`、`x0.51 credits`、免费标签等）；
+   - **上下文窗口自由调节**：支持为每个模型单独输入自定义上下文 Token 限制并持久化保存，Python 反代转发时自动做上下文保护截断；
+   - **思考强度 (Reasoning Effort) 调节与关闭**：对支持思考的模型提供强度档位切换（如 `low` / `high` / `max` / `xhigh`），并支持「🚫 关闭思考」，无缝注入 `chat_template_kwargs.enable_thinking: false`，彻底还原 WorkBuddy 官方 Agent 体验。
+5. **内嵌 Debug 与运行日志查看器**：
+   - **完全告别外部黑框**：后端服务标准输出与错误流自动重定向至本地 `%LOCALAPPDATA%\codebuddy2openai\proxy_stdout.log`；
+   - **左侧独立「实时日志」Tab**：内置深色终端风格的代码阅读器，支持自动追加、手动刷新与清空。
 6. **系统托盘与关闭策略设置**：
    - 支持关闭窗口转为系统托盘后台运行（托盘左键切换显隐、右键托盘菜单打开/退出）。
    - 设置面板中提供两档选择：「最小化到系统托盘（后台继续提供 API 服务）」与「直接退出程序（自动停止服务释放端口）」，配置持久化于 `%LOCALAPPDATA%\codebuddy2openai\settings.json`。
-7. **自述文件全面重写**：
-   - `README.md` 已全面重写，剔除上游原作者内容，更新为你专属的架构设计、特性列表、Mermaid 流程图、多模型表格及客户端调用示例。
+7. **Agent 一键接入**：
+   - Hermes Agent：一键检测并注入 `AppData\Local\hermes\config.yaml`。
+   - ZCode：一键检测并注入 `cli/config.json` 与 `v2/config.json`。
 
-**Why:** 用户要求将 Debug 信息直接内嵌在控制台界面中查看，摆脱外部黑色终端窗口。
+**Why:** 用户要求模型列表全量覆盖官方模型库，并补全 WorkBuddy 核心的倍率显示、上下文限制与思考强度调节能力。
 **How to apply:** 维护 `C:\Users\VOS-User\Desktop\codebuddy2openai`，后续所有跨端 Agent 配置及客户端演进均以此架构为基准。
