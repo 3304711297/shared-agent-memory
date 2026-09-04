@@ -82,4 +82,4 @@ credentials. Each auxiliary task resolves its own `provider` + `model`:
   Redact key/token/secret fields when inspecting `auth.json`.
 - See `references/vision-401-case.md` for a full worked example of 401 keyless recovery.
 - See `references/provider-quirks-gemini-and-opencode-free.md` for Google AI Studio location restrictions, Antigravity OAuth bridge, and OpenCode Free relay 429 patterns.
-- See `references/local-custom-provider-gui-registration.md` for registering local custom providers/proxies (e.g. WorkBuddy/CodeBuddy `8787`, Antigravity `18080`) into Hermes Desktop GUI picker and CLI model aliases.
+- See `references/custom-local-provider-gui-registration.md` for registering local custom providers/proxies (WorkBuddy `8787`, EasyCLIProxyAPI `18080`), avoiding GUI duplicate model entries, multi-agent path discovery on Windows, desktop quota plugin (`token-stats`) microservice architecture & Popover/Tip UI design rules, and browser automation profile protection.
