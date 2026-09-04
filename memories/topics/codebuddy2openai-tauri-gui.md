@@ -20,13 +20,17 @@ metadata:
    - 彻底将积分进度与资源包明细收拢至当前账号卡片内部，彻底消除多账号重叠与视觉污染。
    - 登录 Tab 纯粹专注扫码/手机验证码登录，不混入无关积分卡。
 4. **Agent 一键配置与修复**：
-   - 一键检测与写入 Hermes Agent：已兼容识别 `C:\Users\VOS-User\AppData\Local\hermes\config.yaml` 真实路径，自动在 `config.yaml` 注入供应商并映射 7 个便捷模型别名。
+   - 一键检测与写入 Hermes Agent：已将首选路径固定为真正的 `C:\Users\VOS-User\AppData\Local\hermes\config.yaml`（已配置 WorkBuddy 供应商与 7 个模型别名，状态正常显示为「已接入配置」绿色徽章）。
    - 一键检测与写入 ZCode：自动在 `cli/config.json` 与 `v2/config.json` 注入 15 个模型。
-5. **系统托盘与关闭策略设置 (新增)**：
+5. **服务启动静默与 Debug 控制台灵活切换 (新增)**：
+   - **默认行为**：启动反代服务时传入 Windows `CREATE_NO_WINDOW (0x08000000)` 标志，**彻底静默无黑框弹出**。
+   - **设置控制**：在「服务设置」中提供「启动服务时显示 Debug 黑色控制台窗口」开关（默认关闭），勾选后启动即可显示前台 CMD。
+   - **即时查看**：在「服务设置」中提供「立即弹出前台 Debug 调试窗口」按钮，点击可随时单独唤出前台 CMD 查看实时 Python 日志。
+6. **系统托盘与关闭策略设置**：
    - 支持关闭窗口转为系统托盘后台运行（托盘左键切换显隐、右键托盘菜单打开/退出）。
    - 设置面板中提供两档选择：「最小化到系统托盘（后台继续提供 API 服务）」与「直接退出程序（自动停用服务释放端口）」，配置持久化于 `%LOCALAPPDATA%\codebuddy2openai\settings.json`。
-6. **自述文件焕新**：
+7. **自述文件全面重写**：
    - `README.md` 已全面重写，剔除上游原作者内容，更新为你专属的架构设计、特性列表、Mermaid 流程图、多模型表格及客户端调用示例。
 
-**Why:** 用户要求对标 EasyCLIProxyAPI 架构补全功能，摆脱原版 WorkBuddy 依赖，修复 Agent 状态检测路径，重写自述文件并增加系统托盘/关闭行为设置。
+**Why:** 用户要求修复 Hermes Agent 状态检测路径（修正为 AppData 真实有效文件），默认隐藏启动反代时的黑框窗口并增加调试窗口开关与即时弹出按钮。
 **How to apply:** 维护 `C:\Users\VOS-User\Desktop\codebuddy2openai`，后续所有跨端 Agent 配置及客户端演进均以此架构为基准。
