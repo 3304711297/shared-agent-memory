@@ -63,6 +63,11 @@ metadata:
 
 ### 2. ZCode Gemini 3.8 / 3.7 / 3.6 / 3.1 矩阵接入
 - **网关就绪**：本地 EasyCLIProxyAPI 核心（监听 `127.0.0.1:18080`）原生支持 Anthropic Messages 协议（`/v1/messages`），实测 `gemini-3.8-flash`（带 thinking 思考链）、`gemini-3.7-flash`、`gemini-3.1-pro-low` 均稳定返回 200 OK。
+- **思考强度 auto/high 深度机制（2026-09-04 终极定案，实验实证）**：
+  - **必须牢记的机制**：EasyCLIProxyAPI 的 `oauth-model-alias` 已把 `gemini-3.8-flash` **强制映射**（`force-mapping: true`）到上游 `gemini-3.8-flash-high`（模型名后缀 `-high` 即上游高思考模型）。因此**无论客户端传什么 reasoning 参数，上游永远走 high 思考**——面板里看到的 `auto` 只是**使用记录面板的显示标签**，不是真实思考强度！数据库 `usage_events.reasoning_effort` 为空时 GUI 显示 `auto`；它不反映实际推理行为。
+  - **实测铁证**：CLI `config.json` 无 reasoning 配置（"auto" 显示）时，`reasoning_tokens` 照样有 57/0/208；Hermes 传 `reasoning_effort: ultra` 的记录 `reasoning_tokens` 有 71~803。模型名后缀 `-high` 才是决定因素。
+  - **已被否决的方案（勿再尝试）**：① ZCode CLI `config.json` 给 gemini 模型加 `reasoning` 节点 → 无效（该字段对 anthropic kind 的 -high 模型无附加作用，且用户要求回滚）；② cpa-core `config.yaml` 加 `payload.default` 强制注入 `reasoning_effort: "high"` → 无效且导致模型调用失败（已回滚并重启核心）。真正链路：客户端任意 effort → `-high` 上游模型 → 强制高思考。
+  - **重启方法论**：修改 `cpa-core/config.yaml` 后必须重启核心。守护进程 EasyCLIProxyAPI.exe（GUI 壳）不会自动重启被杀的 cli-proxy-api.exe 核心；需连 GUI 壳一起 `Stop-Process` 后重新 `Popen` 启动 `EasyCLIProxyAPI.exe`（它负责拉起核心子进程）。
 - **配置持久化**：
   - 更新全局配置 `C:\Users\VOS-User\.zcode\v2\config.json` 与工作区配置 `D:\ai coding\.zcode\v2\config.json`。
   - 在 `zcode-antigravity-local`（Google 提供商）中注入：
@@ -133,10 +138,10 @@ metadata:
 - **核心项**：
   - `provider["zcode-antigravity-local"]`: `name: "Google"`, `baseURL: "http://127.0.0.1:18080"`, `apiKey: "wY5Xr4HVPT3BZivioFX2L_3XhXdFfU8QBjT_Ff4xGJ0"`；
   - 模型字典：`gemini-3.8-flash` (优先级 200), `gemini-3.7-flash` (201), `gemini-3.1-pro-low` (203), `gemini-web-search` (204)；
-  - **ZCode CLI 思考强度排查与对齐（2026-09-04）**：
+  - **ZCode CLI 思考强度排查与对齐（2026-09-04，已被后续实验修正）**：
     - 现象：ZCode 调用 `gemini-3.8-flash` 在 EasyCLIProxyAPI 后台显示思考强度为 `auto`，完成 Token 仅 70 余个，前端完全没有展开思考。
-    - 根因：Google Gemini Flash 模型的思考逻辑为「动态自适应（Dynamic Thinking）」，当请求参数为 `auto` 时，模型根据简单 Prompt 判定无需深度思维链，返回思考 Token 为 0；此前 `v2/config.json` 配置了 `reasoning.defaultVariant: high`，但 `cli/config.json` 遗漏了 `reasoning` 节点，导致 CLI 端发起请求时默认传 `auto`。
-    - 修复：在 `cli/config.json` 为 `gemini-3.8-flash`、`3.7-flash`、`3.6-flash` 补齐 `reasoning: { defaultVariant: "high", enabled: true, variants: ["low", "medium", "high"] }`，锁定 `high` 深度思考。
+    - ~~根因：cli/config.json 遗漏 reasoning 节点~~（**此判断已被推翻**：见上方「终极定案」——面板 `auto` 只是显示标签，真实思考由上游 `-high` 模型强制保证，reasoning_tokens 实测非零）。
+    - 已按用户要求回滚 cli/config.json 中临时加入的 reasoning 节点，恢复与 wb-backup-20260904 一致的原始结构。
   - 置顶：在 `~/.zcode/v2/model-provider-display-order.json` 中将 `"zcode-antigravity-local"` 排在首位。
 
 ### 3. 全流程避坑速查（7 大血泪教训）
