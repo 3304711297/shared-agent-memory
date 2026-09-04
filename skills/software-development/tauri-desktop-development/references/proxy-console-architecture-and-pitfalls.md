@@ -107,3 +107,22 @@ When translating proprietary code assistants (e.g. WorkBuddy/Copilot) into stand
 3. **Dynamic Reasoning Effort & Thinking Switch**:
    - Extract `reasoning.supportedEfforts` to populate dropdown options (`low`, `high`, `xhigh`, `max`).
    - For models where `canDisableThinking: true`, provide a `🚫 关闭思考` option that injects `chat_template_kwargs: {"enable_thinking": false}` into upstream requests.
+
+---
+
+## 5. Local Daemon / Microservice Resilience (Quota Monitor Pattern)
+
+When desktop plugins or panels depend on a background microservice running on a local loopback port (e.g. `fetch_quota.py --serve` on `127.0.0.1:18088`):
+1. **Ghost Process & Port Hang Pitfall**:
+   If an updater, agent, or user kills the microservice via PID or if the script hangs mid-request, the socket may stay in a zombie/hanging state, causing the GUI to pop up errors like `刷新配额失败：本地微服务未响应` or connection timeouts.
+2. **Deterministic Triage & Recovery**:
+   - Verify listening port and owner PID: `netstat -ano | grep <port>`
+   - Force kill stale processes holding the port or process name:
+     ```powershell
+     Stop-Process -Id <pid> -Force
+     ```
+   - Relaunch cleanly via silent `pythonw` daemon with no window:
+     ```powershell
+     pythonw.exe fetch_quota.py --serve
+     ```
+   - Validate HTTP 200 response with live payload probe (`/quota?force=1`) before reporting health.
