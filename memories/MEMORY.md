@@ -1,4 +1,4 @@
-Hermes 默认模型为 gemini-3.7-flash（提供商 custom:local-(127.0.0.1:18080)，base_url http://127.0.0.1:18080/v1），通过本地 ZCode Antigravity 桥接运行并支持 Ultra 思考模式。图片解析辅助模型为 auxiliary.vision=custom:local+gemini-3.7-flash。
+Hermes 默认主力模型为 gemini-3.8-flash，底层通过 EasyCLIProxyAPI（官方核心 v7.2.149，位于 D:\EasyCLIProxyAPI-v0.2.71-Windows-amd64，本地网关 18080）原生桥接 Antigravity；ZCode-Antigravity 桥已彻底退役。图片解析辅助模型为 auxiliary.vision=custom:local+gemini-3.7-flash。
 §
 WorkBuddy/CodeBuddy 通过本地 codebuddy2openai 桥接为 OpenAI 兼容端点（http://127.0.0.1:8787/v1），已配置模型别名 workbuddy / workbuddy-glm / workbuddy-kimi / workbuddy-deepseek / workbuddy-hy4。
 §
