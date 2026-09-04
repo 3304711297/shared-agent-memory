@@ -133,6 +133,10 @@ metadata:
 - **核心项**：
   - `provider["zcode-antigravity-local"]`: `name: "Google"`, `baseURL: "http://127.0.0.1:18080"`, `apiKey: "wY5Xr4HVPT3BZivioFX2L_3XhXdFfU8QBjT_Ff4xGJ0"`；
   - 模型字典：`gemini-3.8-flash` (优先级 200), `gemini-3.7-flash` (201), `gemini-3.1-pro-low` (203), `gemini-web-search` (204)；
+  - **ZCode CLI 思考强度排查与对齐（2026-09-04）**：
+    - 现象：ZCode 调用 `gemini-3.8-flash` 在 EasyCLIProxyAPI 后台显示思考强度为 `auto`，完成 Token 仅 70 余个，前端完全没有展开思考。
+    - 根因：Google Gemini Flash 模型的思考逻辑为「动态自适应（Dynamic Thinking）」，当请求参数为 `auto` 时，模型根据简单 Prompt 判定无需深度思维链，返回思考 Token 为 0；此前 `v2/config.json` 配置了 `reasoning.defaultVariant: high`，但 `cli/config.json` 遗漏了 `reasoning` 节点，导致 CLI 端发起请求时默认传 `auto`。
+    - 修复：在 `cli/config.json` 为 `gemini-3.8-flash`、`3.7-flash`、`3.6-flash` 补齐 `reasoning: { defaultVariant: "high", enabled: true, variants: ["low", "medium", "high"] }`，锁定 `high` 深度思考。
   - 置顶：在 `~/.zcode/v2/model-provider-display-order.json` 中将 `"zcode-antigravity-local"` 排在首位。
 
 ### 3. 全流程避坑速查（7 大血泪教训）
