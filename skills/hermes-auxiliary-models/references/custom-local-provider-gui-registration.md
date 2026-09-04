@@ -92,11 +92,51 @@ When automating web tasks or taking snapshots in Hermes on Windows:
   - Avoid `browser_exec` launching new browser instances against user profiles; prioritize `smart-web-crawler` (static direct extraction) or attaching to an existing session via `chrome-devtools-mcp` with `--autoConnect`.
 
 ## 10. Verification Before Completion & Remote CI Gating
-- **Remote CI Verification Iron Law**: When pushing commits or doc changes to any repository configured with GitHub Actions CI (e.g. `youshouldknow`, `tweakbyjie`):
+- **Remote CI Verification Iron Law**: When pushing commits or doc changes to any repository configured with GitHub Actions CI (e.g. `youshouldknow`, `tweakbyjie`, `make-bilibili-great-together`):
   - Local build passing or `git push` exiting with 0 is NOT sufficient evidence to claim completion.
   - The agent MUST actively poll or watch the remote CI pipeline (`gh run watch <run_id> --repo <repo>` or `gh run list --repo <repo>`).
   - Verify that the workflow status empirically reports `completed` and `success` (100% green).
   - Never end the turn, celebrate, or declare work complete until all remote CI workflows have verified successfully.
+
+## 11. Upstream Watch & State-in-Issue Idempotency Pattern
+When implementing or debugging automated upstream monitoring workflows (`upstream-watch.yml`) that track upstream commit SHAs via GitHub Issues (the state-in-issue pattern without external database):
+- **The Closed-State Pitfall**: Querying only open issues (`state=open&per_page=1`) to discover the previously recorded SHA breaks idempotency. When an evaluation issue is reviewed and closed, `state=open` returns empty, causing `RECORDED` SHA to reset to empty. The workflow mistakenly concludes upstream advanced and re-opens duplicate issues on every schedule run (e.g. daily false-positive alarms for the exact same commit SHA).
+- **The Robust Invariant**:
+  - Always query `state=all&per_page=1` with the specific label filter (`labels=upstream-sync`) to retrieve the last recorded SHA from the most recent issue, regardless of whether it is currently open or closed.
+  - Only when upstream HEAD SHA actually differs from `RECORDED` should the workflow advance: if an unclosed open issue exists (`state=open`), add a transitioning comment and close it, then open the new issue for the newly discovered commit range.
+
+## 12. Windows Skill Platform & Environment Gating Diagnostics
+When auditing or troubleshooting skills on Windows:
+- **Platform Filtering Invariant**: Hermes Agent inspects each skill's `SKILL.md` frontmatter. If `platforms:` lists only `[linux, macos]` without `windows`, Hermes automatically and silently filters out the skill on Windows hosts. It remains physically on disk in `skills/` but will not appear in `hermes skills list` or `<available_skills>`.
+- **Environment Scoping**: Skills declaring `environments: [kanban]` only activate inside Kanban dispatcher runs.
+- **Auditing Discrepancies**: To diagnose why disk skill counts exceed CLI enabled counts, parse the YAML frontmatter of on-disk skills to distinguish true omissions from intended platform/environment filtering.
+
+## 13. Userscript `@require` Remote Asset Failure & Manager Silent Crash Diagnostics
+When diagnosing userscripts (ScriptCat, Tampermonkey) that appear enabled in the browser extension popup (`当前页运行脚本 1/1`) but have zero effect on the page:
+- **The Silent `@require` Failure Trap**: Scripts relying on external `@require` assets (e.g. multi-megabyte dictionary files like `locals.js` hosted on `raw.githubusercontent.com`) often fail silently during installation or update in networks with DNS poisoning or CDN throttling. The script manager installs the script header successfully, but the external dependency payload is missing or empty.
+- **Silent Exception Suppression**: At runtime, the script's entry guard (e.g. `if (typeof I18N === 'undefined') throw new Error(...)`) throws immediately on line 1 of initialization. Because Chromium extension content scripts execute in an isolated sandbox where `alert()` dialogs are suppressed without rendering to the user, the script crashes silently before injecting CSS, registering menu commands, or translating DOM nodes.
+- **Empirical Diagnostic Path via CDP / DevTools**:
+  1. Inspect `document.documentElement.lang` and check whether custom styles defined by the script are present in `document.querySelectorAll('style')`.
+  2. Inspect the extension's LevelDB (`Local Extension Settings/<extension_id>`) for `compiled_resource` and cached `@require` payloads.
+  3. Check console messages for competing scripts/extensions (e.g. simultaneous auto-translators like KISS-Translator or DOM-sanitizing ad-blockers) that mutate or capture target nodes before the userscript's MutationObserver settles.
+- Resolution:
+  - Prepend a reverse proxy / mirror accelerator (e.g. `https://ghproxy.net/` or fastly jsdelivr) to the `@require` URL in the script editor and force re-fetching external resources (`工具 -> 重新获取外部资源`).
+  - Prefer using GreasyFork packaged releases where external dependencies are strictly mirrored or bundled inline.
+
+## 14. Modern Chromium MV3 UserScript Manager Global Failure & Handshake Diagnostics
+When a user reports that **all userscripts** across all websites fail to take effect despite being enabled in a Manifest V3 userscript manager (e.g. ScriptCat 1.4+, Tampermonkey 5+):
+- **Popup (N/N) Fallacy**: The popup displaying `当前页运行脚本 (1/1)` or active script chips is purely a client-side static URL regex check against `@match` patterns. It is NOT proof that the script or manager runtime was injected into the DOM.
+- **Handshake Verification**: ScriptCat injects `scriptcat-inject.js` into the MAIN world and expects a CustomEvent handshake (`requestEventFlag` -> `broadcastEventFlag` over a channel like `0be4e6a5-a95a-4982-ae64-eaed28361dfc`) with `scripting.js` in the USER_SCRIPT world before running user scripts. If dispatching `{action: "requestEventFlag"}` on that channel yields zero response, the extension's scripting runtime failed to inject.
+- **Chromium 138+ / Edge 144+ "Allow User Scripts" Switch**:
+  - In modern Chromium (e.g. Edge Dev 154), the global "Developer Mode" toggle alone is no longer sufficient.
+  - Chromium introduced a per-extension switch **"Allow user scripts" (允许用户脚本)** on the extension's Details page (`edge://extensions/?id=<extension_id>`). If disabled or uninitialized after a browser update, Chromium silently blocks `chrome.userScripts` execution without page-level warnings.
+- **MV3 Service Worker Desynchronization & Zombie State**:
+  - In MV3, background workers terminate after 30 seconds of inactivity. During browser updates, sudden restarts, or external debugging attachments (CDP), the Service Worker may fail to bind to the browser's `Extension Scripts` LevelDB upon wake-up, leaving dynamic scripts unregistered.
+- **Standard Recovery Sequence**:
+  1. Go to `edge://extensions` (or `chrome://extensions`).
+  2. Toggle the userscript manager (ScriptCat) **OFF then ON** (or click the reload icon 🔄). This kills the zombie Service Worker and forces clean re-registration of dynamic scripts via `chrome.userScripts.register()` and `chrome.scripting.registerContentScripts()`.
+  3. Open the extension's **Details** page and verify both **"Allow user scripts"** (if present) and **"Site access: On all sites"** are enabled.
+  4. Fully restart the browser process if Chromium's internal `Extension Scripts` LevelDB locks persist.
 
 
 
