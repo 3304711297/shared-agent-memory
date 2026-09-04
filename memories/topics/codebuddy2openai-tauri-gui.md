@@ -28,6 +28,7 @@ metadata:
    - 修复了 Tauri v2 默认将 `agent_type` 映射为驼峰 `agentType` 导致的命令调用参数丢失报错（双向契约兼容 snake_case 与 camelCase），一键写入与移除现已顺畅执行。
 5. **内嵌 Debug 与运行日志查看器**：
    - **完全告别外部黑框**：后端服务标准输出与错误流自动重定向至本地 `%LOCALAPPDATA%\codebuddy2openai\proxy_stdout.log`；
+   - **跨编码容错与全链路 UTF-8**：Rust 端读取日志改用 `String::from_utf8_lossy` 容错解码，彻底根治 Windows 默认 GBK 导致的 `stream did not contain valid UTF-8` 报错；同时为 Python 进程注入 `PYTHONIOENCODING=utf-8` 与 `PYTHONUTF8=1` 环境变量，确保日志输出全链路中文原生合规。
    - **左侧独立「实时日志」Tab**：内置深色终端风格的代码阅读器，支持自动追加、手动刷新与清空。
 6. **系统托盘与内核右键菜单 (对标 GUI.for.Cores / sing-box 交互风格)**：
    - 托盘右键菜单完全按照网络代理内核标准重构，包含三段式分组：
