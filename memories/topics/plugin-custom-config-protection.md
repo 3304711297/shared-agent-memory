@@ -41,4 +41,4 @@ metadata:
 - **修复**：SW 上下文 `registerContentScripts` 补注册（`persistAcrossSessions: true`）。
 - **验证（Hermes 复核 2026-09-04 晚）**：重启 Edge 后注册幸存（persistAcrossSessions 生效）；实测 GitHub（标题「我的仓库」）、Hugging Face（「模型」）、OpenRouter 汉化全部生效。
 - **复发处置**：重跑 `C:\Users\VOS-User\AppData\Local\hermes\scripts\cdp_live.py`（`check-register` / `fix-register`）。技术要点：Edge 154 的 CDP HTTP 发现端点全 404，须从 `DevToolsActivePort` 文件读 WS 地址直连 + `suppress_origin=True`；MV3 SW 约 30s 休眠，需先开 options 页唤醒。WorkBuddy 侧同款工具在 `C:\Users\VOS-User\WorkBuddy\2026-09-04-16-45-23\`（cdp.py / fix_register.py / handshake_test.py）。
-- **上游隐患**：Edge 154 isolated world 中 `chrome.extension` = undefined，脚本猫 scripting.js 顶层读 `chrome.extension.inIncognitoContext` 存在崩溃风险，建议向 scriptscat/scriptcat 反馈（连同早退守卫不校验 getRegisteredContentScripts 的问题）。
+- **上游反馈（2026-09-04 完成）**：已提 issue **https://github.com/scriptscat/scriptcat/issues/1724**：① 早退守卫仅查 userScripts 侧、未校验 getRegisteredContentScripts 是否含 scriptcat-scripting，丢失后永不自愈；② Edge 154 isolated world 中 `chrome.extension` = undefined，scripting.js 顶层读 `chrome.extension.inIncognitoContext` 存在崩溃风险。gh 添加 label 需仓库写权限（外部账号被拒），label 由维护者补。
