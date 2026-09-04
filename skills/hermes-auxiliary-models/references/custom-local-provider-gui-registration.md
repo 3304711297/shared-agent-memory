@@ -91,4 +91,12 @@ When automating web tasks or taking snapshots in Hermes on Windows:
   - Set `browser.allow_private_urls: true` when local Web development testing (`localhost`, `127.0.0.1`) is needed.
   - Avoid `browser_exec` launching new browser instances against user profiles; prioritize `smart-web-crawler` (static direct extraction) or attaching to an existing session via `chrome-devtools-mcp` with `--autoConnect`.
 
+## 10. Verification Before Completion & Remote CI Gating
+- **Remote CI Verification Iron Law**: When pushing commits or doc changes to any repository configured with GitHub Actions CI (e.g. `youshouldknow`, `tweakbyjie`):
+  - Local build passing or `git push` exiting with 0 is NOT sufficient evidence to claim completion.
+  - The agent MUST actively poll or watch the remote CI pipeline (`gh run watch <run_id> --repo <repo>` or `gh run list --repo <repo>`).
+  - Verify that the workflow status empirically reports `completed` and `success` (100% green).
+  - Never end the turn, celebrate, or declare work complete until all remote CI workflows have verified successfully.
+
+
 
