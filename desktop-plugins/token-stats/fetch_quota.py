@@ -65,7 +65,8 @@ def fetch_google_quota(force=False):
     if not token:
         return {"error": "No access_token found in auth file"}
 
-    url = "https://cloudcode-pa.googleapis.com/v1internal:retrieveUserQuotaSummary"
+    # Antigravity 实际使用的是 daily-cloudcode-pa 端点，而非通用 cloudcode-pa
+    url = "https://daily-cloudcode-pa.googleapis.com/v1internal:retrieveUserQuotaSummary"
     payload = json.dumps({"project": project_id}).encode("utf-8")
 
     proxy_handler = urllib.request.ProxyHandler({"http": PROXY_URL, "https": PROXY_URL})
