@@ -40,12 +40,12 @@ def get_auth_file():
     return None
 
 
-def fetch_google_quota():
+def fetch_google_quota(force=False):
     global _cache_data, _cache_time
     now = time.time()
 
     with _lock:
-        if _cache_data and (now - _cache_time < CACHE_TTL):
+        if not force and _cache_data and (now - _cache_time < CACHE_TTL):
             return _cache_data
 
     auth_path = get_auth_file()
@@ -140,6 +140,7 @@ def fetch_google_quota():
         "claudeQuotaWeekly": third_party_weekly,
         "source": "Google 官方直连 (EasyCLIProxyAPI)",
         "updatedAt": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        "updatedAtLocal": time.strftime("%H:%M:%S"),
     }
 
     with _lock:
@@ -165,8 +166,12 @@ class QuotaHandler(BaseHTTPRequestHandler):
         self.end_headers()
 
     def do_GET(self):
-        if self.path in ("/quota", "/api/quota", "/"):
-            data = fetch_google_quota()
+        clean_path = self.path.split("?")[0]
+        query = self.path.split("?")[1] if "?" in self.path else ""
+        force = ("force=1" in query) or ("refresh=1" in query)
+
+        if clean_path in ("/quota", "/api/quota", "/"):
+            data = fetch_google_quota(force=force)
             body = json.dumps(data, ensure_ascii=False).encode("utf-8")
             self.send_response(200)
             self.send_header("Content-Type", "application/json; charset=utf-8")

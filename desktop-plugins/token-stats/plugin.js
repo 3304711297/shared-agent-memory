@@ -2,6 +2,7 @@
  * Hermes Desktop Plugin: antigravity-quota
  * 现代化极简奢华 UI 看板：实时监控 Google / Antigravity 官方配额及精确重置倒计时。
  * 遵循 Hermes 设计规范与现代前端美学标准，彻底消除锯齿文本与生硬折行。
+ * 支持手动强制穿透刷新（带高响应动画、完成反馈与精确时间戳）。
  */
 
 import {
@@ -68,6 +69,8 @@ function AntigravityQuotaChip() {
   const busy = useValue(host.state.busy)
   const [open, setOpen] = useState(false)
   const [refreshing, setRefreshing] = useState(false)
+  const [justUpdated, setJustUpdated] = useState(false)
+  const [lastSyncTime, setLastSyncTime] = useState('')
 
   const [quotaData, setQuotaData] = useState({
     quota5h: 100,
@@ -81,10 +84,11 @@ function AntigravityQuotaChip() {
     claudeWeekly: 100,
   })
 
-  const fetchLiveQuota = async () => {
+  const fetchLiveQuota = async (isManual = false) => {
     try {
       setRefreshing(true)
-      const res = await fetch('http://127.0.0.1:18088/quota')
+      const url = isManual ? 'http://127.0.0.1:18088/quota?force=1' : 'http://127.0.0.1:18088/quota'
+      const res = await fetch(url)
       if (res.ok) {
         const data = await res.json()
         if (data && data.status === 'ok') {
@@ -99,18 +103,37 @@ function AntigravityQuotaChip() {
             claude5h: data.claudeQuota5h != null ? Math.round(data.claudeQuota5h) : 100,
             claudeWeekly: data.claudeQuotaWeekly != null ? Math.round(data.claudeQuotaWeekly) : 100,
           })
+          const syncTime =
+            data.updatedAtLocal ||
+            new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+          setLastSyncTime(syncTime)
+
+          if (isManual) {
+            setJustUpdated(true)
+            haptic?.('success') || haptic?.('tap')
+            host.notify({
+              kind: 'info',
+              message: `✅ Google 官方配额已同步 (同步于 ${syncTime})`,
+            })
+            setTimeout(() => setJustUpdated(false), 2400)
+          }
         }
       }
     } catch {
-      // 保持当前已知数值
+      if (isManual) {
+        host.notify({
+          kind: 'error',
+          message: '刷新配额失败：本地微服务未响应',
+        })
+      }
     } finally {
-      setTimeout(() => setRefreshing(false), 600)
+      setTimeout(() => setRefreshing(false), 500)
     }
   }
 
   useEffect(() => {
     fetchLiveQuota()
-    const timer = setInterval(fetchLiveQuota, 10000)
+    const timer = setInterval(() => fetchLiveQuota(false), 10000)
     return () => clearInterval(timer)
   }, [])
 
@@ -216,20 +239,56 @@ function AntigravityQuotaChip() {
                       'px-1.5 py-0.5 text-[0.625rem] font-medium rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20',
                     children: 'Pro 订阅',
                   }),
-                  jsx('button', {
-                    type: 'button',
-                    onClick: () => {
-                      haptic?.('tap')
-                      fetchLiveQuota()
-                    },
-                    title: '刷新配额',
-                    className: cn(
-                      'p-1 text-[0.6875rem] text-(--ui-text-tertiary) hover:text-(--foreground) rounded-md transition-all',
-                      'hover:bg-(--chrome-action-hover) cursor-pointer',
-                      refreshing && 'animate-spin text-emerald-400'
-                    ),
-                    children: '🔄',
-                  }),
+                  justUpdated
+                    ? jsxs('span', {
+                        className:
+                          'px-1.5 py-0.5 text-[0.625rem] font-medium rounded-md bg-emerald-500/20 text-emerald-300 flex items-center gap-1 transition-all',
+                        children: [
+                          jsx('svg', {
+                            className: 'w-2.5 h-2.5',
+                            fill: 'none',
+                            viewBox: '0 0 24 24',
+                            stroke: 'currentColor',
+                            strokeWidth: 3,
+                            children: jsx('path', {
+                              strokeLinecap: 'round',
+                              strokeLinejoin: 'round',
+                              d: 'M5 13l4 4L19 7',
+                            }),
+                          }),
+                          '已刷新',
+                        ],
+                      })
+                    : jsx('button', {
+                        type: 'button',
+                        disabled: refreshing,
+                        onClick: (e) => {
+                          e.stopPropagation()
+                          haptic?.('tap')
+                          fetchLiveQuota(true)
+                        },
+                        title: '点击强制向 Google 官方拉取最新配额',
+                        className: cn(
+                          'p-1.5 text-(--ui-text-tertiary) hover:text-(--foreground) rounded-md transition-all',
+                          'hover:bg-(--chrome-action-hover) active:scale-90 cursor-pointer flex items-center justify-center',
+                          refreshing && 'opacity-75 cursor-wait'
+                        ),
+                        children: jsx('svg', {
+                          className: cn(
+                            'w-3.5 h-3.5 transition-transform duration-300',
+                            refreshing && 'animate-spin text-emerald-400'
+                          ),
+                          fill: 'none',
+                          viewBox: '0 0 24 24',
+                          stroke: 'currentColor',
+                          strokeWidth: 2,
+                          children: jsx('path', {
+                            strokeLinecap: 'round',
+                            strokeLinejoin: 'round',
+                            d: 'M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15',
+                          }),
+                        }),
+                      }),
                 ],
               }),
             ],
@@ -241,12 +300,22 @@ function AntigravityQuotaChip() {
               'px-2.5 py-1.5 rounded-lg bg-black/20 border border-white/5 flex items-center justify-between text-[0.6875rem]',
             children: [
               jsx('span', {
-                className: 'text-(--ui-text-tertiary) truncate max-w-48',
+                className: 'text-(--ui-text-tertiary) truncate max-w-44 font-mono text-[11px]',
                 children: quotaData.account,
               }),
-              jsx('span', {
-                className: 'text-[0.625rem] text-emerald-400/90 font-mono',
-                children: '● EasyCLIProxy 直连',
+              jsxs('div', {
+                className: 'flex items-center gap-1.5 text-[0.625rem]',
+                children: [
+                  jsx('span', {
+                    className: 'text-emerald-400/90 font-mono',
+                    children: '● EasyCLIProxy 直连',
+                  }),
+                  lastSyncTime &&
+                    jsxs('span', {
+                      className: 'text-(--ui-text-quaternary) font-mono',
+                      children: ['(', lastSyncTime, ')'],
+                    }),
+                ],
               }),
             ],
           }),
