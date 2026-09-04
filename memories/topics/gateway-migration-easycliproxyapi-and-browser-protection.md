@@ -82,7 +82,7 @@ metadata:
   - 迁移至 EasyCLIProxyAPI 官方核心（7.2.149）后，官方核心无此私有接口，且使用 API Key 轮询管理接口触发了防爆破 IP 封禁。
 - **全新直连架构升级**：
   - **凭据直读**：`fetch_quota.py` 重构为直接读取 EasyCLIProxyAPI 官方凭据（`D:\EasyCLIProxyAPI\auth\antigravity-*.json`），无需 DPAPI 解密，直接获取当前活跃 Google OAuth Access Token。
-  - **直连 Google Quota API**：经本地代理 `127.0.0.1:3067` 毫秒级直连 Google 官方接口 `cloudcode-pa.googleapis.com/v1internal:retrieveUserQuotaSummary`，精准获取：
+  - **直连 Google Quota API**：经本地代理 `127.0.0.1:3067` 毫秒级直连 Google 官方接口 `https://daily-cloudcode-pa.googleapis.com/v1internal:retrieveUserQuotaSummary`（注：必须带 `daily-` 前缀，这是 Antigravity 专有配额池，若使用通用 `cloudcode-pa` 会读取到非 Antigravity 的独立配额池导致数值不一致），精准获取：
     - Gemini 5 小时额度比例及精确重置时间戳（精确到秒与本地时间倒计时）；
     - Gemini 周额度比例及完全刷新时间；
     - 3P (Claude / GPT) 5h 及周额度状态。
