@@ -13,6 +13,8 @@ metadata:
 - 两者均已改用受管 venv 解释器：`C:\Users\VOS-User\.workbuddy\binaries\python\envs\default\Scripts\python.exe converter.py --port 8787 --desensitize`
 - 项目目录：`C:\Users\VOS-User\AppData\Local\hermes\codebuddy2openai`
 
+> **⚠️ vbs 重定向坑（2026-09-04 已修）**：`WshShell.Run` 不经 cmd.exe，直接写 `python.exe ... >> log 2>&1` 会导致 `>>` 被当作字面参数、CreateProcess 静默失败——双击快捷方式毫无反应（.bat 正常，因为 cmd 原生支持重定向）。vbs 内必须包一层 `cmd /c`：`WshShell.Run "cmd /c """"...python.exe"" converter.py --port 8787 --desensitize >> proxy_stdout.log 2>&1""", 0, False`。
+
 ## 健康检查
 - `curl http://127.0.0.1:8787/health` → status ok、nickname「晚街」、token_expired=false 即正常
 - `curl http://127.0.0.1:8787/v1/models` → 完整模型列表
