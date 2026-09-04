@@ -27,6 +27,12 @@ NousResearch hermes-agent v0.21.0 于 2026-09-02 23 时重装完成并验证（d
   - 现象：Hermes GUI 弹窗「无法检查更新，请检查网络连接后重试」或 `schannel: server closed abruptly`。
   - 根因：Windows Schannel 通过本地 HTTP 代理握手易重置 + Git 全局/仓库未绑定代理 + 用户环境变量缺失。
   - 修复：①`git config --global http.sslBackend openssl`（切换 OpenSSL 后端防 TLS RST）；②`hermes-agent` 仓库配置 `http.proxy http://127.0.0.1:3067`；③设置 Windows 用户环境变量 `HTTP(S)_PROXY=http://127.0.0.1:3067`。实测 `hermes update --check` 100% 成功。
+- **Hermes 自动更新报错退出码 1 根因与修复（2026-09-04）**：
+  - 现象：Hermes Desktop 启动时弹出错误对话框：`Error: Hermes update did not finish. Update failed (exit 1)... Details: desktop-update-handoff.log`。
+  - 根因：`desktop-update-handoff` 调起的 `hermes update` 在执行 `git fetch origin main` 时，因走代理 `127.0.0.1:3067` 的公共出口 IP 对 GitHub 匿名请求过多，遭遇 GitHub HTTP 429 限流（`The requested URL returned error: 429`）。因不是 401 认证挑战，Git 不会主动调起凭据助手，直接报错退出。
+  - 修复：
+    1. 配置 `git config --global url."https://3304711297@github.com/".insteadOf "https://github.com/"`，强制所有发往 GitHub 的 Git HTTPS 请求带上 GitHub CLI 用户身份 `3304711297`，直接享有独立认证高额度，彻底规避匿名代理 IP 429 限流。
+    2. 执行 `hermes update --yes --gateway --force --branch main --keep-stash`，代码已平滑更新至最新 commit `f1ccf436a2`，前端 Web UI 构建完成，技能与网关已正常重启。
 
 **Why:** 安装两次失败均因 git/uv 不走系统代理，且坏了的旧 checkout 会被安装器整目录移走导致运行时丢失；记住这些可避免重复踩坑。
 **How to apply:** 任何 hermes 安装/更新/克隆 GitHub 的命令前先 export 代理变量；检查 hermes 状态看 logs\gateway.log 与 gateway_state.json（进程核对 tasklist）。相关：[[user-windows-environment]]
