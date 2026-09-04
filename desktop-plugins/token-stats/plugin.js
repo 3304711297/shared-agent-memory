@@ -53,14 +53,14 @@ function formatResetTime(isoString) {
 }
 
 function getProgressColor(pct) {
-  if (pct >= 50) return 'bg-emerald-500'
-  if (pct >= 20) return 'bg-amber-500'
+  if (pct >= 40) return 'bg-emerald-500'
+  if (pct >= 15) return 'bg-amber-500'
   return 'bg-rose-500'
 }
 
 function getTextColor(pct) {
-  if (pct >= 50) return 'text-emerald-400'
-  if (pct >= 20) return 'text-amber-400'
+  if (pct >= 40) return 'text-emerald-400'
+  if (pct >= 15) return 'text-amber-400'
   return 'text-rose-400'
 }
 
@@ -133,12 +133,49 @@ function AntigravityQuotaChip() {
             onClick: () => haptic?.('tap'),
             children: [
               jsx('span', {
-                className: cn('font-semibold', getTextColor(quotaData.quota5h)),
-                children: `🔋 5h:${quotaData.quota5h}%`,
+                className: 'text-[0.75rem] mr-0.5 select-none leading-none',
+                children: '🔋',
               }),
+              // 5h 维度
               jsxs('span', {
-                className: 'text-(--ui-text-tertiary)',
-                children: ['周:', quotaData.quotaWeekly, '%'],
+                className: 'inline-flex items-baseline gap-0.5',
+                children: [
+                  jsx('span', {
+                    className: 'text-[10px] font-sans font-medium text-(--ui-text-secondary)',
+                    children: '5h',
+                  }),
+                  jsx('span', {
+                    className: 'text-[10px] text-(--ui-text-quaternary) font-mono',
+                    children: ':',
+                  }),
+                  jsxs('span', {
+                    className: cn('font-mono font-bold tracking-tight', getTextColor(quotaData.quota5h)),
+                    children: [quotaData.quota5h, '%'],
+                  }),
+                ],
+              }),
+              // 维度分隔符
+              jsx('span', {
+                className: 'text-[10px] text-white/15 select-none font-mono mx-0.5',
+                children: '·',
+              }),
+              // 周 维度
+              jsxs('span', {
+                className: 'inline-flex items-baseline gap-0.5',
+                children: [
+                  jsx('span', {
+                    className: 'text-[10px] font-sans font-medium text-(--ui-text-secondary)',
+                    children: '周',
+                  }),
+                  jsx('span', {
+                    className: 'text-[10px] text-(--ui-text-quaternary) font-mono',
+                    children: ':',
+                  }),
+                  jsxs('span', {
+                    className: cn('font-mono font-bold tracking-tight', getTextColor(quotaData.quotaWeekly)),
+                    children: [quotaData.quotaWeekly, '%'],
+                  }),
+                ],
               }),
             ],
           }),
