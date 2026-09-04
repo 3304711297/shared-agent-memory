@@ -83,3 +83,4 @@ credentials. Each auxiliary task resolves its own `provider` + `model`:
 - See `references/vision-401-case.md` for a full worked example of 401 keyless recovery.
 - See `references/provider-quirks-gemini-and-opencode-free.md` for Google AI Studio location restrictions, Antigravity OAuth bridge, and OpenCode Free relay 429 patterns.
 - See `references/custom-local-provider-gui-registration.md` for registering local custom providers/proxies (WorkBuddy `8787`, EasyCLIProxyAPI `18080`), avoiding GUI duplicate model entries, multi-agent path discovery on Windows, desktop quota plugin (`token-stats`) microservice architecture & Popover/Tip UI design rules, and browser automation profile protection.
+- When committing code or docs to repositories with GitHub Actions CI, ALWAYS watch/poll the remote workflow (`gh run watch` or `gh run list`) and verify CI turns 100% green before ending the conversation.
