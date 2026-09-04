@@ -162,6 +162,11 @@ When bridging upstream AI platforms (e.g. WorkBuddy, Copilot, or multi-model pro
   2. **Context Window Sliders/Inputs**: Allow users to set per-model context token limits (e.g., 1024 to hardware max) saved in a local config (`model_settings.json`), auto-enforcing `max_tokens` clipping during proxy forwarding.
   3. **Thinking/Reasoning Mode Control**: For reasoning-capable models, dynamically populate reasoning effort options (`low`, `high`, `xhigh`, `max`) from metadata, and provide a `🚫 关闭思考` option that injects `chat_template_kwargs: {"enable_thinking": false}` into upstream requests.
 
+### 7. Local Daemon & Microservice Resilience
+When desktop plugins or panels depend on a background microservice running on a local loopback port (e.g. `fetch_quota.py --serve` on `127.0.0.1:18088`):
+- **Ghost Socket Hangs**: If a background process is terminated improperly during update cycles or file-lock clearance, Windows may leave the socket unresponsive or hung in `TIME_WAIT`/deadlock, surfacing UI alerts like `刷新配额失败：本地微服务未响应`.
+- **Clean Recovery Workflow**: Query the port owner (`netstat -ano | grep <port>`), kill lingering PIDs (`Stop-Process -Force`), relaunch via detached silent `pythonw.exe <script> --serve`, and immediately probe `/quota?force=1` for an HTTP 200 payload.
+
 ## References & Deep-Dives
 - `references/proxy-console-architecture-and-pitfalls.md` — Detailed recipes and code patterns for subprocess window suppression (`CREATE_NO_WINDOW`), full-stack UTF-8 stream decoding, 3-tier daemon tray management with bi-directional event broadcast, Tauri v2 snake_case IPC deserialization, and upstream model matrix reverse-engineering.
 
