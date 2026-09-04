@@ -33,3 +33,18 @@ metadata:
 
 ## 4. 云端自动备份与主分支
 - 所有技能安装、去重修复、README 文档与记忆变动均已 100% 同步并推送到 GitHub `3304711297/shared-agent-memory` 的 **`hermes` 默认主分支**。
+
+## 5. 2026-09-04 对比与增补审计
+
+- **技能总量核对**：
+  - 磁盘物理总数：126 个（包含 41 个开源增补与 ZCode 迁移定制技能）；
+  - 实际在册与激活：`hermes skills list` 显示 113 个启用（41 hub-installed, 52 builtin, 20 local）；
+  - 差额 13 个的机制归因：
+    - 12 个属于 Linux/macOS 专有依赖（`platforms: [linux, macos]`，如 `serving-llms-vllm`, `unsloth`, `audiocraft-audio-generation`, `searxng-search` 等），Hermes 根据 Windows 宿主环境原生机制自动安全过滤；
+    - 1 个为 Kanban 流专属技能（`sdlc-review`，`environments: [kanban]`），仅在看板派遣流中按需激活；
+  - 增补技能：新增 `obsidian`（知识库管理）与 `hermes-auxiliary-models`（辅助模型故障自愈与本地路由），状态均已完备。
+- **MCP 协议扩展（4 → 5）**：
+  - 新增在册 MCP 服务器 **`DeepWiki`**（`url: https://mcp.deepwiki.com/mcp`，提供 7 项 GitHub 仓库与架构深度知识库检索工具）；
+  - 现有在线 MCP 共 5 个：`Chrome-Devtools` (29)、`Desktop-Commander` (30)、`Serena` (33)、`Context7` (6)、`DeepWiki` (7)，共计 105 项延时加载工具能力。
+- **4 大插件状态**：`context7`, `desktop-commander`, `serena`, `superpowers` 严格锁定 Windows 启动参数与静默模式，配置未发生非受控漂移。
+
