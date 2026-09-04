@@ -34,3 +34,4 @@
 - [Youshouldknow BIOS Knowledge Series](youshouldknow-bios-knowledge-series.md) — ysk 新增 BIOS 选项科普系列 21 篇（2026-09-02，逐篇附出处）；gen-matrix 平台排序缺陷已修；ysk 新增页面必须重跑 gen-matrix.py
 - [Serena MCP Silent Config](serena-mcp-silent-config.md) — Serena 插件静默配置（禁用 Web Dashboard 与 GUI 日志弹窗，离线快速启动）
 - [Multi Branch Memory Backup](multi-branch-memory-backup.md) — 双 Agent 记忆多分支隔离备份规则：ZCode 推送 zcode 分支，Hermes 推送 hermes 分支
+- [WorkBuddy Proxy Startup](workbuddy-proxy-startup.md) — codebuddy2openai 反代（127.0.0.1:8787）启动/健康检查/排查顺序；venv 解释器已固化进启动脚本；非自启需桌面快捷方式手动拉起；venv 被清则重装 httpx fastapi uvicorn[standard]
