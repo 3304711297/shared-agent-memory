@@ -1,6 +1,7 @@
 /**
  * Hermes Desktop Plugin: antigravity-quota
  * 实时监控 Google / Antigravity 官方配额及重置倒计时（5h 重置点 / 每周完全刷新时间）。
+ * 已全面升级适配 EasyCLIProxyAPI 架构，通过本地微服务直连 Google 官方配额 API。
  */
 
 import { cn, haptic, host, Tip, useValue } from '@hermes/plugin-sdk'
@@ -8,7 +9,6 @@ import { jsx, jsxs } from 'react/jsx-runtime'
 import { useEffect, useState } from 'react'
 
 const ID = 'token-stats'
-const MANAGEMENT_KEY = 'wY5Xr4HVPT3BZivioFX2L_3XhXdFfU8QBjT_Ff4xGJ0'
 
 function formatResetTime(isoString) {
   if (!isoString) return '--'
@@ -17,7 +17,7 @@ function formatResetTime(isoString) {
     const now = Date.now()
     const diff = target - now
     if (diff <= 0) return '即将刷新'
-    
+
     const totalMinutes = Math.floor(diff / (1000 * 60))
     const hours = Math.floor(totalMinutes / 60)
     const minutes = totalMinutes % 60
@@ -25,12 +25,12 @@ function formatResetTime(isoString) {
     const remainHours = hours % 24
 
     if (days > 0) {
-      return `${days}天 ${remainHours}小时后 (${new Date(isoString).toLocaleDateString([], {month: '2-digit', day: '2-digit'})} ${new Date(isoString).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})})`
+      return `${days}天 ${remainHours}小时后 (${new Date(isoString).toLocaleDateString([], { month: '2-digit', day: '2-digit' })} ${new Date(isoString).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })})`
     }
     if (hours > 0) {
-      return `${hours}小时 ${minutes}分钟后 (${new Date(isoString).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})})`
+      return `${hours}小时 ${minutes}分钟后 (${new Date(isoString).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })})`
     }
-    return `${minutes}分钟后 (${new Date(isoString).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})})`
+    return `${minutes}分钟后 (${new Date(isoString).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })})`
   } catch {
     return isoString
   }
@@ -40,93 +40,42 @@ function AntigravityQuotaChip() {
   const busy = useValue(host.state.busy)
 
   const [quotaData, setQuotaData] = useState({
-    quota5h: 57,
-    quotaWeekly: 64,
-    reset5h: '2026-09-03T12:09:03Z',
-    resetWeekly: '2026-09-09T08:07:32Z',
-    source: '实时网关',
+    quota5h: 100,
+    quotaWeekly: 43,
+    reset5h: null,
+    resetWeekly: null,
+    source: 'Google 官方直连 (EasyCLIProxyAPI)',
     plan: 'Google AI Pro',
-    account: 'jimygod114514@gmail.com'
+    account: 'jimygod114514@gmail.com',
+    claude5h: 100,
+    claudeWeekly: 100,
   })
 
   useEffect(() => {
     let timer = null
 
     const fetchLiveQuota = async () => {
-      let q5h = null
-      let qWeek = null
-      let r5h = null
-      let rWeek = null
-      let src = '实时网关'
-      let plan = 'Google AI Pro'
-      let account = 'jimygod114514@gmail.com'
-
       try {
-        const authFilesReq = await fetch('http://127.0.0.1:18080/v0/management/auth-files', {
-          headers: { 'Authorization': `Bearer ${MANAGEMENT_KEY}` }
-        })
-        if (authFilesReq.ok) {
-          const authFiles = await authFilesReq.json()
-          const file = authFiles?.files?.find(f => f.email || f.provider === 'antigravity') || authFiles?.files?.[0]
-          if (file?.auth_index && file?.project_id) {
-            account = file.email || file.label || account
-            const callReq = await fetch('http://127.0.0.1:18080/v0/management/api-call', {
-              method: 'POST',
-              headers: {
-                'Authorization': `Bearer ${MANAGEMENT_KEY}`,
-                'Content-Type': 'application/json'
-              },
-              body: JSON.stringify({
-                auth_index: file.auth_index,
-                method: 'POST',
-                url: 'https://cloudcode-pa.googleapis.com/v1internal:retrieveUserQuotaSummary',
-                header: {
-                  'Authorization': 'Bearer $TOKEN$',
-                  'Accept': '*/*',
-                  'Content-Type': 'application/json',
-                  'User-Agent': 'antigravity/hub/2.8.1 windows/amd64'
-                },
-                data: JSON.stringify({ project: file.project_id })
-              })
+        const res = await fetch('http://127.0.0.1:18088/quota')
+        if (res.ok) {
+          const data = await res.json()
+          if (data && data.status === 'ok') {
+            setQuotaData({
+              quota5h: data.quota5h != null ? Math.round(data.quota5h) : 100,
+              quotaWeekly: data.quotaWeekly != null ? Math.round(data.quotaWeekly) : 100,
+              reset5h: data.reset5h,
+              resetWeekly: data.resetWeekly,
+              source: data.source || 'Google 官方直连 (EasyCLIProxyAPI)',
+              plan: data.plan || 'Google AI Pro',
+              account: data.account || 'jimygod114514@gmail.com',
+              claude5h: data.claudeQuota5h != null ? Math.round(data.claudeQuota5h) : 100,
+              claudeWeekly: data.claudeQuotaWeekly != null ? Math.round(data.claudeQuotaWeekly) : 100,
             })
-
-            if (callReq.ok) {
-              const callResp = await callReq.json()
-              const summary = JSON.parse(callResp.body)
-              const groups = summary?.groups || []
-              for (const g of groups) {
-                for (const b of (g.buckets || [])) {
-                  const bid = b.bucketId || ''
-                  const frac = b.remainingFraction != null ? b.remainingFraction : 1.0
-                  const pct = Math.round(frac * 100)
-                  if (bid.includes('5h') && q5h == null) {
-                    q5h = pct
-                    r5h = b.resetTime
-                  }
-                  if (bid.includes('week') && qWeek == null) {
-                    qWeek = pct
-                    rWeek = b.resetTime
-                  }
-                }
-              }
-              src = 'Antigravity 网关'
-            }
           }
         }
       } catch (err) {
-        // 网关离线时保持上次已知状态
+        // 本地服务短时重试中，保持上次已知数值
       }
-
-      setQuotaData(prev => ({
-        ...prev,
-        quota5h: q5h != null ? q5h : prev.quota5h,
-        quotaWeekly: qWeek != null ? qWeek : prev.quotaWeekly,
-        reset5h: r5h || prev.reset5h,
-        resetWeekly: rWeek || prev.resetWeekly,
-        source: src,
-        plan,
-        account
-      }))
     }
 
     fetchLiveQuota()
@@ -135,20 +84,25 @@ function AntigravityQuotaChip() {
   }, [])
 
   const tipLines = [
-    `🔋 【Google 剩余额度与重置看板】`,
+    `🔋 【Google 官方实时额度看板】`,
     `────────────────────────`,
-    `• 5 小时剩余额度: ${quotaData.quota5h}%`,
+    `• Gemini 5h 剩余额度: ${quotaData.quota5h}%`,
     `  ⏳ 5h 重置倒计时: ${formatResetTime(quotaData.reset5h)}`,
     ``,
-    `• 本周剩余额度: ${quotaData.quotaWeekly}%`,
-    `  ⏳ 本周刷新时间: ${formatResetTime(quotaData.resetWeekly)}`,
+    `• Gemini 本周剩余额度: ${quotaData.quotaWeekly}%`,
+    `  ⏳ 本周完全刷新: ${formatResetTime(quotaData.resetWeekly)}`,
+    quotaData.claude5h != null ? [
+      ``,
+      `• 3P (Claude/GPT) 5h: ${quotaData.claude5h}%`,
+      `• 3P (Claude/GPT) 周: ${quotaData.claudeWeekly}%`
+    ].join('\n') : null,
     `────────────────────────`,
     `• 账号类型: ${quotaData.plan}`,
     `• 授权账号: ${quotaData.account}`,
     `• 数据通道: ${quotaData.source}`,
     `────────────────────────`,
     `💡 提示: 上下文容量、速率及缓存命中率已由 Hermes 原生状态栏托管。`
-  ].join('\n')
+  ].filter(Boolean).join('\n')
 
   return jsx(Tip, {
     label: tipLines,
@@ -163,7 +117,7 @@ function AntigravityQuotaChip() {
         haptic?.('tap')
         host.notify({
           kind: 'info',
-          message: `5h额度: ${quotaData.quota5h}% (重置: ${formatResetTime(quotaData.reset5h)}) | 周额度: ${quotaData.quotaWeekly}%`
+          message: `Gemini 5h额度: ${quotaData.quota5h}% (重置: ${formatResetTime(quotaData.reset5h)}) | 周额度: ${quotaData.quotaWeekly}% | 账号: ${quotaData.account}`
         })
       },
       children: [
