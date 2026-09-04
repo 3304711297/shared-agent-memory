@@ -72,3 +72,21 @@ metadata:
     - `gemini-3.1-pro-low`（优先级 203）
     - `gemini-web-search`（优先级 204）
   - 在 `model-provider-display-order.json` 中将 `zcode-antigravity-local` 置顶，确保在 ZCode 的模型下拉列表中直接展示并可供选择。
+
+---
+
+## 四、 Hermes 配额监控插件 (token-stats) 全面适配升级（2026-09-04）
+
+- **旧架构缺陷**：
+  - 原插件依赖已退役的 ZCode-Antigravity 私有补丁 `/v0/management/api-call` 和 `%LOCALAPPDATA%\ZCodeAntigravity\auth`。
+  - 迁移至 EasyCLIProxyAPI 官方核心（7.2.149）后，官方核心无此私有接口，且使用 API Key 轮询管理接口触发了防爆破 IP 封禁。
+- **全新直连架构升级**：
+  - **凭据直读**：`fetch_quota.py` 重构为直接读取 EasyCLIProxyAPI 官方凭据（`D:\EasyCLIProxyAPI\auth\antigravity-*.json`），无需 DPAPI 解密，直接获取当前活跃 Google OAuth Access Token。
+  - **直连 Google Quota API**：经本地代理 `127.0.0.1:3067` 毫秒级直连 Google 官方接口 `cloudcode-pa.googleapis.com/v1internal:retrieveUserQuotaSummary`，精准获取：
+    - Gemini 5 小时额度比例及精确重置时间戳（精确到秒与本地时间倒计时）；
+    - Gemini 周额度比例及完全刷新时间；
+    - 3P (Claude / GPT) 5h 及周额度状态。
+  - **本地高性能微服务**：`fetch_quota.py` 自带轻量 HTTP 服务（监听 `127.0.0.1:18088/quota`），带 30s 内存防抖缓存，跨域无阻（CORS *）。
+  - **前端插件对齐**：`desktop-plugins/token-stats/plugin.js` 统一请求 `http://127.0.0.1:18088/quota`，彻底与 EasyCLIProxyAPI 管理接口解耦。
+  - **系统级自启动守护**：注册 Windows 计划任务 `Hermes_Quota_Service`，随用户登录无窗口静默后台自启。
+
