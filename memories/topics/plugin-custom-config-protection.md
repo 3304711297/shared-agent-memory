@@ -31,3 +31,14 @@ metadata:
 
 **Why:** 盲目覆盖会把 Windows `cmd /c` 和 Serena 静默参数冲掉，导致 MCP 进程启动崩溃或每次调用频繁弹窗。  
 **How to apply:** 收到上游更新 Issue 后，先检查受保护配置文件列表，仅增量合入核心逻辑与技能，保留 Windows 与静默参数配置。
+
+---
+
+## 附：ScriptCat 全脚本静默失效事件（2026-09-04，已闭环 ✅）
+
+- **现象**：Edge Dev 154.0.4251.0 + 脚本猫 1.4.0，所有用户脚本不注入（弹窗静态匹配仍显示「运行 (1/1)」，极具迷惑性）。
+- **根因**：`chrome.scripting` 动态注册的 `scriptcat-scripting`（isolated world 广播者）丢失（`getRegisteredContentScripts()=[]`）；SW 的 `registerUserscripts()` 早退守卫（REGISTER_DONE + scriptcat-inject 存在 → return）导致永不补注册 → 三层握手（scripting.js 广播 broadcastEventFlag → inject/content 双 ack → 脚本清单下发 .slc/.elc）永不发生。
+- **修复**：SW 上下文 `registerContentScripts` 补注册（`persistAcrossSessions: true`）。
+- **验证（Hermes 复核 2026-09-04 晚）**：重启 Edge 后注册幸存（persistAcrossSessions 生效）；实测 GitHub（标题「我的仓库」）、Hugging Face（「模型」）、OpenRouter 汉化全部生效。
+- **复发处置**：重跑 `C:\Users\VOS-User\AppData\Local\hermes\scripts\cdp_live.py`（`check-register` / `fix-register`）。技术要点：Edge 154 的 CDP HTTP 发现端点全 404，须从 `DevToolsActivePort` 文件读 WS 地址直连 + `suppress_origin=True`；MV3 SW 约 30s 休眠，需先开 options 页唤醒。WorkBuddy 侧同款工具在 `C:\Users\VOS-User\WorkBuddy\2026-09-04-16-45-23\`（cdp.py / fix_register.py / handshake_test.py）。
+- **上游隐患**：Edge 154 isolated world 中 `chrome.extension` = undefined，脚本猫 scripting.js 顶层读 `chrome.extension.inIncognitoContext` 存在崩溃风险，建议向 scriptscat/scriptcat 反馈（连同早退守卫不校验 getRegisteredContentScripts 的问题）。
