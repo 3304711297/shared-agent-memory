@@ -153,4 +153,4 @@ metadata:
 6. **管理端口 IP 封禁**：严禁拿普通 API Key 轮询 `/v0/management/`，触发防爆破后本地 IP 会被封禁 30 分钟；
 7. **刷新交互假死感**：后端增加 `?force=1` 穿透防抖缓存，前端配备矢量旋转 Spinner、`✓ 已刷新` 胶囊变形与 Toast 弹窗反馈。
 
-**2026-09-05 勘误**：「已退役 ZCode-Antigravity 派生分支」指旧 CLI 桥接方式，**仓库本身未退役**（Go 项目持续活跃，有 V1.0.0 正式版），保留勿归档。
+**2026-09-05 勘误→终局**：「已退役 ZCode-Antigravity 派生分支」指旧 CLI 桥接方式。fork 仓库 3304711297/ZCode-Antigravity 已于同日**删除**（用户拍板：已迁上游 EasyCLIProxyAPI 无保留价值；其唯一独特提交 Gemini 3.8 Flash 支持被上游 Hhz0822/ZCode-Antigravity 独立实现于 4344d05，上游活跃 v1.0.3 准备中，需用时直接用上游）。本地无 clone/进程/服务残留；桌面 Antigravity.lnk 与 D:ntigravity-chinese-main 属 Antigravity IDE 及其汉化，与本桥无关，勿删。
