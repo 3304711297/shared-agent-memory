@@ -44,5 +44,5 @@
 - [Plugin Custom Config Protection](plugin-custom-config-protection.md) — 插件自定义配置保护策略（upstream.json 严禁全量覆盖）
 - [Superpowers and Software Development Separation](superpowers-and-software-development-separation.md) — superpowers 与 software-development 技能分类的同名冲突历史、去重清理与权责分工规范
 - [Workbuddy Proxy Startup](workbuddy-proxy-startup.md) — WorkBuddy 代理启动方式记录
-- [Codebuddy2openai Upstream Benchmark](codebuddy2openai-upstream-benchmark.md) — 09-05 对标 EasyCLIProxyAPI v0.2.72 可采纳清单（三档+排除项）；本地 XSS/设置不持久化/托盘硬编码等缺陷已定位；上游浅克隆在 %TEMP%\easycliproxyapi
+- [Codebuddy2openai Upstream Benchmark](codebuddy2openai-upstream-benchmark.md) — 09-05 对标 EasyCLIProxyAPI **三批采纳全部落地**（6 提交 CI 全绿：XSS/单实例锁/双主题/TTFT/用量统计/更新检查）；遗留拆文件与 CI 加测试待拍板
 - [Hermes Ecosystem Evaluation and YSK Sync](hermes-ecosystem-evaluation-and-ysk-sync.md) — 社区 Hermes 资源评估（1/2/4/6 安装价值辨析）与 3/5（高阶指令速查+官方生态进阶）整理落入 youshouldknow 项目全流程闭环（commit abcc8f8，CI 全绿部署）
