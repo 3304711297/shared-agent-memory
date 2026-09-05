@@ -99,6 +99,46 @@
       ]
     },
     {
+      "id": "cli-gh",
+      "display": "系统 CLI：GitHub CLI",
+      "checks": [
+        { "type": "gh-release", "repo": "cli/cli" }
+      ],
+      "installed": [
+        { "where": "MSI 机器级安装（gh auth 走 keyring）", "version": "2.100.0" }
+      ]
+    },
+    {
+      "id": "cli-git",
+      "display": "系统 CLI：Git for Windows",
+      "checks": [
+        { "type": "gh-release", "repo": "git-for-windows/git" }
+      ],
+      "installed": [
+        { "where": "D:\\Git（自定义路径，升级须走官方安装器锁路径流程，禁用 winget）", "version": "2.55.0.windows.5" }
+      ]
+    },
+    {
+      "id": "cli-powershell",
+      "display": "系统 CLI：PowerShell 7",
+      "checks": [
+        { "type": "gh-release", "repo": "PowerShell/PowerShell" }
+      ],
+      "installed": [
+        { "where": "winget 用户级（5.1 系统内置不列入）", "version": "7.6.5" }
+      ]
+    },
+    {
+      "id": "cli-lychee",
+      "display": "系统 CLI：lychee 链接检查",
+      "checks": [
+        { "type": "gh-release", "repo": "lycheeverse/lychee", "tag_strip": "^lychee-v" }
+      ],
+      "installed": [
+        { "where": "%LOCALAPPDATA%\\Programs\\lychee", "version": "0.24.2" }
+      ]
+    },
+    {
       "id": "hermes-hub-skills",
       "display": "Hermes Hub 技能库（skills/ 目录提交）",
       "checks": [
@@ -116,6 +156,8 @@
   ],
   "notWatched": [
     "【用户拍板 2026-09-05】hermes-agent 与 ZCode CLI 本体永久不纳入看门（各自自带更新机制：hermes update --check / ZCode 客户端自更新）",
+    "Pester 6.1.0 与 PSScriptAnalyzer 1.25.0：刻意钉在与 tweak CI 一致的版本上，升级反而破坏本地校验一致性，不纳入",
+    "handle.exe（Sysinternals live 版本无稳定版本号）、rip grep/ugrep（ZCode 客户端内置随客户端分发）",
     "context7-mcp：自动跟随最新——hermes config.yaml npx 未钉版 + 插件为 http 远端托管（mcp.context7.com），2026-09-05 从受监控清单移出",
     "未安装的市场插件不监控：cloudbase-skills(0.1.0)、example-plugin(0.2.0)、代码安全防护（后者在 CDN manifest 与本地合并清单均未出现，来源待查，疑似按版本/渠道下发）",
     "zcode-custom 六个自有 skill（用户原创，无上游）",

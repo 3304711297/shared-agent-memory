@@ -1,6 +1,6 @@
 # 🔔 本地能力组件上游更新报告
 
-> 生成时间：2026-09-05 12:36（北京时间） · 清单：`capability-inventory.json`
+> 生成时间：2026-09-05 13:32（北京时间） · 清单：`capability-inventory.json`
 >
 > **跟进方式**：升级对应组件后，把清单里的 `installed.version` 更新为新版本并随共享库推 `main`，本看门会在下次运行时自动收口本 Issue。
 
@@ -15,6 +15,10 @@
 | EasyCLIProxyAPI 网关核心 | `cliproxyapi` | v7.2.151 | ✅ 最新 |
 | ZCode 插件：github | `zcode-github` | 0.1.2 | ✅ 最新 |
 | ZCode 内置插件组（随客户端构建种子分发） | `zcode-bundled-plugins` | 本地源 | ✅ 最新 |
+| 系统 CLI：GitHub CLI | `cli-gh` | v2.100.0 | ✅ 最新 |
+| 系统 CLI：Git for Windows | `cli-git` | v2.55.0.windows.5 | ✅ 最新 |
+| 系统 CLI：PowerShell 7 | `cli-powershell` | v7.6.5 | ✅ 最新 |
+| 系统 CLI：lychee 链接检查 | `cli-lychee` | 0.24.2 | ✅ 最新 |
 | Hermes Hub 技能库（skills/ 目录提交） | `hermes-hub-skills` | 4441a2a2 | ✅ 最新 |
 
 ## 明细
@@ -66,6 +70,26 @@
 - `ZCode 内置组件（缓存随计算机控制联动）`：已装 **0.5.12** / 本地清单 **缺失** → 🟡 本地清单无此项
 - `ZCode 内置插件（已停用）`：已装 **0.1.0** / 本地清单 **0.1.0** → ✅ 一致
 - `ZCode 内置插件（已停用）`：已装 **0.1.0** / 本地清单 **0.1.0** → ✅ 一致
+
+### 系统 CLI：GitHub CLI（cli-gh）
+
+- 上游最新：**v2.100.0**
+- `MSI 机器级安装（gh auth 走 keyring）`：已装 **2.100.0** → ✅ 一致
+
+### 系统 CLI：Git for Windows（cli-git）
+
+- 上游最新：**v2.55.0.windows.5**
+- `D:\Git（自定义路径，升级须走官方安装器锁路径流程，禁用 winget）`：已装 **2.55.0.windows.5** → ✅ 一致
+
+### 系统 CLI：PowerShell 7（cli-powershell）
+
+- 上游最新：**v7.6.5**
+- `winget 用户级（5.1 系统内置不列入）`：已装 **7.6.5** → ✅ 一致
+
+### 系统 CLI：lychee 链接检查（cli-lychee）
+
+- 上游最新：**0.24.2**
+- `%LOCALAPPDATA%\Programs\lychee`：已装 **0.24.2** → ✅ 一致
 
 ### Hermes Hub 技能库（skills/ 目录提交）（hermes-hub-skills）
 
