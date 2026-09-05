@@ -28,6 +28,11 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: python scripts/check_capability_upstream.py
 
+      - name: Ensure capability-watch label exists
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh label create capability-watch --color "d93f0b" --description "本地能力组件上游更新待跟进" --force || true
+
       - name: Create or update tracking issue
         if: steps.check.outputs.has_updates == 'true'
         env:
