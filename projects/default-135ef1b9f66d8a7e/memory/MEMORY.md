@@ -21,7 +21,7 @@
 - [GitHub Stars Organization](github-stars-organization.md) — GitHub 星标 495 个与 13 个 Lists 的分类整理任务
 - [OpenRouter Chinese Scripts Comparison](openrouter-chinese-scripts-comparison.md) — 三个 OpenRouter 汉化脚本对比与 datou1996+LynnGuo666 共存配置
 - [OpenRouter Chinese Plus Project](openrouter-chinese-plus-project.md) — 桌面 openrouter-chinese 三合一脚本项目；用户用 ScriptCat；React 拆分价格节点 DOM 特性；两轮工程复审已全部修复（30 项单测含伪 DOM 生命周期/退出码驱动重建/ourBase 统一/v1.1 SPA 路由清理）
-- [Three Project Audit 2026-08-28](three-project-audit-2026-08-28.md) — 三项目并行审查发现清单（tweak VersionConsistency CI 永远 skip/三模块缺往返测试；ysk 31 处旧基线未复核/首页漏 AI工具分类；orc 状态文件损坏会版本倒退/检查器异常被吞 CI 永绿），未修复前此清单仍有效
+- [Three Project Audit 2026-08-28](three-project-audit-2026-08-28.md) — 08-28 清单已全部收口；09-05 全账号审计修复批（GameQos fail-closed/看门退出码/c2o 三 P1/alerts 全开/stale 清零）及低优先遗留（Power 往返测试、orc tag 落后等）
 - [HuggingFace Chinese Plus Project](huggingface-chinese-plus-project.md) — 桌面 huggingface-chinese 汉化脚本项目；引擎原创 GPL-3.0 + izhadu 词库自动同步；v1.0.1 已发布待真机冒烟
 - [SteamDB Chinese Plus Project](steamdb-chinese-plus-project.md) — 桌面 steamdb-chinese 汉化脚本项目；接续停更 SteamDB_CN；词库真源 Chr233/GM_Scripts(AGPL-3.0)；v1.0.1 已发布+真机冒烟通过
 - [Bilibili Enhancement Tools](bilibili-enhancement-tools.md) — B站增强三件套调研：SukkaW 反跟踪油猴脚本（安全可装）+ BewlyCat(功能向) vs AveMujica(外观向) 二选一，B站2026-01推荐API需BewlyCat≥1.5.6；源码级重叠四块+脚本独有清单+共存关模块建议
