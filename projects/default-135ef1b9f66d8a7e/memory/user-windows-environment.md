@@ -42,7 +42,7 @@ metadata:
 - 网络代理（2026-08-21 确认）：本机经本地代理上网，`http_proxy`/`https_proxy`/`all_proxy`/`ZCODE_HTTP_PROXY` 均为 `http://127.0.0.1:3067`。curl 自动遵循这些变量、可正常访问 raw.githubusercontent.com；**Node 内置 fetch(undici) 不读代理环境变量，会直连失败**——Node 脚本访问外网应先直连再回退 curl 子进程（或用 undici ProxyAgent）
 - 代理节点会临时故障（2026-08-23 实例：gh 调 GitHub API 出现 TLS 握手超时，数分钟前同代理还是通的）——遇 gh/API 突发超时先重试，仍失败可提示用户换节点（用户自行更换后即恢复）；**确认是代理问题前别急着改命令**
 - 文件摆放偏好（2026-08-23 明确）：**不喜欢把自装内容放 C 盘**——浏览器扩展等自装文件统一放 D 盘（如 `D:\extensions\`）；涉及安装/落盘位置的操作默认优先考虑 D 盘
-- GitHub 账号：gh CLI 已登录 `3304711297`（昵称"智商已更新"），建仓/推 API 均可用
+- GitHub 账号：gh CLI 已登录 `3304711297`（昵称"智商已更新"），建仓/推 API 均可用；**token 无 delete_repo scope（2026-09-05 实测 `gh repo delete` 返回 403 Must have admin rights）**——删仓库需用户交互式授权 `gh auth refresh -h github.com -s delete_repo`（浏览器输码）后重试，主会话无法代做
 
 ## 模型网关与 Antigravity 桥接（2026-09-04 架构迭代）
 - **网关核心**：已彻底退役旧版 ZCode-Antigravity 派生分支，全面升级至官方 **EasyCLIProxyAPI**（核心版本 `v7.2.151`，2026-09-05 手动升级并冒烟验证，commit 5208aec7；安装于 `D:\EasyCLIProxyAPI-v0.2.71-Windows-amd64`，cpa-core 内不留旧版本备份，回退=从 GitHub Releases 重装）。

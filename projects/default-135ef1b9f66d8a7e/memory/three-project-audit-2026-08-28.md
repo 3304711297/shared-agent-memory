@@ -34,4 +34,10 @@ metadata:
 
 **2026-09-05 全账号四组并行审计（4+2 代理）+ 修复收口：本记忆 08-28 清单全部收口确认**——VersionConsistency 真跑、往返测试 8/9（仅剩 Power.ps1 无真实 powercfg 往返）、31 处基线已标注、AI工具分类已补、orc 三问题（状态文件/吞异常/dependabot）全修且 52 测试绿。**新发现并当日修复（均推送 CI 绿）**：①tweak `f1ff65a` GameQos 备份/恢复 fail-closed（原 SilentlyContinue+恒 return $true 假成功，新增 5 故障用例，全量 120 测试）；②tweak `15db397` 看门 v2 API 不可达误报分支消失回归；③ysk `cc9c07b` watch_bilibili main() 无条件 return 0 改失败→1 + gen-matrix YAML 吞错改警告不静默；④c2o `2020b4b/c9da638/b23c2d5` 日志 UTF-8 边界 panic、开发机路径硬编码全量环境变量化（C2O_PYTHON/C2O_CONVERTER/HERMES_HOME，原路径留作兜底）、/health 收窄为状态字段+Host 校验中间件防 DNS rebinding（实跑冒烟恶意 Host 403）。**横向**：全账号 10 仓 dependabot alerts 已开启（此前全部关闭）；ysk 3 个 dependabot PR 已合并（setup-python/checkout 7 跳版无回归）；stale 分支清零（tweak audit/coverage-check+docs/clarify…、ysk audit/…、mbgt plan5-polish）；tubatoolsPlugin 两个死 workflow 已删；c2o 补 dependabot.yml。**遗留（低优先）**：Power.ps1 往返测试、orc tag 落后（v1.2.2 vs 产物 1.3.2）、三汉化仓 build.mjs `state.buildNumber||1` 本地兜底可降版本、c2o 凭据明文与零 CI（仅 dependabot）、mbgt main 领先 v0.3.4 十六提交未 bump。**勘误**：ZCode-Antigravity 未退役（活跃 Go 项目）；tubatoolsPlugin=图吧工具箱 WinUI3 社区仓（低活跃）、profile 仓=账号门面（均无需看门）。shared-agent-memory capability-watch 新 cron（每日 UTC01:00）2026-09-05 才建，首跑明晨待验证。lychee 间歇封锁新增 techpowerup.com（偶发 403，main 复跑即绿，暂未入台账）。
 
+**2026-09-05 遗留清理批次（用户拍板"遗留的都按建议处理"+"删除 tubatoolsPlugin 没用了"）：**
+- **tubatoolsPlugin 删除待办**：`gh repo delete 3304711297/tubatoolsPlugin --yes` 实测 403——gh token 缺 delete_repo scope（交互式授权，主会话无法代做），已请用户跑 `gh auth refresh -h github.com -s delete_repo` 后回来执行删除。其两个死 workflow 此前已删。
+- **代理运行中**：①tweak Power.ps1 补 powercfg 备份→恢复往返测试（mock 桩化不改真机电源计划，基线 120 测试应增至 ≥123）；②三汉化仓 build.mjs `state.buildNumber||1` 兜底改为 buildNumber 非 ≥1 整数即抛错（防本地直跑 build 版本倒退）+ orc 打注解 tag `v1.3.2` 对齐实际产物（OUR_BASE 1.3 + build 2）。
+- **排队中**：c2o 补基础 CI（cargo check/clippy + 前端 build）；mbgt bump 版本发版（main 领先 v0.3.4 十六提交，按"改版本号才发版"惯例 bump→version-release.yml 自动发版）——**bump 后必须本地重建 dist 并提醒用户 developerPrivate.reload**（用户日常仅 BewlyCat+mbgt 启用）。
+- 主会话完成后应回填本节实际结果与提交号。
+
 [[desktop-projects-tweak-youshouldknow]] [[project-security-audit-2026-08-25]] [[openrouter-chinese-plus-project]] [[youshouldknow-doc-details]]
