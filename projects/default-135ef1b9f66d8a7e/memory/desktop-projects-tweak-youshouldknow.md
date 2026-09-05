@@ -53,3 +53,13 @@ metadata:
 - 覆盖审计契约收紧（2026-08-21，ysk `c809bf9` / tweak `0392638`）：外部 AI 复审证实 Compare-IdSet 丢弃 missing 差集（只有 extra 判失败、并集兜底），已改为逐份 missing+extra 均判失败并删并集兜底；严格审计暴露 27 个真实漏项（合并编号标题如 `MEMORY-001/002` + Coverage Check 未标 CORE/CPU/POWER/REGISTRY 编号），展开/补全后 44/44/44/44 全绿。详见 [[cross-repo-coverage-audit]]。
 - 外部文章《win11优化拓展》评估与收录（2026-08-23，ysk `6663cc4`）：用户问这篇"设备管理器全禁流"游戏优化文是否写进项目，结论**不整篇照收、按辨析文形式收录**（用户拍板：HPET 不禁用、走优化脚本 BOOT-001，其余按建议改进后入 ysk）。已发布 `docs/系统调优与安全/设备管理器禁用类优化辨析.md`（同步 nav+分类索引）：逐条 ✅⚠️❌🔴 定级——GS Wavetable/摄像头禁用零帧率收益，UMBus/PIC 安慰剂（UMBus 有枚举异常案例），HPET 禁用与既有「HPET 辨析」冲突→导向 BOOT-001，Hyper-V/虚拟字样设备全禁层次错误→导向菜单10 `Invoke-VbsModule` 功能层操作，❻fTPM 禁用＋清除 TPM 明确反对（TPM 不在性能路径，清除销毁 Hello 凭据/证书且不可逆、失 Win11 资格；AMD fTPM 卡顿已由 AGESA V2 1.2.0.7 修复，正解是升 BIOS）。唯一吸收项：网卡环保节能（EEE）关闭，以⚠️需实测等级在文中引向《Windows网络栈优化原则》第五节（网络栈文本身未改动）。工程确认：审计只扫 manifest/mapping/reference 三份固定资料且 knowledge.lock 锁定版本→新增知识页不触契约、无需提锁；mkdocs --strict 本地过、CI build/link-check/deploy 全绿、线上页 200；tweak 零改动。同日二轮（ysk `67860f4`）：用户提供《禁用设备列表.txt》三档清单截图（基本/深度/ACPI 勾选，约二十项）继续并入同文新增第三节——判定比第一份更差：系统计时器与 ACPI 热区域为危险项（热区域是笔电风扇调速/过热降频数据源），NDIS 虚拟网络适配器枚举器对本机有直接杀伤（Karing TUN 即此类，已互链 Karing 文章），Microsoft 虚拟驱动器枚举器破坏 ISO 挂载，PCI 加密/解密控制器多为缺驱动的 TPM/PSP 或 MEI 须先按硬件 ID 查身份，Numeric Data Processor 两现暴露清单质量；事实核查补十行、分类索引描述改"两份社区设备禁用清单"，CI 全绿+线上已含新内容。随后按用户纠正提交 `9958e91`：NDIS Virtual Network Adapter Enumerator 改为⚠️按具体实现判断，明确现代代理工具常自带/安装独立 TUN/Wintun，Karing 自带 TUN 不等于依赖该系统枚举器；自带独立设备且无其他依赖时通常可保持禁用，无法确认时不要当优化项盲禁。删除文章面向公众不应出现的“本机”及个体化结论，修复 ACPI 表格重复列；mkdocs 严格构建、CI build/link-check/deploy 与线上文案验证全过。用户明确要求仅改文档，不擅自修改设备状态。
 - 2026-08-24 本地已从 GitHub 快进同步：tweak `9bc665b` → `9093115`（含 tag `v0.2.8`，远端新增 11 个提交），youshouldknow `9958e91` → `1ece26a`（远端新增 2 个提交）；两仓库 `main...origin/main` 均为 `0 0`，工作区干净。同步使用 `pull --ff-only`，未使用 reset 或覆盖本地提交。
+- 2026-09-03 评估并吸收 Kiwi-Tweaks 2.0 与 Atom-Tool-Box 精华及双仓上游看门闭环：
+  1. **`tweakbyjie` 落地 Part 12 与系统加固**：
+     - 新增 `Modules/GameQos.ps1` 与 `Modules/Backup.GameQos.ps1`，为 CS2/Valorant/Apex/COD/LoL 等竞技网游注入 DSCP 46 加速转发标记；
+     - 在 Part 1 核心系统行为优化中新增 `DisableWpbtExecution`（阻止 UEFI WPBT 固件开机静默注入 OEM 软件）、`TaskbarEndTask`（Windows 11 任务栏右键直接结束任务）与 `EnableTelemetry=0`（PowerShellCore 遥测隔离）；
+     - 修复 `Modules/Backup.Nvme.ps1` 沙箱恢复静默容错，114 项 Pester 单元测试全绿（commit `0ed52b8`）。
+  2. **`youshouldknow` 落地深度科普**：
+     - 新增 `docs/网络通信/Windows游戏网络QoS策略与DSCP原理.md`，剖析 DiffServ/802.1p 队列映射与 TCP CUBIC 原理；
+     - 新增 `docs/系统知识/UEFI-WPBT固件自动注入与Windows防御.md`，剖析 ACPI WPBT 表、厂商静默下发风险与禁用实战；
+     - mkdocs strict 构建全绿（commit `6fef374`）。
+  3. **双仓上游看门 CI 上线**：两仓均配置 `.github/workflows/upstream-watch.yml`、`tools/upstream-sources.json` 与 `tools/check-upstream.py`，每周一/三/五定期巡检 `contactkiwitweaks-stack/Kiwi-Tweaks` 与 `ProjectAtomOS/Atom-Tool-Box`，发现新提交时自动开启 Issue 提醒评估。

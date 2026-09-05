@@ -44,24 +44,49 @@ metadata:
 - 文件摆放偏好（2026-08-23 明确）：**不喜欢把自装内容放 C 盘**——浏览器扩展等自装文件统一放 D 盘（如 `D:\extensions\`）；涉及安装/落盘位置的操作默认优先考虑 D 盘
 - GitHub 账号：gh CLI 已登录 `3304711297`（昵称"智商已更新"），建仓/推 API 均可用
 
-## ZCode 模型与 Antigravity 桥接
-- 用户通过 **ZCode-Antigravity**（Hhz0823/ZCode-Antigravity）接入 Gemini / Claude 等模型
-- 桥接进程：`cli-proxy-api.exe`，本地监听 `http://127.0.0.1:18080`，配置文件位于 `C:\Users\VOS-User\AppData\Local\ZCodeAntigravity\config.yaml`（API key 在 `api-keys:` 列表）
-- 提供模型：`gemini-3.7-flash`（主控对话）、`gemini-3.1-flash-image`（图像生成/Nano Banana 2）、`gemini-web-search`、`claude-sonnet-4-6` 等
-- **模型配置（2026-09-03）**：
-  - 桥接端已恢复为官方标准模型映射（不进行 3.8 借壳映射）：
-    - `gemini-3.7-flash` -> `gemini-3.7-flash-high`
-    - `gemini-3.6-flash` -> `gemini-3.6-flash-high`
-    - `gemini-web-search` -> `gemini-3.1-flash-lite`
-  - ZCode 与桥接端模型列表保持一致干净。
-- **用户全局 Skills**（位于 `C:\Users\VOS-User\.zcode\skills\`）：
+## 模型网关与 Antigravity 桥接（2026-09-04 架构迭代）
+- **网关核心**：已彻底退役旧版 ZCode-Antigravity 派生分支，全面升级至官方 **EasyCLIProxyAPI**（核心版本 `v7.2.149`，安装于 `D:\EasyCLIProxyAPI-v0.2.71-Windows-amd64`）。
+- **运行方式**：本地模型网关监听 `http://127.0.0.1:18080`，官方核心内嵌正版 OAuth 凭据，直接原生支持 `gemini-3.8-flash`（及 `-high` 思维链）、`gemini-3.7-flash`、`gemini-3.6-flash`、`gemini-3.1-pro-low`、`gemini-3.1-flash-image`（生图）、`gemini-web-search` 等全系模型。
+- **协议双通**：
+  - Hermes Agent 走 OpenAI 兼容协议（`http://127.0.0.1:18080/v1/chat/completions`，提供商 `cpa-gui`）；
+  - ZCode 走 Anthropic Messages 协议（`http://127.0.0.1:18080/v1/messages`，提供商 `cpa-gui`，主力模型 `gemini-3.8-flash`）。
+- **ZCode 客户端路径规范化**：因 EasyCLIProxyAPI 控制台硬编码探查系统盘规范路径，已在系统建立 NTFS 目录联接（Junction）：
+  - `%LOCALAPPDATA%\Programs\ZCode` -> `D:\zcode`
+  - `%ProgramFiles%\ZCode` -> `D:\zcode`
+  使控制台无需将软件重装至 C 盘即可原生识别客户端版本与一键启动。
+- **Google 配额监控微服务 (`Hermes_Quota_Service`)**：
+  - 监听 `http://127.0.0.1:18088/quota`，内存缓存 30s，支持 `?force=1` 穿透直连 Google 官方 Antigravity 专有端点（`daily-cloudcode-pa.googleapis.com`）；
+  - 注册为 Windows 计划任务 `Hermes_Quota_Service`，开机通过 `pythonw.exe` 静默无窗口后台常驻；
+  - 配套 Hermes 桌面端 `token-stats` 毛玻璃 Popover 状态栏微件。
+- **三层假故障网络辨析法则**：
+  - `TLS timeout` / 握手超时 -> Karing 节点掉线或网络中断；
+  - `invalid_grant` -> Google 授权会话失效或 IP 剧烈飘移，需用 EasyCLIProxyAPI 重新登录；
+  - `User location is not supported` -> 节点出口地区未获 Google AI 授权（如香港地区节点）；
+  - **铁律**：遇到上述三种报错先查代理节点与出口地区，严禁轻率修改本地网关代码。
+
+## 浏览器与扩展环境清单（D 盘摆放规范）
+- **日常浏览器**：Microsoft Edge Dev，用户配置目录位于 `%LOCALAPPDATA%\Microsoft\Edge Dev\User Data`。
+- **扩展与脚本数据保护**：Hermes 的 `config.yaml` 必须设置 `browser.use_real_profile: false`，彻底隔离日常 Edge 用户目录，防止自动化 Chromium 实例退出时写回空注册表导致扩展清空。
+- **核心扩展清单与物理路径**：
+  - **应用商店版扩展**（数据位于 `Local Extension Settings`，重装同 ID 即可自动接回数据）：
+    - 脚本猫 (ScriptCat)：`liilgpjgabokdklappibcjfablkpcekh`（全部油猴脚本安然无恙）
+    - 简约翻译 (KISS Translator)：`jemckldkclkinpjighnoilpbldbdmmlh`
+    - 小电视空降助手 (SponsorBlock)：`khkeolgobhdoloioehjgfpobjnmagfha`
+    - BewlyCat (B站美化)：`naephbpbijnomloddmldmgmfcjhikbac`
+  - **本地解压版扩展**（依规范统一存放于 `D:\extensions\`，在 `edge://extensions` 开发者模式加载）：
+    - 青柠起始页：`D:\extensions\LimeStartPage\src`
+    - 小黑盒扩展 (better-XiaoHeiHe)：`D:\extensions\better-XiaoHeiHe-main`
+    - BewlyBewly / 辅助扩展：`D:\extensions\extension`
+
+## ZCode 全局 Skills 与记忆备份
+- **用户核心全局 Skills**（位于 `C:\Users\VOS-User\.zcode\skills\`；2026-09-05 起另有 87 个 Hermes hub skills 迁入，详见 [[hermes-to-zcode-capability-sync]]）：
   1. `gemini-image-gen`：请求本地 `http://127.0.0.1:18080/v1/chat/completions` 调用 `gemini-3.1-flash-image` 生图并保存至 `generated_images/`
   2. `frontend-design`：现代高审美 UI 设计规范（Tailwind / 现代排版）
   3. `readme-master`：专业开源级 README.md 深度扫描与生成规范
   4. `smart-web-crawler`：带代理支持的轻量网页提取与 Markdown 转换（`crawl.py`）
   5. `chinese-copywriting`：中文技术排版规范与中英混排空格自动化（`pangu_format.py`）
   6. `semantic-release-pro`：语义化 Commit、SemVer 计算与 Changelog 生成规范
-- **ZCode 记忆持久化云端备份**：私有仓库 `https://github.com/3304711297/zcode-memories`（Private），本地 `~/.zcode/cli/memories/` 已初始化并关联推送；带 `backup-memories.cmd`，已建立"记忆变动自动静默备份"铁律机制。
+- **ZCode 记忆持久化云端备份**：私有仓库 `https://github.com/3304711297/shared-agent-memory`（Private，`zcode` 分支；Hermes 侧推 `hermes` 分支），本地 `~/.zcode/cli/memories/` 已初始化并关联推送，已建立"记忆变动自动静默备份"铁律机制（详见 [[multi-branch-memory-backup]]）。
 
 ## WorkBuddy 模型桥接
 - **WorkBuddy 客户端**：安装在 `D:\workbuddy\WorkBuddy.exe`，CLI 脚本在 `D:\workbuddy\resources\app.asar.unpacked\cli\bin\codebuddy`。
