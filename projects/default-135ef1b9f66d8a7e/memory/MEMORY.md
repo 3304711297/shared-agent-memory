@@ -17,7 +17,7 @@
 - [Pester 6 Mock Pitfalls](pester6-mock-pitfalls.md) — Pester 6 命令 mock 三坑：param 条件分支不可靠改适配器注入、捕获列表用闭包变量勿用 $script:、$args 匹配要含完整路径
 - [Youshouldknow Doc Details](youshouldknow-doc-details.md) — 薄页重定向、分类索引补齐、主文加厚与显式导航；部署门禁 needs [build, link-check] 已收紧
 - [Ysk Content User Approval](ysk-content-user-approval.md) — 用户拍板：往 ysk 塞内容必须先给可选项让其选择，禁止自行决定写什么（点名指定除外）
-- [Cross-Repo Coverage Audit](cross-repo-coverage-audit.md) — Coverage 审计契约（逐份与 manifest 完全一致，现 48 项含 GAMEQOS 类）；审计器 ID 正则硬编码前缀，新增清单类别必须同步扩正则；lock 严格同步策略已拍板（ysk 任何 main 提交都需提锁）
+- [Cross-Repo Coverage Audit](cross-repo-coverage-audit.md) — Coverage 审计契约（逐份与 manifest 完全一致，现 48 项含 GAMEQOS 类）；审计器 ID 正则硬编码前缀，新增清单类别必须同步扩正则；09-05 策略变更：lock 校验收敛至 tag 发版，日常审计直连 ysk/main（严格同步作废）
 - [Tweak Upstream Watch](tweak-upstream-watch.md) — tweakbyjie 上游看门 v2.1（多分支+全 commit 明细+新分支自动发现+API 不可达跳过不误报）四源清单；用户拍板：永远看完整提交不做路径过滤，新来源基线取当时最新避免误报
 - [Skill Plugin Resources](skill-plugin-resources.md) — 书签 skill hub 九资源：SkillHub.cn/ColaSkill/Hermes Skills Hub + ECC/gemini-skills/zcode-plugins + Anthropic 官方三仓（skills/claude-plugins-official/knowledge-work-plugins），找技能先中文目录后 GitHub 审读，Claude 系官方仓优先
 - [GitHub Stars Organization](github-stars-organization.md) — **任务完成（09-05）**：星标 539 个/29 个 Lists；AI 细分为 Agent 端 21 + Plugin 和 Skill 库 14 + AI 其他 19，原「AI·大模型与工具」拆完删除；未归档仅 HelloGitHub；GraphQL 坑 deleteUserList=listId；用户拍板永远看完整提交
