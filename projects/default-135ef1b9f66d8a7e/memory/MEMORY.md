@@ -1,12 +1,12 @@
 - [Auto Backup Memories to GitHub](auto-backup-memories-to-github.md) — 记忆文件变动或新增后必须自动静默提交并推送 shared-agent-memory 的 main 分支（严禁等待用户提醒，无需询问用户）
 - [Adobe MCP Authentication](adobe-mcp-authentication.md) — Adobe for creativity MCP server requires OAuth authentication; 403 errors indicate missing Authorization headers
 - [Five Repo Task Book v42](five-repo-task-book-v42.md) — 五仓库任务书 v4.2（15 条）**全部完成推送、五仓 CI 全绿**；tweak 已发 **v0.2.21**（tag-only 流程三步+包内版本注入实测）；脚本猫更新检测人工验收通过；含 BOM/mkdocs-tags/lock 提锁契约与待用户拍板事项（orc dependabot.yml 等）
-- [Bilibili Great Together Project](bilibili-great-together-project.md) — make-bilibili-great-together：**v0.3.2 双形态就绪；用户日常已切换=仅 BewlyCat+mbgt 扩展（0.3.2）启用、脚本及其他全禁**（旧「userscript 启用」作废）；bump 后扩展 dist 需本地重建+developerPrivate.reload；卡片「错误」=playinfo WARN 非故障；铁律：钩子读被 mock 全局走闭包原引用
-- [User Windows Environment](user-windows-environment.md) — Windows 环境：本地代理 127.0.0.1:3067、gh 账号 3304711297、PS 5.1/7 双版本规则、浏览器是 Edge Dev、**模型网关=官方 EasyCLIProxyAPI（18080，已退役 ZCode-Antigravity 派生分支，ZCode 走 cpa-gui/Anthropic 协议、主力 gemini-3.8-flash）**、配额微服务 18088、三层假故障辨析、扩展清单与 D 盘摆放规范
+- [Bilibili Great Together Project](bilibili-great-together-project.md) — make-bilibili-great-together：**v0.3.5 已发版（09-05 bump，本地 dist 已重建待用户 reload）；用户日常已切换=仅 BewlyCat+mbgt 扩展启用**；bump 后扩展 dist 需本地重建+developerPrivate.reload；卡片「错误」=playinfo WARN 非故障；铁律：钩子读被 mock 全局走闭包原引用
+- [User Windows Environment](user-windows-environment.md) — Windows 环境：本地代理 127.0.0.1:3067、gh 账号 3304711297（**delete_repo scope 已授权**）、PS 5.1/7 双版本规则、浏览器是 Edge Dev、模型网关=官方 EasyCLIProxyAPI（ZCode-Antigravity 桥与 tubatoolsPlugin 已删，ZCode 现行走 v2 OAuth 套餐）、配额微服务 18088、扩展清单与 D 盘摆放规范
 - [Edge Dev CDP MCP Setup](edge-dev-cdp-mcp-setup.md) — 最终方案：edge://inspect 开关（持久化）+ 每浏览器会话点一次「允许」+ MCP autoConnect；工具超时=弹窗在等点；根因 zh_CN default_locale 被 Edge 153 拒 → 空降助手+青柠+小黑盒(better-XiaoHeiHe v1.2)三个解压版统一在 D:\extensions\（manifest 已 key 固定 ID + locale 改 en，无自动更新）；勿装 Tampermonkey；用户拍板只接管原封不动日常 Edge；反馈闭环：微软×2 + issue#316 + issue k1m0206/better-XiaoHeiHe#13 + B站私信（毛布斯只此一条，勿再发）
 - [Answer Every User Question](answer-every-user-question.md) — 用户逐条追踪问题，漏答或括号带过会被反复追问；回复前自查每个问题都有成段明确回答
 - [Desktop Commander Overview](desktop-commander-overview.md) — DC 与内置工具重叠高，仅四类场景必选它：大数据 REPL 分析/长跑进程盯日志/SSH 持久会话/超大目录流式搜索；一次性命令用内置即可
-- [Superpowers Usage](superpowers-usage.md) — 开发纪律套件（TDD/计划/验证），编码项目时按其流程走；运维型工作不触发，勿卸
+- [Superpowers Usage](superpowers-usage.md) — 开发纪律套件（TDD/计划/调试方法论），用于编码项目而非运维型工作
 - [Desktop Projects Tweak Youshouldknow](desktop-projects-tweak-youshouldknow.md) — 桌面两个项目位置、GitHub 同步关系、最新提交与 lock 过期风险
 - [Chinese Commit Messages](user-pref-chinese-commits.md) — 提交信息中文偏好
 - [POW File Traceability](pow-file-traceability.md) — 电源计划文件哈希与来源可追溯性
@@ -16,29 +16,31 @@
 - [Evidence Before Absence Claims](evidence-before-absence-claims.md) — 用户质疑"是否改了我系统"时先只读取证（PSReadLine 历史在 %APPDATA% 路径），绝不凭意图下绝对结论，错说主动收回
 - [Pester 6 Mock Pitfalls](pester6-mock-pitfalls.md) — Pester 6 命令 mock 三坑：param 条件分支不可靠改适配器注入、捕获列表用闭包变量勿用 $script:、$args 匹配要含完整路径
 - [Youshouldknow Doc Details](youshouldknow-doc-details.md) — 薄页重定向、分类索引补齐、主文加厚与显式导航；部署门禁 needs [build, link-check] 已收紧
+- [Ysk Content User Approval](ysk-content-user-approval.md) — 用户拍板：往 ysk 塞内容必须先给可选项让其选择，禁止自行决定写什么（点名指定除外）
 - [Cross-Repo Coverage Audit](cross-repo-coverage-audit.md) — Coverage 审计契约（逐份与 manifest 完全一致，现 48 项含 GAMEQOS 类）；审计器 ID 正则硬编码前缀，新增清单类别必须同步扩正则；lock 严格同步策略已拍板（ysk 任何 main 提交都需提锁）
-- [Tweak Upstream Watch](tweak-upstream-watch.md) — tweakbyjie 上游看门 v2（多分支+全 commit 明细+新分支自动发现）四源清单；用户拍板：永远看完整提交不做路径过滤，新来源基线取当时最新避免误报
+- [Tweak Upstream Watch](tweak-upstream-watch.md) — tweakbyjie 上游看门 v2.1（多分支+全 commit 明细+新分支自动发现+API 不可达跳过不误报）四源清单；用户拍板：永远看完整提交不做路径过滤，新来源基线取当时最新避免误报
 - [Skill Plugin Resources](skill-plugin-resources.md) — 书签 skill hub 九资源：SkillHub.cn/ColaSkill/Hermes Skills Hub + ECC/gemini-skills/zcode-plugins + Anthropic 官方三仓（skills/claude-plugins-official/knowledge-work-plugins），找技能先中文目录后 GitHub 审读，Claude 系官方仓优先
-- [GitHub Stars Organization](github-stars-organization.md) — GitHub 星标 495 个与 13 个 Lists 的分类整理任务
-- [OpenRouter Chinese Scripts Comparison](openrouter-chinese-scripts-comparison.md) — 三个 OpenRouter 汉化脚本对比与 datou1996+LynnGuo666 共存配置
-- [OpenRouter Chinese Plus Project](openrouter-chinese-plus-project.md) — 桌面 openrouter-chinese 三合一脚本项目；用户用 ScriptCat；React 拆分价格节点 DOM 特性；两轮工程复审已全部修复（30 项单测含伪 DOM 生命周期/退出码驱动重建/ourBase 统一/v1.1 SPA 路由清理）
-- [Three Project Audit 2026-08-28](three-project-audit-2026-08-28.md) — 08-28 清单已全部收口；09-05 全账号审计修复批（GameQos fail-closed/看门退出码/c2o 三 P1/alerts 全开/stale 清零）及低优先遗留（Power 往返测试、orc tag 落后等）
-- [HuggingFace Chinese Plus Project](huggingface-chinese-plus-project.md) — 桌面 huggingface-chinese 汉化脚本项目；引擎原创 GPL-3.0 + izhadu 词库自动同步；v1.0.1 已发布待真机冒烟
-- [SteamDB Chinese Plus Project](steamdb-chinese-plus-project.md) — 桌面 steamdb-chinese 汉化脚本项目；接续停更 SteamDB_CN；词库真源 Chr233/GM_Scripts(AGPL-3.0)；v1.0.1 已发布+真机冒烟通过
+- [GitHub Stars Organization](github-stars-organization.md) — **任务完成（09-05）**：星标 539 个/29 个 Lists；AI 细分为 Agent 端 21 + Plugin 和 Skill 库 14 + AI 其他 19，原「AI·大模型与工具」拆完删除；未归档仅 HelloGitHub；GraphQL 坑 deleteUserList=listId；用户拍板永远看完整提交
+- [OpenRouter Chinese Scripts Comparison](openrouter-chinese-scripts-comparison.md) — 三个 OpenRouter 汉化脚本对比结论与 datou1996+LynnGuo666 共存配置方案
+- [OpenRouter Chinese Plus Project](openrouter-chinese-plus-project.md) — 桌面 openrouter-chinese 三合一脚本项目；用户用 ScriptCat；React 拆分价格节点 DOM 特性；两轮工程复审已全部修复；**v1.3.2 tag 已对齐产物，build 防倒退已加（56 测试）**
+- [Three Project Audit 2026-08-28](three-project-audit-2026-08-28.md) — 08-28 清单已全部收口；09-05 全账号审计修复批（GameQos fail-closed/看门退出码/c2o 三 P1/alerts 全开/stale 清零/遗留批回填含 Power 往返+汉化 build 防倒退+mbgt 0.3.5+漏洞清零）及低优先遗留（c2o 凭据明文/零 CI 之外已补 dependabot）
+- [HuggingFace Chinese Plus Project](huggingface-chinese-plus-project.md) — 桌面 huggingface-chinese 汉化脚本项目；引擎原创 GPL-3.0 + izhadu 词库自动同步；**产物 1.3.3（buildNumber 3），build 防倒退已加（172 测试）**
+- [SteamDB Chinese Plus Project](steamdb-chinese-plus-project.md) — 桌面 steamdb-chinese 汉化脚本项目；接续停更 SteamDB_CN；词库真源 Chr233/GM_Scripts(AGPL-3.0)；**v1.4.4，build 防倒退已加（39 测试）**
 - [Bilibili Enhancement Tools](bilibili-enhancement-tools.md) — B站增强三件套调研：SukkaW 反跟踪油猴脚本（安全可装）+ BewlyCat(功能向) vs AveMujica(外观向) 二选一，B站2026-01推荐API需BewlyCat≥1.5.6；源码级重叠四块+脚本独有清单+共存关模块建议
-- [Hermes Agent Install](hermes-agent-install.md) — hermes-agent（HERMES_HOME=LocalAppData，GUI 桌面端为主用法）：git/uv 必须走 127.0.0.1:3067 代理；429 限流→GitHub URL 带身份 insteadOf 已修；token-stats 配额微服务 18088 与更新弹窗文件锁排查；模型接 ZCode-Antigravity 桥
+- [Hermes Agent Install](hermes-agent-install.md) — hermes-agent（HERMES_HOME=LocalAppData，GUI 桌面端为主用法）：git/uv 必须走 127.0.0.1:3067 代理；429 限流→GitHub URL 带身份 insteadOf 已修；token-stats 配额微服务 18088 与更新弹窗文件锁排查
 - [Hermes Shared Memory](hermes-shared-memory.md) — 共享库单一真源=ZCode 记忆目录（main 分支）；hermes 经 NTFS junction 直读 topics 并自行提交推送 main（旧「ZCode 代推」规则作废）
 - [Bilibili Video Transcription Pipeline](bilibili-video-transcription-pipeline.md) — B站视频→逐字稿管线（直连API防412+ffmpeg whisper small+误听对照表），脚本在 bios_knowledge/
 - [Youshouldknow BIOS Knowledge Series](youshouldknow-bios-knowledge-series.md) — ysk BIOS 选项科普系列（2026-09-02 批次+09-03 EP15 NVMe，逐篇附出处）；同步点 d0fc852；B站看门 bilibili-watch 每 6h 自动开 Issue；ysk 新增页面必须重跑 gen-matrix.py
 - [Serena MCP Silent Config](serena-mcp-silent-config.md) — Serena 插件静默配置（禁用 Web Dashboard 与 GUI 日志弹窗，离线快速启动）
 - [Multi Branch Memory Backup](multi-branch-memory-backup.md) — 共享库三分支架构（2026-09-05 重构）：main=双端共享唯一真源（hermes junction 直读）、zcode/hermes=各自专属；谁改谁当轮推 main；**仓库已公开**（脱敏后转公开，用户拍板不做历史重写）
-- [User Global Preferences](user-global-preferences.md) — 用户全局铁律与偏好（自 Hermes USER.md 沉淀）：CI 全绿才收尾、不确定信息联网核实、复杂任务技能优先、Whisper small、UI 键值分层等宽加粗/加载动效、桌面工具内嵌无黑框、托盘 GUI.for.Cores 风格
+- [User Global Preferences](user-global-preferences.md) — 用户全局铁律与偏好：CI 全绿才收尾、不确定信息联网核实、**多任务优先并行子代理（实测并发上限≈2，按 2 个一批排队）**、Whisper small、UI 键值分层等宽加粗/加载动效、桌面工具内嵌无黑框、托盘 GUI.for.Cores 风格
 - [Hermes to ZCode Capability Sync](hermes-to-zcode-capability-sync.md) — 2026-09-05 Hermes→ZCode 能力同步：87 skills 迁入 ~/.zcode/skills、deepwiki MCP 新增、重复（superpowers/docx 等）与 Hermes 专有（quota/dogfood 等）跳过清单、记忆库 7 补 5 合
 - [Capability Upstream Watch](capability-upstream-watch.md) — 每日能力组件上游看门（shared-agent-memory Actions，capability-watch 标签 Issue）+ watch-capability.cmd 本地一键；ZCode 市场两层架构（bundled 种子+CDN）；升级组件后必须回写 capability-inventory.json 推 main 自动收口；用户拍板 agent 本体永久排除
-- [Codebuddy2openai Tauri GUI](codebuddy2openai-tauri-gui.md) — codebuddy2openai Tauri GUI 项目记录（托盘/实时日志/倍率展示等）
-- [Gateway Migration EasyCLIProxyAPI](gateway-migration-easycliproxyapi-and-browser-protection.md) — 模型网关迁移官方 EasyCLIProxyAPI 与浏览器扩展保护记录
+- [Codebuddy2openai Tauri GUI](codebuddy2openai-tauri-gui.md) — codebuddy2openai Tauri GUI：09-05 三 P1 修复（日志 UTF-8 panic/路径全量环境变量化 C2O_PYTHON 等/health 收窄+Host 校验防 rebinding）+ 基础 CI 补齐 + **ZCode 接入改引导式（Desktop 只认 UI 内添加，写 JSON 是假阳性）+ 端口真实探测徽章**；构建链已通：tauri dev/build 三坑修复 + bundle 固化 nsis（WiX 弃用），新版 exe/setup.exe 已产出
+- [ZCode Desktop Config Architecture](zcode-desktop-config-architecture.md) — ZCode 双体系配置实测：**v2 provider family OAuth（v2/setting.json）为现行模型选择，cli/config.json provider map 旧体系不读**；Desktop 自定义供应商只认 UI 内添加（leveldb 压缩无法程序化写）；自动配置一律走引导+端口探测
+- [Gateway Migration EasyCLIProxyAPI](gateway-migration-easycliproxyapi-and-browser-protection.md) — 模型网关迁移官方 EasyCLIProxyAPI 与浏览器扩展保护记录；**ZCode-Antigravity fork 已删（上游 Hhz0823 活跃 v1.0.3，需用时直用上游）**
 - [Hermes Quota Embedded](hermes-quota-embedded.md) — Hermes 配额监控内置化（token-stats 后端插件替代计划任务/微服务）
 - [Hermes Skills and MCP Optimization](hermes-skills-and-mcp-optimization-2026-09-03.md) — Hermes 技能与 MCP 优化记录（2026-09-03）
 - [Plugin Custom Config Protection](plugin-custom-config-protection.md) — 插件自定义配置保护策略（upstream.json 严禁全量覆盖）
-- [Superpowers and Software Development Separation](superpowers-and-software-development-separation.md) — superpowers 与 software-development 技能分工边界
+- [Superpowers and Software Development Separation](superpowers-and-software-development-separation.md) — superpowers 与 software-development 技能分类的同名冲突历史、去重清理与权责分工规范
 - [Workbuddy Proxy Startup](workbuddy-proxy-startup.md) — WorkBuddy 代理启动方式记录
