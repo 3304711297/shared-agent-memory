@@ -18,7 +18,7 @@
 - [Youshouldknow Doc Details](youshouldknow-doc-details.md) — 薄页重定向、分类索引补齐、主文加厚与显式导航；部署门禁 needs [build, link-check] 已收紧
 - [Cross-Repo Coverage Audit](cross-repo-coverage-audit.md) — Coverage 审计契约（逐份与 manifest 完全一致，现 48 项含 GAMEQOS 类）；审计器 ID 正则硬编码前缀，新增清单类别必须同步扩正则；lock 严格同步策略已拍板（ysk 任何 main 提交都需提锁）
 - [Tweak Upstream Watch](tweak-upstream-watch.md) — tweakbyjie 上游看门 v2（多分支+全 commit 明细+新分支自动发现）四源清单；用户拍板：永远看完整提交不做路径过滤，新来源基线取当时最新避免误报
-- [Skill Plugin Resources](skill-plugin-resources.md) — 书签 skill hub 六资源：SkillHub.cn/ColaSkill/Hermes Skills Hub + ECC/gemini-skills/zcode-plugins，找技能先中文目录后 GitHub 审读
+- [Skill Plugin Resources](skill-plugin-resources.md) — 书签 skill hub 九资源：SkillHub.cn/ColaSkill/Hermes Skills Hub + ECC/gemini-skills/zcode-plugins + Anthropic 官方三仓（skills/claude-plugins-official/knowledge-work-plugins），找技能先中文目录后 GitHub 审读，Claude 系官方仓优先
 - [GitHub Stars Organization](github-stars-organization.md) — GitHub 星标 495 个与 13 个 Lists 的分类整理任务
 - [OpenRouter Chinese Scripts Comparison](openrouter-chinese-scripts-comparison.md) — 三个 OpenRouter 汉化脚本对比与 datou1996+LynnGuo666 共存配置
 - [OpenRouter Chinese Plus Project](openrouter-chinese-plus-project.md) — 桌面 openrouter-chinese 三合一脚本项目；用户用 ScriptCat；React 拆分价格节点 DOM 特性；两轮工程复审已全部修复（30 项单测含伪 DOM 生命周期/退出码驱动重建/ourBase 统一/v1.1 SPA 路由清理）
