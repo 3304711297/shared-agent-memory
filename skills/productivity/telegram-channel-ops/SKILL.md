@@ -97,6 +97,9 @@ When the channel owner's personal account is subject to Telegram anti-spam restr
 
 ## 4. Key Pitfalls & Invariants
 
+- **Anti-Spam Restriction Workaround**: When a Telegram account has repeated restrictions/spam penalties, do not attempt to login with Telethon/Userbot scripts (which risk instant permanent termination `PHONE_NUMBER_BANNED`). Instead, use mutual contacts to bypass direct message restrictions, create a dedicated bot via `@BotFather` on an unflagged account, and promote it to channel administrator with posting/editing permissions.
+
 - **Bot Message Edit Boundary**: A Telegram Bot can only edit messages sent by that bot itself. A bot cannot edit messages posted by human administrators via `editMessageText`; if a human-authored message must be modified, the bot must delete the original message and re-post the corrected text.
 - **Proxy Requirement**: Local scripts calling `api.telegram.org` must explicitly pass the proxy handler; standard environment variables (`HTTP_PROXY` / `HTTPS_PROXY`) are ignored by default in some Python `urllib` Windows setups without `ProxyHandler`.
 - **Channel ID Prefix**: Public channels use `@slug`; private channels require numeric chat IDs beginning with `-100` (e.g. `-1002070574431`). Passing a raw integer without `-100` returns `Chat not found`.
+- **Bot Token Storage**: Keep the active Telegram Bot Token in `%LOCALAPPDATA%\hermes\auth\telegram_channel.json` with 0600/restricted permissions, never checked into public Git repositories.
