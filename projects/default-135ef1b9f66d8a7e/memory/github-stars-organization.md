@@ -19,4 +19,6 @@ metadata:
 
 **2026-09-05 任务重启状态：** 用户要求继续整理并把 **AI 大类细分为三个新分类：「Agent 端」（agent 框架/harness/CLI 智能体）、「Plugin 和 Skill 库」（skills/plugins 市场与仓库）、「AI 其他」**（模型工具/提示词/教程资源）。实查 Lists 已是 **27 个**（非基线 13），其中已有「AI·大模型与工具」53 项——用户确认方案时需二选一：(a) 新建三 List 并重分配该 53 项；(b) 保留现有、三新分类只收未归档。数据/方案文件：D:i coding\workspace 缓存 stars_org_20260905.json + stars_plan_20260905.md（子代理产出）。方案经用户确认后执行 createUserList/updateUserListsForItem。
 
+**2026-09-05 任务完成：AI 三细分已落地（用户拍板"拆完删除"+ohmyzsh/qinglong 移表，不做跨表去重）。** 执行结果 ALL PASS：新建「Agent 端」21 项、「Plugin 和 Skill 库」14 项、「AI 其他」19 项（成员逐项精确匹配方案）；原「AI · 大模型与工具」53 项迁移 54 项（含 2 个未归档新星标）后清空删除；ohmyzsh 移入桌面增强、qinglong 真实移表（+自托管 −桌面增强）；Lists 27→29，未归档仅 HelloGitHub（1 个，按约定保留）。**基线勘误：08-20 晚间会话其实已完成 14 个中文 List 归档，"约 200+ 未归档"是执行前旧基线**。数据/快照/执行器：D:i coding\.zcode\workspace\default\stars_*.json/py。GraphQL 坑：deleteUserList 的输入字段是 listId 不是 id；根级 repository(owner:,name:) 而非 viewer.repository。
+
 [[user-windows-environment]] [[desktop-projects-tweak-youshouldknow]]
