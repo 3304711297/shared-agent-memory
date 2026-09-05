@@ -136,7 +136,7 @@ metadata:
 ### 2. ZCode 客户端接入配置 (`~/.zcode/v2/config.json`)
 - **协议**：Anthropic Messages 协议 (`kind: "anthropic"`)；
 - **核心项**：
-  - `provider["zcode-antigravity-local"]`: `name: "Google"`, `baseURL: "http://127.0.0.1:18080"`, `apiKey: "wY5Xr4HVPT3BZivioFX2L_3XhXdFfU8QBjT_Ff4xGJ0"`；
+  - `provider["zcode-antigravity-local"]`: `name: "Google"`, `baseURL: "http://127.0.0.1:18080"`, `apiKey: "***（本地网关密钥，公开仓库已脱敏）"`；
   - 模型字典：`gemini-3.8-flash` (优先级 200), `gemini-3.7-flash` (201), `gemini-3.1-pro-low` (203), `gemini-web-search` (204)；
   - **ZCode CLI 思考强度排查与对齐（2026-09-04，已被后续实验修正）**：
     - 现象：ZCode 调用 `gemini-3.8-flash` 在 EasyCLIProxyAPI 后台显示思考强度为 `auto`，完成 Token 仅 70 余个，前端完全没有展开思考。
