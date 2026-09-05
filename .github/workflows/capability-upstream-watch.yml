@@ -1,0 +1,58 @@
+name: Capability Upstream Watch
+
+on:
+  schedule:
+    # 每天 UTC 01:00（北京时间 09:00）运行
+    - cron: '0 1 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  watch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Compare inventory against upstreams
+        id: check
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python scripts/check_capability_upstream.py
+
+      - name: Create or update tracking issue
+        if: steps.check.outputs.has_updates == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          COUNT="${{ steps.check.outputs.update_count }}"
+          EXISTING=$(gh issue list --state open --label "capability-watch" --json number --jq '.[0].number')
+          if [ -n "$EXISTING" ]; then
+            echo "更新已存在的 Issue #$EXISTING"
+            gh issue edit "$EXISTING" --body-file capability-report.md
+          else
+            gh issue create \
+              --title "🔔 [Capability Watch] 本地能力组件有上游更新（${COUNT} 项待跟进）" \
+              --body-file capability-report.md \
+              --label "capability-watch"
+          fi
+
+      - name: Auto-close when inventory caught up
+        if: steps.check.outputs.has_updates == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          EXISTING=$(gh issue list --state open --label "capability-watch" --json number --jq '.[0].number')
+          if [ -n "$EXISTING" ]; then
+            gh issue close "$EXISTING" --comment "✅ 清单已与上游一致，自动收口。下次有新版本会重新开 Issue。"
+          else
+            echo "无待跟进项，也无未关闭 Issue，跳过。"
+          fi

@@ -1,0 +1,100 @@
+{
+  "version": 1,
+  "description": "本地能力组件清单（skill/mcp/plugin/工具核心的已装版本与上游源）。由 capability-upstream-watch 工作流每日比对；【维护铁律】升级或新装任何组件后，必须同步更新本清单并随共享库推 main，看门自动收口对应 Issue。",
+  "updatedAt": "2026-09-05",
+  "components": [
+    {
+      "id": "chrome-devtools-mcp",
+      "display": "Chrome DevTools MCP",
+      "checks": [
+        { "type": "npm", "package": "chrome-devtools-mcp" }
+      ],
+      "installed": [
+        { "where": "ZCode cli/config.json mcp.servers（钉版）", "version": "1.7.0" },
+        { "where": "ZCode 插件 claude-plugins-official", "version": "1.7.0", "sha": "614b4ebe23196dc0c657671ee52e7138f6d09017" },
+        { "where": "Hermes config.yaml mcp_servers（钉版）", "version": "1.7.0" }
+      ],
+      "claudeMarketplaceSha": {
+        "plugin": "chrome-devtools-mcp",
+        "installedSha": "614b4ebe23196dc0c657671ee52e7138f6d09017"
+      }
+    },
+    {
+      "id": "context7-mcp",
+      "display": "Context7 MCP（文档检索）",
+      "checks": [
+        { "type": "npm", "package": "@upstash/context7-mcp" }
+      ],
+      "installed": [
+        { "where": "Hermes config.yaml（upstream.json 记录）", "version": "4.0.4" },
+        { "where": "ZCode 插件 claude-plugins-official（远端托管版，版本号 0.0.0 无意义）", "version": "4.0.4" }
+      ]
+    },
+    {
+      "id": "desktop-commander",
+      "display": "Desktop Commander",
+      "checks": [
+        { "type": "npm", "package": "@wonderwhy-er/desktop-commander" }
+      ],
+      "installed": [
+        { "where": "Hermes 插件 upstream.json 记录", "version": "0.2.48" },
+        { "where": "ZCode 插件 claude-plugins-official（插件壳版本 0.2.0，核心随 git-subdir main）", "version": "0.2.48" }
+      ]
+    },
+    {
+      "id": "superpowers",
+      "display": "Superpowers 开发纪律套件",
+      "checks": [
+        { "type": "gh-release", "repo": "obra/superpowers" }
+      ],
+      "installed": [
+        { "where": "ZCode 插件 claude-plugins-official", "version": "6.3.0", "sha": "b36e0829c6d0140e93cfef2ca599b1b07d4a7797" },
+        { "where": "Hermes 插件 upstream.json 记录", "version": "6.3.0", "sha": "b36e0829c6d0140e93cfef2ca599b1b07d4a7797" }
+      ],
+      "claudeMarketplaceSha": {
+        "plugin": "superpowers",
+        "installedSha": "b36e0829c6d0140e93cfef2ca599b1b07d4a7797"
+      }
+    },
+    {
+      "id": "serena",
+      "display": "Serena 语义代码分析",
+      "checks": [
+        { "type": "gh-release", "repo": "oraios/serena" }
+      ],
+      "installed": [
+        { "where": "Hermes 插件 upstream.json 记录", "version": "1.7.0" },
+        { "where": "ZCode 插件 claude-plugins-official（版本号 0.0.0 无意义，随 hermes 评估）", "version": "1.7.0" }
+      ]
+    },
+    {
+      "id": "cliproxyapi",
+      "display": "EasyCLIProxyAPI 网关核心",
+      "checks": [
+        { "type": "gh-release", "repo": "router-for-me/CLIProxyAPI" }
+      ],
+      "installed": [
+        { "where": "D:\\EasyCLIProxyAPI-v0.2.71-Windows-amd64\\cpa-core", "version": "7.2.151" }
+      ]
+    },
+    {
+      "id": "zcode-github",
+      "display": "ZCode 插件：github",
+      "checks": [
+        { "type": "zcode-marketplace", "plugin": "github" }
+      ],
+      "installed": [
+        { "where": "ZCode 插件（已启用）", "version": "0.1.1" }
+      ]
+    }
+  ],
+  "notWatched": [
+    "ZCode 官方市场已下架插件：browser-use(0.4.2)/computer-use(0.5.14)/document-skills(0.1.4)/skill-creator(0.1.0)/zcode-guide(0.1.0)——仍在本地启用，但 2026-09-05 起市场 manifest 已不含它们，无上游可查；ZCode 客户端插件管理如有自带更新提示以它为准",
+    "hermes skills hub 内置注册表技能（hermes GUI 自带更新提示，无公开 git 上游可查）",
+    "zcode-custom 六个自有 skill（用户原创，无上游）",
+    "hermes-agent 本体（hermes update --check / GUI 弹窗自带提醒）",
+    "ZCode CLI 本体（自带更新机制）",
+    "deepwiki 等 http 远端 MCP（服务端永远最新）",
+    "ZCode 官方市场已停用插件 android-emulator / ios-simulator"
+  ]
+}
