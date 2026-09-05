@@ -33,7 +33,7 @@
 - [Youshouldknow BIOS Knowledge Series](youshouldknow-bios-knowledge-series.md) — ysk BIOS 选项科普系列（2026-09-02 批次+09-03 EP15 NVMe，逐篇附出处）；同步点 d0fc852；B站看门 bilibili-watch 每 6h 自动开 Issue；ysk 新增页面必须重跑 gen-matrix.py
 - [Serena MCP Silent Config](serena-mcp-silent-config.md) — Serena 插件静默配置（禁用 Web Dashboard 与 GUI 日志弹窗，离线快速启动）
 - [Multi Branch Memory Backup](multi-branch-memory-backup.md) — 共享库三分支架构（2026-09-05 重构）：main=双端共享唯一真源（hermes junction 直读）、zcode/hermes=各自专属；谁改谁当轮推 main；**仓库已公开**（脱敏后转公开，用户拍板不做历史重写）
-- [User Global Preferences](user-global-preferences.md) — 用户全局铁律与偏好：CI 全绿才收尾、不确定信息联网核实、**多任务优先并行子代理（实测并发上限≈2，按 2 个一批排队）**、Whisper small、UI 键值分层等宽加粗/加载动效、桌面工具内嵌无黑框、托盘 GUI.for.Cores 风格
+- [User Global Preferences](user-global-preferences.md) — 用户全局铁律与偏好：CI 全绿才收尾、不确定信息联网核实、**多任务优先并行子代理（Gemini 实测单批支持 10 并发，建议 3~6 批次）**、Whisper small、UI 键值分层等宽加粗/加载动效、桌面工具内嵌无黑框、托盘 GUI.for.Cores 风格
 - [Hermes to ZCode Capability Sync](hermes-to-zcode-capability-sync.md) — 2026-09-05 Hermes→ZCode 能力同步：87 skills 迁入 ~/.zcode/skills、deepwiki MCP 新增、重复（superpowers/docx 等）与 Hermes 专有（quota/dogfood 等）跳过清单、记忆库 7 补 5 合
 - [Capability Upstream Watch](capability-upstream-watch.md) — 每日能力组件上游看门（shared-agent-memory Actions，capability-watch 标签 Issue）+ watch-capability.cmd 本地一键；ZCode 市场两层架构（bundled 种子+CDN）；升级组件后必须回写 capability-inventory.json 推 main 自动收口；用户拍板 agent 本体永久排除
 - [Codebuddy2openai Tauri GUI](codebuddy2openai-tauri-gui.md) — codebuddy2openai Tauri GUI：09-05 三 P1 修复（日志 UTF-8 panic/路径全量环境变量化 C2O_PYTHON 等/health 收窄+Host 校验防 rebinding）+ 基础 CI 补齐 + **ZCode 接入改引导式（Desktop 只认 UI 内添加，写 JSON 是假阳性）+ 端口真实探测徽章**；构建链已通：tauri dev/build 三坑修复 + bundle 固化 nsis（WiX 弃用），新版 exe/setup.exe 已产出
