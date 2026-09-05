@@ -100,9 +100,13 @@ def upstream_version(check):
             f"https://registry.npmjs.org/{pkg}/latest", accept="application/json"
         ).get("version")
     if t == "gh-release":
-        return http_json(
+        tag = http_json(
             f"https://api.github.com/repos/{check['repo']}/releases/latest", auth=True
         ).get("tag_name")
+        strip = check.get("tag_strip")
+        if strip and tag:
+            tag = re.sub(strip, "", tag)
+        return tag
     if t == "zcode-marketplace":
         # 真源 = zai-org/zcode-plugins 仓库；CDN 为其镜像，仓库失败时回退
         try:
