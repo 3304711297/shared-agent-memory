@@ -63,3 +63,4 @@ metadata:
      - 新增 `docs/系统知识/UEFI-WPBT固件自动注入与Windows防御.md`，剖析 ACPI WPBT 表、厂商静默下发风险与禁用实战；
      - mkdocs strict 构建全绿（commit `6fef374`）。
   3. **双仓上游看门 CI 上线**：两仓均配置 `.github/workflows/upstream-watch.yml`、`tools/upstream-sources.json` 与 `tools/check-upstream.py`，每周一/三/五定期巡检 `contactkiwitweaks-stack/Kiwi-Tweaks` 与 `ProjectAtomOS/Atom-Tool-Box`，发现新提交时自动开启 Issue 提醒评估。
+- 2026-09-05 新增 `docs/系统知识/Windows目录联接Junction与符号链接辨析.md`（commit `a94830c`，CI 四项全绿，线上 200）：三种链接对照、删除语义一手实测（rd /s /q、rm -rf、Remove-Item -Recurse 均只摘除联接点不伤目标，文件级操作才穿透）、多 AI 助手共享数据目录实战与 git/.gitignore 注意事项。同步 nav + 分类索引 + 根 README + gen-matrix（85 篇）。缘起：ZCode/Hermes 双 Agent 共享记忆库的 junction 方案（见 [[capability-upstream-watch]] 与三分支架构记忆）。
