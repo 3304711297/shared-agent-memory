@@ -32,6 +32,7 @@
 - [Multi Branch Memory Backup](multi-branch-memory-backup.md) — 共享库三分支架构（2026-09-05 重构）：main=双端共享唯一真源（hermes junction 直读）、zcode/hermes=各自专属；谁改谁当轮推 main
 - [User Global Preferences](user-global-preferences.md) — 用户全局铁律与偏好（自 Hermes USER.md 沉淀）：CI 全绿才收尾、不确定信息联网核实、复杂任务技能优先、Whisper small、UI 键值分层等宽加粗/加载动效、桌面工具内嵌无黑框、托盘 GUI.for.Cores 风格
 - [Hermes to ZCode Capability Sync](hermes-to-zcode-capability-sync.md) — 2026-09-05 Hermes→ZCode 能力同步：87 skills 迁入 ~/.zcode/skills、deepwiki MCP 新增、重复（superpowers/docx 等）与 Hermes 专有（quota/dogfood 等）跳过清单、记忆库 7 补 5 合
+- [Capability Upstream Watch](capability-upstream-watch.md) — 每日能力组件上游看门（shared-agent-memory 仓库 Actions，capability-watch 标签 Issue）；升级组件后必须回写 capability-inventory.json 推 main 自动收口；首轮抓出 chrome-devtools-mcp 1.8.0/context7 4.0.5/github 插件 0.1.2
 - [Codebuddy2openai Tauri GUI](codebuddy2openai-tauri-gui.md) — codebuddy2openai Tauri GUI 项目记录（托盘/实时日志/倍率展示等）
 - [Gateway Migration EasyCLIProxyAPI](gateway-migration-easycliproxyapi-and-browser-protection.md) — 模型网关迁移官方 EasyCLIProxyAPI 与浏览器扩展保护记录
 - [Hermes Quota Embedded](hermes-quota-embedded.md) — Hermes 配额监控内置化（token-stats 后端插件替代计划任务/微服务）
