@@ -1,48 +1,45 @@
-# ZCode Agent 私有记忆库 (Personal Memories Backup) 🧠
+# shared-agent-memory 双 Agent 共享记忆库 🧠
 
-本仓库用于持久化备份 **ZCode Agent** 的所有本地记忆文件（`~/.zcode/cli/memories/`），包含跨会话累积的系统环境配置、工程契约、项目审计发现、踩坑记录及偏好设置。
+Hermes Agent 与 ZCode 共用的跨端长期记忆库。**共享内容只有一份**：物理存放在 ZCode 记忆目录（本仓库 `main` 分支检出），Hermes 通过 NTFS 目录联接直读，切换 Agent 零同步成本。
 
-> 🔒 **私有仓库声明**：此仓库设为 Private（仅自己可见），防止个人环境配置、记忆细节与私有工程习惯外泄。
+> 🔒 私有仓库（仅自己可见）。分支架构 2026-09-05 重构，取代旧的「zcode/hermes 双分支互为镜像」模型。
 
 ---
 
-## 📂 目录结构与记忆范围
+## 🌿 三分支模型
 
-```text
-memories/
-├── README.md               # 备份说明与恢复指南
-├── .gitignore
-├── backup-memories.cmd     # Windows 一键增量备份脚本
-└── projects/
-    ├── default-*/          # 全局/默认工作区记忆（系统环境、CI契约、通用偏好）
-    ├── tweak-*/            # tweakbyjie 专属工程细节与 BCD/MPO/Defender 踩坑记忆
-    ├── youshouldknow-*/    # YouShouldKnow 知识库规范与联动记忆
-    └── omp-*/              # 历史工作区记忆
-```
+| 分支 | 内容 | 物理位置 |
+|------|------|----------|
+| `main`（默认） | **双端共享记忆库**（唯一真源）：`projects/default-*/memory/*.md` 专题记忆 + `MEMORY.md` 索引 | `C:\Users\VOS-User\.zcode\cli\memories\` |
+| `zcode` | 仅 ZCode 专属、不与 Hermes 共享的内容（占位，暂空） | 按需检出 |
+| `hermes` | 仅 Hermes 专属：home 白名单备份（SOUL.md、原生 USER.md/MEMORY.md、技能/插件配置）；**不含共享 topics** | `%LOCALAPPDATA%\hermes\` |
+
+**Hermes 如何读共享库**：`%LOCALAPPDATA%\hermes\memories\topics` 是指向本仓库记忆目录的 NTFS junction，hermes 原生记忆系统透明读写同一份文件。
+
+**归属判断**：两端都该知道的 → main；仅 ZCode 用 → zcode；仅 Hermes 用 → hermes。谁改动谁在当轮结束前推送，无需提醒。
 
 ---
 
 ## 🔄 更换电脑 / 重装系统恢复指南
 
-重装系统或切换新设备后，只需两步即可 100% 恢复所有记忆：
-
 ```powershell
-# 1. 确保安装了 Git 并完成 GitHub 登录
-# 2. 将本私有仓库直接克隆到 ZCode 记忆目录：
-git clone https://github.com/3304711297/zcode-memories.git "$HOME\.zcode\cli\memories"
+# 1. 安装 Git 并完成 GitHub 登录（gh auth login）
+# 2. 克隆共享记忆库到 ZCode 记忆目录（检出 main）：
+git clone -b main https://github.com/3304711297/shared-agent-memory.git "$HOME\.zcode\cli\memories"
+# 3. 重建 Hermes 侧 junction（hermes home 就位后执行）：
+cmd /c mklink /J "%LOCALAPPDATA%\hermes\memories\topics" "C:\Users\VOS-User\.zcode\cli\memories\projects\default-135ef1b9f66d8a7e\memory"
 ```
 
-恢复完成后，重新打开 ZCode 客户端，Agent 将立即自动读取全部历史记忆与项目上下文！
+恢复后重启 ZCode / Hermes 即自动读取全部记忆。
 
 ---
 
-## ⚡ 日常备份方式
+## ⚡ 日常备份
 
-在任何需要备份最新记忆的时刻，只需在终端运行：
+共享库变动（任一 Agent）：
 
-```powershell
-cd "$HOME\.zcode\cli\memories"
-git add .
-git commit -m "backup: 同步最新 ZCode 记忆文件"
-git push
+```bash
+git -C "C:/Users/VOS-User/.zcode/cli/memories" add -A && git -C "C:/Users/VOS-User/.zcode/cli/memories" commit -m "memory: <简述>" && git -C "C:/Users/VOS-User/.zcode/cli/memories" push origin main
 ```
+
+或直接运行本目录的 `backup-memories.cmd`。Hermes 专属变动则在其 home 仓库推 `hermes` 分支。
