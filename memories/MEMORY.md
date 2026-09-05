@@ -8,5 +8,6 @@ Windows 运行与工具环境：本地网络代理为 127.0.0.1:3067；GitHub CL
 §
 ScriptCat 全脚本静默失效（Edge Dev 154）已修复闭环：根因=chrome.scripting 动态注册的 scriptcat-scripting 广播者丢失（getRegisteredContentScripts=[]），SW 早退守卫（REGISTER_DONE+scriptcat-inject 存在→return）永不补注册，握手断致全部脚本失效（弹窗仍显示 1/1）。修复=SW 内 registerContentScripts 补注册（persistAcrossSessions:true），重启 Edge 复核注册幸存、GitHub/HF/OpenRouter 汉化实测生效。复发时用 hermes/scripts/cdp_live.py（check-register/fix-register；Edge 154 HTTP 发现端点 404 须直连 WS+suppress_origin，SW 30s 休眠需开 options 页唤醒）。已向上游提 issue：scriptscat/scriptcat#1724（早退守卫不校验 scripting 侧 + Edge 154 isolated world chrome.extension=undefined 隐患）。
 §
+Hermes 配额监控与桌面美化内置化演进（2026-09-05）：token-stats 插件（FastAPI 路由 /api/plugins/token-stats/ 随桌面后端自动挂载）已升级集成左侧 Pulse 导航、/quota 全景看板、时间格式持久化、WorkBuddy 8787 探测与 /quota 会话斜杠指令；同时已装配 zcode-theme 专属沉浸式深炭主题插件（悬浮底栏与琥珀金高亮）。EasyCLIProxyAPI 凭据读 D:\EasyCLIProxyAPI\auth\antigravity-*.json，30s 内存缓存。旧计划任务已停用。
 §
-Hermes 配额监控已内置化（2026-09-04）：Hermes_Quota_Service 计划任务登录触发器已停用、18088 独立微服务已退役；配额数据改由 Hermes 后端用户插件 token-stats（~/.hermes/plugins/token-stats/dashboard/plugin_api.py，FastAPI 路由 /api/plugins/token-stats/quota|health）随桌面端后端进程自动挂载提供，已加入 config.yaml plugins.enabled。桌面插件 desktop-plugins/token-stats/plugin.js 经 ctx.rest('/quota') 读取，无 CORS/端口依赖。EasyCLIProxyAPI 凭据仍读 D:\EasyCLIProxyAPI\auth\antigravity-*.json，30s 内存缓存+磁盘缓存 direct-quota.json。
+Telegram 频道 @emoegg（蛋总的圈）已绑定专属管理员机器人 @HermesAgentByjieBot（ID: 8361539844），本地凭据见 auth/telegram_channel.json，通过 scripts/tg_channel.py 经 127.0.0.1:3067 代理实现发帖、改帖与管理。

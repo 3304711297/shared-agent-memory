@@ -1,0 +1,6 @@
+{
+  "bot_token": "YOUR_BOT_TOKEN_HERE",
+  "bot_username": "YOUR_BOT_USERNAME",
+  "channel_id": "@your_channel_slug",
+  "proxy": "http://127.0.0.1:3067"
+}
