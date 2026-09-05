@@ -1,0 +1,11 @@
+{
+  "name": "token-stats",
+  "label": "Token Stats",
+  "description": "Google / Antigravity 官方配额监控后端 API（桌面状态栏数据服务）",
+  "icon": "BatteryCharging",
+  "version": "1.0.0",
+  "tab": {
+    "hidden": true
+  },
+  "api": "plugin_api.py"
+}
