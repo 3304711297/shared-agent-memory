@@ -2,7 +2,9 @@
 name: codebuddy2openai-tauri-gui
 description: codebuddy2openai 桌面客户端对标 EasyCLIProxyAPI 重构实践与状态
 metadata:
+  node_type: memory
   type: project
+  originSessionId: sess_91c8484d-0d81-48d1-89e3-b7d52ed11653
 ---
 
 # CodeBuddy2OpenAI 桌面端架构 (对标 EasyCLIProxyAPI)
@@ -56,6 +58,15 @@ metadata:
 - 已知存量风险（未修，设计内）：accounts.json 明文 token（与桌面端同级）、converter --api-key 默认空时零鉴权（GUI 不传 key）、proxy_stop 按命令行匹配可能误杀其他 converter.py 进程、脱敏功能=绕过上游合规词检测（合规风险用户自担）。
 
 **2026-09-05 ZCode 一键接入根因确认（实测）**：c2o 写 `~/.zcode/cli/config.json` 与 `v2/config.json` 的 provider.workbuddy 结构正确（与生效过的 cpa-gui provider 同构），但 **ZCode Desktop 的"模型设置"自定义供应商列表存在其内部压缩 leveldb（%APPDATA%/ZCode/session，UTF-16LE+snappy，无法程序化读写），只认 UI 添加，直接写 JSON 它不读**——写入后状态显示"已接入配置"但模型永不出现（c2o 的状态判定只是"文件里有 key"，属假阳性）。**已验证的可用路径**：Desktop 模型设置 → 添加供应商 → Chat Completions 格式 + baseURL http://127.0.0.1:8787/v1 + key `local` + 手动加模型 → 连接成功，聊天模型选择器即可选（用户已跑通）。**c2o 待改→已完成（`18c3e00`，同日）**：configure_zcode 改引导式（不再写文件，返回 JSON 引导信息；前端复制到剪贴板+展开步骤文本框+按钮改「复制接入配置」）；agent_detect 加 loopback_port_open（TcpStream 800ms 探测）真实可达性探测，徽章改报「服务在线·可接入/服务离线」，假阳性消除；remove_zcode 保留文件清理并提示 Desktop 内条目需手动删。用户 rebuild 后需 developerPrivate 无关——Tauri 应用需重新构建安装包或 cargo tauri dev 生效。ECP 官方文档亦无 ZCode 接入页（claude-code/codex/droid/grok-build/opencode/pi 有），此坑业界通用。
+
+**2026-09-05 tauri dev 环境三个坑（用户 `npm run tauri dev` 实测连环发现，均已修）**：① package.json 原本无 `tauri` script 且未装 @tauri-apps/cli → 已装 tauri-cli 2.11.4 + scripts 加 `"tauri": "tauri"`（`ba1e26c`）；② tauri.conf.json 的 build 段缺 `beforeDevCommand`/`beforeBuildCommand` → `tauri dev` 不会自启 vite，卡死在 "Waiting for your frontend dev server to start on http://localhost:5173/"（netstat 见 SYN_SENT）→ 已补 `"beforeDevCommand": "npm run dev"` + `"beforeBuildCommand": "npm run build"`（`da5a94d`）；③ vite chokidar 监视整个项目目录，cargo 编译写 `src-tauri/target/debug/deps/*.exe` 时文件被 Windows 锁定 → chokidar 抛 `EBUSY: resource busy or locked, watch ...codebuddy2openai.exe` 把 vite 进程干崩（beforeDevCommand 非零退出）→ 已在 vite.config.js 加 `server.watch.ignored: ['**/src-tauri/target/**']`（`ca29709`）——Tauri+Vite on Windows 经典坑，官方模板默认带此排除。现 `npm run tauri dev`（首跑编译 Rust 数分钟）与 `npm run tauri build` 均为标准一键流程。**④ tauri build 的 MSI/WiX 打包环境性失败（WixTools314 light.exe 挂，exe 本体已成功）→ bundle targets 从 "all" 固化 `["nsis"]`（`4a45660`），NSIS 一次成功**；产物：`src-tauri/target/release/codebuddy2openai.exe`（绿色直跑）与 `bundle/nsis/codebuddy2openai_0.1.0_x64-setup.exe`（安装包）；用户已产出新版，用于验证 Agent 引导式接入与真实探测徽章。
+
+**2026-09-05 模型矩阵表格三轮 UI 迭代 + ZCode 引导面板重构（用户审美反馈驱动，均已推送 CI 绿）**：
+- 表格三轮收敛：① 列宽规划（table 加 `models-table` 类：各列 nowrap、输入框/下拉定宽、min-width 740、section-title-row 按钮 flex-shrink:0+nowrap 防折行飘移，`c1fdebe`）；② 用户建议改"点击弹窗编辑"——上下文/思考强度单元格变只读展示按钮（cell-edit 类），点击弹居中模态框集中编辑（**保持 `ctx-<id>`/`effort-<id>` 元素 id 不变以复用 saveModelConfig**），删除模型描述列（用户："完全无用"）、列头简化为"模型"/"标签"（`6430db6`）；③ 用户建议两列合一——上下文+思考强度合并单列"参数（上下文 / 思考）"竖排两个值按钮、空操作列整列删除、min-width 480（`f140398`/`bd79468`）；
+- **弹窗 hidden 覆盖坑**：`.modal-overlay { display:flex }` 会覆盖 HTML hidden 属性的 display:none → 页面加载即弹空窗且取消/保存"无反应"（hidden=true 同样被压）→ 必须补 `.modal-overlay[hidden] { display:none !important; }`（`cf96ead`）；
+- ZCode 引导面板按用户要求重构（`ce33862`）：按钮改「如何接入配置」，取消整块 textarea，改结构化面板——Base URL/API 格式/API Key 独立字段行（键值分层等宽加粗、点击值即复制、成功变绿 1.5s+toast）、模型列表渲染 15 个可点击芯片（点击复制单个模型名 + 「复制全部模型」芯片），clipboard API 带 execCommand 兜底；
+- Emitter 未使用导入清理（`04d7457`）：emit 调用全在 commands.rs 且函数内局部 `use tauri::Emitter`，lib.rs 顶部导入为死代码，删除后构建零警告；
+- **操作纪律教训：用户在跑 npm run tauri build/cargo 构建时严禁改动工作区源文件**（曾中途改 lib.rs 被用户叫停"先别修复"，git checkout 回滚，待 build 完成后再应用）。
 
 **Why:** 用户要求模型列表全量覆盖官方模型库，并补全 WorkBuddy 核心的倍率显示、上下文限制与思考强度调节能力。
 **How to apply:** 维护 `C:\Users\VOS-User\Desktop\codebuddy2openai`，后续所有跨端 Agent 配置及客户端演进均以此架构为基准。
