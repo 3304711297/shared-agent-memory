@@ -1,14 +1,13 @@
 /**
- * Hermes Desktop Plugin: tg-channel-themes (@emoegg 频道精选 19 款全量主题合集)
+ * Hermes Desktop Plugin: tg-channel-themes (@emoegg 频道精选 18 款实用主题合集)
  *
- * 完整移植自 Telegram 频道 @emoegg 第 12 号精选主题合集：
+ * 移植自 Telegram 频道 @emoegg 第 12 号精选主题合集（已剔除与桌面端调性不符的微信日间版）：
  *
  * 【经典 IM 社交系列】
  * 1. qq-classic: QQ 经典 (Such QQ)
- * 2. wechat-light: 微信日间 (小而美 8.0)
- * 3. wechat-dark: 微信夜间 1 (小而美 8.0 暗黑模式)
- * 4. wechatify-dark: 微信夜间 2 (WeChatify Dark OLED)
- * 5. wechat-dark3: 微信夜间 3 (夜间微信)
+ * 2. wechat-dark: 微信夜间 1 (小而美 8.0 暗黑模式)
+ * 3. wechatify-dark: 微信夜间 2 (WeChatify Dark OLED)
+ * 4. wechat-dark3: 微信夜间 3 (夜间微信)
  *
  * 【动漫 / 卡通风格系列】
  * 6. anime-designer: 动漫夜间 (Designer)
@@ -104,42 +103,7 @@ const ALL_THEMES = [
     typography: TYPOGRAPHY,
   },
 
-  // --- 2. 微信日间 (小而美 8.0) ---
-  {
-    name: 'wechat-light',
-    label: '微信日间 (小而美 8.0)',
-    description: 'Official WeChat 8.0 light theme with signature green bubbles and neutral grey canvas',
-    colors: {
-      background: '#ededed',
-      foreground: '#191919',
-      card: '#ffffff',
-      cardForeground: '#191919',
-      muted: '#dfdfdf',
-      mutedForeground: '#7d7d7d',
-      popover: '#ffffff',
-      popoverForeground: '#191919',
-      primary: '#07c160',
-      primaryForeground: '#ffffff',
-      secondary: '#e1f6eb',
-      secondaryForeground: '#059648',
-      accent: '#e6faef',
-      accentForeground: '#07c160',
-      border: '#dcdcdc',
-      input: '#ffffff',
-      ring: '#07c160',
-      midground: '#07c160',
-      composerRing: '#07c160',
-      destructive: '#fa5151',
-      destructiveForeground: '#ffffff',
-      sidebarBackground: '#e8e8e8',
-      sidebarBorder: '#d9d9d9',
-      userBubble: '#95ec69',
-      userBubbleBorder: '#86d45e',
-    },
-    typography: TYPOGRAPHY,
-  },
-
-  // --- 3. 微信夜间 1 (小而美 8.0 暗黑模式) ---
+  // --- 2. 微信夜间 1 (小而美 8.0 暗黑模式) ---
   {
     name: 'wechat-dark',
     label: '微信夜间 1 (小而美暗黑)',
