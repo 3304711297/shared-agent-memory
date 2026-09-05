@@ -19,6 +19,10 @@ NousResearch hermes-agent v0.21.0 于 2026-09-02 23 时重装完成并验证（d
 - ~~桌面快捷方式指 CLI~~（已改为 GUI，见上条）。
 - **浏览器控制（2026-09-03 定案）**：hermes 挂载 ZCode 同款 chrome-devtools MCP 驱动**日常 Edge**——config.yaml `mcp_servers.chrome-devtools: command cmd + args [/c, npx, -y, chrome-devtools-mcp@1.7.0, --autoConnect, --user-data-dir=<Edge Dev User Data>]`，真机验证通过（开 example.com 取标题）。Windows 下 MCP 命令用 `cmd`+`/c` 包装最稳。每个 Edge 会话浏览器内可能需点一次「允许」。**勿走 CDP 端口路线**：Chromium 136+ 对默认配置目录硬禁 --remote-debugging-port，HKCU/HKLM 的 RemoteDebuggingAllowed 与 DevToolsRemoteDebuggingAllowed=1 均解不开（已实测勿重试；策略残留注册表无害）；Edge 快捷方式补丁已还原；browser.use_real_profile 路线已弃。
 - 冒烟提示：网关就绪日志（Starting Hermes Gateway / Turn machinery warmed）写入 `%LOCALAPPDATA%\hermes\logs\gateway.log`，不进 stdout，验证时看文件别盯终端。
+- **配额监控微服务 (token-stats plugin)**：
+  - 本地微服务由 `desktop-plugins\token-stats\fetch_quota.py --serve` 驱动，监听 `127.0.0.1:18088/quota`；
+  - 若在桌面端看到「刷新配额失败：本地微服务未响应」报错，说明 18088 端口的 Python 微服务意外退出或端口挂起；
+  - 启动方式：通过 `service\quota_service.vbs` 静默后台拉起，或以 `pythonw.exe fetch_quota.py --serve` 启动。
 - **Edge 起不来=锁占用排查法（2026-09-03 实战）**：hermes 测试中断曾遗留 ①孤儿 chrome-devtools-mcp node 进程群、②无头 Playwright Chromium（进程名 chrome.exe、带真实 Edge User Data，Get-Process msedge 扫不到！）占住 `Edge Dev\User Data\lockfile` → Edge 静默秒退无窗口。修复：杀 ms-playwright/chrome-devtools-mcp 相关进程 → 删 lockfile 与 DevToolsActivePort → 重启 Edge。定位占用者用 handle.exe（live.sysinternals.com 下载，已存 D:\temp\handle.exe）。
 - **ZCode 插件与 MCP 全量生态打通（2026-09-03）**：
   - Hermes 原生智能体插件（`%LOCALAPPDATA%\hermes\plugins\`）规范化接入：`desktop-commander`, `superpowers`, `serena`, `context7` 4 个插件全部就绪且由 Hermes 插件系统集中管理生命周期（GUI「插件」设置页直接可视化控制）。
@@ -33,6 +37,10 @@ NousResearch hermes-agent v0.21.0 于 2026-09-02 23 时重装完成并验证（d
   - 修复：
     1. 配置 `git config --global url."https://3304711297@github.com/".insteadOf "https://github.com/"`，强制所有发往 GitHub 的 Git HTTPS 请求带上 GitHub CLI 用户身份 `3304711297`，直接享有独立认证高额度，彻底规避匿名代理 IP 429 限流。
     2. 执行 `hermes update --yes --gateway --force --branch main --keep-stash`，代码已平滑更新至最新 commit `f1ccf436a2`，前端 Web UI 构建完成，技能与网关已正常重启。
+- **Hermes 更新弹窗「关闭其他进程以更新 Hermes」排查与处理（2026-09-04）**：
+  - 现象：更新过程中弹窗警告：`关闭其他进程以更新 Hermes · Hermes 无法安全地自动关闭这些进程。请关闭拥有这些进程的应用、终端或服务，然后重试更新`，技术详情指向 `pythonw.exe (PID 4032) ... fetch_quota.py --serve`。
+  - 根因：更新安装器需要覆盖更新 `hermes-agent\venv` 下的依赖与执行模块，但后台常驻的配额服务或辅助脚本（如 `fetch_quota.py`）仍在运行并独占句柄，触发 Windows 进程文件锁，导致更新器出于安全策略暂停并弹出拦截。
+  - 处理：任务管理器或命令行 `taskkill /F /PID <pid>` 结束占用进程，再执行更新即可；当手动 `hermes update` 已经执行完成并显示最新（`f1ccf436a2`）后，该弹窗仅为历史残留阻断提示，直接点击「暂不」或「×」关闭即可。
 
 **Why:** 安装两次失败均因 git/uv 不走系统代理，且坏了的旧 checkout 会被安装器整目录移走导致运行时丢失；记住这些可避免重复踩坑。
 **How to apply:** 任何 hermes 安装/更新/克隆 GitHub 的命令前先 export 代理变量；检查 hermes 状态看 logs\gateway.log 与 gateway_state.json（进程核对 tasklist）。相关：[[user-windows-environment]]

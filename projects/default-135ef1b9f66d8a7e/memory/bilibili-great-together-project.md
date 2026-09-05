@@ -255,3 +255,12 @@ AbortController 穿透 fetchLike / userscript 纯函数覆盖评估（拦截点/
   - 根因：原 `version-release.yml` 在单 Job 内通过 `if: skip == 'false'` 阻止后续构建步骤，但在 Post Job 阶段 `actions/setup-node` 会无条件尝试保存 `cache: pnpm` 目录，因未执行 pnpm 该路径不存在抛出 `Path Validation Error` 导致工作流失败红叉。
   - 修复：重构为 `check`（轻量判决 3s）与 `release`（条件执行 `needs.check.outputs.skip == 'false'`）双 Job 架构。无版本变更时 release Job 被标准跳过，工作流保持 100% 成功绿标。
 
+## 2026-09-04 上游同步看门处置（Issue #9）与 upstream-watch 幂等修复 ✓（main@c401fcd，CI 绿）
+
+- **Issue #9（上游 SukkaW 提交 19ac3ae 评估）**：
+  - 逐条比对确认 20 笔提交（`cab37eb` 至 `19ac3ae`）：所有核心功能特性（4K/HDR/杜比解锁、`upos-sz-mirror14b` PCDN 规避、`trackid` 清洗、P2P 相对协议兼容等）在 2026-08-30 初始移植基线中已全量对齐；上游工程/工作流微调（`0bd1530`、`19ac3ae` 等）不适用本仓库 Monorepo 体系；
+  - 结论：无需 cherry-pick 代码，已在 Issue #9 详细留言并正式关闭。
+- **看门工作流根因修复（upstream-watch 幂等防刷，commit `c401fcd`）**：
+  - **根本原因**：原 `.github/workflows/upstream-watch.yml` 仅按 `state=open` 检索 Issue；当旧 Issue 被评估处置并关闭后，检索结果为空，导致 `RECORDED` SHA 丢失并回退至全量检查，造成每日定时调度误开新 Issue（历史 Issue #2、#8、#9 循环触发的根本原因）。
+  - **修复实现**：检索条件调整为全量 Issue（`state=all`），通过最近一条带 `upstream-sync` 标签的 Issue 稳定提取基准 SHA；检测到上游实际前进时自动收口旧 open Issue 并开新 Issue。
+  - **验证**：本地 143 项单测与全量构建通过；推送后 GitHub Actions CI（Run `33847625201`）与 Version Release（Run `33847625252`）34s 全绿；手动触发 `upstream-watch`（Run `33847700806`）验证成功命中已关闭 Issue #9 的 SHA `19ac3ae`，日志确认输出「记录 SHA 与上游一致，无更新，幂等空转」，0 误报开单。

@@ -2,7 +2,7 @@
 - [Adobe MCP Authentication](adobe-mcp-authentication.md) — Adobe for creativity MCP server requires OAuth authentication; 403 errors indicate missing Authorization headers
 - [Five Repo Task Book v42](five-repo-task-book-v42.md) — 五仓库任务书 v4.2（15 条）**全部完成推送、五仓 CI 全绿**；tweak 已发 **v0.2.21**（tag-only 流程三步+包内版本注入实测）；脚本猫更新检测人工验收通过；含 BOM/mkdocs-tags/lock 提锁契约与待用户拍板事项（orc dependabot.yml 等）
 - [Bilibili Great Together Project](bilibili-great-together-project.md) — make-bilibili-great-together：**v0.3.2 双形态就绪；用户日常已切换=仅 BewlyCat+mbgt 扩展（0.3.2）启用、脚本及其他全禁**（旧「userscript 启用」作废）；bump 后扩展 dist 需本地重建+developerPrivate.reload；卡片「错误」=playinfo WARN 非故障；铁律：钩子读被 mock 全局走闭包原引用
-- [User Windows Environment](user-windows-environment.md) — Windows 环境：本地代理 127.0.0.1:3067、gh 账号 3304711297、PS 5.1/7 双版本规则、浏览器是 Edge Dev、ZCode-Antigravity 桥接(18080端口，gemini-3.7-flash主控+gemini-3.1-flash-image生图Skill已跑通)
+- [User Windows Environment](user-windows-environment.md) — Windows 环境：本地代理 127.0.0.1:3067、gh 账号 3304711297、PS 5.1/7 双版本规则、浏览器是 Edge Dev、**模型网关=官方 EasyCLIProxyAPI（18080，已退役 ZCode-Antigravity 派生分支，ZCode 走 cpa-gui/Anthropic 协议、主力 gemini-3.8-flash）**、配额微服务 18088、三层假故障辨析、扩展清单与 D 盘摆放规范
 - [Edge Dev CDP MCP Setup](edge-dev-cdp-mcp-setup.md) — 最终方案：edge://inspect 开关（持久化）+ 每浏览器会话点一次「允许」+ MCP autoConnect；工具超时=弹窗在等点；根因 zh_CN default_locale 被 Edge 153 拒 → 空降助手+青柠+小黑盒(better-XiaoHeiHe v1.2)三个解压版统一在 D:\extensions\（manifest 已 key 固定 ID + locale 改 en，无自动更新）；勿装 Tampermonkey；用户拍板只接管原封不动日常 Edge；反馈闭环：微软×2 + issue#316 + issue k1m0206/better-XiaoHeiHe#13 + B站私信（毛布斯只此一条，勿再发）
 - [Answer Every User Question](answer-every-user-question.md) — 用户逐条追踪问题，漏答或括号带过会被反复追问；回复前自查每个问题都有成段明确回答
 - [Desktop Commander Overview](desktop-commander-overview.md) — DC 与内置工具重叠高，仅四类场景必选它：大数据 REPL 分析/长跑进程盯日志/SSH 持久会话/超大目录流式搜索；一次性命令用内置即可
@@ -24,9 +24,18 @@
 - [HuggingFace Chinese Plus Project](huggingface-chinese-plus-project.md) — 桌面 huggingface-chinese 汉化脚本项目；引擎原创 GPL-3.0 + izhadu 词库自动同步；v1.0.1 已发布待真机冒烟
 - [SteamDB Chinese Plus Project](steamdb-chinese-plus-project.md) — 桌面 steamdb-chinese 汉化脚本项目；接续停更 SteamDB_CN；词库真源 Chr233/GM_Scripts(AGPL-3.0)；v1.0.1 已发布+真机冒烟通过
 - [Bilibili Enhancement Tools](bilibili-enhancement-tools.md) — B站增强三件套调研：SukkaW 反跟踪油猴脚本（安全可装）+ BewlyCat(功能向) vs AveMujica(外观向) 二选一，B站2026-01推荐API需BewlyCat≥1.5.6；源码级重叠四块+脚本独有清单+共存关模块建议
-- [Hermes Agent Install](hermes-agent-install.md) — hermes-agent v0.21.0 重装完成（2026-09-02）：git/uv 必须走 127.0.0.1:3067 代理、HERMES_HOME=LocalAppData、Studio 已弃、待用户 hermes setup 配 key
+- [Hermes Agent Install](hermes-agent-install.md) — hermes-agent（HERMES_HOME=LocalAppData，GUI 桌面端为主用法）：git/uv 必须走 127.0.0.1:3067 代理；429 限流→GitHub URL 带身份 insteadOf 已修；token-stats 配额微服务 18088 与更新弹窗文件锁排查；模型接 ZCode-Antigravity 桥
 - [Hermes Shared Memory](hermes-shared-memory.md) — hermes 通过 zcode-shared-memory skill 直接读写本记忆库；hermes 写入不提交 git，由 ZCode 负责推送
 - [Bilibili Video Transcription Pipeline](bilibili-video-transcription-pipeline.md) — B站视频→逐字稿管线（直连API防412+ffmpeg whisper small+误听对照表），脚本在 bios_knowledge/
-- [Youshouldknow BIOS Knowledge Series](youshouldknow-bios-knowledge-series.md) — ysk 新增 BIOS 选项科普系列 21 篇（2026-09-02，逐篇附出处）；gen-matrix 平台排序缺陷已修；ysk 新增页面必须重跑 gen-matrix.py
+- [Youshouldknow BIOS Knowledge Series](youshouldknow-bios-knowledge-series.md) — ysk BIOS 选项科普系列（2026-09-02 批次+09-03 EP15 NVMe，逐篇附出处）；同步点 d0fc852；B站看门 bilibili-watch 每 6h 自动开 Issue；ysk 新增页面必须重跑 gen-matrix.py
 - [Serena MCP Silent Config](serena-mcp-silent-config.md) — Serena 插件静默配置（禁用 Web Dashboard 与 GUI 日志弹窗，离线快速启动）
 - [Multi Branch Memory Backup](multi-branch-memory-backup.md) — 双 Agent 记忆多分支隔离备份规则：ZCode 推送 zcode 分支，Hermes 推送 hermes 分支
+- [User Global Preferences](user-global-preferences.md) — 用户全局铁律与偏好（自 Hermes USER.md 沉淀）：CI 全绿才收尾、不确定信息联网核实、复杂任务技能优先、Whisper small、UI 键值分层等宽加粗/加载动效、桌面工具内嵌无黑框、托盘 GUI.for.Cores 风格
+- [Hermes to ZCode Capability Sync](hermes-to-zcode-capability-sync.md) — 2026-09-05 Hermes→ZCode 能力同步：87 skills 迁入 ~/.zcode/skills、deepwiki MCP 新增、重复（superpowers/docx 等）与 Hermes 专有（quota/dogfood 等）跳过清单、记忆库 7 补 5 合
+- [Codebuddy2openai Tauri GUI](codebuddy2openai-tauri-gui.md) — codebuddy2openai Tauri GUI 项目记录（托盘/实时日志/倍率展示等）
+- [Gateway Migration EasyCLIProxyAPI](gateway-migration-easycliproxyapi-and-browser-protection.md) — 模型网关迁移官方 EasyCLIProxyAPI 与浏览器扩展保护记录
+- [Hermes Quota Embedded](hermes-quota-embedded.md) — Hermes 配额监控内置化（token-stats 后端插件替代计划任务/微服务）
+- [Hermes Skills and MCP Optimization](hermes-skills-and-mcp-optimization-2026-09-03.md) — Hermes 技能与 MCP 优化记录（2026-09-03）
+- [Plugin Custom Config Protection](plugin-custom-config-protection.md) — 插件自定义配置保护策略（upstream.json 严禁全量覆盖）
+- [Superpowers and Software Development Separation](superpowers-and-software-development-separation.md) — superpowers 与 software-development 技能分工边界
+- [Workbuddy Proxy Startup](workbuddy-proxy-startup.md) — WorkBuddy 代理启动方式记录
