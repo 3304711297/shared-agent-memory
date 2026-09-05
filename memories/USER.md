@@ -20,6 +20,6 @@ User communicates in Chinese; reply in Chinese by default.
 §
 - 用户强偏好桌面工具与代理控制台采用完全内嵌化的交互设计：严禁后台启动反代时弹出外部黑色 CMD 终端窗口（必须默认静默无黑框）；所有 Debug 信息、运行输出与错误日志必须直接内嵌在控制台应用界面的「实时日志」页面中查看。
 - 偏好系统托盘采用轻量无图标、分组分割线的现代内核管理风格（对标 GUI.for.Cores / sing-box）；大模型倍率展示严格去除无意义英文单位（如 credits），保持纯净数值倍率。
-- 用户个人 Telegram 频道：拥有并运营 Telegram 频道 @emoegg（https://t.me/emoegg，Web 预览 https://t.me/s/emoegg，频道现用名「蛋总的圈」，曾用名「某不知名杂货铺」），专注于网络代理协议解析、延迟/RTT 测评、TUN 协议栈、GFW/地方防火墙机制研究及实用软件定制资源。
+- 用户个人 Telegram 频道：拥有并运营 Telegram 频道 @emoegg（https://t.me/emoegg，Web 预览 https://t.me/s/emoegg，频道现用名「蛋总的圈」，曾用名「某不知名杂货铺」），专注于网络代理协议解析、延迟/RTT 测评、TUN 协议栈、GFW/地方防火墙机制研究及实用软件定制资源。已绑定专属管理机器人 @HermesAgentByjieBot（ID: 8361539844，具备发布、编辑、删除与置顶等完整管理员权限，配置位于 %LOCALAPPDATA%\hermes\auth\telegram_channel.json，专用脚本为 scripts/tg_channel.py）。
 §
 用户工作偏好：全面优先使用并发进行工作以最大化效率；多任务/多仓库/大批量检查修复场景优先调度并行子代理（当前 Hermes + Gemini 实测单批最高支持 10 并发，日常推荐 3~6 个一批并行推进，彻底解除旧 2 并发限制）。
