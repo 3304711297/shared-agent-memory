@@ -1,8 +1,8 @@
 User communicates in Chinese; reply in Chinese by default.
 §
-用户主用 Hermes Agent 作为日常主力 AI 编码与操作系统助手（ZCode 处于备用/不常用状态）；记忆库 shared-agent-memory（GitHub 仓库 3304711297/shared-agent-memory）默认主分支为 hermes，变动自动静默推送到 GitHub hermes 分支。
+用户主用 Hermes Agent 作为日常主力 AI 编码与操作系统助手（ZCode 处于备用/不常用状态）；记忆库 shared-agent-memory（GitHub 仓库 3304711297/shared-agent-memory）自 2026-09-05 起为三分支架构：默认主分支 main=双端共享记忆库唯一真源（本 Agent 的 memories/topics 是指向它的 junction，读写字同一份），zcode/hermes 分支各放 Agent 专属内容。
 §
-用户铁律：记忆库 shared-agent-memory（GitHub 仓库 3304711297/shared-agent-memory）默认主分支为 hermes；后续任何记忆变动（新增、修改）必须在当轮结束前自动静默提交并推送到 GitHub（hermes 分支），严禁遗漏或等待用户提醒。优先使用技能/插件提升执行效率。
+用户铁律：记忆库 shared-agent-memory（GitHub 仓库 3304711297/shared-agent-memory）main 分支=共享真源；后续任何共享记忆变动（topics/ 下新增、修改）必须在当轮结束前自动静默提交并推送到 GitHub main 分支，Hermes 专属内容（USER.md/根 MEMORY.md 等）推 hermes 分支，严禁遗漏或等待用户提醒。优先使用技能/插件提升执行效率。
 §
 用户偏好：对于上游同步看门（upstream-watch）及常规评估类 GitHub Issue，完成比对评估无须代码改动或移植后，可直接自动在 GitHub 上留言并关闭 Issue，无需每次额外询问确认。
 §
