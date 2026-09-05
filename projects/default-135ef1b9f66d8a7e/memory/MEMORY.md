@@ -44,3 +44,4 @@
 - [Plugin Custom Config Protection](plugin-custom-config-protection.md) — 插件自定义配置保护策略（upstream.json 严禁全量覆盖）
 - [Superpowers and Software Development Separation](superpowers-and-software-development-separation.md) — superpowers 与 software-development 技能分类的同名冲突历史、去重清理与权责分工规范
 - [Workbuddy Proxy Startup](workbuddy-proxy-startup.md) — WorkBuddy 代理启动方式记录
+- [Codebuddy2openai Upstream Benchmark](codebuddy2openai-upstream-benchmark.md) — 09-05 对标 EasyCLIProxyAPI v0.2.72 可采纳清单（三档+排除项）；本地 XSS/设置不持久化/托盘硬编码等缺陷已定位；上游浅克隆在 %TEMP%\easycliproxyapi
