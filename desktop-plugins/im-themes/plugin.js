@@ -1,28 +1,27 @@
 /**
- * Hermes Desktop Plugin: tg-channel-themes (@emoegg 频道精选 15 款沉浸主题合集)
+ * Hermes Desktop Plugin: tg-channel-themes (@emoegg 频道精选 14 款纯暗黑/夜间沉浸主题合集)
  *
- * 移植自 Telegram 频道 @emoegg 第 12 号精选主题合集（已精简剔除刺眼日间亮色，保留高颜值暗黑与舒眼米色）：
+ * 移植自 Telegram 频道 @emoegg 第 12 号精选主题合集（已彻底剔除所有日间浅色，全量收敛为纯粹的暗黑与极客夜间工作台）：
  *
- * 【经典 IM 社交系列】
- * 1. qq-classic: QQ 经典 (Such QQ)
+ * 【经典 IM 社交暗黑系列】
+ * 1. qq-classic: QQ 经典 (Such QQ 暗夜天蓝)
  * 2. wechat-dark: 微信夜间 1 (小而美 8.0 暗黑模式)
  * 3. wechatify-dark: 微信夜间 2 (WeChatify Dark OLED)
  * 4. wechat-dark3: 微信夜间 3 (夜间微信)
  *
- * 【动漫 / 极简风格系列】
+ * 【动漫夜间系列】
  * 5. anime-designer: 动漫夜间 (Designer)
- * 6. cream-sepia: 米色日间 (米色舒眼护眼羊皮纸)
  *
  * 【极客 / 编程审美暗黑系列】
- * 7. brownie-dark: 酒红简洁 (Brownie)
- * 8. palenight: 紫色简洁 (Palenight Material)
- * 9. spacegrey: 黄色文字 (Spacegrey)
- * 10. puaro-grey: 淡灰简洁 (Puaro)
- * 11. forest-green: 暗绿文字 (Forest Green)
- * 12. dracula-mint: 蓝绿夜间 (Dracula Mint)
- * 13. amber-orange: 橙黄夜间 (Is So Elegant)
- * 14. neon-purple: 暗紫夜间 (Buifys)
- * 15. jotunheim-blue: 湛蓝夜间 (Jotunheim)
+ * 6. brownie-dark: 酒红简洁 (Brownie)
+ * 7. palenight: 紫色简洁 (Palenight Material)
+ * 8. spacegrey: 黄色文字 (Spacegrey)
+ * 9. puaro-grey: 淡灰简洁 (Puaro)
+ * 10. forest-green: 暗绿文字 (Forest Green)
+ * 11. dracula-mint: 蓝绿夜间 (Dracula Mint)
+ * 12. amber-orange: 橙黄夜间 (Is So Elegant)
+ * 13. neon-purple: 暗紫夜间 (Buifys)
+ * 14. jotunheim-blue: 湛蓝夜间 (Jotunheim)
  *
  * 每一个主题均注册至 THEMES_AREA，并在 Ctrl+K 命令面板中支持一键极速切换。
  */
@@ -238,42 +237,7 @@ const ALL_THEMES = [
     typography: TYPOGRAPHY,
   },
 
-  // --- 7. 米色日间 (米色舒眼) ---
-  {
-    name: 'cream-sepia',
-    label: '米色日间 (米色舒眼)',
-    description: 'Eye-care sepia cream parchment daytime theme with calm forest green accents',
-    colors: {
-      background: '#f8f4ec',
-      foreground: '#38332b',
-      card: '#ffffff',
-      cardForeground: '#38332b',
-      muted: '#eee8dc',
-      mutedForeground: '#857c6e',
-      popover: '#ffffff',
-      popoverForeground: '#38332b',
-      primary: '#4d7c0f',
-      primaryForeground: '#ffffff',
-      secondary: '#f2f8e9',
-      secondaryForeground: '#3f6212',
-      accent: '#ecfccb',
-      accentForeground: '#365314',
-      border: '#e4dcd0',
-      input: '#ffffff',
-      ring: '#65a30d',
-      midground: '#65a30d',
-      composerRing: '#65a30d',
-      destructive: '#dc2626',
-      destructiveForeground: '#ffffff',
-      sidebarBackground: '#f1ebd8',
-      sidebarBorder: '#dfd4be',
-      userBubble: '#65a30d',
-      userBubbleBorder: '#4d7c0f',
-    },
-    typography: TYPOGRAPHY,
-  },
-
-  // --- 11. 酒红简洁 (Brownie) ---
+  // --- 7. 酒红简洁 (Brownie) ---
   {
     name: 'brownie-dark',
     label: '酒红简洁 (Brownie)',
