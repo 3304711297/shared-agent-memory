@@ -86,7 +86,7 @@ metadata:
   4. `smart-web-crawler`：带代理支持的轻量网页提取与 Markdown 转换（`crawl.py`）
   5. `chinese-copywriting`：中文技术排版规范与中英混排空格自动化（`pangu_format.py`）
   6. `semantic-release-pro`：语义化 Commit、SemVer 计算与 Changelog 生成规范
-- **ZCode 记忆持久化云端备份**：私有仓库 `https://github.com/3304711297/shared-agent-memory`（Private，`zcode` 分支；Hermes 侧推 `hermes` 分支），本地 `~/.zcode/cli/memories/` 已初始化并关联推送，已建立"记忆变动自动静默备份"铁律机制（详见 [[multi-branch-memory-backup]]）。
+- **ZCode 记忆持久化云端备份**：私有仓库 `https://github.com/3304711297/shared-agent-memory`（Private，2026-09-05 三分支架构：共享内容推 `main`，`zcode`/`hermes` 分支各放 Agent 专属），本地 `~/.zcode/cli/memories/` 检出 main，已建立"记忆变动自动静默备份"铁律机制（详见 [[multi-branch-memory-backup]]）。
 
 ## WorkBuddy 模型桥接
 - **WorkBuddy 客户端**：安装在 `D:\workbuddy\WorkBuddy.exe`，CLI 脚本在 `D:\workbuddy\resources\app.asar.unpacked\cli\bin\codebuddy`。
