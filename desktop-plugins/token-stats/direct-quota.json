@@ -2,15 +2,15 @@
   "status": "ok",
   "account": "jimygod114514@gmail.com",
   "plan": "Google AI Pro",
-  "quota5h": 0.5,
+  "quota5h": 0.3,
   "reset5h": "2026-09-05T17:50:17Z",
   "quotaWeekly": 39.0,
   "resetWeekly": "2026-09-11T01:03:50Z",
   "claudeQuota5h": 100,
   "claudeQuotaWeekly": 100,
   "source": "Google 官方直连 (Hermes 内置)",
-  "updatedAt": "2026-09-05T15:29:17Z",
-  "updatedAtLocal": "23:29:17",
+  "updatedAt": "2026-09-05T15:53:15Z",
+  "updatedAtLocal": "23:53:15",
   "workbuddy": {
     "id": "workbuddy",
     "name": "WorkBuddy (codebuddy2openai)",
@@ -18,7 +18,38 @@
     "statusLabel": "运行中",
     "endpoint": "http://127.0.0.1:8787/v1",
     "modelsCount": 28,
-    "note": "已挂载 28 个可用模型"
+    "note": "账号「晚街」· 积分 2861/3700 (77.3%)",
+    "usage": {
+      "nickname": "晚街",
+      "total": 3700.0,
+      "remain": 2861.04000059,
+      "used": 838.95999941,
+      "remainPercent": 77.3,
+      "isPaidUser": false,
+      "packages": [
+        {
+          "code": "TCACA_code_007_nzdH5h4Nl0",
+          "total": 2200.0,
+          "remain": 1861.04000059,
+          "used": 338.95999941,
+          "unit": "credits"
+        },
+        {
+          "code": "TCACA_code_008_cfWoLwvjU4",
+          "total": 500.0,
+          "remain": 0.0,
+          "used": 500.0,
+          "unit": "credits"
+        },
+        {
+          "code": "TCACA_code_030_BjSt89qTvr",
+          "total": 1000.0,
+          "remain": 1000.0,
+          "used": 0.0,
+          "unit": "credits"
+        }
+      ]
+    }
   },
   "providers": [
     {
@@ -30,7 +61,7 @@
       "windows": [
         {
           "label": "Gemini 5h 滚动额度",
-          "remaining": 0.5,
+          "remaining": 0.3,
           "reset": "2026-09-05T17:50:17Z"
         },
         {
@@ -52,7 +83,38 @@
       "statusLabel": "运行中",
       "endpoint": "http://127.0.0.1:8787/v1",
       "modelsCount": 28,
-      "note": "已挂载 28 个可用模型"
+      "note": "账号「晚街」· 积分 2861/3700 (77.3%)",
+      "usage": {
+        "nickname": "晚街",
+        "total": 3700.0,
+        "remain": 2861.04000059,
+        "used": 838.95999941,
+        "remainPercent": 77.3,
+        "isPaidUser": false,
+        "packages": [
+          {
+            "code": "TCACA_code_007_nzdH5h4Nl0",
+            "total": 2200.0,
+            "remain": 1861.04000059,
+            "used": 338.95999941,
+            "unit": "credits"
+          },
+          {
+            "code": "TCACA_code_008_cfWoLwvjU4",
+            "total": 500.0,
+            "remain": 0.0,
+            "used": 500.0,
+            "unit": "credits"
+          },
+          {
+            "code": "TCACA_code_030_BjSt89qTvr",
+            "total": 1000.0,
+            "remain": 1000.0,
+            "used": 0.0,
+            "unit": "credits"
+          }
+        ]
+      }
     }
   ]
 }
