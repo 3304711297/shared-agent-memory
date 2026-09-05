@@ -44,7 +44,7 @@
 - [Plugin Custom Config Protection](plugin-custom-config-protection.md) — 插件自定义配置保护策略（upstream.json 严禁全量覆盖）
 - [Superpowers and Software Development Separation](superpowers-and-software-development-separation.md) — superpowers 与 software-development 技能分类的同名冲突历史、去重清理与权责分工规范
 - [Workbuddy Proxy Startup](workbuddy-proxy-startup.md) — WorkBuddy 代理启动方式记录
-- [Codebuddy2openai Upstream Benchmark](codebuddy2openai-upstream-benchmark.md) — 09-05 对标 EasyCLIProxyAPI：三批采纳已推送（6 提交 CI 全绿：XSS/单实例锁/双主题/TTFT/用量统计/更新检查）；批次4 遗留处理中——自动拉起+main.js/commands.rs 拆分已本地提交（3619d59/ffa35ea）**待 Hermes 验收后推送**，4C（CSP/CI 测试/requirements）压后
+- [Codebuddy2openai Upstream Benchmark](codebuddy2openai-upstream-benchmark.md) — 09-05 对标 EasyCLIProxyAPI **四批全部落地推送（11 提交 CI 全绿，遗留清零）**：XSS/单实例锁/双主题/TTFT/用量统计/更新检查/auto_start_proxy/双端拆分/CSP+pytest 24 用例+CI 加测试；批次4 经 [[Hermes Side Verification Handoff]] 验收合流
 - [Hermes Side Verification Handoff](hermes-side-verification-handoff.md) — 用户可令 Hermes 旁路接手全量构建/代码审查/验收：ZCode 只做秒级底线检查+本地提交保护现场+冻结树待验收，验收反馈回来后再推送；被取消的子代理可能已写完文件，先审计残骸
 - [Hermes Ecosystem Evaluation and YSK Sync](hermes-ecosystem-evaluation-and-ysk-sync.md) — 社区 Hermes 资源评估（1/2/4/6 安装价值辨析）与 3/5（高阶指令速查+官方生态进阶）整理落入 youshouldknow 项目全流程闭环（commit abcc8f8，CI 全绿部署）
 - [Telegram Channel Emoegg Ops](telegram-channel-emoegg-ops.md) — 用户个人 Telegram 频道 @emoegg（蛋总的圈）专属 Bot (@HermesAgentByjieBot) 管理体系、主号风控背景与 14 款纯暗黑精选主题落地
