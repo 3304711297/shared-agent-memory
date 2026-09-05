@@ -2,7 +2,9 @@
 name: workbuddy-proxy-startup
 description: codebuddy2openai 反代（127.0.0.1:8787）启动、故障排查与 venv 依赖说明
 metadata:
+  node_type: memory
   type: reference
+  originSessionId: sess_c9f48820-9daf-4a39-9173-ecedab6369dc
 ---
 
 # codebuddy2openai 反代运维速查
@@ -18,6 +20,7 @@ metadata:
 ## 健康检查
 - `curl http://127.0.0.1:8787/health` → status ok、nickname「晚街」、token_expired=false 即正常
 - `curl http://127.0.0.1:8787/v1/models` → 完整模型列表
+- `curl http://127.0.0.1:8787/api/usage_summary` → 积分用量 `{uid,nickname,total,remain,used,is_paid_user,packages[]}`；2026-09-06 实测「晚街」remain 2779.8 / total 3700（套餐 1779.8+0+1000）；Python 访问需显式禁代理（`ProxyHandler({})`）防 3067 劫持 localhost
 - 监听确认：`netstat -ano | findstr :8787`
 
 ## 排查顺序（Hermes 调 WorkBuddy 模型失败时）
