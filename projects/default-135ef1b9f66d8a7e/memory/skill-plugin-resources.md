@@ -16,4 +16,9 @@ metadata:
 5. **google-gemini/gemini-skills** — https://github.com/google-gemini/gemini-skills ：Google 官方，Gemini API/SDK 与模型交互技能。
 6. **zai-org/zcode-plugins** — https://github.com/zai-org/zcode-plugins ：ZCode 插件市场官方仓库（内置+社区插件），ZCode 组件升级/排查市场问题时对照它（关联 [[capability-upstream-watch]] 的两层市场架构）。
 
-**How to apply:** 用户要找某类能力（如 PPT/SEO/安全审计技能）或 ZCode/Hermes 缺功能时，先查 1/2 的中文目录定位技能名，再回 GitHub 拿源码审读后安装；Gemini/ZCode 官方需求直接用 5/6。第三方 skill 安装前必须人工审内容（提示词注入面），不盲装。
+**Anthropic 官方仓库（2026-09-05 补充，用户书签追加）**
+7. **anthropics/skills** — https://github.com/anthropics/skills ：Agent Skills 官方公共仓库（Claude 系技能的源头真源）。
+8. **anthropics/claude-plugins-official** — https://github.com/anthropics/claude-plugins-official ：Anthropic 官方管理的高质量 Claude Code 插件目录。
+9. **anthropics/knowledge-work-plugins** — https://github.com/anthropics/knowledge-work-plugins ：面向知识工作者的开源插件集（主要供 Claude Cowork 使用）。
+
+**How to apply:** 用户要找某类能力（如 PPT/SEO/安全审计技能）或 ZCode/Hermes 缺功能时，先查 1/2 的中文目录定位技能名，再回 GitHub 拿源码审读后安装；Claude 系官方技能/插件直接用 7/8/9（源头真源，优先于第三方转译）；Gemini/ZCode 官方需求直接用 5/6。第三方 skill 安装前必须人工审内容（提示词注入面），不盲装。
