@@ -67,14 +67,18 @@ When re-registering or migrating a local provider (e.g. migrating from a legacy 
 - **EasyCLIProxyAPI (18080) Dual Protocol Support**: EasyCLIProxyAPI serves both `/v1/chat/completions` (OpenAI format, for Hermes) and `/v1/messages` (Anthropic format, for ZCode/Claude Code), providing Gemini 3.8/3.7/3.6/3.1 with thinking/reasoning.
 - **Agent Path Detection on Windows**: EasyCLIProxyAPI hardcodes client discovery to `%LOCALAPPDATA%\Programs\<Agent>\<Agent>.exe` and `%ProgramFiles%\<Agent>\<Agent>.exe`. If an agent (e.g. ZCode) is installed on another drive (e.g. `D:\zcode\ZCode.exe`), create directory junctions (`mklink /J`) in standard locations so EasyCLIProxyAPI can detect the client and enable the launch button.
 
-## 8. Desktop Quota Monitor Plugin Architecture (`token-stats`) & UI Design Rules
+## 8. Embedded Desktop Quota Monitor Plugin Architecture (`token-stats`) & UI Design Rules
 When running Hermes Desktop with the `token-stats` status-bar quota chip for Google / Antigravity:
-- **Legacy Trap**: Earlier iterations depended on ZCode-Antigravity's private `/v0/management/api-call` hook and `%LOCALAPPDATA%\ZCodeAntigravity\auth`. Upstream official CLIProxyAPI (7.2.149 in EasyCLIProxyAPI) does not ship that custom endpoint, and polling `/v0/management/` using API keys triggers a 30-minute anti-bruteforce IP ban on `127.0.0.1`.
+- **Embedded Architecture Evolution (2026-09-04 / 2026-09-05)**:
+  - The legacy standalone 18088 microservice and scheduled task `Hermes_Quota_Service` are retired. Quota is served by an embedded Hermes user plugin (`plugins/token-stats/dashboard/plugin_api.py`) mounted at `/api/plugins/token-stats/quota` on Hermes's own internal backend server.
+  - Lifecycle follows the desktop app: app open → service up, app close → service down. Zero persistent background daemons or scheduled tasks.
+  - The desktop UI (`desktop-plugins/token-stats/plugin.js`) communicates via `ctx.rest('/quota')`, requiring zero CORS configuration and no fixed port bindings.
+  - Features full-surface integration: status-bar Chip (`statusBar.right`), Popover details, Sidebar nav entry (`SIDEBAR_NAV_AREA`, Pulse icon), dedicated full-page dashboard (`ROUTES_AREA: /quota`), Command Palette shortcut (`PALETTE_AREA`), and local preference persistence via `ctx.storage`.
+  - Also integrates non-blocking local gateway probing for WorkBuddy (`127.0.0.1:8787/v1`) alongside Antigravity official credentials.
 - **Direct Quota Architecture**:
-  - `fetch_quota.py` directly reads plaintext Google OAuth tokens from `D:\EasyCLIProxyAPI\auth\antigravity-*.json` (no DPAPI decryption needed).
+  - Reads plaintext Google OAuth tokens from `D:\EasyCLIProxyAPI\auth\antigravity-*.json` (no DPAPI decryption needed).
   - Queries Google's official Antigravity Quota endpoint: `https://daily-cloudcode-pa.googleapis.com/v1internal:retrieveUserQuotaSummary` (via proxy `127.0.0.1:3067`). **Critical Distinction**: Google maintains two separate quota pools under the same OAuth token — `daily-cloudcode-pa` is the dedicated Antigravity quota bucket (used by Antigravity / EasyCLIProxyAPI GUI); querying generic `cloudcode-pa` reaches an unrelated CloudCode pool and returns completely mismatched quota fractions (e.g. 100%/43% vs. 74%/87%).
-  - Runs a local lightweight microservice on `127.0.0.1:18088/quota` (with CORS and 30s cache) registered as Windows Scheduled Task `Hermes_Quota_Service` (`pythonw.exe`).
-  - `desktop-plugins/token-stats/plugin.js` queries `http://127.0.0.1:18088/quota` cleanly, displaying 5h limit %, weekly limit %, and reset countdowns without touching the proxy's management port.
+  - 30-second in-memory cache with fallback to disk cache `direct-quota.json`. Pass `?force=1` on explicit user click to bypass cache.
 - **Desktop UI Design & Micro-Component Rules**:
   - **Popover vs. Tip Pitfall**: The Hermes native `<Tip>` component has `box-decoration-clone inline max-w-64` intended strictly for 1-line action hints. Using `<Tip>` for multi-line status dashboards produces ragged-right "torn tape" stepped backgrounds and splits Chinese words awkwardly across lines. Always use `Popover` (`PopoverContent` with `bg-elevated`, `backdrop-blur-xl`, rounded card, and visual progress bars) for multi-row overlays, keeping `<Tip>` only as a 1-line hover hint.
   - **Status Bar Key-Value Contrast**: In compact status chips (e.g. `5h:100%`), never paint label (`5h`), delimiter (`:`), and value (`100%`) in the same uniform color. Mute the label (`text-[10px] text-secondary`), de-emphasize punctuation (`text-quaternary font-mono`), and bold the numerical value in monospace (`font-mono font-bold text-emerald-400`) so users scan core metrics instantly without visual clutter.
