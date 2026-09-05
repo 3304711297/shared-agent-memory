@@ -19,6 +19,8 @@ metadata:
 
 **2026-08-27 策略拦截实测 + 推送合并规则（tweak 红→绿闭环）：** 同日同时改两仓时曾把 tweak 改动（`6898ca1`）先于提锁单独推送，ysk `9b1e212` 一落地即令 lock 过期，coverage-audit 实测转红（run 33072955544，12 秒即拦），证实策略自动执行而非摆设；随后单独提交锁 bump（`893b3a2`，→ ysk `9b1e212b3e...`）恢复全绿。沉淀操作规则：**凡涉及两仓，一律"先推 ysk→取完整 SHA→把提锁与 tweak 其余改动合并为同一次 tweak 提交再推"，不为锁单独烧一个提交**。lychee 已收紧为仅 200..=299 可达并按域名显式排除约 20 个反爬站（CI 不再检查这些域名，属人工复核责任）；CI Actions 全部固定完整 commit SHA。
 
+**2026-09-05 策略变更（用户拍板方案 B，tweak `d1e9988`）：lock 门禁收敛至 tag 发版。** 此前"ysk 任何 main 提交 → tweak lock 过期 → CI 红 → 人工提锁"的噪音被用户要求消除。现状：push/PR 的 coverage-audit 直连 `youshouldknow/main`（`-KnowledgeRef main`），不再校验 lock（lock 过期假警报归零）；**lock 校验仅保留在 tag 发版时执行**（`if: startsWith(github.ref, 'refs/tags/v')`），发布审计仍可复现。四份资料与 manifest 的一致性校验在所有触发下不变——ysk 改映射资料而 tweak 未同步仍会真红。后果：tweak 日常审计结果绑定 ysk/main 浮动，历史 CI 不可比（已接受）。**原"lock 严格同步策略（ysk 任何提交都需提锁）"作废**；提锁仅在发版前需要。
+
 **2026-09-05 清单 44→48 项 + 新类别需扩审计正则（tweak `fc6a39b`）：** 为闭合上游吸收联动（Kiwi-Tweaks→菜单 12、Atom-Tool-Box→菜单 1），manifest 新增 `GAMEQOS-001`（category `GameQos`，新类别）与 `CORE-017/018/019`（WPBT/TaskbarEndTask/PS Core 遥测），四资料同步。**坑：审计器 ID 提取正则（`Test-CrossRepoCoverage.ps1` 的 `Get-CoverageIds`，约 :34）硬编码前缀清单，manifest 侧直接读 JSON id 不受影响 → 本地用通用正则预检会显示一致，CI 却对每份文档报"缺少 GAMEQOS-001"**。新增清单类别时必须同步把前缀加进该正则；已有前缀下加编号则不用。ysk 侧新页联动清单：front matter `tweak_module`（gen-matrix.py 会校验矩阵页）+ mkdocs.yml nav + 分类索引 README，三者缺一会挂 docs CI；WPBT 页含微软 learn 外链已过 lychee。
 
 [[desktop-projects-tweak-youshouldknow]] [[tweak-modularization-plan]] [[youshouldknow-modular-linkage]]
