@@ -45,7 +45,7 @@ metadata:
 - GitHub 账号：gh CLI 已登录 `3304711297`（昵称"智商已更新"），建仓/推 API 均可用
 
 ## 模型网关与 Antigravity 桥接（2026-09-04 架构迭代）
-- **网关核心**：已彻底退役旧版 ZCode-Antigravity 派生分支，全面升级至官方 **EasyCLIProxyAPI**（核心版本 `v7.2.149`，安装于 `D:\EasyCLIProxyAPI-v0.2.71-Windows-amd64`）。
+- **网关核心**：已彻底退役旧版 ZCode-Antigravity 派生分支，全面升级至官方 **EasyCLIProxyAPI**（核心版本 `v7.2.151`，2026-09-05 手动升级并冒烟验证，commit 5208aec7；旧核心备份在 cpa-core/cli-proxy-api.exe.v7.2.149.bak；安装于 `D:\EasyCLIProxyAPI-v0.2.71-Windows-amd64`）。
 - **运行方式**：本地模型网关监听 `http://127.0.0.1:18080`，官方核心内嵌正版 OAuth 凭据，直接原生支持 `gemini-3.8-flash`（及 `-high` 思维链）、`gemini-3.7-flash`、`gemini-3.6-flash`、`gemini-3.1-pro-low`、`gemini-3.1-flash-image`（生图）、`gemini-web-search` 等全系模型。
 - **协议双通**：
   - Hermes Agent 走 OpenAI 兼容协议（`http://127.0.0.1:18080/v1/chat/completions`，提供商 `cpa-gui`）；
