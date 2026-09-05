@@ -15,6 +15,7 @@ metadata:
 - **Issue 语义（label `capability-watch`）**：Issue 开着 = 清单落后于上游；升级组件后**必须把清单 `installed.version` 回写为新版并推 main**，下次运行自动收口。Actions 有 skipped_count 防误收口（本地源未检查时不关闭 Issue）。与 hermes 分支旧 watcher 的 `upstream-watch` 标签互不干扰。
 - **首轮差异（Issue #2，2026-09-05 当日全部落地并收口）**：chrome-devtools-mcp 1.8.0（双端 MCP 钉版已改、claude 市场插件重装至 pin 45f187b1、保护参数 `--ignore-default-chrome-arg=--disable-extensions` 已补回插件）；github 插件 0.1.2（CDN zip sha256 校验换装）；context7-mcp 确认为远端托管（http mcp.context7.com + npx 未钉版）自动最新，移出监控。
 - **无 CLI 的 ZCode 插件手工更新法（复刻安装器行为，已两次实操验证）**：下载 zip/tarball → 校验 sha256/来源 → 解压到 cache 新版本目录（zip 需剥离顶层前缀）→ installed_plugins.json 定向更新 version/installPath/updatedAt/source.sha（勿动 cacheTransactionId 等其余字段）→ 删旧版本目录（.git 只读 pack 需先 chmod -R u+w）→ 本地跑脚本验证全绿。注意 python 脚本内不可用 /tmp 路径（MSYS 虚拟路径，Windows python 看不到）。
+- **GUI「可更新」徽章与开关的两个坑（2026-09-05）**：①徽章比对源是客户端本地市场快照 `plugins/marketplaces/claude-plugins-official/.claude-plugin/marketplace.json`（8 月快照、非 git 不会自更新）——手工换装后 pin ≠ 已装 sha 会误报可更新，定向补丁该文件的 sha 字段即可；②客户端运行中内存注册表不感知手工换装，启用开关会因校验旧路径（已删目录）失败而弹回，重启客户端即恢复（enabledPlugins 真值存 cli/config.json 未丢）。
 - **【用户拍板 2026-09-05】hermes-agent 与 ZCode CLI 本体永久不纳入看门**（各自自带更新机制；注意 hermes-agent 仓库的 skills/ 子目录提交监控属于技能库不属于本体）；未安装的市场插件（cloudbase-skills/example-plugin/代码安全防护）也不监控，代码安全防护在两份清单均未见、来源待查。
 - **脚本坑位**：npm scoped 包需全量 URL 编码（@ 和 /）且必须用普通 Accept 头（GitHub 专用 Accept 会 406）；GitHub API 匿名限流需带 token；工作流建 Issue 前先确保标签存在；内置插件 zip 在 CDN 上连已装版本都 404，勿再试。
 - **覆盖盲区**（清单 notWatched 同步维护）：hermes hub 技能（hermes GUI 自带提示）、http 远端 MCP（永远最新）、zcode-custom 自有 skill（无上游）。
