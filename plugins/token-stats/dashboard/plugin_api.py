@@ -74,18 +74,22 @@ def _stale_disk_cache() -> Optional[dict]:
 
 
 def check_workbuddy_status() -> dict[str, Any]:
-    """Non-blocking check for local WorkBuddy / codebuddy2openai gateway (port 8787)."""
+    """Non-blocking check for local WorkBuddy / codebuddy2openai gateway (port 8787).
+
+    Probes /v1/models for liveness, then fetches /api/usage_summary for
+    credits & active account (endpoint added by ZCode, commit 5b4381c).
+    """
     import urllib.request
 
     opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
     endpoint = "http://127.0.0.1:8787/v1"
     try:
         req = urllib.request.Request(f"{endpoint}/models")
-        with opener.open(req, timeout=1.0) as resp:
+        with opener.open(req, timeout=1.5) as resp:
             if resp.status == 200:
                 data = json.loads(resp.read().decode("utf-8"))
                 models = data.get("data", [])
-                return {
+                base: dict[str, Any] = {
                     "id": "workbuddy",
                     "name": "WorkBuddy (codebuddy2openai)",
                     "status": "online",
@@ -94,6 +98,32 @@ def check_workbuddy_status() -> dict[str, Any]:
                     "modelsCount": len(models),
                     "note": f"已挂载 {len(models)} 个可用模型",
                 }
+                # Fetch credits & account summary
+                try:
+                    req2 = urllib.request.Request("http://127.0.0.1:8787/api/usage_summary")
+                    with opener.open(req2, timeout=4) as resp2:
+                        usage = json.loads(resp2.read().decode("utf-8"))
+                    if "error" not in usage:
+                        remain = usage.get("remain", 0.0)
+                        total = usage.get("total", 0.0)
+                        pct = round(remain / total * 100, 1) if total > 0 else 0.0
+                        base.update({
+                            "usage": {
+                                "nickname": usage.get("nickname", "—"),
+                                "total": total,
+                                "remain": remain,
+                                "used": usage.get("used", 0.0),
+                                "remainPercent": pct,
+                                "isPaidUser": usage.get("is_paid_user", False),
+                                "packages": usage.get("packages", []),
+                            },
+                            "note": f"账号「{usage.get('nickname', '—')}」· 积分 {remain:.0f}/{total:.0f} ({pct}%)",
+                        })
+                    else:
+                        base["usageError"] = usage.get("error", "unknown")
+                except Exception as exc:
+                    base["usageError"] = f"积分获取失败: {exc}"
+                return base
     except Exception:
         pass
 
@@ -255,6 +285,24 @@ def format_quota_markdown(data: dict) -> str:
     wb_status = wb.get("statusLabel", "未启动")
     wb_note = wb.get("note", "")
 
+    wb_usage_section = ""
+    usage = wb.get("usage")
+    if wb.get("status") == "online" and usage:
+        pct = usage.get("remainPercent", 0)
+        paid = "付费版" if usage.get("isPaidUser") else "免费版"
+        packages = usage.get("packages", [])
+        pkg_lines = "\n".join(
+            f"  - 包 `{p.get('code', '')[-8:]}`: `{p.get('remain', 0):.0f}`/`{p.get('total', 0):.0f}` {p.get('unit', 'credits')}"
+            for p in packages
+        )
+        wb_usage_section = f"""
+- **当前账号**：`{usage.get('nickname', '—')}` ({paid})
+- **积分余量**：`{usage.get('remain', 0):.1f}` / `{usage.get('total', 0):.0f}` (`{pct}%`)
+- **积分包明细**：
+{pkg_lines}"""
+    elif wb.get("usageError"):
+        wb_usage_section = f"\n- **积分查询**: ⚠️ {wb.get('usageError')}"
+
     return f"""### 📊 模型配额与本地网关监控 (`{sync}`)
 
 **Google AI (Antigravity 官方直连)**
@@ -265,7 +313,7 @@ def format_quota_markdown(data: dict) -> str:
 
 **WorkBuddy (codebuddy2openai)**
 - **网关状态**：`{wb_status}` · `{wb_note}`
-- **本地端点**：`http://127.0.0.1:8787/v1`
+- **本地端点**：`http://127.0.0.1:8787/v1`{wb_usage_section}
 
 *(输入 `/quota refresh` 可强制穿透刷新)*"""
 
