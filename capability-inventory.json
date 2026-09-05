@@ -1,6 +1,6 @@
 {
-  "version": 1,
-  "description": "本地能力组件清单（skill/mcp/plugin/工具核心的已装版本与上游源）。由 capability-upstream-watch 工作流每日比对；【维护铁律】升级或新装任何组件后，必须同步更新本清单并随共享库推 main，看门自动收口对应 Issue。",
+  "version": 2,
+  "description": "本地能力组件清单（skill/mcp/plugin/工具核心的已装版本与上游源）。由 capability-upstream-watch 工作流每日比对远端源；本地源组件用 watch-capability.cmd 或任意 Agent 会话跑脚本比对。【维护铁律】升级或新装任何组件后，必须同步更新本清单并随共享库推 main，看门自动收口对应 Issue。",
   "updatedAt": "2026-09-05",
   "components": [
     {
@@ -86,15 +86,35 @@
       "installed": [
         { "where": "ZCode 插件（已启用）", "version": "0.1.1" }
       ]
+    },
+    {
+      "id": "zcode-bundled-plugins",
+      "display": "ZCode 内置插件组（随客户端构建种子分发）",
+      "checks": [
+        {
+          "type": "local-merged-marketplace",
+          "file": "C:/Users/VOS-User/.zcode/cli/plugins/marketplaces/zcode-plugins-official/marketplace.json",
+          "note": "UI 市场真源 = 客户端本地合并清单（bundled 种子 + CDN 在线）；此检查仅本地运行有效，Actions 跳过。客户端更新种子后跑 watch-capability.cmd 检测并回写清单。"
+        }
+      ],
+      "installed": [
+        { "name": "browser-use", "where": "ZCode 内置插件（已启用）", "version": "0.4.2" },
+        { "name": "computer-use", "where": "ZCode 内置插件（已启用）", "version": "0.5.14" },
+        { "name": "document-skills", "where": "ZCode 内置插件（已启用）", "version": "0.1.4" },
+        { "name": "skill-creator", "where": "ZCode 内置插件（已启用）", "version": "0.1.0" },
+        { "name": "zcode-guide", "where": "ZCode 内置插件（已启用）", "version": "0.1.0" },
+        { "name": "restore-legacy-sessions", "where": "ZCode 内置插件（已启用）", "version": "0.1.0" },
+        { "name": "zcode-cua", "where": "ZCode 内置组件（缓存随计算机控制联动）", "version": "0.5.12" },
+        { "name": "android-emulator", "where": "ZCode 内置插件（已停用）", "version": "0.1.0" },
+        { "name": "ios-simulator", "where": "ZCode 内置插件（已停用）", "version": "0.1.0" }
+      ]
     }
   ],
   "notWatched": [
-    "ZCode 官方市场已下架插件：browser-use(0.4.2)/computer-use(0.5.14)/document-skills(0.1.4)/skill-creator(0.1.0)/zcode-guide(0.1.0)——仍在本地启用，但 2026-09-05 起市场 manifest 已不含它们，无上游可查；ZCode 客户端插件管理如有自带更新提示以它为准",
+    "【用户拍板 2026-09-05】hermes-agent 与 ZCode CLI 本体永久不纳入看门（各自自带更新机制：hermes update --check / ZCode 客户端自更新）",
+    "未安装的市场插件不监控：cloudbase-skills(0.1.0)、example-plugin(0.2.0)、代码安全防护（后者在 CDN manifest 与本地合并清单均未出现，来源待查，疑似按版本/渠道下发）",
     "hermes skills hub 内置注册表技能（hermes GUI 自带更新提示，无公开 git 上游可查）",
     "zcode-custom 六个自有 skill（用户原创，无上游）",
-    "hermes-agent 本体（hermes update --check / GUI 弹窗自带提醒）",
-    "ZCode CLI 本体（自带更新机制）",
-    "deepwiki 等 http 远端 MCP（服务端永远最新）",
-    "ZCode 官方市场已停用插件 android-emulator / ios-simulator"
+    "deepwiki 等 http 远端 MCP（服务端永远最新）"
   ]
 }
