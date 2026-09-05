@@ -21,6 +21,10 @@ import { useEffect, useState } from 'react'
 
 const ID = 'token-stats'
 
+// Plugin context captured at register() — the door to ctx.rest (the namespace-
+// scoped REST path to the token-stats backend router inside the Hermes process).
+let pluginCtx = null
+
 function formatResetTime(isoString) {
   if (!isoString) return '--'
   try {
@@ -65,7 +69,7 @@ function getTextColor(pct) {
   return 'text-rose-400'
 }
 
-function AntigravityQuotaChip() {
+function AntigravityQuotaChip({ ctx }) {
   const busy = useValue(host.state.busy)
   const [open, setOpen] = useState(false)
   const [refreshing, setRefreshing] = useState(false)
@@ -87,43 +91,42 @@ function AntigravityQuotaChip() {
   const fetchLiveQuota = async (isManual = false) => {
     try {
       setRefreshing(true)
-      const url = isManual ? 'http://127.0.0.1:18088/quota?force=1' : 'http://127.0.0.1:18088/quota'
-      const res = await fetch(url)
-      if (res.ok) {
-        const data = await res.json()
-        if (data && data.status === 'ok') {
-          setQuotaData({
-            quota5h: data.quota5h != null ? Math.round(data.quota5h) : 100,
-            quotaWeekly: data.quotaWeekly != null ? Math.round(data.quotaWeekly) : 100,
-            reset5h: data.reset5h,
-            resetWeekly: data.resetWeekly,
-            source: data.source || 'Google 官方直连 (EasyCLIProxyAPI)',
-            plan: data.plan || 'Google AI Pro',
-            account: data.account || 'jimygod114514@gmail.com',
-            claude5h: data.claudeQuota5h != null ? Math.round(data.claudeQuota5h) : 100,
-            claudeWeekly: data.claudeQuotaWeekly != null ? Math.round(data.claudeQuotaWeekly) : 100,
-          })
-          const syncTime =
-            data.updatedAtLocal ||
-            new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
-          setLastSyncTime(syncTime)
+      const path = isManual ? '/quota?force=1' : '/quota'
+      const rest = (ctx && ctx.rest) || (pluginCtx && pluginCtx.rest)
+      if (!rest) throw new Error('plugin context unavailable')
+      const data = await rest.call(ctx || pluginCtx, path)
+      if (data && data.status === 'ok') {
+        setQuotaData({
+          quota5h: data.quota5h != null ? Math.round(data.quota5h) : 100,
+          quotaWeekly: data.quotaWeekly != null ? Math.round(data.quotaWeekly) : 100,
+          reset5h: data.reset5h,
+          resetWeekly: data.resetWeekly,
+          source: data.source || 'Google 官方直连 (EasyCLIProxyAPI)',
+          plan: data.plan || 'Google AI Pro',
+          account: data.account || 'jimygod114514@gmail.com',
+          claude5h: data.claudeQuota5h != null ? Math.round(data.claudeQuota5h) : 100,
+          claudeWeekly: data.claudeQuotaWeekly != null ? Math.round(data.claudeQuotaWeekly) : 100,
+        })
+        const syncTime =
+          data.updatedAtLocal ||
+          new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+        setLastSyncTime(syncTime)
 
-          if (isManual) {
-            setJustUpdated(true)
-            haptic?.('success') || haptic?.('tap')
-            host.notify({
-              kind: 'info',
-              message: `✅ Google 官方配额已同步 (同步于 ${syncTime})`,
-            })
-            setTimeout(() => setJustUpdated(false), 2400)
-          }
+        if (isManual) {
+          setJustUpdated(true)
+          haptic?.('success') || haptic?.('tap')
+          host.notify({
+            kind: 'info',
+            message: `✅ Google 官方配额已同步 (同步于 ${syncTime})`,
+          })
+          setTimeout(() => setJustUpdated(false), 2400)
         }
       }
     } catch {
       if (isManual) {
         host.notify({
           kind: 'error',
-          message: '刷新配额失败：本地微服务未响应',
+          message: '刷新配额失败：Hermes 内置配额服务未响应',
         })
       }
     } finally {
@@ -452,11 +455,12 @@ export default {
   id: ID,
   name: 'Antigravity Quota Monitor',
   register(ctx) {
+    pluginCtx = ctx
     ctx.register({
       id: 'chip',
       area: 'statusBar.right',
       order: 10,
-      render: () => jsx(AntigravityQuotaChip, {}),
+      render: () => jsx(AntigravityQuotaChip, { ctx }),
     })
   },
 }
