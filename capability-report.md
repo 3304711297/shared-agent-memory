@@ -1,6 +1,6 @@
 # 🔔 本地能力组件上游更新报告
 
-> 生成时间：2026-09-05 11:26（北京时间） · 清单：`capability-inventory.json`
+> 生成时间：2026-09-05 11:32（北京时间） · 清单：`capability-inventory.json`
 >
 > **跟进方式**：升级对应组件后，把清单里的 `installed.version` 更新为新版本并随共享库推 `main`，本看门会在下次运行时自动收口本 Issue。
 
@@ -16,6 +16,7 @@
 | EasyCLIProxyAPI 网关核心 | `cliproxyapi` | v7.2.151 | ✅ 最新 |
 | ZCode 插件：github | `zcode-github` | 0.1.2 | 🔴 有更新 |
 | ZCode 内置插件组（随客户端构建种子分发） | `zcode-bundled-plugins` | 本地源 | ✅ 最新 |
+| Hermes Hub 技能库（skills/ 目录提交） | `hermes-hub-skills` | 4441a2a2 | ✅ 最新 |
 
 ## 明细
 
@@ -73,6 +74,11 @@
 - `ZCode 内置组件（缓存随计算机控制联动）`：已装 **0.5.12** / 本地清单 **缺失** → 🟡 本地清单无此项
 - `ZCode 内置插件（已停用）`：已装 **0.1.0** / 本地清单 **0.1.0** → ✅ 一致
 - `ZCode 内置插件（已停用）`：已装 **0.1.0** / 本地清单 **0.1.0** → ✅ 一致
+
+### Hermes Hub 技能库（skills/ 目录提交）（hermes-hub-skills）
+
+- 上游最新：**4441a2a2**（2026-09-04）docs(agents): split AGENTS.md into root + per-area files (≤8
+- 基线：`4441a2a2` → ✅ 一致
 
 ---
 
