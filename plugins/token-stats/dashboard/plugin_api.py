@@ -1,14 +1,13 @@
 """token-stats dashboard plugin — Google/Antigravity quota API, mounted at /api/plugins/token-stats/.
 
-Port of the standalone quota micro-service (desktop-plugins/token-stats/fetch_quota.py, port
-18088) into a Hermes dashboard-plugin backend router, so the desktop app's own backend
-process serves the data — no scheduled task, no separate daemon. Lifecycle follows the
-desktop app: app open → service up; app closed → service down.
+Port of the standalone quota micro-service into a Hermes dashboard-plugin backend router,
+so the desktop app's own backend process serves the data — no scheduled task, no separate daemon.
+Lifecycle follows the desktop app: app open → service up; app closed → service down.
 
 Auth model: these routes inherit the dashboard's own auth middleware chain
 (_plugin_api_runtime_gate in web_server.py + token/session auth). CORS is not needed —
 the desktop renderer reaches the backend through the app's namespace-scoped REST door
-(host.request / pluginRest), never cross-origin.
+(host.request / pluginRest / ctx.rest), never cross-origin.
 """
 
 from __future__ import annotations
@@ -42,7 +41,6 @@ def _hermes_home() -> Path:
 
 
 def _auth_dir() -> Path:
-    # EasyCLIProxyAPI official credential store (local gateway bridge).
     override = os.environ.get("HERMES_QUOTA_AUTH_DIR")
     if override:
         return Path(override)
@@ -50,8 +48,6 @@ def _auth_dir() -> Path:
 
 
 def _cache_file() -> Path:
-    # Keep the cache file next to the desktop plugin that reads it, so the old
-    # frontend keeps its disk fallback even while the backend moves here.
     return _hermes_home() / "desktop-plugins" / "token-stats" / "direct-quota.json"
 
 
@@ -75,6 +71,41 @@ def _stale_disk_cache() -> Optional[dict]:
         return old
     except Exception:
         return None
+
+
+def check_workbuddy_status() -> dict[str, Any]:
+    """Non-blocking check for local WorkBuddy / codebuddy2openai gateway (port 8787)."""
+    import urllib.request
+
+    opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+    endpoint = "http://127.0.0.1:8787/v1"
+    try:
+        req = urllib.request.Request(f"{endpoint}/models")
+        with opener.open(req, timeout=1.0) as resp:
+            if resp.status == 200:
+                data = json.loads(resp.read().decode("utf-8"))
+                models = data.get("data", [])
+                return {
+                    "id": "workbuddy",
+                    "name": "WorkBuddy (codebuddy2openai)",
+                    "status": "online",
+                    "statusLabel": "运行中",
+                    "endpoint": endpoint,
+                    "modelsCount": len(models),
+                    "note": f"已挂载 {len(models)} 个可用模型",
+                }
+    except Exception:
+        pass
+
+    return {
+        "id": "workbuddy",
+        "name": "WorkBuddy (codebuddy2openai)",
+        "status": "offline",
+        "statusLabel": "未启动",
+        "endpoint": endpoint,
+        "modelsCount": 0,
+        "note": "本地反代服务待机中 (端口 8787)",
+    }
 
 
 def fetch_google_quota(force: bool = False) -> dict:
@@ -102,7 +133,7 @@ def fetch_google_quota(force: bool = False) -> dict:
     if not token:
         return {"error": "No access_token found in auth file"}
 
-    # Antigravity uses the daily-cloudcode-pa endpoint (not generic cloudcode-pa).
+    # Antigravity uses daily-cloudcode-pa endpoint (not generic cloudcode-pa).
     url = "https://daily-cloudcode-pa.googleapis.com/v1internal:retrieveUserQuotaSummary"
     payload = json.dumps({"project": project_id}).encode("utf-8")
 
@@ -159,6 +190,9 @@ def fetch_google_quota(force: bool = False) -> dict:
                 elif ("week" in bid or "weekly" in bid) and third_party_weekly is None:
                     third_party_weekly = pct
 
+    # Probe WorkBuddy gateway
+    wb_status = check_workbuddy_status()
+
     result: dict[str, Any] = {
         "status": "ok",
         "account": email,
@@ -172,6 +206,22 @@ def fetch_google_quota(force: bool = False) -> dict:
         "source": "Google 官方直连 (Hermes 内置)",
         "updatedAt": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         "updatedAtLocal": time.strftime("%H:%M:%S"),
+        "workbuddy": wb_status,
+        "providers": [
+            {
+                "id": "antigravity",
+                "name": "Google AI (Antigravity)",
+                "plan": "Google AI Pro",
+                "account": email,
+                "status": "active",
+                "windows": [
+                    {"label": "Gemini 5h 滚动额度", "remaining": quota_5h if quota_5h is not None else 100, "reset": reset_5h},
+                    {"label": "Gemini 每周总配额", "remaining": quota_weekly if quota_weekly is not None else 100, "reset": reset_weekly},
+                    {"label": "3P 协同池 (Claude/GPT)", "remaining": third_party_5h if third_party_5h is not None else 100, "reset": None},
+                ],
+            },
+            wb_status,
+        ],
     }
 
     with _cache_lock:
@@ -186,6 +236,38 @@ def fetch_google_quota(force: bool = False) -> dict:
         pass
 
     return result
+
+
+def format_quota_markdown(data: dict) -> str:
+    """Render quota and gateway data into crisp, readable markdown for CLI and chat."""
+    if "error" in data:
+        return f"⚠️ **配额获取异常**: {data.get('error')}"
+
+    account = data.get("account", "未知账号")
+    plan = data.get("plan", "Google AI Pro")
+    q5h = data.get("quota5h", 100)
+    qw = data.get("quotaWeekly", 100)
+    r5h = data.get("reset5h", "--")
+    rw = data.get("resetWeekly", "--")
+    cq5h = data.get("claudeQuota5h", 100)
+    sync = data.get("updatedAtLocal", "--")
+    wb = data.get("workbuddy", {})
+    wb_status = wb.get("statusLabel", "未启动")
+    wb_note = wb.get("note", "")
+
+    return f"""### 📊 模型配额与本地网关监控 (`{sync}`)
+
+**Google AI (Antigravity 官方直连)**
+- **订阅方案**：`{plan}` (`{account}`)
+- **Gemini 5h 额度**：`{q5h}%` *(重置: `{r5h}`)*
+- **Gemini 周总配额**：`{qw}%` *(重置: `{rw}`)*
+- **Claude 3p 协同**：`{cq5h}%`
+
+**WorkBuddy (codebuddy2openai)**
+- **网关状态**：`{wb_status}` · `{wb_note}`
+- **本地端点**：`http://127.0.0.1:8787/v1`
+
+*(输入 `/quota refresh` 可强制穿透刷新)*"""
 
 
 @router.get("/quota")
