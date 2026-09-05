@@ -40,3 +40,6 @@ sessions/
 tmp/
 hermes-agent/
 profiles/
+
+# 共享 topics 已是 NTFS junction（真源在 shared-agent-memory 仓库 main 分支），严禁跟踪
+memories/topics/
