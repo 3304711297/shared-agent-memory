@@ -465,35 +465,97 @@ function AntigravityQuotaChip({ ctx }) {
                   ],
                 }),
 
-              // WorkBuddy 网关探测简卡
+              // WorkBuddy 网关探测简卡（含账号与积分）
               jsxs('div', {
-                className:
-                  'p-2 rounded-lg bg-black/25 border border-white/5 flex items-center justify-between text-[0.6875rem]',
+                className: 'p-2.5 rounded-lg bg-black/25 border border-white/5 flex flex-col gap-1.5 text-[0.6875rem]',
                 children: [
+                  // 第一行：状态与名称
                   jsxs('div', {
-                    className: 'flex items-center gap-1.5',
+                    className: 'flex items-center justify-between',
                     children: [
-                      jsx('span', {
-                        className: cn(
-                          'w-1.5 h-1.5 rounded-full',
-                          quotaData.workbuddy.status === 'online' ? 'bg-emerald-400' : 'bg-zinc-500'
-                        ),
+                      jsxs('div', {
+                        className: 'flex items-center gap-1.5',
+                        children: [
+                          jsx('span', {
+                            className: cn(
+                              'w-1.5 h-1.5 rounded-full',
+                              quotaData.workbuddy.status === 'online' ? 'bg-emerald-400' : 'bg-zinc-500'
+                            ),
+                          }),
+                          jsx('span', {
+                            className: 'text-(--ui-text-secondary)',
+                            children: 'WorkBuddy (8787)',
+                          }),
+                        ],
                       }),
                       jsx('span', {
-                        className: 'text-(--ui-text-secondary)',
-                        children: 'WorkBuddy (8787)',
+                        className: cn(
+                          'font-mono text-[10px] px-1.5 py-0.5 rounded',
+                          quotaData.workbuddy.status === 'online'
+                            ? 'bg-emerald-500/15 text-emerald-300'
+                            : 'bg-zinc-800 text-zinc-400'
+                        ),
+                        children: quotaData.workbuddy.statusLabel || '待机中',
                       }),
                     ],
                   }),
-                  jsx('span', {
-                    className: cn(
-                      'font-mono text-[10px] px-1.5 py-0.5 rounded',
-                      quotaData.workbuddy.status === 'online'
-                        ? 'bg-emerald-500/15 text-emerald-300'
-                        : 'bg-zinc-800 text-zinc-400'
-                    ),
-                    children: quotaData.workbuddy.statusLabel || '待机中',
-                  }),
+
+                  // 第二行：账号与积分（在线且有数据时显示）
+                  quotaData.workbuddy.status === 'online' &&
+                    quotaData.workbuddy.usage &&
+                    jsxs('div', {
+                      className: 'flex flex-col gap-1 pt-0.5',
+                      children: [
+                        // 账号昵称 + 积分余量
+                        jsxs('div', {
+                          className: 'flex items-center justify-between',
+                          children: [
+                            jsxs('span', {
+                              className: 'text-(--ui-text-tertiary)',
+                              children: [
+                                '👤 ',
+                                quotaData.workbuddy.usage.nickname || '—',
+                                quotaData.workbuddy.usage.isPaidUser ? '' : ' (免费版)',
+                              ],
+                            }),
+                            jsxs('span', {
+                              className: cn(
+                                'font-mono font-bold tracking-tight',
+                                getTextColor(quotaData.workbuddy.usage.remainPercent)
+                              ),
+                              children: [
+                                Math.round(quotaData.workbuddy.usage.remain),
+                                ' / ',
+                                Math.round(quotaData.workbuddy.usage.total),
+                                ' credits',
+                              ],
+                            }),
+                          ],
+                        }),
+
+                        // 积分进度条
+                        jsx('div', {
+                          className: 'h-1 w-full rounded-full bg-white/10 overflow-hidden',
+                          children: jsx('div', {
+                            className: cn(
+                              'h-full rounded-full transition-all duration-500',
+                              getProgressColor(quotaData.workbuddy.usage.remainPercent)
+                            ),
+                            style: {
+                              width: `${Math.min(100, Math.max(0, quotaData.workbuddy.usage.remainPercent))}%`,
+                            },
+                          }),
+                        }),
+                      ],
+                    }),
+
+                  // 积分查询失败提示
+                  quotaData.workbuddy.status === 'online' &&
+                    quotaData.workbuddy.usageError &&
+                    jsx('div', {
+                      className: 'text-[0.625rem] text-amber-400/80 pt-0.5',
+                      children: `⚠️ ${quotaData.workbuddy.usageError}`,
+                    }),
                 ],
               }),
             ],
@@ -883,6 +945,78 @@ function QuotaPage({ ctx }) {
               }),
             ],
           }),
+
+          // 积分概览行（在线且数据可得时显示）
+          data.workbuddy.status === 'online' &&
+            data.workbuddy.usage &&
+            jsxs('div', {
+              className: 'p-4 rounded-xl bg-black/20 border border-white/5 flex flex-col gap-3',
+              children: [
+                // 账号与余量
+                jsxs('div', {
+                  className: 'flex items-center justify-between',
+                  children: [
+                    jsxs('span', {
+                      className: 'text-xs text-(--ui-text-secondary)',
+                      children: [
+                        '👤 当前账号: ',
+                        jsx('span', { className: 'font-mono text-(--foreground)', children: data.workbuddy.usage.nickname || '—' }),
+                        jsx('span', {
+                          className: 'ml-1.5 px-1.5 py-0.5 text-[10px] rounded bg-white/5 text-(--ui-text-tertiary)',
+                          children: data.workbuddy.usage.isPaidUser ? '付费版' : '免费版',
+                        }),
+                      ],
+                    }),
+                    jsxs('span', {
+                      className: cn('font-mono text-lg font-bold tracking-tight', getTextColor(data.workbuddy.usage.remainPercent)),
+                      children: [
+                        data.workbuddy.usage.remain != null ? data.workbuddy.usage.remain.toFixed(1) : '—',
+                        jsx('span', { className: 'text-xs text-(--ui-text-tertiary) font-normal', children: ' / ' }),
+                        Math.round(data.workbuddy.usage.total || 0),
+                        ' credits',
+                      ],
+                    }),
+                  ],
+                }),
+
+                // 进度条
+                jsx('div', {
+                  className: 'h-2 w-full rounded-full bg-white/10 overflow-hidden',
+                  children: jsx('div', {
+                    className: cn('h-full rounded-full transition-all duration-500', getProgressColor(data.workbuddy.usage.remainPercent)),
+                    style: { width: `${Math.min(100, Math.max(0, data.workbuddy.usage.remainPercent || 0))}%` },
+                  }),
+                }),
+
+                // 积分包明细
+                (data.workbuddy.usage.packages || []).length > 0 &&
+                  jsxs('div', {
+                    className: 'flex flex-col gap-1 pt-1 border-t border-white/5',
+                    children: [
+                      jsx('span', { className: 'text-[10px] text-(--ui-text-tertiary) pt-1', children: '积分包明细' }),
+                      ...data.workbuddy.usage.packages.map((p, i) =>
+                        jsxs('div', {
+                          className: 'flex items-center justify-between text-[11px] font-mono',
+                          children: [
+                            jsx('span', { className: 'text-(--ui-text-tertiary)', children: `包 #${i + 1} (…${String(p.code || '').slice(-6)})` }),
+                            jsxs('span', {
+                              className: cn(
+                                getTextColor(p.total > 0 ? (p.remain / p.total) * 100 : 0)
+                              ),
+                              children: [
+                                (p.remain || 0).toFixed(0),
+                                ' / ',
+                                (p.total || 0).toFixed(0),
+                                ` ${p.unit || 'credits'}`,
+                              ],
+                            }),
+                          ],
+                        }, i)
+                      ),
+                    ],
+                  }),
+              ],
+            }),
 
           jsxs('div', {
             className: 'px-4 py-3 rounded-xl bg-black/20 border border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs',
