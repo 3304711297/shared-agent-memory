@@ -17,4 +17,6 @@ metadata:
 **Why:** 用户已明确拒绝本地分类方案，坚持 GitHub 原生 Lists；需记录总数、已有分类占用与接口以避免重复创建和重复归档。
 **How to apply:** 后续分类前先校验 13 个现有 Lists 名称去重；聚类依据 description+topics+language 而非单纯 language；预览新分类表经用户确认后再调用 createUserList/updateUserListsForItem 批量执行；Python 脚本统一用 `py` 启动。
 
+**2026-09-05 任务重启状态：** 用户要求继续整理并把 **AI 大类细分为三个新分类：「Agent 端」（agent 框架/harness/CLI 智能体）、「Plugin 和 Skill 库」（skills/plugins 市场与仓库）、「AI 其他」**（模型工具/提示词/教程资源）。实查 Lists 已是 **27 个**（非基线 13），其中已有「AI·大模型与工具」53 项——用户确认方案时需二选一：(a) 新建三 List 并重分配该 53 项；(b) 保留现有、三新分类只收未归档。数据/方案文件：D:i coding\workspace 缓存 stars_org_20260905.json + stars_plan_20260905.md（子代理产出）。方案经用户确认后执行 createUserList/updateUserListsForItem。
+
 [[user-windows-environment]] [[desktop-projects-tweak-youshouldknow]]
