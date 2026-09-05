@@ -20,7 +20,7 @@ metadata:
 - **UI/状态栏审美**：高度注重界面与微交互体验——严禁简陋文本折行与单调着色；要求键值分层、核心数值等宽加粗高亮；交互必须具备加载动效、完成提示与数据变动即时反馈；桌面端偏好沉浸式 ZCode 风格暗黑 IDE 美学（哑光深炭底色、细微描边、悬浮底栏与琥珀金点缀，已通过 desktop-plugins/zcode-theme 原生闭环）。
 - **桌面工具内嵌化强偏好**：桌面工具与代理控制台采用完全内嵌交互——严禁后台启动反代时弹出外部黑色 CMD 终端窗口（必须默认静默无黑框）；所有 Debug 信息、运行输出与错误日志直接内嵌在控制台「实时日志」页面查看。
 - 托盘偏好：系统托盘采用轻量无图标、分组分割线的现代内核管理风格（对标 GUI.for.Cores / sing-box）；倍率展示去除无意义英文单位（如 credits），保持纯净数值。
-- **跨 Agent 协同自驱接手铁律（2026-09-05 确立）**：当需要等待 ZCode、外部长跑构建或长时间测试完成并自动接手时，**严禁口头承诺后休眠等待用户提醒**，也严禁在前台死循环阻塞会话；必须使用 `terminal(command="python C:/Users/VOS-User/AppData/Local/hermes/scripts/watch_zcode.py", background=True, notify=True)` 在后台挂起轻量守护监听脚本，退出时由系统通知唤醒，自动无缝派发多子代理接手审查推进。
+- **跨 Agent 协同自驱接手铁律（2026-09-05 确立）**：当需要等待 ZCode、外部长跑构建或长时间测试完成并自动接手时，**严禁口头承诺后休眠等待用户提醒**，也严禁在前台死循环阻塞会话；必须使用 `terminal(command="python C:/Users/VOS-User/AppData/Local/hermes/scripts/watch_zcode.py", background=True, notify=True)` 在后台挂起轻量守护监听脚本，退出时由 Hermes 内部进程退出信号（Process Exit Event，纯应用内事件总线，完全独立于且不受 Windows 系统通知关闭影响）自动唤醒，无缝派发多子代理接手审查推进。
 - **用户个人 Telegram 频道**：拥有并运营 `@emoegg`（https://t.me/emoegg，Web 预览 https://t.me/s/emoegg，频道现用名「蛋总的圈」，曾用名「某不知名杂货铺」），专注于网络代理协议解析（SS/Trojan/VLESS等）、延迟与 RTT 深度测评、TUN 协议栈对比、GFW 与地方防火墙机制研究及实用软件/音乐定制资源。已绑定专属管理机器人 `@HermesAgentByjieBot`（ID: 8361539844，具发布/编辑/删除/置顶全套管理员权限，凭据位于 `%LOCALAPPDATA%\hermes\auth\telegram_channel.json`，CLI 脚本位于 `scripts/tg_channel.py`）。
 
 2026-09-05 用户澄清与实测：**多仓库/多任务场景优先用并行子代理省时间**。此前「实测并发上限≈2」系 ZCode 端体验套餐 GLM-5.3-flash 模型所致；**当前 Hermes 端（Gemini 3.8 Flash + EasyCLIProxyAPI 网关）实测：**
