@@ -2,13 +2,57 @@
   "status": "ok",
   "account": "jimygod114514@gmail.com",
   "plan": "Google AI Pro",
-  "quota5h": 97.5,
+  "quota5h": 0.5,
   "reset5h": "2026-09-05T17:50:17Z",
-  "quotaWeekly": 55.2,
+  "quotaWeekly": 39.0,
   "resetWeekly": "2026-09-11T01:03:50Z",
   "claudeQuota5h": 100,
   "claudeQuotaWeekly": 100,
   "source": "Google 官方直连 (Hermes 内置)",
-  "updatedAt": "2026-09-05T12:54:16Z",
-  "updatedAtLocal": "20:54:16"
+  "updatedAt": "2026-09-05T15:29:17Z",
+  "updatedAtLocal": "23:29:17",
+  "workbuddy": {
+    "id": "workbuddy",
+    "name": "WorkBuddy (codebuddy2openai)",
+    "status": "online",
+    "statusLabel": "运行中",
+    "endpoint": "http://127.0.0.1:8787/v1",
+    "modelsCount": 28,
+    "note": "已挂载 28 个可用模型"
+  },
+  "providers": [
+    {
+      "id": "antigravity",
+      "name": "Google AI (Antigravity)",
+      "plan": "Google AI Pro",
+      "account": "jimygod114514@gmail.com",
+      "status": "active",
+      "windows": [
+        {
+          "label": "Gemini 5h 滚动额度",
+          "remaining": 0.5,
+          "reset": "2026-09-05T17:50:17Z"
+        },
+        {
+          "label": "Gemini 每周总配额",
+          "remaining": 39.0,
+          "reset": "2026-09-11T01:03:50Z"
+        },
+        {
+          "label": "3P 协同池 (Claude/GPT)",
+          "remaining": 100,
+          "reset": null
+        }
+      ]
+    },
+    {
+      "id": "workbuddy",
+      "name": "WorkBuddy (codebuddy2openai)",
+      "status": "online",
+      "statusLabel": "运行中",
+      "endpoint": "http://127.0.0.1:8787/v1",
+      "modelsCount": 28,
+      "note": "已挂载 28 个可用模型"
+    }
+  ]
 }
