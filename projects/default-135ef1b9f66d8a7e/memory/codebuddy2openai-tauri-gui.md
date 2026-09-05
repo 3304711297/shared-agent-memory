@@ -68,5 +68,13 @@ metadata:
 - Emitter 未使用导入清理（`04d7457`）：emit 调用全在 commands.rs 且函数内局部 `use tauri::Emitter`，lib.rs 顶部导入为死代码，删除后构建零警告；
 - **操作纪律教训：用户在跑 npm run tauri build/cargo 构建时严禁改动工作区源文件**（曾中途改 lib.rs 被用户叫停"先别修复"，git checkout 回滚，待 build 完成后再应用）。
 
+**2026-09-05 前端迭代与 Tauri 工程坑（会话归档批次，提交 ce33862→bd79468/da5a94d/ca29709/4a45660/cf96ead/04d7457）**：
+- 模型矩阵表格改只读单元格+弹窗编辑（ctx/effort 合并为单列"参数"，点击弹居中 modal，保存后行内值即时更新）；模型描述列删除；列头简化；操作列删除。
+- **Tauri+Vite on Windows 三坑**：① `tauri.conf.json` 必须配 `beforeDevCommand: "npm run dev"`，否则 tauri dev 干等 5173；② vite 的 `server.watch.ignored` 必须排除 `**/src-tauri/target/**`，否则 cargo 写 exe 被 Windows 锁定时 chokidar 抛 EBUSY 崩掉 beforeDevCommand；③ Windows 打包用 `bundle.targets: ["nsis"]`（WiX light.exe 在本机环境性失败，NSIS 一次成功）。
+- **CSS 坑**：`.modal-overlay { display:flex }` 会覆盖 `hidden` 属性的默认 display:none——弹窗加载即显示且"取消"失效；必须补 `.modal-overlay[hidden] { display:none !important; }`。
+- `Emitter` 死导入已清（emit 全在 commands.rs 且函数内局部 use），构建零警告；`package.json` 补 @tauri-apps/cli 与 `tauri` script。
+- README 已同步：模型列表改"自动获取 WorkBuddy 支持的模型"动态说明、架构 mermaid 折叠 details、ZCode 引导式接入描述。
+- 用户拍板保留 ysk《本地回环服务的暴露面与防护》页（本会话唯一新增 ysk 内容）。
+
 **Why:** 用户要求模型列表全量覆盖官方模型库，并补全 WorkBuddy 核心的倍率显示、上下文限制与思考强度调节能力。
 **How to apply:** 维护 `C:\Users\VOS-User\Desktop\codebuddy2openai`，后续所有跨端 Agent 配置及客户端演进均以此架构为基准。
