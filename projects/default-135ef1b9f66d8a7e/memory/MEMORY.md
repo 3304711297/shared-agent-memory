@@ -33,7 +33,7 @@
 - [Youshouldknow BIOS Knowledge Series](youshouldknow-bios-knowledge-series.md) — ysk BIOS 选项科普系列（2026-09-02 批次+09-03 EP15 NVMe，逐篇附出处）；同步点 d0fc852；B站看门 bilibili-watch 每 6h 自动开 Issue；ysk 新增页面必须重跑 gen-matrix.py
 - [Serena MCP Silent Config](serena-mcp-silent-config.md) — Serena 插件静默配置（禁用 Web Dashboard 与 GUI 日志弹窗，离线快速启动）
 - [Multi Branch Memory Backup](multi-branch-memory-backup.md) — 共享库三分支架构（2026-09-05 重构）：main=双端共享唯一真源（hermes junction 直读）、zcode/hermes=各自专属；谁改谁当轮推 main；**仓库已公开**（脱敏后转公开，用户拍板不做历史重写）
-- [User Global Preferences](user-global-preferences.md) — 用户全局铁律与偏好：CI 全绿才收尾、不确定信息联网核实、**多任务优先并行子代理（Gemini 实测单批支持 10 并发，建议 3~6 批次）**、Whisper small、UI 键值分层等宽加粗/加载动效、桌面工具内嵌无黑框、托盘 GUI.for.Cores 风格
+- [User Global Preferences](user-global-preferences.md) — 用户全局铁律与偏好：CI 全绿才收尾、不确定信息联网核实、**多任务优先并行子代理（Gemini 实测单批支持 10 并发，建议 3~6 批次）**、**跨 Agent 协同自驱接手（后台守护+notify唤醒，严禁口头空等）**、Whisper small、UI 键值分层等宽加粗/加载动效、桌面工具内嵌无黑框、托盘 GUI.for.Cores 风格
 - [Hermes to ZCode Capability Sync](hermes-to-zcode-capability-sync.md) — 2026-09-05 Hermes→ZCode 能力同步：87 skills 迁入 ~/.zcode/skills、deepwiki MCP 新增、重复（superpowers/docx 等）与 Hermes 专有（quota/dogfood 等）跳过清单、记忆库 7 补 5 合
 - [Capability Upstream Watch](capability-upstream-watch.md) — 每日能力组件上游看门（shared-agent-memory Actions，capability-watch 标签 Issue）+ watch-capability.cmd 本地一键；ZCode 市场两层架构（bundled 种子+CDN）；升级组件后必须回写 capability-inventory.json 推 main 自动收口；用户拍板 agent 本体永久排除
 - [Codebuddy2openai Tauri GUI](codebuddy2openai-tauri-gui.md) — codebuddy2openai Tauri GUI：09-05 三 P1 修复（日志 UTF-8 panic/路径全量环境变量化 C2O_PYTHON 等/health 收窄+Host 校验防 rebinding）+ 基础 CI 补齐 + **ZCode 接入改引导式（Desktop 只认 UI 内添加，写 JSON 是假阳性）+ 端口真实探测徽章**；构建链已通：tauri dev/build 三坑修复 + bundle 固化 nsis（WiX 弃用），新版 exe/setup.exe 已产出
@@ -44,7 +44,8 @@
 - [Plugin Custom Config Protection](plugin-custom-config-protection.md) — 插件自定义配置保护策略（upstream.json 严禁全量覆盖）
 - [Superpowers and Software Development Separation](superpowers-and-software-development-separation.md) — superpowers 与 software-development 技能分类的同名冲突历史、去重清理与权责分工规范
 - [Workbuddy Proxy Startup](workbuddy-proxy-startup.md) — WorkBuddy 代理启动方式记录
-- [Codebuddy2openai Upstream Benchmark](codebuddy2openai-upstream-benchmark.md) — 09-05 对标 EasyCLIProxyAPI **三批采纳全部落地**（6 提交 CI 全绿：XSS/单实例锁/双主题/TTFT/用量统计/更新检查）；遗留拆文件与 CI 加测试待拍板
+- [Codebuddy2openai Upstream Benchmark](codebuddy2openai-upstream-benchmark.md) — 09-05 对标 EasyCLIProxyAPI：三批采纳已推送（6 提交 CI 全绿：XSS/单实例锁/双主题/TTFT/用量统计/更新检查）；批次4 遗留处理中——自动拉起+main.js/commands.rs 拆分已本地提交（3619d59/ffa35ea）**待 Hermes 验收后推送**，4C（CSP/CI 测试/requirements）压后
+- [Hermes Side Verification Handoff](hermes-side-verification-handoff.md) — 用户可令 Hermes 旁路接手全量构建/代码审查/验收：ZCode 只做秒级底线检查+本地提交保护现场+冻结树待验收，验收反馈回来后再推送；被取消的子代理可能已写完文件，先审计残骸
 - [Hermes Ecosystem Evaluation and YSK Sync](hermes-ecosystem-evaluation-and-ysk-sync.md) — 社区 Hermes 资源评估（1/2/4/6 安装价值辨析）与 3/5（高阶指令速查+官方生态进阶）整理落入 youshouldknow 项目全流程闭环（commit abcc8f8，CI 全绿部署）
 - [Telegram Channel Emoegg Ops](telegram-channel-emoegg-ops.md) — 用户个人 Telegram 频道 @emoegg（蛋总的圈）专属 Bot (@HermesAgentByjieBot) 管理体系、主号风控背景与 14 款纯暗黑精选主题落地
 - [Hermes Studio Evaluation and Desktop Theming](hermes-studio-evaluation-and-desktop-theming.md) — 第三方客户端 hermes-studio 深度评估（插件SDK缺失/数据库裂脑/双重代理）与官方桌面端 ZCode Dark 沉浸式 IDE 主题 1:1 复刻落地
