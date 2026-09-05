@@ -1,4 +1,4 @@
-- [Auto Backup Memories to GitHub](auto-backup-memories-to-github.md) — 记忆文件变动或新增后必须自动静默提交并推送到私有仓库 shared-agent-memory（严禁等待用户提醒，无需询问用户）
+- [Auto Backup Memories to GitHub](auto-backup-memories-to-github.md) — 记忆文件变动或新增后必须自动静默提交并推送 shared-agent-memory 的 main 分支（严禁等待用户提醒，无需询问用户）
 - [Adobe MCP Authentication](adobe-mcp-authentication.md) — Adobe for creativity MCP server requires OAuth authentication; 403 errors indicate missing Authorization headers
 - [Five Repo Task Book v42](five-repo-task-book-v42.md) — 五仓库任务书 v4.2（15 条）**全部完成推送、五仓 CI 全绿**；tweak 已发 **v0.2.21**（tag-only 流程三步+包内版本注入实测）；脚本猫更新检测人工验收通过；含 BOM/mkdocs-tags/lock 提锁契约与待用户拍板事项（orc dependabot.yml 等）
 - [Bilibili Great Together Project](bilibili-great-together-project.md) — make-bilibili-great-together：**v0.3.2 双形态就绪；用户日常已切换=仅 BewlyCat+mbgt 扩展（0.3.2）启用、脚本及其他全禁**（旧「userscript 启用」作废）；bump 后扩展 dist 需本地重建+developerPrivate.reload；卡片「错误」=playinfo WARN 非故障；铁律：钩子读被 mock 全局走闭包原引用
@@ -25,11 +25,11 @@
 - [SteamDB Chinese Plus Project](steamdb-chinese-plus-project.md) — 桌面 steamdb-chinese 汉化脚本项目；接续停更 SteamDB_CN；词库真源 Chr233/GM_Scripts(AGPL-3.0)；v1.0.1 已发布+真机冒烟通过
 - [Bilibili Enhancement Tools](bilibili-enhancement-tools.md) — B站增强三件套调研：SukkaW 反跟踪油猴脚本（安全可装）+ BewlyCat(功能向) vs AveMujica(外观向) 二选一，B站2026-01推荐API需BewlyCat≥1.5.6；源码级重叠四块+脚本独有清单+共存关模块建议
 - [Hermes Agent Install](hermes-agent-install.md) — hermes-agent（HERMES_HOME=LocalAppData，GUI 桌面端为主用法）：git/uv 必须走 127.0.0.1:3067 代理；429 限流→GitHub URL 带身份 insteadOf 已修；token-stats 配额微服务 18088 与更新弹窗文件锁排查；模型接 ZCode-Antigravity 桥
-- [Hermes Shared Memory](hermes-shared-memory.md) — hermes 通过 zcode-shared-memory skill 直接读写本记忆库；hermes 写入不提交 git，由 ZCode 负责推送
+- [Hermes Shared Memory](hermes-shared-memory.md) — 共享库单一真源=ZCode 记忆目录（main 分支）；hermes 经 NTFS junction 直读 topics 并自行提交推送 main（旧「ZCode 代推」规则作废）
 - [Bilibili Video Transcription Pipeline](bilibili-video-transcription-pipeline.md) — B站视频→逐字稿管线（直连API防412+ffmpeg whisper small+误听对照表），脚本在 bios_knowledge/
 - [Youshouldknow BIOS Knowledge Series](youshouldknow-bios-knowledge-series.md) — ysk BIOS 选项科普系列（2026-09-02 批次+09-03 EP15 NVMe，逐篇附出处）；同步点 d0fc852；B站看门 bilibili-watch 每 6h 自动开 Issue；ysk 新增页面必须重跑 gen-matrix.py
 - [Serena MCP Silent Config](serena-mcp-silent-config.md) — Serena 插件静默配置（禁用 Web Dashboard 与 GUI 日志弹窗，离线快速启动）
-- [Multi Branch Memory Backup](multi-branch-memory-backup.md) — 双 Agent 记忆多分支隔离备份规则：ZCode 推送 zcode 分支，Hermes 推送 hermes 分支
+- [Multi Branch Memory Backup](multi-branch-memory-backup.md) — 共享库三分支架构（2026-09-05 重构）：main=双端共享唯一真源（hermes junction 直读）、zcode/hermes=各自专属；谁改谁当轮推 main
 - [User Global Preferences](user-global-preferences.md) — 用户全局铁律与偏好（自 Hermes USER.md 沉淀）：CI 全绿才收尾、不确定信息联网核实、复杂任务技能优先、Whisper small、UI 键值分层等宽加粗/加载动效、桌面工具内嵌无黑框、托盘 GUI.for.Cores 风格
 - [Hermes to ZCode Capability Sync](hermes-to-zcode-capability-sync.md) — 2026-09-05 Hermes→ZCode 能力同步：87 skills 迁入 ~/.zcode/skills、deepwiki MCP 新增、重复（superpowers/docx 等）与 Hermes 专有（quota/dogfood 等）跳过清单、记忆库 7 补 5 合
 - [Codebuddy2openai Tauri GUI](codebuddy2openai-tauri-gui.md) — codebuddy2openai Tauri GUI 项目记录（托盘/实时日志/倍率展示等）
