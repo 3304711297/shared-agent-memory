@@ -9,7 +9,7 @@ metadata:
 
 用户铁律要求（2026-09-05 定稿）：**记忆库采用「共享主分支 + Agent 专属分支」模型，有变动时自动静默提交并推送，严禁等用户提醒**。目的：切换 Agent 无需重新拉取文件——共有内容只有一份。
 
-- 远程仓库：`https://github.com/3304711297/shared-agent-memory.git`（默认分支 `main`；**2026-09-05 起为公开仓库**——转公开前已全分支扫描脱敏本机网关 apiKey，但 **git 历史旧提交中仍有该密钥字面量**，该密钥仅守护 127.0.0.1 本地网关、无远程风险，如需彻底清除须 filter-repo 重写历史+强推两分支）。
+- 远程仓库：`https://github.com/3304711297/shared-agent-memory.git`（默认分支 `main`；**2026-09-05 起为公开仓库**——转公开前已全分支扫描脱敏本机网关 apiKey，但 **git 历史旧提交中仍有该密钥字面量**，该密钥仅守护 127.0.0.1 本地网关、无远程风险，如需彻底清除须 filter-repo 重写历史+强推两分支）。**【用户拍板 2026-09-05】不做历史重写**——该密钥仅守护 127.0.0.1 本地网关、外部拿到也连不上，属可接受低风险，后续会话勿再重提。
 - **`main` 分支 = 双端共享记忆库唯一真源**：物理位于 `C:\Users\VOS-User\.zcode\cli\memories\`（本地检出分支），Hermes 经 NTFS 目录联接 `%LOCALAPPDATA%\hermes\memories\topics` 直读同一目录（见 [[hermes-shared-memory]]）。任何一方修改共享内容，当轮结束前执行：
   ```bash
   git -C "C:/Users/VOS-User/.zcode/cli/memories" add -A && git -C "C:/Users/VOS-User/.zcode/cli/memories" commit -m "memory: <简述>" && git -C "C:/Users/VOS-User/.zcode/cli/memories" push origin main
