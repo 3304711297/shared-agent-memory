@@ -15,7 +15,7 @@ import requests
 
 CONFIG_FILE = os.path.expanduser("~/.zcode/config/gemini.json")
 LOCAL_BRIDGE_URL = "http://127.0.0.1:18080"
-LOCAL_BRIDGE_KEY = "wY5Xr4HVPT3BZivioFX2L_3XhXdFfU8QBjT_Ff4xGJ0"
+LOCAL_BRIDGE_KEY = ""  # 默认留空（公开仓库脱敏）；运行时自动从桥接 config.yaml api-keys 读取
 
 def get_bridge_config():
     # Check if local ZCode Antigravity config exists
