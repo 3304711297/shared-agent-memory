@@ -126,6 +126,13 @@ def claude_marketplace_sha(plugin):
     return None
 
 
+def local_merged_versions(path):
+    """读取客户端本地合并市场清单（UI 真源），返回 {插件名: 版本}。"""
+    with open(path, encoding="utf-8") as f:
+        d = json.load(f)
+    return {p.get("name"): p.get("version") for p in d.get("plugins", [])}
+
+
 def main():
     with open(INV_PATH, encoding="utf-8") as f:
         inv = json.load(f)
@@ -140,15 +147,63 @@ def main():
         "",
     ]
     outdated = 0
+    skipped = 0
     rows = []
     details = []
+    on_actions = os.environ.get("GITHUB_ACTIONS") == "true"
 
     for comp in inv["components"]:
         cid = comp["id"]
+        check = comp["checks"][0]
+
+        # 本地源组件：读客户端本地合并清单，仅在本地运行时可比对
+        if check["type"] == "local-merged-marketplace":
+            if on_actions:
+                skipped += 1
+                rows.append(f"| {comp['display']} | `{cid}` | 本地源 | ⏭️ Actions 跳过 |")
+                details.append("\n".join([
+                    f"### {comp['display']}（{cid}）", "",
+                    "- ⏭️ 本地源检查在 Actions 上跳过。客户端更新种子后请在本地运行 `watch-capability.cmd` 比对并回写清单。",
+                ]))
+                continue
+            try:
+                merged = local_merged_versions(check["file"])
+            except Exception as e:
+                rows.append(f"| {comp['display']} | `{cid}` | 本地源 | ⚠️ 读取失败 |")
+                details.append("\n".join([
+                    f"### {comp['display']}（{cid}）", "",
+                    f"- ⚠️ 本地清单读取失败：{type(e).__name__}: {e}",
+                ]))
+                continue
+            behind = False
+            detail = [f"### {comp['display']}（{cid}）", "", f"- 本地清单：`{check['file']}`"]
+            for loc in comp.get("installed", []):
+                name = loc.get("name", "")
+                installed = loc.get("version", "")
+                upv = merged.get(name)
+                if upv is None:
+                    st = "🟡 本地清单无此项"
+                else:
+                    c = ver_cmp(installed, upv)
+                    if c is None:
+                        st = "❓ 无法自动比对"
+                    elif c < 0:
+                        st = "🔴 落后"
+                        behind = True
+                    else:
+                        st = "✅ 一致"
+                detail.append(f"- `{loc.get('where','')}`：已装 **{installed}** / 本地清单 **{upv or '缺失'}** → {st}")
+            state = "🔴 有更新" if behind else "✅ 最新"
+            rows.append(f"| {comp['display']} | `{cid}` | 本地源 | {state} |")
+            if behind:
+                outdated += 1
+            details.append("\n".join(detail))
+            continue
+
         upstream = None
         src_err = None
         try:
-            upstream = upstream_version(comp["checks"][0])
+            upstream = upstream_version(check)
         except Exception as e:  # 单源失败不拖垮整体
             src_err = f"{type(e).__name__}: {e}"
 
@@ -228,9 +283,9 @@ def main():
     gh_out = os.environ.get("GITHUB_OUTPUT")
     if gh_out:
         with open(gh_out, "a", encoding="utf-8") as f:
-            f.write(f"has_updates={has_updates}\nupdate_count={outdated}\n")
+            f.write(f"has_updates={has_updates}\nupdate_count={outdated}\nskipped_count={skipped}\n")
 
-    print(f"components={len(inv['components'])} outdated={outdated} has_updates={has_updates}")
+    print(f"components={len(inv['components'])} outdated={outdated} skipped={skipped} has_updates={has_updates}")
     # 本地运行时直接展示概览
     if not gh_out:
         print(report)
