@@ -48,5 +48,12 @@ metadata:
    - Hermes Agent：一键检测并注入 `AppData\Local\hermes\config.yaml`。
    - ZCode：一键检测并注入 `cli/config.json` 与 `v2/config.json`。
 
+**2026-09-05 安全与健壮性批次（全账号审计产出，均已推送）**：
+- `2020b4b` 日志查看器 UTF-8 边界 panic 修复（中文日志 80KB 截断对齐 char boundary）；
+- `c9da638` 开发机硬编码路径全量环境变量化：集中工具区 env_nonempty/local_appdata/user_home + `C2O_PYTHON`/`C2O_CONVERTER`/`HERMES_HOME`，原 VOS-User 路径仅剩最终兜底（本机行为不变）；**Agent 路径检测已核实通用**：Hermes 候选=官方 Windows 默认 %LOCALAPPDATA%\hermes + HERMES_HOME + ~/.hermes（官方文档三 者 皆 认），ZCode=~/.zcode/cli（官方约定），他人机器可正常检测；
+- `b23c2d5` /health 收窄为 {status, authenticated} 并新增 LocalHostOnlyMiddleware（Host 头校验防 DNS rebinding，[::1]:port 方括号解析已处理）；前端昵称改走 accounts_list 并移除硬编码"晚街"；
+- `d79fd4f` 补基础 CI（windows-latest：npm ci+vite build+cargo check --locked+rust-cache，timeout 30min，首跑 4m26s 绿）+ dependabot.yml（npm+cargo）；
+- 已知存量风险（未修，设计内）：accounts.json 明文 token（与桌面端同级）、converter --api-key 默认空时零鉴权（GUI 不传 key）、proxy_stop 按命令行匹配可能误杀其他 converter.py 进程、脱敏功能=绕过上游合规词检测（合规风险用户自担）。
+
 **Why:** 用户要求模型列表全量覆盖官方模型库，并补全 WorkBuddy 核心的倍率显示、上下文限制与思考强度调节能力。
 **How to apply:** 维护 `C:\Users\VOS-User\Desktop\codebuddy2openai`，后续所有跨端 Agent 配置及客户端演进均以此架构为基准。
