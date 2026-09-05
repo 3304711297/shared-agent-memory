@@ -46,3 +46,5 @@
 - [Workbuddy Proxy Startup](workbuddy-proxy-startup.md) — WorkBuddy 代理启动方式记录
 - [Codebuddy2openai Upstream Benchmark](codebuddy2openai-upstream-benchmark.md) — 09-05 对标 EasyCLIProxyAPI **三批采纳全部落地**（6 提交 CI 全绿：XSS/单实例锁/双主题/TTFT/用量统计/更新检查）；遗留拆文件与 CI 加测试待拍板
 - [Hermes Ecosystem Evaluation and YSK Sync](hermes-ecosystem-evaluation-and-ysk-sync.md) — 社区 Hermes 资源评估（1/2/4/6 安装价值辨析）与 3/5（高阶指令速查+官方生态进阶）整理落入 youshouldknow 项目全流程闭环（commit abcc8f8，CI 全绿部署）
+- [Telegram Channel Emoegg Ops](telegram-channel-emoegg-ops.md) — 用户个人 Telegram 频道 @emoegg（蛋总的圈）专属 Bot (@HermesAgentByjieBot) 管理体系、主号风控背景与 14 款纯暗黑精选主题落地
+- [Hermes Studio Evaluation and Desktop Theming](hermes-studio-evaluation-and-desktop-theming.md) — 第三方客户端 hermes-studio 深度评估（插件SDK缺失/数据库裂脑/双重代理）与官方桌面端 ZCode Dark 沉浸式 IDE 主题 1:1 复刻落地
