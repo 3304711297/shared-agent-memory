@@ -35,7 +35,7 @@ metadata:
 - Error: "Version negotiation failed: the server denied access (HTTP 403)"
 - Plugin installed at: `C:\Users\VOS-User\.zcode\cli\plugins\cache\claude-plugins-official\adobe-for-creativity\2.0.0\`
 - Windows PowerShell 当前装有 Pester 6.1.0（CurrentUser 作用域，与 tweak CI 钉的版本一致），2026-08-21 实测本地 `Invoke-Pester` 跑通全部 14 个用例；PSScriptAnalyzer 1.25.0 同日装好（CurrentUser，与 CI 一致）
-- 本地工具链（2026-08-21）：gh 2.98.0（MSI 默认路径）；lychee 0.24.2 在 `%LOCALAPPDATA%\Programs\lychee`（已追加用户 PATH，旧终端需重开生效）。Git 装在自定义路径 `D:\Git`——**不要用 winget 升级 Git.Git**（可能改写安装路径）
+- 本地工具链（2026-09-05 更新）：gh 2.100.0（MSI 机器级，2026-09-05 由 2.98.0 升级，Authenticode 验签后静默装，keyring 认证无缝保留）；lychee 0.24.2 在 `%LOCALAPPDATA%\Programs\lychee`（已追加用户 PATH，旧终端需重开生效）；PowerShell 7.6.5。Git 装在自定义路径 `D:\Git`——**不要用 winget 升级 Git.Git**（可能改写安装路径）。gh/git/powershell/lychee 已纳入能力看门（[[capability-upstream-watch]]）。
 - Git 安全升级方法：注册表 `HKLM:\SOFTWARE\GitForWindows` 的 InstallPath=D:\Git（机器级安装，升级需 UAC）；从 git-for-windows/git GitHub Releases 下载官方安装器，静默参数 `/VERYSILENT /NORESTART /SUPPRESSMSGBOXES /DIR=D:\Git` 显式锁路径；须用"延迟 90 秒的提权脚本"执行——ZCode 每次 Bash 调用会临时占用 D:\Git 的 bash.exe/msys 文件锁，调用之间才释放
 - 2026-08-21 Git 已成功升级 2.54.0 → 2.55.0.windows.5：安装器 exit=0，`git --version` 确认新版本，`where git` 仍指向 D:\Git，注册表 InstallPath 未变；临时文件已清理
 - winget 的 CDN 源在本机经常连不上（WinHttp 12029），GitHub 直连稳定：装不到的东西优先从 GitHub Releases 直接下载（gh 可自举下载新版 MSI 后 msiexec 提权装）
