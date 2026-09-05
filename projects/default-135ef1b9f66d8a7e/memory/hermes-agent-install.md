@@ -42,5 +42,7 @@ NousResearch hermes-agent v0.21.0 于 2026-09-02 23 时重装完成并验证（d
   - 根因：更新安装器需要覆盖更新 `hermes-agent\venv` 下的依赖与执行模块，但后台常驻的配额服务或辅助脚本（如 `fetch_quota.py`）仍在运行并独占句柄，触发 Windows 进程文件锁，导致更新器出于安全策略暂停并弹出拦截。
   - 处理：任务管理器或命令行 `taskkill /F /PID <pid>` 结束占用进程，再执行更新即可；当手动 `hermes update` 已经执行完成并显示最新（`f1ccf436a2`）后，该弹窗仅为历史残留阻断提示，直接点击「暂不」或「×」关闭即可。
 
+- **Hermes 端无 ZCode 式「配置静默丢弃」风险（2026-09-05 排查）**：ZCode 曾因 cli/config.json 的 provider.npm 字段触发 schema 拒绝、整份配置被静默丢弃（见 [[capability-upstream-watch]]）；对照排查 Hermes 端——config.yaml 无任何 npm 类字段，`hermes doctor` 全项通过（仅浏览器工具 2 个既有 npm 依赖漏洞与若干可选系统依赖警告，与配置校验无关）。结论：该雷区为 ZCode CLI 专属，Hermes 端无需处理。
+
 **Why:** 安装两次失败均因 git/uv 不走系统代理，且坏了的旧 checkout 会被安装器整目录移走导致运行时丢失；记住这些可避免重复踩坑。
 **How to apply:** 任何 hermes 安装/更新/克隆 GitHub 的命令前先 export 代理变量；检查 hermes 状态看 logs\gateway.log 与 gateway_state.json（进程核对 tasklist）。相关：[[user-windows-environment]]

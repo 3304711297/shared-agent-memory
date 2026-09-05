@@ -16,7 +16,7 @@
 - [Evidence Before Absence Claims](evidence-before-absence-claims.md) — 用户质疑"是否改了我系统"时先只读取证（PSReadLine 历史在 %APPDATA% 路径），绝不凭意图下绝对结论，错说主动收回
 - [Pester 6 Mock Pitfalls](pester6-mock-pitfalls.md) — Pester 6 命令 mock 三坑：param 条件分支不可靠改适配器注入、捕获列表用闭包变量勿用 $script:、$args 匹配要含完整路径
 - [Youshouldknow Doc Details](youshouldknow-doc-details.md) — 薄页重定向、分类索引补齐、主文加厚与显式导航；部署门禁 needs [build, link-check] 已收紧
-- [Cross-Repo Coverage Audit](cross-repo-coverage-audit.md) — Coverage 审计契约（逐份与 manifest 完全一致）；2026-08-25 审计器升级 AST 函数校验+菜单/Loader 契约，lock 严格同步策略已拍板（ysk 任何 main 提交都需提锁）
+- [Cross-Repo Coverage Audit](cross-repo-coverage-audit.md) — Coverage 审计契约（逐份与 manifest 完全一致，现 48 项含 GAMEQOS 类）；审计器 ID 正则硬编码前缀，新增清单类别必须同步扩正则；lock 严格同步策略已拍板（ysk 任何 main 提交都需提锁）
 - [GitHub Stars Organization](github-stars-organization.md) — GitHub 星标 495 个与 13 个 Lists 的分类整理任务
 - [OpenRouter Chinese Scripts Comparison](openrouter-chinese-scripts-comparison.md) — 三个 OpenRouter 汉化脚本对比与 datou1996+LynnGuo666 共存配置
 - [OpenRouter Chinese Plus Project](openrouter-chinese-plus-project.md) — 桌面 openrouter-chinese 三合一脚本项目；用户用 ScriptCat；React 拆分价格节点 DOM 特性；两轮工程复审已全部修复（30 项单测含伪 DOM 生命周期/退出码驱动重建/ourBase 统一/v1.1 SPA 路由清理）
@@ -29,7 +29,7 @@
 - [Bilibili Video Transcription Pipeline](bilibili-video-transcription-pipeline.md) — B站视频→逐字稿管线（直连API防412+ffmpeg whisper small+误听对照表），脚本在 bios_knowledge/
 - [Youshouldknow BIOS Knowledge Series](youshouldknow-bios-knowledge-series.md) — ysk BIOS 选项科普系列（2026-09-02 批次+09-03 EP15 NVMe，逐篇附出处）；同步点 d0fc852；B站看门 bilibili-watch 每 6h 自动开 Issue；ysk 新增页面必须重跑 gen-matrix.py
 - [Serena MCP Silent Config](serena-mcp-silent-config.md) — Serena 插件静默配置（禁用 Web Dashboard 与 GUI 日志弹窗，离线快速启动）
-- [Multi Branch Memory Backup](multi-branch-memory-backup.md) — 共享库三分支架构（2026-09-05 重构）：main=双端共享唯一真源（hermes junction 直读）、zcode/hermes=各自专属；谁改谁当轮推 main
+- [Multi Branch Memory Backup](multi-branch-memory-backup.md) — 共享库三分支架构（2026-09-05 重构）：main=双端共享唯一真源（hermes junction 直读）、zcode/hermes=各自专属；谁改谁当轮推 main；**仓库已公开**（脱敏后转公开，用户拍板不做历史重写）
 - [User Global Preferences](user-global-preferences.md) — 用户全局铁律与偏好（自 Hermes USER.md 沉淀）：CI 全绿才收尾、不确定信息联网核实、复杂任务技能优先、Whisper small、UI 键值分层等宽加粗/加载动效、桌面工具内嵌无黑框、托盘 GUI.for.Cores 风格
 - [Hermes to ZCode Capability Sync](hermes-to-zcode-capability-sync.md) — 2026-09-05 Hermes→ZCode 能力同步：87 skills 迁入 ~/.zcode/skills、deepwiki MCP 新增、重复（superpowers/docx 等）与 Hermes 专有（quota/dogfood 等）跳过清单、记忆库 7 补 5 合
 - [Capability Upstream Watch](capability-upstream-watch.md) — 每日能力组件上游看门（shared-agent-memory Actions，capability-watch 标签 Issue）+ watch-capability.cmd 本地一键；ZCode 市场两层架构（bundled 种子+CDN）；升级组件后必须回写 capability-inventory.json 推 main 自动收口；用户拍板 agent 本体永久排除

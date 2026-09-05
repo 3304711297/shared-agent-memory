@@ -1,6 +1,6 @@
 ---
 name: multi-branch-memory-backup
-description: 共享记忆库三分支架构（2026-09-05 重构）：main=双端共享唯一真源，zcode/hermes=各自专属内容分支；谁改动谁当轮推送
+description: 共享记忆库三分支架构（2026-09-05 重构）：main=双端共享唯一真源（仓库已公开），zcode/hermes=各自专属内容分支；谁改动谁当轮推送；用户拍板不做历史重写
 metadata:
   node_type: memory
   type: feedback
