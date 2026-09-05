@@ -133,6 +133,14 @@ def local_merged_versions(path):
     return {p.get("name"): p.get("version") for p in d.get("plugins", [])}
 
 
+def github_commits_for_path(repo, path):
+    """取仓库某路径最近 100 笔提交（新→旧）。"""
+    q = urllib.parse.quote(path, safe="/")
+    return http_json(
+        f"https://api.github.com/repos/{repo}/commits?path={q}&per_page=100", auth=True
+    )
+
+
 def main():
     with open(INV_PATH, encoding="utf-8") as f:
         inv = json.load(f)
@@ -197,6 +205,43 @@ def main():
             rows.append(f"| {comp['display']} | `{cid}` | 本地源 | {state} |")
             if behind:
                 outdated += 1
+            details.append("\n".join(detail))
+            continue
+
+        # 技能库路径提交检查：对比基线 sha，报告新增提交数
+        if check["type"] == "github-commits-path":
+            try:
+                commits = github_commits_for_path(check["repo"], check["path"])
+            except Exception as e:
+                rows.append(f"| {comp['display']} | `{cid}` | N/A | ⚠️ 查询失败 |")
+                details.append("\n".join([
+                    f"### {comp['display']}（{cid}）", "",
+                    f"- ⚠️ 上游查询失败：{type(e).__name__}: {e}",
+                ]))
+                continue
+            head = commits[0]["sha"] if commits else None
+            rec = next((loc.get("sha") for loc in comp.get("installed", []) if loc.get("sha")), None)
+            behind = bool(head and rec and head != rec)
+            count = None
+            if behind and commits:
+                for i, c in enumerate(commits):
+                    if c["sha"] == rec:
+                        count = i
+                        break
+                if count is None:
+                    count = f"{len(commits)}+"
+            head_msg = (commits[0]["commit"]["message"].split("\n")[0][:60]) if commits else ""
+            head_date = commits[0]["commit"]["committer"]["date"][:10] if commits else ""
+            state = "🔴 有更新" if behind else ("✅ 最新" if head else "⚠️ 查询失败")
+            rows.append(f"| {comp['display']} | `{cid}` | {head[:8] if head else 'N/A'} | {state} |")
+            if behind:
+                outdated += 1
+            detail = [f"### {comp['display']}（{cid}）", ""]
+            if head:
+                detail.append(f"- 上游最新：**{head[:8]}**（{head_date}）{head_msg}")
+            detail.append(f"- 基线：`{(rec or '未记录')[:8]}` → " + (f"**{count} 笔新提交涉及技能库**" if behind else "✅ 一致"))
+            if behind:
+                detail.append("- 跟进：Hermes GUI 技能页更新/重跑迁移同步到 ZCode 后，把清单 `installed.sha` 回写为最新 HEAD 并推 main。")
             details.append("\n".join(detail))
             continue
 
