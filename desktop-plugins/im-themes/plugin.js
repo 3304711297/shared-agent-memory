@@ -1,7 +1,7 @@
 /**
- * Hermes Desktop Plugin: tg-channel-themes (@emoegg 频道精选 18 款实用主题合集)
+ * Hermes Desktop Plugin: tg-channel-themes (@emoegg 频道精选 15 款沉浸主题合集)
  *
- * 移植自 Telegram 频道 @emoegg 第 12 号精选主题合集（已剔除与桌面端调性不符的微信日间版）：
+ * 移植自 Telegram 频道 @emoegg 第 12 号精选主题合集（已精简剔除刺眼日间亮色，保留高颜值暗黑与舒眼米色）：
  *
  * 【经典 IM 社交系列】
  * 1. qq-classic: QQ 经典 (Such QQ)
@@ -9,25 +9,20 @@
  * 3. wechatify-dark: 微信夜间 2 (WeChatify Dark OLED)
  * 4. wechat-dark3: 微信夜间 3 (夜间微信)
  *
- * 【动漫 / 卡通风格系列】
- * 6. anime-designer: 动漫夜间 (Designer)
- * 7. cartoon-meow: 卡通日间 (MeowMinimal)
- *
- * 【清新高雅日间系列】
- * 8. clean-blue: 蓝色日间 (简洁·蓝)
- * 9. wine-red-light: 酒红日间 (Nlovetou-酒红)
- * 10. cream-sepia: 米色日间 (米色舒眼)
+ * 【动漫 / 极简风格系列】
+ * 5. anime-designer: 动漫夜间 (Designer)
+ * 6. cream-sepia: 米色日间 (米色舒眼护眼羊皮纸)
  *
  * 【极客 / 编程审美暗黑系列】
- * 11. brownie-dark: 酒红简洁 (Brownie)
- * 12. palenight: 紫色简洁 (Palenight Material)
- * 13. spacegrey: 黄色文字 (Spacegrey)
- * 14. puaro-grey: 淡灰简洁 (Puaro)
- * 15. forest-green: 暗绿文字 (Forest Green)
- * 16. dracula-mint: 蓝绿夜间 (Dracula Mint)
- * 17. amber-orange: 橙黄夜间 (Is So Elegant)
- * 18. neon-purple: 暗紫夜间 (Buifys)
- * 19. jotunheim-blue: 湛蓝夜间 (Jotunheim)
+ * 7. brownie-dark: 酒红简洁 (Brownie)
+ * 8. palenight: 紫色简洁 (Palenight Material)
+ * 9. spacegrey: 黄色文字 (Spacegrey)
+ * 10. puaro-grey: 淡灰简洁 (Puaro)
+ * 11. forest-green: 暗绿文字 (Forest Green)
+ * 12. dracula-mint: 蓝绿夜间 (Dracula Mint)
+ * 13. amber-orange: 橙黄夜间 (Is So Elegant)
+ * 14. neon-purple: 暗紫夜间 (Buifys)
+ * 15. jotunheim-blue: 湛蓝夜间 (Jotunheim)
  *
  * 每一个主题均注册至 THEMES_AREA，并在 Ctrl+K 命令面板中支持一键极速切换。
  */
@@ -243,112 +238,7 @@ const ALL_THEMES = [
     typography: TYPOGRAPHY,
   },
 
-  // --- 7. 卡通日间 (MeowMinimal) ---
-  {
-    name: 'cartoon-meow',
-    label: '卡通日间 (MeowMinimal)',
-    description: 'MeowMinimal cute warm cartoon day theme with peach-cream palette and soft corners',
-    colors: {
-      background: '#faf7f2',
-      foreground: '#2e2621',
-      card: '#ffffff',
-      cardForeground: '#2e2621',
-      muted: '#f2ece4',
-      mutedForeground: '#8a7d74',
-      popover: '#ffffff',
-      popoverForeground: '#2e2621',
-      primary: '#ea580c',
-      primaryForeground: '#ffffff',
-      secondary: '#feede6',
-      secondaryForeground: '#c2410c',
-      accent: '#fed7aa',
-      accentForeground: '#9a3412',
-      border: '#e7ded4',
-      input: '#ffffff',
-      ring: '#f97316',
-      midground: '#f97316',
-      composerRing: '#f97316',
-      destructive: '#e11d48',
-      destructiveForeground: '#ffffff',
-      sidebarBackground: '#f5efe6',
-      sidebarBorder: '#e5dbcf',
-      userBubble: '#fdba74',
-      userBubbleBorder: '#fb923c',
-    },
-    typography: TYPOGRAPHY,
-  },
-
-  // --- 8. 蓝色日间 (简洁·蓝) ---
-  {
-    name: 'clean-blue',
-    label: '蓝色日间 (简洁·蓝)',
-    description: 'Pure crystal blue daytime theme with fresh sky tones and high readability',
-    colors: {
-      background: '#f0f4f9',
-      foreground: '#1b2430',
-      card: '#ffffff',
-      cardForeground: '#1b2430',
-      muted: '#e3ebf4',
-      mutedForeground: '#718096',
-      popover: '#ffffff',
-      popoverForeground: '#1b2430',
-      primary: '#2563eb',
-      primaryForeground: '#ffffff',
-      secondary: '#eff6ff',
-      secondaryForeground: '#1d4ed8',
-      accent: '#dbeafe',
-      accentForeground: '#1e40af',
-      border: '#d0dfef',
-      input: '#ffffff',
-      ring: '#3b82f6',
-      midground: '#3b82f6',
-      composerRing: '#3b82f6',
-      destructive: '#ef4444',
-      destructiveForeground: '#ffffff',
-      sidebarBackground: '#e7eff8',
-      sidebarBorder: '#ccdbee',
-      userBubble: '#3b82f6',
-      userBubbleBorder: '#2563eb',
-    },
-    typography: TYPOGRAPHY,
-  },
-
-  // --- 9. 酒红日间 (Nlovetou-酒红) ---
-  {
-    name: 'wine-red-light',
-    label: '酒红日间 (Nlovetou-酒红)',
-    description: 'Elegant burgundy and rose-cream daytime theme with warm luxury tones',
-    colors: {
-      background: '#fdf8f8',
-      foreground: '#2c181b',
-      card: '#ffffff',
-      cardForeground: '#2c181b',
-      muted: '#f5e8ea',
-      mutedForeground: '#8c6b71',
-      popover: '#ffffff',
-      popoverForeground: '#2c181b',
-      primary: '#9f1239',
-      primaryForeground: '#ffffff',
-      secondary: '#ffe4e6',
-      secondaryForeground: '#881337',
-      accent: '#fecdd3',
-      accentForeground: '#881337',
-      border: '#ecd5d9',
-      input: '#ffffff',
-      ring: '#be123c',
-      midground: '#be123c',
-      composerRing: '#be123c',
-      destructive: '#dc2626',
-      destructiveForeground: '#ffffff',
-      sidebarBackground: '#f7ebed',
-      sidebarBorder: '#e8ced3',
-      userBubble: '#be123c',
-      userBubbleBorder: '#9f1239',
-    },
-    typography: TYPOGRAPHY,
-  },
-
-  // --- 10. 米色日间 (米色舒眼) ---
+  // --- 7. 米色日间 (米色舒眼) ---
   {
     name: 'cream-sepia',
     label: '米色日间 (米色舒眼)',
