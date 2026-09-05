@@ -19,7 +19,8 @@ INV_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__
 REPORT_PATH = "capability-report.md"
 GH_TOKEN = os.environ.get("GH_TOKEN", "")
 CLAUDE_MKT_REPO = "anthropics/claude-plugins-official"
-ZCODE_MKT_URL = "https://cdn-zcode.z.ai/zcode/official-plugin/marketplace.json"
+ZCODE_MKT_URL = "https://raw.githubusercontent.com/zai-org/zcode-plugins/main/marketplace.json"
+ZCODE_MKT_CDN = "https://cdn-zcode.z.ai/zcode/official-plugin/marketplace.json"
 
 _cache = {}
 
@@ -103,7 +104,11 @@ def upstream_version(check):
             f"https://api.github.com/repos/{check['repo']}/releases/latest", auth=True
         ).get("tag_name")
     if t == "zcode-marketplace":
-        mkt = http_json(ZCODE_MKT_URL)
+        # 真源 = zai-org/zcode-plugins 仓库；CDN 为其镜像，仓库失败时回退
+        try:
+            mkt = http_json(ZCODE_MKT_URL, accept="application/json")
+        except Exception:
+            mkt = http_json(ZCODE_MKT_CDN, accept="application/json")
         for p in mkt.get("plugins", []):
             if p.get("name") == check["plugin"]:
                 return p.get("version")
