@@ -10,25 +10,14 @@
         { "type": "npm", "package": "chrome-devtools-mcp" }
       ],
       "installed": [
-        { "where": "ZCode cli/config.json mcp.servers（钉版）", "version": "1.7.0" },
-        { "where": "ZCode 插件 claude-plugins-official", "version": "1.7.0", "sha": "614b4ebe23196dc0c657671ee52e7138f6d09017" },
-        { "where": "Hermes config.yaml mcp_servers（钉版）", "version": "1.7.0" }
+        { "where": "ZCode cli/config.json mcp.servers（钉版，含防扩展清空保护参数）", "version": "1.8.0" },
+        { "where": "ZCode 插件 claude-plugins-official（已补保护参数）", "version": "1.8.0", "sha": "45f187b1e3202c9f32ddba913be5d68751c3caa3" },
+        { "where": "Hermes config.yaml mcp_servers（钉版，含保护参数）", "version": "1.8.0" }
       ],
       "claudeMarketplaceSha": {
         "plugin": "chrome-devtools-mcp",
-        "installedSha": "614b4ebe23196dc0c657671ee52e7138f6d09017"
+        "installedSha": "45f187b1e3202c9f32ddba913be5d68751c3caa3"
       }
-    },
-    {
-      "id": "context7-mcp",
-      "display": "Context7 MCP（文档检索）",
-      "checks": [
-        { "type": "npm", "package": "@upstash/context7-mcp" }
-      ],
-      "installed": [
-        { "where": "Hermes config.yaml（upstream.json 记录）", "version": "4.0.4" },
-        { "where": "ZCode 插件 claude-plugins-official（远端托管版，版本号 0.0.0 无意义）", "version": "4.0.4" }
-      ]
     },
     {
       "id": "desktop-commander",
@@ -84,7 +73,7 @@
         { "type": "zcode-marketplace", "plugin": "github" }
       ],
       "installed": [
-        { "where": "ZCode 插件（已启用）", "version": "0.1.1" }
+        { "where": "ZCode 插件（已启用）", "version": "0.1.2" }
       ]
     },
     {
@@ -127,9 +116,10 @@
   ],
   "notWatched": [
     "【用户拍板 2026-09-05】hermes-agent 与 ZCode CLI 本体永久不纳入看门（各自自带更新机制：hermes update --check / ZCode 客户端自更新）",
+    "context7-mcp：自动跟随最新——hermes config.yaml npx 未钉版 + 插件为 http 远端托管（mcp.context7.com），2026-09-05 从受监控清单移出",
     "未安装的市场插件不监控：cloudbase-skills(0.1.0)、example-plugin(0.2.0)、代码安全防护（后者在 CDN manifest 与本地合并清单均未出现，来源待查，疑似按版本/渠道下发）",
-    "hermes skills hub 内置注册表技能（hermes GUI 自带更新提示，无公开 git 上游可查）",
     "zcode-custom 六个自有 skill（用户原创，无上游）",
-    "deepwiki 等 http 远端 MCP（服务端永远最新）"
+    "deepwiki 等 http 远端 MCP（服务端永远最新）",
+    "hermes token-stats 插件（hermes 专有后端，随 hermes 本体分发，无公开上游）"
   ]
 }
