@@ -103,11 +103,30 @@ Because Windows does not cascade process termination to grandchildren upon GUI w
 1. **Tier 1: Hermes Native On-Demand Lazy Connect & Idle Recycle (In-App Hygiene)**:
    Never run heavy stdio MCP servers in persistent eager mode. In Hermes `config.yaml` (`mcp_servers.<name>`), configure:
    - `lazy: true`: Enables cold-on-demand start. Hermes registers tools at startup from its local schema cache (`cache/mcp_schema_cache.json`) with **zero subprocesses spawned** (0 Node, 0 Serena, 0 Python), achieving instant boot and zero idle RAM. The process is spawned only on the first actual tool call.
-   - `idle_timeout_seconds: 180` (or 300): If no tool calls occur for the duration, Hermes automatically triggers a clean `recycle`, terminating the stdio subprocess and freeing all memory/handles until the next call.
+   - `idle_timeout_seconds: 60`: If no tool calls occur for 60 seconds, Hermes automatically triggers a clean `recycle`, terminating the stdio subprocess and freeing all memory/handles until the next call.
 2. **Tier 2: System-Level Targeted Whitelist Reaper & Agent Guard (Exit Failsafe)**:
    When cleaning up or automating post-exit shutdown, never blindly `taskkill /IM node.exe` (which kills user web servers, Vite, Next.js). Target exclusively verified MCP signatures:
    - Node MCPs: `commandline` matching `chrome-devtools-mcp`, `desktop-commander`, `context7-mcp`.
    - Python MCPs: `serena.exe` and `cmdline` containing `serena`.
    - Implementation: canonical safe reaper at `C:/Users/VOS-User/AppData/Local/hermes/scripts/cleanup_agent_orphans.py`, orchestrated by background daemon `C:/Users/VOS-User/AppData/Local/hermes/scripts/agent_guard.py` (2.5s debounce after all Agent GUIs close).
-- **OpenViking Service Decoupling**: OpenViking is the shared dual-agent memory service, decoupled from OS auto-start (per user preference: on-demand via `openviking_service.py` or Desktop shortcuts `启动 OpenViking.lnk` / `停止 OpenViking.lnk`). Never couple its lifecycle to a single agent's startup.
+- **OpenViking Automated Demand-Wake & Zero-Focus-Steal Invariant**:
+  - OpenViking is the shared dual-agent memory service, completely decoupled from OS auto-start (`Startup/OpenVikingGateway.vbs` removed) and free of desktop shortcut clutter.
+  - **Native GUI PATH Shim**: Hermes' OpenViking plugin runs `shutil.which("openviking-server")` on 1933 connection drops. A compiled Go binary with `-H=windowsgui` PE subsystem header at `C:/Users/VOS-User/.openviking/shim-bin/openviking-server.exe` (placed first on User PATH) intercepts the call and transparently boots the full lazy-gateway stack without spawning `cmd.exe` or flashing console windows.
+  - **Zero Console-Allocation / Zero Focus-Steal (CRITICAL)**: In background supervisor or auto-sleep routines running under `pythonw.exe` (such as `openviking_lazy_gateway.py` or `agent_guard.py`), NEVER invoke console executables (`netstat.exe`, `taskkill.exe`) without `CREATE_NO_WINDOW = 0x08000000`. On Windows, running console apps from a windowless process forces the OS to allocate a transient `conhost.exe` host window; even a 10ms transient console creation steals foreground input focus, disrupting active typing and destroying uncommitted IME candidate buffers. Always terminate processes via native `psutil` (`proc.kill()` / Win32 `TerminateProcess`) and query ports via `psutil.net_connections()`.
+  - **Tri-phase Lifecycle**: Demand-wake on first memory access -> 2-minute idle auto-sleep (100% VRAM release) -> automatic termination upon Agent GUI close via `agent_guard`.
+
+## 10. Native Tool Prioritization & Tool Call Efficiency (User Rule)
+The user strictly enforces tool execution efficiency and minimal round-trip overhead:
+- **Direct Native Tools First**: Always use specialized Hermes native tools directly:
+  - File reading: `read_file` (built-in line numbers & pagination; never `python open().read()`).
+  - Targeted edits: `patch` (fuzzy matching, AST validation, unified diffs; never full-file python rewrites that destroy indentation/formatting).
+  - Search & inspection: `search_files` (ripgrep-backed content/filename search; never custom `python os.walk`).
+- **Python Invocation Boundary**: Reserve `python -c` or execution scripts strictly for complex multi-step batch logic that genuinely requires code execution (e.g. process tree auditing, cryptographic/Wbi signing algorithms, SQLite database analysis, cross-store reconciliation).
+- **config.yaml Security Exception**: Hermes core prevents `patch`/`write_file` edits on its own `config.yaml` as a security-sensitive guard. For this file specifically, use `python` with `ruamel.yaml` (`preserve_quotes=True`) to maintain structural fidelity without clobbering formatting.
+- **ZCode config.json Schema Guard**: Whenever editing ZCode's `config.json` (such as modifying `plugins.enabledPlugins`), ALWAYS run `node "D:/zcode/resources/glm/zcode.cjs" plugins list --json` immediately afterwards to verify schema compliance and prevent silent configuration drop.
+
+## 11. Real-Browser Automation Boundary (chrome-devtools vs Native Browser)
+- **Irreplaceable Capability**: `chrome-devtools` MCP is preserved in Hermes (and ZCode) specifically because it drives the user's **daily Edge Dev profile** (via `--user-data-dir`, `--autoConnect`, and `--ignore-default-chrome-arg=--disable-extensions`).
+- **Native Browser Incompatibility**: Hermes' built-in `browser` toolset cannot replace this workflow: its `browser.use_real_profile` flag hard-rejects Chromium pre-release channels (Beta/Dev/Canary) via `_real_profile_unsupported_reason()`, and runs in an isolated disposable sandbox.
+- **autoConnect Prerequisite**: The `--autoConnect` flag attaches to an **already-running** Edge Dev browser (version 144+) with remote debugging enabled (`edge://inspect/#remote-debugging`). It does NOT launch Edge. Edge Dev must be running; each fresh session may prompt a one-time security dialog ("是否允许远程调试？") requiring user confirmation.
 

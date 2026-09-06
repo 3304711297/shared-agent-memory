@@ -19,6 +19,7 @@ import threading
 import time
 from pathlib import Path
 from typing import Any, Optional
+from concurrent.futures import ThreadPoolExecutor
 
 from fastapi import APIRouter, Query
 from fastapi.responses import JSONResponse
@@ -51,14 +52,84 @@ def _cache_file() -> Path:
     return _hermes_home() / "desktop-plugins" / "token-stats" / "direct-quota.json"
 
 
-def get_auth_file() -> Optional[str]:
+def _find_usage_db() -> Optional[Path]:
+    candidates = [
+        Path(r"D:\EasyCLIProxyAPI-v0.2.71-Windows-amd64\usage-records\usage.db"),
+        Path(r"D:\EasyCLIProxyAPI\usage-records\usage.db"),
+        _auth_dir().parent / "usage-records" / "usage.db",
+    ]
+    for c in candidates:
+        if c.exists():
+            return c
+    return None
+
+
+def _get_active_email() -> Optional[str]:
+    """Identify the currently active/most recently used account from EasyCLIProxyAPI."""
+    db_path = _find_usage_db()
+    if db_path and db_path.exists():
+        try:
+            import sqlite3
+            conn = sqlite3.connect(f"file:{db_path.as_posix()}?mode=ro", uri=True)
+            try:
+                row = conn.execute(
+                    "SELECT source FROM usage_events WHERE source != '' ORDER BY id DESC LIMIT 1"
+                ).fetchone()
+                if row and row[0]:
+                    return row[0].strip()
+            finally:
+                conn.close()
+        except Exception:
+            pass
+
+    log_file = _auth_dir() / "logs" / "main.log"
+    if log_file.exists():
+        try:
+            with open(log_file, "rb") as f:
+                f.seek(0, 2)
+                size = f.tell()
+                f.seek(max(0, size - 8192))
+                tail = f.read().decode("utf-8", errors="ignore")
+            import re
+            matches = re.findall(r"auth=antigravity-([^ \t\r\n]+\.json)", tail)
+            if matches:
+                last = matches[-1]
+                if last.endswith(".json"):
+                    return last[:-5]
+        except Exception:
+            pass
+
+    return None
+
+
+def get_auth_files() -> list[tuple[Path, dict]]:
+    """Return all valid Antigravity auth files and their parsed metadata."""
     auth_dir = _auth_dir()
     if not auth_dir.exists():
-        return None
+        return []
+    files: list[tuple[Path, dict]] = []
     for f in sorted(auth_dir.iterdir()):
         if f.name.startswith("antigravity-") and f.name.endswith(".json"):
-            return str(f)
-    return None
+            try:
+                data = json.loads(f.read_text(encoding="utf-8"))
+                if not data.get("disabled", False):
+                    files.append((f, data))
+            except Exception:
+                continue
+    return files
+
+
+def get_auth_file() -> Optional[str]:
+    auth_items = get_auth_files()
+    if not auth_items:
+        return None
+    active_email = _get_active_email()
+    if active_email:
+        for p, d in auth_items:
+            if d.get("email") == active_email:
+                return str(p)
+    auth_items.sort(key=lambda x: (x[1].get("priority", 0), x[1].get("timestamp", 0)), reverse=True)
+    return str(auth_items[0][0])
 
 
 def _stale_disk_cache() -> Optional[dict]:
@@ -138,32 +209,15 @@ def check_workbuddy_status() -> dict[str, Any]:
     }
 
 
-def fetch_google_quota(force: bool = False) -> dict:
-    """Fetch quota from Google's official endpoint via the local proxy (30s in-memory cache)."""
-    global _cache_data, _cache_time
-
-    now = time.time()
-    with _cache_lock:
-        if not force and _cache_data is not None and (now - _cache_time < CACHE_TTL):
-            return _cache_data
-
-    auth_path = get_auth_file()
-    if not auth_path:
-        return {"error": f"EasyCLIProxyAPI auth file not found in {_auth_dir()}"}
-
-    try:
-        auth = json.loads(Path(auth_path).read_text(encoding="utf-8"))
-    except Exception as exc:
-        return {"error": f"Failed to read auth file: {exc}"}
-
+def _fetch_single_google_quota(auth_path: Path, auth: dict) -> Optional[dict]:
     token = auth.get("access_token", "")
     project_id = auth.get("project_id", "aicode-consumers")
     email = auth.get("email", "")
+    priority = auth.get("priority", 0)
 
     if not token:
-        return {"error": "No access_token found in auth file"}
+        return None
 
-    # Antigravity uses daily-cloudcode-pa endpoint (not generic cloudcode-pa).
     url = "https://daily-cloudcode-pa.googleapis.com/v1internal:retrieveUserQuotaSummary"
     payload = json.dumps({"project": project_id}).encode("utf-8")
 
@@ -183,14 +237,10 @@ def fetch_google_quota(force: bool = False) -> dict:
         )
         with opener.open(req, timeout=8) as res:
             if res.status != 200:
-                return {"error": f"Google returned HTTP {res.status}"}
+                return None
             raw = json.loads(res.read().decode("utf-8"))
     except Exception:
-        # Network failure → fall back to the on-disk cache, flagged stale.
-        old = _stale_disk_cache()
-        if old is not None:
-            return old
-        return {"error": "Request to Google failed (network) and no disk cache available"}
+        return None
 
     quota_5h: Optional[float] = None
     reset_5h: Optional[str] = None
@@ -220,38 +270,122 @@ def fetch_google_quota(force: bool = False) -> dict:
                 elif ("week" in bid or "weekly" in bid) and third_party_weekly is None:
                     third_party_weekly = pct
 
-    # Probe WorkBuddy gateway
-    wb_status = check_workbuddy_status()
-
-    result: dict[str, Any] = {
-        "status": "ok",
+    is_pro = ("qq.com" in email) or (auth.get("plan") == "pro") or (auth.get("is_pro") is True)
+    return {
         "account": email,
-        "plan": "Google AI Pro",
+        "email": email,
+        "plan": "Google AI Pro" if is_pro else "Google AI",
+        "priority": priority,
         "quota5h": quota_5h if quota_5h is not None else 100,
         "reset5h": reset_5h,
         "quotaWeekly": quota_weekly if quota_weekly is not None else 100,
         "resetWeekly": reset_weekly,
-        "claudeQuota5h": third_party_5h,
-        "claudeQuotaWeekly": third_party_weekly,
+        "claudeQuota5h": third_party_5h if third_party_5h is not None else 100,
+        "claudeQuotaWeekly": third_party_weekly if third_party_weekly is not None else 100,
+    }
+
+
+def fetch_google_quota(force: bool = False) -> dict:
+    """Fetch quota from Google's official endpoint via the local proxy (30s in-memory cache).
+
+    Supports multi-account pools with concurrent querying and dynamic active-account routing detection.
+    """
+    global _cache_data, _cache_time
+
+    now = time.time()
+    with _cache_lock:
+        if not force and _cache_data is not None and (now - _cache_time < CACHE_TTL):
+            # Check if active account shifted
+            active_email = _get_active_email()
+            if active_email and _cache_data.get("account") != active_email:
+                accounts = _cache_data.get("accounts", [])
+                target = next((a for a in accounts if a.get("account") == active_email), None)
+                if target:
+                    _cache_data["account"] = target["account"]
+                    _cache_data["activeAccount"] = target["account"]
+                    _cache_data["plan"] = target["plan"]
+                    _cache_data["quota5h"] = target["quota5h"]
+                    _cache_data["reset5h"] = target["reset5h"]
+                    _cache_data["quotaWeekly"] = target["quotaWeekly"]
+                    _cache_data["resetWeekly"] = target["resetWeekly"]
+                    _cache_data["claudeQuota5h"] = target["claudeQuota5h"]
+                    _cache_data["claudeQuotaWeekly"] = target["claudeQuotaWeekly"]
+                    for a in accounts:
+                        a["isActive"] = (a.get("account") == active_email)
+            return _cache_data
+
+    auth_items = get_auth_files()
+    if not auth_items:
+        return {"error": f"EasyCLIProxyAPI auth file not found in {_auth_dir()}"}
+
+    active_email = _get_active_email()
+
+    parsed_accounts: list[dict[str, Any]] = []
+    with ThreadPoolExecutor(max_workers=min(4, len(auth_items))) as executor:
+        futures = [executor.submit(_fetch_single_google_quota, p, a) for p, a in auth_items]
+        for f in futures:
+            try:
+                acc = f.result()
+                if acc:
+                    parsed_accounts.append(acc)
+            except Exception:
+                pass
+
+    if not parsed_accounts:
+        # Fall back to disk cache
+        old = _stale_disk_cache()
+        if old is not None:
+            return old
+        return {"error": "Request to Google failed (network) and no disk cache available"}
+
+    for acc in parsed_accounts:
+        acc["isActive"] = (acc.get("account") == active_email)
+
+    primary = next((a for a in parsed_accounts if a.get("isActive")), None)
+    if not primary:
+        parsed_accounts.sort(key=lambda a: (a.get("priority", 0), a.get("account", "")), reverse=True)
+        primary = parsed_accounts[0]
+        primary["isActive"] = True
+
+    # Probe WorkBuddy gateway
+    wb_status = check_workbuddy_status()
+
+    providers: list[dict[str, Any]] = []
+    for acc in parsed_accounts:
+        active_label = " (当前活跃)" if acc.get("isActive") else ""
+        providers.append({
+            "id": f"antigravity_{acc['account']}",
+            "name": f"Google AI{active_label}",
+            "plan": acc["plan"],
+            "account": acc["account"],
+            "status": "active" if acc.get("isActive") else "standby",
+            "priority": acc["priority"],
+            "windows": [
+                {"label": "Gemini 5h 滚动额度", "remaining": acc["quota5h"], "reset": acc["reset5h"]},
+                {"label": "Gemini 每周总配额", "remaining": acc["quotaWeekly"], "reset": acc["resetWeekly"]},
+                {"label": "3P 协同池 (Claude/GPT)", "remaining": acc["claudeQuota5h"], "reset": None},
+            ],
+        })
+    providers.append(wb_status)
+
+    result: dict[str, Any] = {
+        "status": "ok",
+        "account": primary["account"],
+        "activeAccount": primary["account"],
+        "plan": primary["plan"],
+        "quota5h": primary["quota5h"],
+        "reset5h": primary["reset5h"],
+        "quotaWeekly": primary["quotaWeekly"],
+        "resetWeekly": primary["resetWeekly"],
+        "claudeQuota5h": primary["claudeQuota5h"],
+        "claudeQuotaWeekly": primary["claudeQuotaWeekly"],
+        "accounts": parsed_accounts,
+        "accountsCount": len(parsed_accounts),
         "source": "Google 官方直连 (Hermes 内置)",
         "updatedAt": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         "updatedAtLocal": time.strftime("%H:%M:%S"),
         "workbuddy": wb_status,
-        "providers": [
-            {
-                "id": "antigravity",
-                "name": "Google AI (Antigravity)",
-                "plan": "Google AI Pro",
-                "account": email,
-                "status": "active",
-                "windows": [
-                    {"label": "Gemini 5h 滚动额度", "remaining": quota_5h if quota_5h is not None else 100, "reset": reset_5h},
-                    {"label": "Gemini 每周总配额", "remaining": quota_weekly if quota_weekly is not None else 100, "reset": reset_weekly},
-                    {"label": "3P 协同池 (Claude/GPT)", "remaining": third_party_5h if third_party_5h is not None else 100, "reset": None},
-                ],
-            },
-            wb_status,
-        ],
+        "providers": providers,
     }
 
     with _cache_lock:
@@ -273,19 +407,40 @@ def format_quota_markdown(data: dict) -> str:
     if "error" in data:
         return f"⚠️ **配额获取异常**: {data.get('error')}"
 
-    account = data.get("account", "未知账号")
-    plan = data.get("plan", "Google AI Pro")
-    q5h = data.get("quota5h", 100)
-    qw = data.get("quotaWeekly", 100)
-    r5h = data.get("reset5h", "--")
-    rw = data.get("resetWeekly", "--")
-    cq5h = data.get("claudeQuota5h", 100)
     sync = data.get("updatedAtLocal", "--")
     wb = data.get("workbuddy", {})
     wb_status = wb.get("statusLabel", "未启动")
     wb_note = wb.get("note", "")
 
-    wb_usage_section = ""
+    accounts = data.get("accounts")
+    if not accounts:
+        accounts = [{
+            "account": data.get("account", "未知账号"),
+            "plan": data.get("plan", "Google AI Pro"),
+            "quota5h": data.get("quota5h", 100),
+            "quotaWeekly": data.get("quotaWeekly", 100),
+            "reset5h": data.get("reset5h", "--"),
+            "resetWeekly": data.get("resetWeekly", "--"),
+            "claudeQuota5h": data.get("claudeQuota5h", 100),
+            "isActive": True,
+        }]
+
+    lines = [f"### 📊 模型配额与本地网关监控 (`{sync}`)\n"]
+    lines.append("**Google AI (EasyCLIProxyAPI 官方直连)**")
+
+    for acc in accounts:
+        active_badge = " `● 当前活跃`" if acc.get("isActive") else ""
+        lines.append(f"- **账号**：`{acc['account']}` ({acc.get('plan', 'Google AI')}){active_badge}")
+        lines.append(
+            f"  - Gemini 5h: `{acc['quota5h']}%` *(重置: `{acc.get('reset5h') or '--'}`)* | 周配额: `{acc['quotaWeekly']}%` *(重置: `{acc.get('resetWeekly') or '--'}`)*"
+        )
+        lines.append(f"  - Claude 3p 协同: `{acc.get('claudeQuota5h', 100)}%`")
+
+    lines.append("")
+    lines.append("**WorkBuddy (codebuddy2openai)**")
+    lines.append(f"- **网关状态**：`{wb_status}` · `{wb_note}`")
+    lines.append("- **本地端点**：`http://127.0.0.1:8787/v1`")
+
     usage = wb.get("usage")
     if wb.get("status") == "online" and usage:
         pct = usage.get("remainPercent", 0)
@@ -295,27 +450,15 @@ def format_quota_markdown(data: dict) -> str:
             f"  - 包 `{p.get('code', '')[-8:]}`: `{p.get('remain', 0):.0f}`/`{p.get('total', 0):.0f}` {p.get('unit', 'credits')}"
             for p in packages
         )
-        wb_usage_section = f"""
-- **当前账号**：`{usage.get('nickname', '—')}` ({paid})
-- **积分余量**：`{usage.get('remain', 0):.1f}` / `{usage.get('total', 0):.0f}` (`{pct}%`)
-- **积分包明细**：
-{pkg_lines}"""
+        lines.append(f"- **当前账号**：`{usage.get('nickname', '—')}` ({paid})")
+        lines.append(f"- **积分余量**：`{usage.get('remain', 0):.1f}` / `{usage.get('total', 0):.0f}` (`{pct}%`)")
+        if pkg_lines:
+            lines.append(f"- **积分包明细**：\n{pkg_lines}")
     elif wb.get("usageError"):
-        wb_usage_section = f"\n- **积分查询**: ⚠️ {wb.get('usageError')}"
+        lines.append(f"- **积分查询**: ⚠️ {wb.get('usageError')}")
 
-    return f"""### 📊 模型配额与本地网关监控 (`{sync}`)
-
-**Google AI (Antigravity 官方直连)**
-- **订阅方案**：`{plan}` (`{account}`)
-- **Gemini 5h 额度**：`{q5h}%` *(重置: `{r5h}`)*
-- **Gemini 周总配额**：`{qw}%` *(重置: `{rw}`)*
-- **Claude 3p 协同**：`{cq5h}%`
-
-**WorkBuddy (codebuddy2openai)**
-- **网关状态**：`{wb_status}` · `{wb_note}`
-- **本地端点**：`http://127.0.0.1:8787/v1`{wb_usage_section}
-
-*(输入 `/quota refresh` 可强制穿透刷新)*"""
+    lines.append("\n*(输入 `/quota refresh` 可强制穿透刷新)*")
+    return "\n".join(lines)
 
 
 @router.get("/quota")
