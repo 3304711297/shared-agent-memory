@@ -56,12 +56,17 @@ OpenViking 摄入长 Markdown 文档时输入常超过 2000 tokens。llama-serve
 必须配置扩展参数：
 `-c 8192 -b 8192 --ubatch-size 8192 -ngl 99`
 
-### 4. Serverless 懒人网关（按需拉起 + 空闲休眠与 Venv 隔离）
+### 4. Serverless 懒人网关与 Agent 退出自动清理（Agent Guard 闭环）
 脚本位于 `C:\Users\VOS-User\AppData\Local\hermes\scripts\openviking_lazy_gateway.py`。
-依用户指令（2026-09-06），已移除 `Startup` 开机自启动项，改为按需手动启停：
-- 桌面提供 `启动 OpenViking.lnk`（点击静默拉起 1933 懒网关）与 `停止 OpenViking.lnk`（点击一键杀掉网关与模型进程释放显存与内存）；
-- 统一运维脚本 `python C:/Users/VOS-User/AppData/Local/hermes/scripts/openviking_service.py [start|stop|restart|status]`。
-- **运行环境严格隔离**：必须使用 OpenViking 独立虚拟环境 `C:\Users\VOS-User\.openviking\venv\Scripts\pythonw.exe` 驱动，严禁借用 `hermes-agent\venv`，规避 Windows 文件锁拦截 Hermes 桌面更新；
+依用户指令（2026-09-06）：
+1. **解除开机自启**：已从 `Startup` 移除 `OpenVikingGateway.vbs`；
+2. **全自动退出清理（方案 A）**：部署 `scripts/agent_guard.py`（开机启动项 `Startup/AgentGuard.vbs`，经 `.openviking\venv\Scripts\pythonw.exe` 驱动，占用 ~18MB 内存，CPU 0%）。静默监控 `Hermes.exe` 与 `ZCode.exe`：
+   - 当检测到所有 Agent GUI 均已关闭后，防抖 2.5 秒，自动连根清除 MCP 孙子孤儿进程（`chrome-devtools-mcp`、`desktop-commander`、`context7-mcp`、`serena`）、残留后台 Python 进程，并自动执行 `openviking_service.py stop` 完全释放 GPU 显存与内存；
+3. **桌面快捷辅助**：
+   - `启动 OpenViking.lnk`（点击后台静默开启 1933 懒网关）；
+   - `停止 OpenViking.lnk`（点击一键杀掉网关与模型进程）；
+   - `清理孤儿进程.lnk`（一键手动强制清扫孤儿进程）。
+4. **运行环境严格隔离**：必须使用 OpenViking 独立虚拟环境 `C:\Users\VOS-User\.openviking\venv\Scripts\pythonw.exe` 驱动，严禁借用 `hermes-agent\venv`，规避 Windows 文件锁拦截 Hermes 桌面更新。
 - 平时状态：0% GPU、0 MB 显存、0% CPU；
 - 收到提问时：自动在后台 5~6 秒内静默拉起 18082 与 1934，无任何黑框终端弹出；
 - 连续 2 分钟无请求：自动 taskkill 终止推理进程，100% 归还 800MB 显存。
