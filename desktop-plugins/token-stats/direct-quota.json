@@ -2,15 +2,15 @@
   "status": "ok",
   "account": "jimygod114514@gmail.com",
   "plan": "Google AI Pro",
-  "quota5h": 89.7,
+  "quota5h": 62.0,
   "reset5h": "2026-09-06T06:57:00Z",
-  "quotaWeekly": 37.2,
+  "quotaWeekly": 32.6,
   "resetWeekly": "2026-09-11T01:03:50Z",
   "claudeQuota5h": 100,
   "claudeQuotaWeekly": 100,
   "source": "Google 官方直连 (Hermes 内置)",
-  "updatedAt": "2026-09-06T02:25:53Z",
-  "updatedAtLocal": "10:25:53",
+  "updatedAt": "2026-09-06T03:13:11Z",
+  "updatedAtLocal": "11:13:11",
   "workbuddy": {
     "id": "workbuddy",
     "name": "WorkBuddy (codebuddy2openai)",
@@ -22,16 +22,16 @@
     "usage": {
       "nickname": "晚街",
       "total": 3809.0,
-      "remain": 2848.86000065,
-      "used": 960.1399993499999,
+      "remain": 2848.84000065,
+      "used": 960.15999935,
       "remainPercent": 74.8,
       "isPaidUser": false,
       "packages": [
         {
           "code": "TCACA_code_007_nzdH5h4Nl0",
           "total": 2309.0,
-          "remain": 1848.86000065,
-          "used": 460.13999935,
+          "remain": 1848.84000065,
+          "used": 460.15999935,
           "unit": "credits"
         },
         {
@@ -61,12 +61,12 @@
       "windows": [
         {
           "label": "Gemini 5h 滚动额度",
-          "remaining": 89.7,
+          "remaining": 62.0,
           "reset": "2026-09-06T06:57:00Z"
         },
         {
           "label": "Gemini 每周总配额",
-          "remaining": 37.2,
+          "remaining": 32.6,
           "reset": "2026-09-11T01:03:50Z"
         },
         {
@@ -87,16 +87,16 @@
       "usage": {
         "nickname": "晚街",
         "total": 3809.0,
-        "remain": 2848.86000065,
-        "used": 960.1399993499999,
+        "remain": 2848.84000065,
+        "used": 960.15999935,
         "remainPercent": 74.8,
         "isPaidUser": false,
         "packages": [
           {
             "code": "TCACA_code_007_nzdH5h4Nl0",
             "total": 2309.0,
-            "remain": 1848.86000065,
-            "used": 460.13999935,
+            "remain": 1848.84000065,
+            "used": 460.15999935,
             "unit": "credits"
           },
           {

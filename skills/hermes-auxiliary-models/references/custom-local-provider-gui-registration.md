@@ -154,7 +154,9 @@ When diagnosing search capabilities or encountering `gemini-web-search` in EasyC
     1. Pre-validate key via `POST https://api.exa.ai/search` with header `x-api-key: <KEY>`.
     2. Persist credential into `~/.hermes/.env` via `save_env_value('EXA_API_KEY', '<KEY>')`.
     3. Lock engine via `hermes config set web.backend exa`, `hermes config set web.search_backend exa`, and `hermes config set web.extract_backend exa`.
-  - **Key-Backed Recommendations**: For reliable technical research without public rate limits, configure `brave-free` (2,000 free req/mo via `BRAVE_SEARCH_API_KEY`), `exa` (via `EXA_API_KEY`), or `tavily` (1,000 free req/mo via `TAVILY_API_KEY`).
+  - **Key-Backed Recommendations & The Overseas Card Wall Trap**:
+    - **The Stripe Verification Trap**: Overseas commercial search providers (Brave Search, Tavily) have tightened anti-sybil controls, requiring a valid credit card even for "free" tiers to perform $0 authorization checks. Domestic Chinese dual-currency cards and IPs almost invariably fail Stripe fraud checks (`未能验证您的支付方式`). Never guide users into repeated card trials across SaaS platforms—advise immediate stop to prevent card lockouts.
+    - **Reliable Zero-Card Hierarchy**: (1) Dedicated `EXA_API_KEY` (if acquired); (2) Hermes native Keyless Ring (public Exa/Parallel/Firecrawl MCP); (3) Local `pip install ddgs` for 100% credential-free, zero-card, local-only fallback.
 
 ## 16. Skill Provenance Diagnostics: Bundled vs. Installed vs. Platform Gating
 When determining whether a skill on disk was shipped with Hermes or installed later by the user:
@@ -167,6 +169,9 @@ When determining whether a skill on disk was shipped with Hermes or installed la
 - **Skill Uninstallation & Cleanup Invariants**:
   - `hermes skills uninstall` accepts only **one** positional argument `name`. Passing multiple names raises `unrecognized arguments`. To remove multiple skills, chain commands: `hermes skills uninstall -y <name1> && hermes skills uninstall -y <name2>`.
   - Always pass `-y` (or `--yes`) in non-interactive/scripted contexts; omitting it triggers an interactive `[y/N]` confirmation that auto-cancels on EOF/closed stdin.
+- **Cross-Agent Dual-Library Cleanliness (Hermes vs. ZCode)**:
+  - `hermes skills uninstall` executes strictly within Hermes (`%LOCALAPPDATA%\hermes\skills`). It NEVER touches ZCode's independent skills directory (`~/.zcode/skills`).
+  - When pruning obsolete skills originally synced via dual-agent capability synchronization, always inspect `~/.zcode/skills` and prune the twin directories to prevent ZCode skill drift and keep both environments in 100% parity.
 
 ## 17. Hermes Desktop Managed Local Models & Runtime Storage Relocation on Windows (C Drive Space Protection)
 When using Hermes Desktop's integrated **Local Models** (`本地模型`) feature (powered by managed `llama.cpp` runtime):
@@ -180,6 +185,14 @@ When using Hermes Desktop's integrated **Local Models** (`本地模型`) feature
   ```
   - Windows handles transparent kernel-level I/O redirection: all `.part` downloads, completed `.gguf` weights, companion `assets/` (e.g. `mmproj` vision projectors), and `llama-server` engine binaries physically reside on `D:\`, consuming **0 bytes** on C:.
   - Fully transparent to the Hermes Desktop GUI, progress bars, and supervised `llama-server` process; survives Hermes application updates and profile resets.
+- **Managed Router Architecture & `/v1/embeddings` 501 Trap**:
+  - The supervised process (`llama-server.exe`) runs as a multi-model chat router (`--models-autoload`, `--jinja`, `--models-dir`) listening on a loopback port (typically `18434`), recorded in `%LOCALAPPDATA%\hermes\runtimes\llamacpp\server.json` alongside an ephemeral `api_key`.
+  - Chat completions (`/v1/chat/completions`) work natively with full thinking/reasoning streaming (`reasoning_content`).
+  - **The Router Embedding 501 Pitfall**: The router instance is started without the `--embedding` flag. Sending requests to `/v1/embeddings` against the managed router returns `HTTP 501: Not Implemented`. To serve vector models like `bge-m3` for RAG/OpenViking, spawn a dedicated background `llama-server.exe` instance with `-m <model.gguf> --embedding --port <port>` or use `fastembed` in Python.
+- **Laptop GPU VRAM Sizing Invariant (8GB Class)**:
+  - Dense models >9B (e.g. 14B, 27B, 35B) overflow 8GB VRAM and spill into system RAM across PCIe, throttling throughput down to ~4–8 tokens/s with high thermal load.
+  - Sub-9B Q4/Q5 models (e.g. `Qwen3.5-9B-Q4_K_M` at ~5.3GB, `DeepSeek-R1-Distill-Qwen-7B-Q4_K_M` at ~4.4GB) fit 100% in 8GB VRAM with ~2.5GB reserved for KV cache, yielding full CUDA acceleration (~20–60 tokens/s).
+  - High-parameter MoE models (e.g. `Qwen3-Coder-30B-A3B`) with low active parameter count (Active 3B) remain viable in hybrid memory configurations (~18–28 tokens/s) because memory bandwidth pressure per token is bounded by the active expert slice.
 
 ## 18. OpenViking Context Database & Local Model Dual-Drive Memory Architecture
 When integrating OpenViking (`volcengine/OpenViking`) as an external memory provider for Hermes Agent (`hermes memory setup openviking`):

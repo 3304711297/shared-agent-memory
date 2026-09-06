@@ -17,3 +17,5 @@ ZCode 跨端测试规范（09-05 用户拍板）：严禁用 zcode.cjs headless 
 Hermes 桌面 token 双口径：会话列表数字=该会话累计消耗（input+output 按轮累加，缓存读不计入）；状态栏 xk/1M=当前上下文占用（下一轮 prompt，压缩阈值看它）。多轮后左侧必然≥状态栏，100k vs 38k 属正常。
 §
 Hermes 检索与抽取全量接管为 Exa 独享（EXA_API_KEY 已入库 .env，web.backend/search_backend/extract_backend=exa，避开公共免密限流）；EasyCLIProxyAPI(18080) 的 gemini-web-search 仅为 gemini-3.1-flash-lite 别名无实时搜索（无 Grounding 工具），不可作搜索源；已卸载冗余社区技能 duckduckgo-search 与 searxng-search。
+§
+本机硬件：RTX 4070 Laptop (8GB 显存) + 24GB 内存；C 盘空间紧张 (~50GB)，Hermes 本地模型与运行时已建立 NTFS Junction 映射至 D 盘（models -> D:\HermesModels，runtimes -> D:\HermesRuntimes）；OpenViking 独立虚拟环境位于 C:\Users\VOS-User\.openviking\venv。

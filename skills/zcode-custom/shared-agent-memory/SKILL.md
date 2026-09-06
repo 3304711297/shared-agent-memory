@@ -52,3 +52,25 @@ metadata:
    ```
 
 **注意**：`memories/topics` 已在 home 仓库 .gitignore 中排除，严禁再往 hermes 分支提交共享 topics 镜像；旧镜像历史存档于 hermes 分支 `957241a`。
+
+## 智能语义检索与层级加载层 (OpenViking)
+
+为了避免全局 Grep 造成的长文本 Token 暴击与关键词错失，架构挂载了 OpenViking 作为**二级派生检索索引**（Git `main` 仍为唯一物理真源）：
+
+- **服务拓扑**：
+  - **OpenViking 核心服务**：`http://127.0.0.1:1933`（独立虚拟环境 `C:\Users\VOS-User\.openviking\venv`，无黑框后台运行）
+  - **本地向量 Embedding**：`http://127.0.0.1:18082/v1`（llama-server 纯本地驱动 `D:\HermesModels\bge-m3-Q8_0.gguf`，CUDA RTX 4070 硬件加速，1024 维）
+  - **提炼模型 (VLM)**：`http://127.0.0.1:18080/v1`（gemini-3.8-flash，用于秒级提炼 L0 摘要与 L1 大纲）
+  - **共享记忆挂载点**：`viking://resources/shared-memory/`（客观知识库命名空间，严格与 Agent/User 私有偏好隔离）
+- **双驱动自动同步**：
+  1. **即时驱动（Git Hook）**：在 `C:\Users\VOS-User\.zcode\cli\memories\.git\hooks\post-commit` 与 `post-merge` 挂接 `sync_shared_memory_openviking.py`，ZCode 或本地有 commit 产生时秒级增量触发 OpenViking 重新扫描；
+  2. **兜底探活**：`sync_shared_memory_openviking.py` 记录 `last_synced_commit.txt`，对比 Git HEAD SHA 自动防漂移。
+- **Hermes 召回约束（防 Prompt 污染与注意力稀释）**：
+  - `OPENVIKING_RECALL_LIMIT=3`
+  - `OPENVIKING_RECALL_SCORE_THRESHOLD=0.35`
+  - `OPENVIKING_RECALL_PREFER_ABSTRACT=true`（优先拉取 L0 一句话摘要，按需用 `viking_read` 钻取 L2 全文）
+  - `OPENVIKING_RECALL_RESOURCES=true`
+- **后台服务守护与运维**：
+  - 查看状态：`python C:/Users/VOS-User/AppData/Local/hermes/scripts/openviking_service.py status`
+  - 启停服务：`python C:/Users/VOS-User/AppData/Local/hermes/scripts/openviking_service.py [start|stop|restart]`
+
