@@ -29,8 +29,8 @@ metadata:
                          │
                          ↓
        Serverless 懒加载网关 (HTTP 127.0.0.1:1933)
-       - 按需自动唤醒 18082 & 1934
-       - 15 分钟空闲自动终止进程、100% 释放 GPU 显存
+       - 按需自动唤醒 18082 与 1934
+       - 2 分钟空闲自动终止进程、100% 释放 GPU 显存
                          │
                          ↓
        Hermes 原生 Memory Provider (openviking 插件, 保守召回策略)
@@ -60,7 +60,7 @@ OpenViking 摄入长 Markdown 文档时输入常超过 2000 tokens。llama-serve
 脚本位于 `C:\Users\VOS-User\AppData\Local\hermes\scripts\openviking_lazy_gateway.py`，并在 `Startup` 目录配置 `OpenVikingGateway.vbs` 开机静默拉起：
 - 平时状态：0% GPU、0 MB 显存、0% CPU；
 - 收到提问时：自动在后台 5~6 秒内静默拉起 18082 与 1934，无任何黑框终端弹出；
-- 连续 15 分钟无请求：自动 taskkill 终止推理进程，100% 归还 800MB 显存。
+- 连续 2 分钟无请求：自动 taskkill 终止推理进程，100% 归还 800MB 显存。
 
 ### 5. Hermes 保守召回策略
 在 Hermes `config.yaml` 与 `.env` 中锁定：

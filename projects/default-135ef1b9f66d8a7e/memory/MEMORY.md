@@ -51,5 +51,5 @@
 - [Telegram Channel Emoegg Ops](telegram-channel-emoegg-ops.md) — 用户个人 Telegram 频道 @emoegg（蛋总的圈）专属 Bot (@HermesAgentByjieBot) 管理体系、主号风控背景与 14 款纯暗黑精选主题落地
 - [Hermes Studio Evaluation and Desktop Theming](hermes-studio-evaluation-and-desktop-theming.md) — 第三方客户端 hermes-studio 深度评估（插件SDK缺失/数据库裂脑/双重代理）与官方桌面端 ZCode Dark 沉浸式 IDE 主题 1:1 复刻落地
 - [Hermes Search Provider Exa and Cleanup](hermes-search-provider-exa-and-cleanup.md) — Hermes 检索与抽取全量锁定为 Exa 独享（EXA_API_KEY 固化于 .env）、解构 EasyCLIProxyAPI 网关 gemini-web-search 伪联网本质、清理 duckduckgo 与 searxng 冗余技能
-- [OpenViking Lazy Gateway and Local BGE-M3](openviking-lazy-gateway-and-local-bge-m3.md) — OpenViking 智能语义检索接入、本地 CUDA BGE-M3 向量加速（1024维/8192批处理）、D:\HermesModels 存储重定向与 Serverless 按需唤醒/15分钟空闲自动休眠静默网关落地全貌
+- [OpenViking Lazy Gateway and Local BGE-M3](openviking-lazy-gateway-and-local-bge-m3.md) — OpenViking 智能语义检索接入、本地 CUDA BGE-M3 向量加速（1024维/8192批处理）、D:\HermesModels 存储重定向与 Serverless 按需唤醒/2分钟空闲自动休眠静默网关落地全貌
 
