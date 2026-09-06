@@ -128,7 +128,10 @@ def stop_daemon():
                 continue
             cmd = ' '.join(proc.info['cmdline'] or []).lower()
             if "agent_guard.py" in cmd:
-                subprocess.run(["taskkill", "/F", "/PID", str(pid)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                try:
+                    proc.kill()
+                except Exception:
+                    subprocess.run(["taskkill", "/F", "/PID", str(pid)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, creationflags=CREATE_NO_WINDOW)
                 killed += 1
         except (psutil.NoSuchProcess, psutil.AccessDenied):
             pass

@@ -21,11 +21,33 @@ except ImportError:
 LOG_DIR = Path(r"C:\Users\VOS-User\AppData\Local\hermes\logs")
 LOG_FILE = LOG_DIR / "agent_cleanup.log"
 
+CREATE_NO_WINDOW = 0x08000000
+
 MCP_NODE_KEYWORDS = [
     "chrome-devtools-mcp",
     "desktop-commander",
     "context7-mcp",
 ]
+
+
+def safe_kill(proc: psutil.Process) -> None:
+    try:
+        for child in proc.children(recursive=True):
+            try:
+                child.kill()
+            except Exception:
+                pass
+        proc.kill()
+    except Exception:
+        try:
+            subprocess.run(
+                ["taskkill", "/F", "/T", "/PID", str(proc.pid)],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                creationflags=CREATE_NO_WINDOW,
+            )
+        except Exception:
+            pass
 
 
 def log(msg: str):
@@ -64,7 +86,7 @@ def cleanup_orphans(force_all: bool = False, stop_openviking: bool = True) -> di
     gui_active = is_agent_gui_running()
 
     if not psutil:
-        subprocess.run(["taskkill", "/F", "/IM", "serena.exe"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        subprocess.run(["taskkill", "/F", "/IM", "serena.exe"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, creationflags=CREATE_NO_WINDOW)
         return killed_counts
 
     for proc in psutil.process_iter(['pid', 'name', 'cmdline']):
@@ -80,30 +102,21 @@ def cleanup_orphans(force_all: bool = False, stop_openviking: bool = True) -> di
                 if any(kw in cmdline for kw in MCP_NODE_KEYWORDS):
                     # Only kill if GUI is closed OR force_all
                     if not gui_active or force_all:
-                        try:
-                            subprocess.run(["taskkill", "/F", "/T", "/PID", str(pid)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-                            killed_counts["node"] += 1
-                        except Exception:
-                            pass
+                        safe_kill(proc)
+                        killed_counts["node"] += 1
 
             # 2. Serena MCP (serena.exe and its spawned uvx/python helpers)
             elif name == 'serena.exe' or ('serena' in cmdline and name in ('python.exe', 'pythonw.exe', 'uv.exe', 'uvx.exe')):
                 if not gui_active or force_all:
-                    try:
-                        subprocess.run(["taskkill", "/F", "/T", "/PID", str(pid)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-                        killed_counts["serena"] += 1
-                    except Exception:
-                        pass
+                    safe_kill(proc)
+                    killed_counts["serena"] += 1
 
             # 3. Zombie Hermes CLI / Gateway / Serve processes (ONLY when GUI is closed)
             elif name in ('python.exe', 'pythonw.exe'):
                 if not gui_active or force_all:
                     if "hermes_cli.main gateway run" in cmdline or "hermes_cli.main --profile default serve" in cmdline:
-                        try:
-                            subprocess.run(["taskkill", "/F", "/T", "/PID", str(pid)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-                            killed_counts["python"] += 1
-                        except Exception:
-                            pass
+                        safe_kill(proc)
+                        killed_counts["python"] += 1
 
         except (psutil.NoSuchProcess, psutil.AccessDenied):
             pass

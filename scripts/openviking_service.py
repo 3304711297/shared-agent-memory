@@ -42,7 +42,19 @@ def check_port_listening(port: int, path: str = "/api/v1/system/status") -> bool
 def get_pids_for_ports(ports: list[int]) -> set[str]:
     pids = set()
     try:
-        out = subprocess.run(["netstat", "-ano"], capture_output=True, text=True, errors="ignore").stdout
+        import psutil
+        target_ports = set(ports)
+        for conn in psutil.net_connections(kind="inet"):
+            if conn.status == psutil.CONN_LISTEN and conn.laddr and conn.laddr.port in target_ports:
+                if conn.pid:
+                    pids.add(str(conn.pid))
+        if pids:
+            return pids
+    except Exception:
+        pass
+
+    try:
+        out = subprocess.run(["netstat", "-ano"], capture_output=True, text=True, errors="ignore", creationflags=CREATE_NO_WINDOW).stdout
         for line in out.splitlines():
             parts = line.strip().split()
             if len(parts) >= 5 and parts[3] == "LISTENING":
@@ -104,11 +116,21 @@ def stop():
         pass
 
     if pids:
-        for pid in pids:
+        for pid_str in pids:
             try:
-                subprocess.run(["taskkill", "/F", "/T", "/PID", pid], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                import psutil
+                p = psutil.Process(int(pid_str))
+                for child in p.children(recursive=True):
+                    try:
+                        child.kill()
+                    except Exception:
+                        pass
+                p.kill()
             except Exception:
-                pass
+                try:
+                    subprocess.run(["taskkill", "/F", "/T", "/PID", pid_str], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, creationflags=CREATE_NO_WINDOW)
+                except Exception:
+                    pass
         print(f"[OpenViking] Terminated {len(pids)} process(es) (PIDs: {', '.join(pids)}).")
     else:
         print("[OpenViking] No running processes found.")
