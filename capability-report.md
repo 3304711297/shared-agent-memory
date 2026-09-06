@@ -1,6 +1,6 @@
 # 🔔 本地能力组件上游更新报告
 
-> 生成时间：2026-09-05 13:32（北京时间） · 清单：`capability-inventory.json`
+> 生成时间：2026-09-06 12:20（北京时间） · 清单：`capability-inventory.json`
 >
 > **跟进方式**：升级对应组件后，把清单里的 `installed.version` 更新为新版本并随共享库推 `main`，本看门会在下次运行时自动收口本 Issue。
 
@@ -19,7 +19,7 @@
 | 系统 CLI：Git for Windows | `cli-git` | v2.55.0.windows.5 | ✅ 最新 |
 | 系统 CLI：PowerShell 7 | `cli-powershell` | v7.6.5 | ✅ 最新 |
 | 系统 CLI：lychee 链接检查 | `cli-lychee` | 0.24.2 | ✅ 最新 |
-| Hermes Hub 技能库（skills/ 目录提交） | `hermes-hub-skills` | 4441a2a2 | ✅ 最新 |
+| Hermes Hub 技能库（skills/ 目录提交） | `hermes-hub-skills` | ee5b5ec2 | ✅ 最新 |
 
 ## 明细
 
@@ -93,8 +93,8 @@
 
 ### Hermes Hub 技能库（skills/ 目录提交）（hermes-hub-skills）
 
-- 上游最新：**4441a2a2**（2026-09-04）docs(agents): split AGENTS.md into root + per-area files (≤8
-- 基线：`4441a2a2` → ✅ 一致
+- 上游最新：**ee5b5ec2**（2026-09-05）docs(skills): reddit-reading spells out that no login is nee
+- 基线：`ee5b5ec2` → ✅ 一致
 
 ---
 
