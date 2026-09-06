@@ -156,21 +156,10 @@ approvals:
   mode: false
 plugins:
   enabled:
-    - context7
-    - desktop-commander
-    - serena
     - superpowers
     - token-stats
   disabled: []
-  entries:
-    desktop-commander:
-      allow_tool_override: false
-    superpowers:
-      allow_tool_override: false
-    serena:
-      allow_tool_override: false
-    context7:
-      allow_tool_override: false
+  entries: {}
 security:
   allow_private_urls: true
   allow_data_training_tiers_noninteractive: true
@@ -206,47 +195,6 @@ mcp_servers:
       - --autoConnect
       - --ignore-default-chrome-arg=--disable-extensions
       - --user-data-dir=C:\Users\VOS-User\AppData\Local\Microsoft\Edge Dev\User Data
-    timeout: 300
-    enabled: true
-    lazy: true
-    idle_timeout_seconds: 60
-  desktop-commander:
-    command: cmd
-    args:
-      - /c
-      - npx
-      - -y
-      - '@wonderwhy-er/desktop-commander@latest'
-    timeout: 300
-    enabled: true
-    lazy: true
-    idle_timeout_seconds: 60
-  serena:
-    command: cmd
-    args:
-      - /c
-      - uvx
-      - --from
-      - serena-agent
-      - serena
-      - start-mcp-server
-      - --enable-web-dashboard
-      - 'false'
-      - --open-web-dashboard
-      - 'false'
-      - --enable-gui-log-window
-      - 'false'
-    timeout: 300
-    enabled: true
-    lazy: true
-    idle_timeout_seconds: 60
-  context7:
-    command: cmd
-    args:
-      - /c
-      - npx
-      - -y
-      - '@upstash/context7-mcp'
     timeout: 300
     enabled: true
     lazy: true
