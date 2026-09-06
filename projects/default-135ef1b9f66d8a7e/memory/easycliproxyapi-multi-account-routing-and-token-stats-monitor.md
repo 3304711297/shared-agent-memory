@@ -50,16 +50,15 @@ metadata:
 
 ---
 
-## 三、 Hermes 辅助模型 (Vision) 配置纠偏
+## 三、 辅助模型配置铁律（用户明确拍板）
 
-- **问题**：`auxiliary.vision.provider: auto` 默认解析至官方 `gemini` 渠道，直连 Google AI Studio API 触发地区封锁（`400 FAILED_PRECONDITION: User location is not supported for the API use`）。
-- **纠偏规范**：
-  - `auxiliary.vision.provider: cpa-gui`
-  - `auxiliary.vision.model: gemini-3.8-flash`
-  - 辅助识图与多模态解析全面经由本地 EasyCLIProxyAPI 网关代理桥接，免额外商业计费且彻底规避地域限制。
+- **铁律**：严禁擅自修改 `auxiliary.*` 辅助模型配置，严格保持官方默认状态：
+  - `auxiliary.vision.provider: auto`
+  - `auxiliary.vision.model: ''`
+  - 辅助模型默认随主聊天模型动态解析/自动跟随，未经用户提议与明确拍板，严禁人工改动。
 
 **Why:**
 避免多账号环境下因优先级配置与监控单文件硬编码导致的流量倾斜认知偏差与配额监控脱节，确保轮询调度与上下文缓存兼顾，并在桌面端直观呈现真实凭据负载全貌。
 
 **How to apply:**
-新增或调整 EasyCLIProxyAPI 多账号时，必须保证同池账号优先级数值一致方可轮询；桌面端查看额度时以 token-stats 凭据池明细卡中的「● 当前活跃」账号为实际消耗准绳；Hermes 视觉与辅助调用统一走 `cpa-gui` 本地端点。
+新增或调整 EasyCLIProxyAPI 多账号时，必须保证同池账号优先级数值一致方可轮询；桌面端查看额度时以 token-stats 凭据池明细卡中的「● 当前活跃」账号为实际消耗准绳；辅助模型严格保持 `auto` 缺省状态。
