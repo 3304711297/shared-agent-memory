@@ -92,5 +92,10 @@ metadata:
 - **P2 文档环境基线升级**：`README.md` 环境要求更新为 `Node.js 24+ 与 npm`；
 - **CI 与全量测试**：pytest 44 项全量通过（新增 6 项测试），CI Run `34026572223` 全绿。同批闭环 openrouter/huggingface/steamdb 词库工作流测试门禁及 shared-agent-memory 供应链 SHA-Pin。
 
+**2026-09-06 边界原子性与多账号模型隔离补齐（提交 3e90c14）**：
+- **accounts.json 强事务阻断**：`_save_tokens()` 确立真源前置原子性，当 `accounts.json` 存在时若写入失败直接抛出 `RuntimeError` 阻断提交流程，禁止提前回写 `.info` 与内存缓存，彻底杜绝 Token Rotation 时的脏状态与重启失效风险；
+- **动态模型缓存按 UID 严格隔离**：`_MODELS_CACHE` 升级为 `dict[str, dict]` 按当前活跃 `uid` 分区存储，彻底杜绝多账号切换时不同账号/套餐/灰度模型矩阵串读；
+- **双向验证通过**：新增 2 项原子阻断与多账号隔离单测（共 45 项 pytest 100% 通过），CI Run `34027062730` 全绿通过。
+
 **Why:** 用户要求模型列表全量覆盖官方模型库，并补全 WorkBuddy 核心的倍率显示、上下文限制与思考强度调节能力。
 **How to apply:** 维护 `C:\Users\VOS-User\Desktop\codebuddy2openai`，后续所有跨端 Agent 配置及客户端演进均以此架构为基准。
