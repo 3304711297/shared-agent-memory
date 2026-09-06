@@ -15,6 +15,11 @@ the chat model (`auxiliary.vision.*`, `auxiliary.compression.*`, …).
 Chat working while an auxiliary call fails is a routing/config problem,
 not a model-capability problem. This skill covers the diagnosis path.
 
+## Standing User Invariant: Auxiliary Models Follow Main Chat Model
+
+- **Iron Rule**: For THIS user's environment, `auxiliary.*` (vision, compression, etc.) **must strictly remain at default `provider: auto` and `model: ''`** (allowing it to dynamically follow the primary chat model).
+- **Never autonomously override auxiliary routing**: Do NOT run `hermes config set auxiliary.vision.provider <provider>` or change auxiliary models without explicit user proposal and approval. Auxiliary models are intended to track the chat session's configured provider automatically.
+
 ## The core invariant
 
 Auxiliary calls do NOT inherit the chat session's provider or
