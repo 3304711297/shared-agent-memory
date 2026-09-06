@@ -226,9 +226,16 @@ When integrating OpenViking (`volcengine/OpenViking`) as an external memory prov
   - **Socket-Activation Architecture (`openviking_lazy_gateway.py`)**:
     - A lightweight stdlib HTTP gateway listens on the expected port `127.0.0.1:1933` (consuming ~15MB RAM, 0% CPU, 0 MB GPU VRAM).
     - **On-Demand Auto-Wake**: When Hermes initiates a prefetch query, browse, or tool call against 1933, the gateway checks if backends are sleeping. If sleeping, it silently spawns both `llama-server.exe` (port 18082, CUDA BGE-M3) and `openviking-server.exe` (internal port 1934) with `CREATE_NO_WINDOW`, waits for health readiness (~4–6s), and transparently proxies the HTTP request.
-    - **Idle Auto-Sleep & VRAM Reclamation**: A background monitor thread tracks request timestamps. When no requests are received for `OPENVIKING_IDLE_TIMEOUT` (default: 900s / 15 minutes), the gateway automatically kills the backend processes on ports 18082 and 1934, **100% freeing the 800MB GPU VRAM** and returning the GPU to idle.
+    - **Idle Auto-Sleep & VRAM Reclamation**: A background monitor thread tracks request timestamps. When no requests are received for `OPENVIKING_IDLE_TIMEOUT` (calibrated to **120s / 2 minutes** per user resource conservation requirements; previously 15 minutes was too sluggish), the gateway automatically kills the backend processes on ports 18082 and 1934, **100% freeing the 800MB GPU VRAM** and returning the GPU to idle.
     - **Timeout Calibration**: Extend `OPENVIKING_RECALL_TIMEOUT_SECONDS=15.0` in Hermes `.env` / `config.yaml` so the initial cold-start wake-up does not hit the default 4.0s recall timeout.
     - **Session-Independent Boot Persistence on Windows**: Launching the gateway via `pythonw.exe` from `shell:startup` (`OpenVikingGateway.vbs` with `WshShell.Run ..., 0, False`) guarantees it starts silently on Windows login with no console windows, remaining 100% resilient to chat session deletions, profile resets, or GUI restarts.
+- **Hermes Desktop Supervised Local Runtime (`local_runtime`) RAM Footprint & Termination Decoupling**:
+  - When a user installs or tests local models via the Hermes Desktop UI (`本地模型` -> `安装运行时` / `✓ 使用`), Hermes spawns a supervised `llama-server.exe` router on port 18434 (listening with `--models-autoload`, `--models-dir`). This supervised process loads multi-billion parameter models resident in RAM/VRAM, consuming **~2.9 GB to 5+ GB of physical RAM**.
+  - **The Supervisor Separation Invariant**: Terminating the OpenViking memory service or sleeping the background embedding server DOES NOT kill Hermes's supervised local chat runtime — they are managed by separate supervisors.
+  - **Complete RAM Reclamation Protocol**: When the user switches to cloud models (e.g. Gemini 3.8 Flash) and demands all memory freed:
+    1. Send a POST request to Hermes Desktop internal endpoint `/api/local-models/server` with body `{"action": "stop"}` (authenticated via `X-Hermes-Session-Token`), or execute `hermes config set local_runtime.enabled false`.
+    2. Terminate the supervised router process PID recorded in `%LOCALAPPDATA%\\hermes\\runtimes\\llamacpp\\server.json` and delete the state file.
+    3. Verify via `tasklist` / `psutil` that physical RAM drops immediately (e.g. 42% -> 30.9%, freeing ~3GB RAM), ensuring zero memory leaks remain.
 
 
 
