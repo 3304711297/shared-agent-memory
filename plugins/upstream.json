@@ -21,51 +21,6 @@
         "Hermes 技能路径映射规范",
         "去重后的单层目录结构"
       ]
-    },
-    "desktop-commander": {
-      "repo": "wonderwhy-er/DesktopCommanderMCP",
-      "branch": "main",
-      "last_synced_commit": "ea8e9a4",
-      "last_synced_release": "v0.2.48",
-      "description": "Desktop Commander 桌面进程管理与交互终端 MCP",
-      "protected_files": [
-        "plugin.yaml"
-      ],
-      "customizations": [
-        "Windows 环境下 cmd /c npx 启动前缀适配",
-        "Hermes 技能相对路径索引"
-      ]
-    },
-    "serena": {
-      "repo": "oraios/serena",
-      "branch": "main",
-      "last_synced_commit": "ef30801",
-      "last_synced_release": "v1.7.0",
-      "description": "Serena 语义代码分析与 AST 符号重构引擎",
-      "protected_files": [
-        "plugin.yaml",
-        ".mcp.json"
-      ],
-      "customizations": [
-        "Windows cmd /c uvx 启动适配",
-        "静默运行参数: --enable-web-dashboard false --open-web-dashboard false --enable-gui-log-window false",
-        "预装本地 serena-agent 离线快速启动"
-      ]
-    },
-    "context7": {
-      "repo": "upstash/context7",
-      "branch": "master",
-      "last_synced_commit": "6d77761",
-      "last_synced_release": "@upstash/context7-mcp@4.0.4",
-      "description": "Upstash Context7 实时最新库文档检索 MCP",
-      "protected_files": [
-        "plugin.yaml",
-        ".mcp.json"
-      ],
-      "customizations": [
-        "Windows 环境下 cmd /c npx 启动适配",
-        "HTTP/SSE 远端端点与环境变量传递保护"
-      ]
     }
   }
 }
