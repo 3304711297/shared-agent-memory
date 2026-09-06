@@ -55,4 +55,5 @@
 - [OpenViking Lazy Gateway and Local BGE-M3](openviking-lazy-gateway-and-local-bge-m3.md) — OpenViking 智能语义检索接入、本地 CUDA BGE-M3 向量加速（1024维/8192批处理）、D:\HermesModels 存储重定向与 Serverless 按需唤醒/2分钟空闲自动休眠静默网关落地全貌
 - [Hermes Config Baseline and Sync Protocol](hermes-config-baseline-and-sync-protocol.md) — Hermes 权威完整配置基准快照（双本地网关/自适应上下文/glm-5.3+hy4两级容灾梯队/MoA显式停用）与改动设置模型自识别自动同步记忆库铁律（双端协同规范）
 - [OpenViking VLM Dynamic Follow](openviking-vlm-dynamic-follow.md) — OpenViking 记忆提炼模型动态跟随当前聊天模型（token-stats /ovlm 端点+自动跟随；生效机制=改 ov.conf 踢 1934；E2E 已验提炼落 glm@8787、Gemini 零消耗）
+- [ToolRush Evaluation and Latency Optimization](toolrush-evaluation-and-latency-optimization.md) — OnlyTerp/toolrush (ToolRush v2) 针对 Hermes 本地工具调用延迟的深度技术评估、加速机制剖析与暂不安装观望决策
 
