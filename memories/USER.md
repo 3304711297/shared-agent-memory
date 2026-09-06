@@ -15,3 +15,5 @@ TG 频道 @emoegg（蛋总的圈：网络代理协议、延迟测评、TUN 与�
 并发优先最大化效率；多任务/多仓库/批量检查修复优先并行子代理（Hermes+Gemini 实测单批上限 10 并发，日常 3~6/批，已解除旧 2 并发限制）；2026-09-05 深夜：WorkBuddy glm-5.3-flash 实测（max_tokens≥300、10 并发 6.61s、15 并发 4.07s 全绿）无 429；该模型属思考型，max_tokens<100 思考链吃光配额致 content=null（测试须给足 max_tokens 或读 reasoning 字段）。
 §
 本地模型使用偏好：对话模型由用户随时按需切换，严禁在设定中固定死主力对话模型；Hermes 客户端「已安装 llama.cpp 运行时」开关必须显式保持关闭（local_runtime.enabled: false），严禁常驻吃 3GB+ 内存；模型与运行时存 D 盘；记忆向量（BGE-M3）仅由 2 分钟空闲自动休眠网关按需拉起。
+§
+Hermes 配置自同步铁律（2026-09-06）：用户通知改动设置时，模型须自行读取 C:\Users\VOS-User\AppData\Local\hermes\config.yaml 识别最新配置，附带当前 Hermes 构建版本与 Git Commit SHA 指纹，脱敏后自动更新共享记忆库 hermes-config-baseline-and-sync-protocol.md 与 hermes-config.yaml 并推 main。
