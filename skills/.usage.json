@@ -50,14 +50,14 @@
     "created_by": "installed",
     "last_patched_at": null,
     "last_reused_patch_generation": 0,
-    "last_used_at": "2026-09-04T07:34:44.326440+00:00",
-    "last_viewed_at": "2026-09-04T07:34:44.324439+00:00",
+    "last_used_at": "2026-09-06T10:32:25.745824+00:00",
+    "last_viewed_at": "2026-09-06T10:32:25.744320+00:00",
     "patch_count": 0,
     "patch_generation": 0,
     "pinned": false,
     "state": "active",
-    "use_count": 3,
-    "view_count": 3
+    "use_count": 4,
+    "view_count": 4
   },
   "ascii-art": {
     "archived_at": null,
@@ -258,16 +258,16 @@
     "archived_at": null,
     "created_at": "2026-09-05T14:40:18.961927+00:00",
     "created_by": "agent",
-    "last_patched_at": "2026-09-06T10:06:32.699029+00:00",
-    "last_reused_patch_generation": 7,
-    "last_used_at": "2026-09-06T10:06:29.135121+00:00",
-    "last_viewed_at": "2026-09-06T10:06:29.132617+00:00",
-    "patch_count": 8,
-    "patch_generation": 8,
+    "last_patched_at": "2026-09-06T10:26:25.764856+00:00",
+    "last_reused_patch_generation": 9,
+    "last_used_at": "2026-09-06T10:26:19.696575+00:00",
+    "last_viewed_at": "2026-09-06T10:26:19.693576+00:00",
+    "patch_count": 10,
+    "patch_generation": 10,
     "pinned": false,
     "state": "active",
-    "use_count": 10,
-    "view_count": 10
+    "use_count": 12,
+    "view_count": 12
   },
   "dispatching-parallel-agents": {
     "archived_at": null,
@@ -275,14 +275,14 @@
     "created_by": null,
     "last_patched_at": null,
     "last_reused_patch_generation": 0,
-    "last_used_at": "2026-09-06T10:03:53.049146+00:00",
-    "last_viewed_at": "2026-09-06T10:03:53.046643+00:00",
+    "last_used_at": "2026-09-06T10:26:12.083556+00:00",
+    "last_viewed_at": "2026-09-06T10:26:12.080555+00:00",
     "patch_count": 0,
     "patch_generation": 0,
     "pinned": false,
     "state": "active",
-    "use_count": 5,
-    "view_count": 5
+    "use_count": 7,
+    "view_count": 7
   },
   "docker-management": {
     "archived_at": null,
@@ -515,14 +515,14 @@
     "created_by": null,
     "last_patched_at": "2026-09-05T16:57:39.336723+00:00",
     "last_reused_patch_generation": 2,
-    "last_used_at": "2026-09-06T10:06:16.996711+00:00",
-    "last_viewed_at": "2026-09-06T10:06:16.994711+00:00",
+    "last_used_at": "2026-09-06T10:10:37.956732+00:00",
+    "last_viewed_at": "2026-09-06T10:10:37.954210+00:00",
     "patch_count": 2,
     "patch_generation": 2,
     "pinned": false,
     "state": "active",
-    "use_count": 30,
-    "view_count": 29
+    "use_count": 31,
+    "view_count": 30
   },
   "hermes-auxiliary-models": {
     "archived_at": null,
@@ -575,14 +575,14 @@
     "created_by": null,
     "last_patched_at": null,
     "last_reused_patch_generation": 0,
-    "last_used_at": null,
-    "last_viewed_at": null,
+    "last_used_at": "2026-09-06T10:10:54.228905+00:00",
+    "last_viewed_at": "2026-09-06T10:10:54.226898+00:00",
     "patch_count": 0,
     "patch_generation": 0,
     "pinned": false,
     "state": "active",
-    "use_count": 0,
-    "view_count": 0
+    "use_count": 1,
+    "view_count": 1
   },
   "hermes-token-debugging": {
     "archived_at": null,
@@ -1010,14 +1010,14 @@
     "created_by": null,
     "last_patched_at": "2026-09-06T03:34:01.561764+00:00",
     "last_reused_patch_generation": 2,
-    "last_used_at": "2026-09-06T10:06:20.043791+00:00",
-    "last_viewed_at": "2026-09-06T10:06:20.041287+00:00",
+    "last_used_at": "2026-09-06T10:37:39.451909+00:00",
+    "last_viewed_at": "2026-09-06T10:37:39.448396+00:00",
     "patch_count": 2,
     "patch_generation": 2,
     "pinned": false,
     "state": "active",
-    "use_count": 79,
-    "view_count": 79
+    "use_count": 82,
+    "view_count": 82
   },
   "sherlock": {
     "archived_at": null,
@@ -1055,14 +1055,14 @@
     "created_by": null,
     "last_patched_at": null,
     "last_reused_patch_generation": 0,
-    "last_used_at": "2026-09-05T12:55:25.049834+00:00",
-    "last_viewed_at": "2026-09-05T12:55:25.047330+00:00",
+    "last_used_at": "2026-09-06T10:28:06.985297+00:00",
+    "last_viewed_at": "2026-09-06T10:28:06.983297+00:00",
     "patch_count": 0,
     "patch_generation": 0,
     "pinned": false,
     "state": "active",
-    "use_count": 10,
-    "view_count": 10
+    "use_count": 11,
+    "view_count": 11
   },
   "tauri-desktop-development": {
     "archived_at": null,
@@ -1235,14 +1235,14 @@
     "created_by": null,
     "last_patched_at": null,
     "last_reused_patch_generation": 0,
-    "last_used_at": "2026-09-04T07:44:08.878621+00:00",
-    "last_viewed_at": "2026-09-04T07:44:08.876259+00:00",
+    "last_used_at": "2026-09-06T10:28:02.615565+00:00",
+    "last_viewed_at": "2026-09-06T10:28:02.613565+00:00",
     "patch_count": 0,
     "patch_generation": 0,
     "pinned": false,
     "state": "active",
-    "use_count": 1,
-    "view_count": 1
+    "use_count": 2,
+    "view_count": 2
   },
   "zcode-shared-memory": {
     "archived_at": null,
