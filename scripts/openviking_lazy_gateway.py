@@ -107,12 +107,32 @@ def sleep_backends():
         if not state.is_awake:
             return
         print(f"[{time.strftime('%H:%M:%S')}] [Auto-Sleep] Idle for {IDLE_TIMEOUT_SECONDS // 60} minutes. Freeing GPU VRAM...")
-        out = subprocess.run(["netstat", "-ano"], capture_output=True).stdout.decode("gbk", errors="ignore")
-        for port in [str(EMBEDDING_PORT), str(BACKEND_PORT)]:
-            for line in out.splitlines():
-                if port in line and "LISTENING" in line:
-                    pid = line.strip().split()[-1]
-                    subprocess.run(["taskkill", "/F", "/PID", pid], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        try:
+            import psutil
+            target_ports = {EMBEDDING_PORT, BACKEND_PORT}
+            for conn in psutil.net_connections(kind="inet"):
+                if conn.status == psutil.CONN_LISTEN and conn.laddr and conn.laddr.port in target_ports:
+                    if conn.pid:
+                        try:
+                            p = psutil.Process(conn.pid)
+                            for child in p.children(recursive=True):
+                                try:
+                                    child.kill()
+                                except Exception:
+                                    pass
+                            p.kill()
+                        except Exception:
+                            pass
+        except Exception:
+            try:
+                out = subprocess.run(["netstat", "-ano"], capture_output=True, creationflags=CREATE_NO_WINDOW).stdout.decode("gbk", errors="ignore")
+                for port in [str(EMBEDDING_PORT), str(BACKEND_PORT)]:
+                    for line in out.splitlines():
+                        if port in line and "LISTENING" in line:
+                            pid = line.strip().split()[-1]
+                            subprocess.run(["taskkill", "/F", "/T", "/PID", pid], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, creationflags=CREATE_NO_WINDOW)
+            except Exception:
+                pass
         state.is_awake = False
         print(f"[{time.strftime('%H:%M:%S')}] [Auto-Sleep] GPU VRAM and resources 100% freed. Standing by.")
 
