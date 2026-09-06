@@ -76,5 +76,13 @@ metadata:
 - README 已同步：模型列表改"自动获取 WorkBuddy 支持的模型"动态说明、架构 mermaid 折叠 details、ZCode 引导式接入描述。
 - 用户拍板保留 ysk《本地回环服务的暴露面与防护》页（本会话唯一新增 ysk 内容）。
 
+**2026-09-06 安全边界与鉴权加固批次（全量巡检 P1 修复，提交 d00f0b8）**：
+- **非回环监听强制鉴权**：当 `--host` 绑定非本机回环地址（如 `0.0.0.0` 或局域网 IP）时，强制要求配置 `--api-key`；若确需无鉴权测试必须显式传入 `--unsafe-expose`，否则安全拒绝启动；
+- **`/api/usage_summary` 鉴权对齐**：挂接 `_check_auth`，与 `/v1/*` 保持完全相同的 API Key 鉴权边界，彻底杜绝无鉴权直接触发腾讯后端查询；
+- **Host 校验角色明晰**：`LocalHostOnlyMiddleware` 定位降级为 defense-in-depth（对本机回环做防 DNS rebinding，非回环下由强制 API Key 承担访问控制）；
+- **凭据单源化与防漂移**：`find_auth_file()` 优先锁定 `workbuddy-desktop.info`；`CredentialManager` 优先读取 `accounts.json` 活跃账号会话，Token 自动刷新时双向原子同步至 `.info` 与 `accounts.json`；`api_usage_summary` 与 `chat_completions` 共用 `get_active_session()`，彻底消除多账号切换状态脱节；
+- **日志分级与自动脱敏**：新增 `--log-level {info,debug,trace}`（默认 info 仅记录请求耗时与摘要，不落盘 prompt/response 正文）；`_sanitize_log_text` 对 Token/Key/Bearer 字段自动做掩码脱敏。
+- **验证通过**：新增 5 项单测（共 38 项 pytest 100% pass），cargo check/test 与前端构建全绿，GitHub Actions Run `34025146502` 绿灯。
+
 **Why:** 用户要求模型列表全量覆盖官方模型库，并补全 WorkBuddy 核心的倍率显示、上下文限制与思考强度调节能力。
 **How to apply:** 维护 `C:\Users\VOS-User\Desktop\codebuddy2openai`，后续所有跨端 Agent 配置及客户端演进均以此架构为基准。
