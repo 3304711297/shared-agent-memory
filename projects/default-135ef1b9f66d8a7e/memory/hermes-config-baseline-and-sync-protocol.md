@@ -14,7 +14,7 @@ metadata:
 | 组件 / 维度 | 当前版本与标识 | 来源 / 验证方式 |
 | :--- | :--- | :--- |
 | **Hermes Agent 版本** | `v0.21.0 (2026.8.31)` | `hermes --version` |
-| **上游 Git Commit SHA** | `245e48008fa814b3251f50755eb656bd9fb86cb1` (Sat Sep 5 17:00:18 2026) | `git -C hermes-agent log -1` |
+| **上游 Git Commit SHA** | `00140a85574d4fc9e42f977a167aeda899b50ca9` (Sun Sep 6 20:50:02 2026) | `git -C hermes-agent log -1` |
 | **Desktop 桌面客户端** | `v0.17.0` | `apps/desktop/package.json` |
 | **配置规范版本** | `_config_version: 40` | `config.yaml` 根字段 |
 | **Python 运行时** | `Python 3.11.16` / `OpenAI SDK 2.24.0` | 内部运行时依赖 |
@@ -63,11 +63,7 @@ model:
   default: gemini-3.8-flash
   provider: cpa-gui
   base_url: http://127.0.0.1:18080/v1
-fallback_providers:
-  - provider: custom:workbuddy-(127.0.0.1:8787)
-    model: glm-5.3-flash
-  - provider: custom:workbuddy-(127.0.0.1:8787)
-    model: hy4-preview
+fallback_providers: []
 database:
   journal_mode: wal
 runtime:
@@ -186,9 +182,9 @@ moa:
   presets:
     default:
       reference_models:
-        - provider: custom:workbuddy-(127.0.0.1:8787)
-          model: glm-5.3-flash
-          enabled: false
+      - provider: custom:workbuddy-(127.0.0.1:8787)
+        model: glm-5.3-flash
+        enabled: false
       aggregator:
         provider: custom:workbuddy-(127.0.0.1:8787)
         model: glm-5.3-flash
@@ -196,9 +192,9 @@ moa:
       degraded_reference_policy: loud
       fanout: user_turn
   reference_models:
-    - provider: custom:workbuddy-(127.0.0.1:8787)
-      model: glm-5.3-flash
-      enabled: false
+  - provider: custom:workbuddy-(127.0.0.1:8787)
+    model: glm-5.3-flash
+    enabled: false
   aggregator:
     provider: custom:workbuddy-(127.0.0.1:8787)
     model: glm-5.3-flash
@@ -210,11 +206,11 @@ skills:
   creation_nudge_interval: 15
   disabled: []
 approvals:
-  mode: false
+  mode: 'off'
 plugins:
   enabled:
-    - superpowers
-    - token-stats
+  - superpowers
+  - token-stats
   disabled: []
   entries:
     superpowers:
@@ -240,6 +236,8 @@ updates:
   pre_update_backup: false
   backup_keep: 5
   non_interactive_local_changes: stash
+computer_use:
+  backend: cua
 local_runtime:
   enabled: false
 _config_version: 40
@@ -247,21 +245,16 @@ mcp_servers:
   chrome-devtools:
     command: cmd
     args:
-      - /c
-      - npx
-      - -y
-      - chrome-devtools-mcp@1.8.0
-      - --autoConnect
-      - --ignore-default-chrome-arg=--disable-extensions
-      - --user-data-dir=C:\Users\VOS-User\AppData\Local\Microsoft\Edge Dev\User Data
+    - /c
+    - npx
+    - -y
+    - chrome-devtools-mcp@1.8.0
+    - --autoConnect
+    - --ignore-default-chrome-arg=--disable-extensions
     timeout: 300
     enabled: true
-  desktop-commander:
-    REMOVED_2026-09-06: true
-  serena:
-    REMOVED_2026-09-06: true
-  context7:
-    REMOVED_2026-09-06: true
+    lazy: true
+    idle_timeout_seconds: 60
   deepwiki:
     url: https://mcp.deepwiki.com/mcp
     enabled: true
@@ -272,101 +265,100 @@ session_reset:
 group_sessions_per_user: true
 platform_toolsets:
   cli:
-    - browser
-    - clarify
-    - code_execution
-    - computer_use
-    - cronjob
-    - delegation
-    - file
-    - image_gen
-    - kanban
-    - memory
-    - session_search
-    - skills
-    - terminal
-    - todo
-    - video
-    - vision
-    - web
+  - clarify
+  - code_execution
+  - computer_use
+  - cronjob
+  - delegation
+  - file
+  - image_gen
+  - kanban
+  - memory
+  - session_search
+  - skills
+  - terminal
+  - todo
+  - video
+  - vision
+  - web
   telegram:
-    - hermes-telegram
+  - hermes-telegram
   discord:
-    - hermes-discord
+  - hermes-discord
   whatsapp:
-    - hermes-whatsapp
+  - hermes-whatsapp
   slack:
-    - hermes-slack
+  - hermes-slack
   signal:
-    - hermes-signal
+  - hermes-signal
   homeassistant:
-    - hermes-homeassistant
+  - hermes-homeassistant
   qqbot:
-    - hermes-qqbot
+  - hermes-qqbot
   yuanbao:
-    - hermes-yuanbao
+  - hermes-yuanbao
   teams:
-    - hermes-teams
+  - hermes-teams
   google_chat:
-    - hermes-google_chat
+  - hermes-google_chat
 custom_providers:
-  - api_key: <REDACTED_LOCAL_KEY>
-    api_mode: chat_completions
-    base_url: http://127.0.0.1:18080/v1
-    model: gemini-3.8-flash
-    models:
-      claude-sonnet-4-6: {}
-      gemini-3.1-flash-image: {}
-      gemini-3.1-pro-low: {}
-      gemini-web-search: {}
-      claude-opus-4-6-thinking: {}
-      gemini-3.6-flash: {}
-      gemini-3.7-flash: {}
-      gemini-3.8-flash: {}
-      gemini-3-flash: {}
-      gemini-pro-agent: {}
-      gpt-oss-120b-medium: {}
-    models_discovered: true
-    name: cpa-gui
-  - name: WorkBuddy (127.0.0.1:8787)
-    base_url: http://127.0.0.1:8787/v1
-    api_key: local
-    model: auto
-    models:
-      auto: {}
-      hy4-preview: {}
-      hy4-preview-x: {}
-      hy3: {}
-      hy3-x: {}
-      glm-5.3: {}
-      glm-5.3-flash: {}
-      glm-5.2: {}
-      glm-5.1: {}
-      glm-5.0: {}
-      glm-5v-turbo: {}
-      glm-4.7: {}
-      glm-4.6: {}
-      glm-4.6v: {}
-      minimax-m3: {}
-      minimax-m2.5: {}
-      kimi-k3-1: {}
-      kimi-k3: {}
-      kimi-k2.7: {}
-      kimi-k2.6: {}
-      kimi-k2.5: {}
-      kimi-k2-thinking: {}
-      deepseek-v4-pro: {}
-      deepseek-v4-flash: {}
-      deepseek-v3-2-volc: {}
-      hunyuan-2.0-thinking: {}
-      hunyuan-chat: {}
-      default: {}
-    models_discovered: true
+- api_key: <REDACTED_LOCAL_KEY>
+  api_mode: chat_completions
+  base_url: http://127.0.0.1:18080/v1
+  model: gemini-3.8-flash
+  models:
+    gemini-3.1-flash-image: {}
+    gemini-pro-agent: {}
+    gpt-oss-120b-medium: {}
+    gemini-web-search: {}
+    claude-opus-4-6-thinking: {}
+    claude-sonnet-4-6: {}
+    gemini-3-flash: {}
+    gemini-3.1-pro-low: {}
+    gemini-3.6-flash: {}
+    gemini-3.7-flash: {}
+    gemini-3.8-flash: {}
+  models_discovered: true
+  name: cpa-gui
+- name: WorkBuddy (127.0.0.1:8787)
+  base_url: http://127.0.0.1:8787/v1
+  api_key: local
+  model: auto
+  models:
+    auto: {}
+    hy4-preview: {}
+    hy4-preview-x: {}
+    hy3: {}
+    hy3-x: {}
+    glm-5.3: {}
+    glm-5.3-flash: {}
+    glm-5.2: {}
+    glm-5.1: {}
+    glm-5.0: {}
+    glm-5v-turbo: {}
+    glm-4.7: {}
+    glm-4.6: {}
+    glm-4.6v: {}
+    minimax-m3: {}
+    minimax-m2.5: {}
+    kimi-k3-1: {}
+    kimi-k3: {}
+    kimi-k2.7: {}
+    kimi-k2.6: {}
+    kimi-k2.5: {}
+    kimi-k2-thinking: {}
+    deepseek-v4-pro: {}
+    deepseek-v4-flash: {}
+    deepseek-v3-2-volc: {}
+    hunyuan-2.0-thinking: {}
+    hunyuan-chat: {}
+    default: {}
+  models_discovered: true
 platforms:
   webhook:
     enabled: true
   qqbot:
-    enabled: true
+    enabled: false
     home_channel:
       platform: qqbot
       chat_id: 078DEECF2FF6867028A5CADEDC823720
@@ -374,36 +366,36 @@ platforms:
       user_id: 078DEECF2FF6867028A5CADEDC823720
 known_plugin_toolsets:
   cli:
-    - a2a
-    - spotify
+  - a2a
+  - spotify
 known_builtin_toolsets:
   cli:
-    - browser
-    - clarify
-    - code_execution
-    - computer_use
-    - context_engine
-    - cronjob
-    - delegation
-    - discord
-    - discord_admin
-    - file
-    - homeassistant
-    - image_gen
-    - memory
-    - session_search
-    - skills
-    - spotify
-    - stt
-    - terminal
-    - todo
-    - tts
-    - video
-    - video_gen
-    - vision
-    - web
-    - x_search
-    - yuanbao
+  - browser
+  - clarify
+  - code_execution
+  - computer_use
+  - context_engine
+  - cronjob
+  - delegation
+  - discord
+  - discord_admin
+  - file
+  - homeassistant
+  - image_gen
+  - memory
+  - session_search
+  - skills
+  - spotify
+  - stt
+  - terminal
+  - todo
+  - tts
+  - video
+  - video_gen
+  - vision
+  - web
+  - x_search
+  - yuanbao
 model_aliases:
   workbuddy:
     model: auto
