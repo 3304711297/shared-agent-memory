@@ -38,6 +38,7 @@
 - [Capability Upstream Watch](capability-upstream-watch.md) — 每日能力组件上游看门（shared-agent-memory Actions，capability-watch 标签 Issue）+ watch-capability.cmd 本地一键；ZCode 市场两层架构（bundled 种子+CDN）；升级组件后必须回写 capability-inventory.json 推 main 自动收口；用户拍板 agent 本体永久排除
 - [Codebuddy2openai Tauri GUI](codebuddy2openai-tauri-gui.md) — codebuddy2openai Tauri GUI：09-05 三 P1 修复（日志 UTF-8 panic/路径全量环境变量化 C2O_PYTHON 等/health 收窄+Host 校验防 rebinding）+ 基础 CI 补齐 + **ZCode 接入改引导式（Desktop 只认 UI 内添加，写 JSON 是假阳性）+ 端口真实探测徽章**；构建链已通：tauri dev/build 三坑修复 + bundle 固化 nsis（WiX 弃用），新版 exe/setup.exe 已产出
 - [ZCode Desktop Config Architecture](zcode-desktop-config-architecture.md) — ZCode 双体系配置实测：**v2 provider family OAuth（v2/setting.json）为现行模型选择，cli/config.json provider map 旧体系不读**；Desktop 自定义供应商只认 UI 内添加（leveldb 压缩无法程序化写）；自动配置一律走引导+端口探测
+- [Hermes ZCode Token Gap Investigation](hermes-zcode-token-gap-investigation.md) — Hermes/ZCode 同会话 token 差距 3.34x 取证闭环（09-06）：网关 usage.db 是唯一中立账本（UA 可区分两端）、客户端 DB 口径相反（Hermes input=增量/ZCode input=全量）、bg-review 90.9% 是廉价缓存读不可关、reasoning_effort 同模型路径刻意被忽略（缓存平价设计）；用户拍板全部不动，官方 issue #104116
 - [Gateway Migration EasyCLIProxyAPI](gateway-migration-easycliproxyapi-and-browser-protection.md) — 模型网关迁移官方 EasyCLIProxyAPI 与浏览器扩展保护记录；**ZCode-Antigravity fork 已删（上游 Hhz0823 活跃 v1.0.3，需用时直用上游）**
 - [Hermes Quota Embedded](hermes-quota-embedded.md) — Hermes 配额监控内置化（token-stats 后端插件替代计划任务/微服务）
 - [Hermes Skills and MCP Optimization](hermes-skills-and-mcp-optimization-2026-09-03.md) — Hermes 技能与 MCP 优化记录（2026-09-03）
