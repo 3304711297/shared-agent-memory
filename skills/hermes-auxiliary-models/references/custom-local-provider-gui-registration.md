@@ -142,5 +142,28 @@ When a user reports that **all userscripts** across all websites fail to take ef
   3. Open the extension's **Details** page and verify both **"Allow user scripts"** (if present) and **"Site access: On all sites"** are enabled.
   4. Fully restart the browser process if Chromium's internal `Extension Scripts` LevelDB locks persist.
 
+## 15. Local Gateway `gemini-web-search` Fallacy vs. Hermes Search Engine Routing
+When diagnosing search capabilities or encountering `gemini-web-search` in EasyCLIProxyAPI (`18080`):
+- **The Alias Fallacy**: In EasyCLIProxyAPI (`cpa-core/config.yaml`), `gemini-web-search` is merely an alias to `gemini-3.1-flash-lite`. In standard OpenAI `/v1/chat/completions` calls, Antigravity/Gemini does NOT trigger Google Search Grounding unless `tools: [{'google_search': {}}]` is explicitly injected in the payload. Unaugmented calls return static cutoff training data.
+- **LLM Grounding vs. Agent Tool Invariant**: Even if a chat model has web grounding, it generates conversational prose with inline citations. An Agent's `web_search` tool contract requires structured JSON metadata (`[{'title', 'url', 'description'}]`). Never substitute a grounded LLM for an Agent's search provider.
+- **Hermes Built-in Search Hierarchy & Keyless Ring**:
+  - Hermes checks `web.search_backend` > explicit credentials (`BRAVE_SEARCH_API_KEY`, `TAVILY_API_KEY`, `EXA_API_KEY`, `SEARXNG_URL`, `ddgs` package).
+  - When zero search keys are configured, Hermes automatically routes through its public **Keyless Ring** (`plugins/web/keyless_mcp.py`: Exa -> Parallel -> Firecrawl -> Keenable), defaulting to `exa` via its public MCP endpoint (`https://mcp.exa.ai/mcp`).
+  - **Zero-Key Local Fallback**: Installing `ddgs` into Hermes's venv (`pip install ddgs`) enables pure local, credential-free DuckDuckGo search without public MCP rate limits.
+  - **Exa Key Activation & Backend Locking**: To graduate from public keyless MCP to dedicated Exa service:
+    1. Pre-validate key via `POST https://api.exa.ai/search` with header `x-api-key: <KEY>`.
+    2. Persist credential into `~/.hermes/.env` via `save_env_value('EXA_API_KEY', '<KEY>')`.
+    3. Lock engine via `hermes config set web.backend exa`, `hermes config set web.search_backend exa`, and `hermes config set web.extract_backend exa`.
+  - **Key-Backed Recommendations**: For reliable technical research without public rate limits, configure `brave-free` (2,000 free req/mo via `BRAVE_SEARCH_API_KEY`), `exa` (via `EXA_API_KEY`), or `tavily` (1,000 free req/mo via `TAVILY_API_KEY`).
+
+## 16. Skill Provenance Diagnostics: Bundled vs. Installed vs. Platform Gating
+When determining whether a skill on disk was shipped with Hermes or installed later by the user:
+- **Official Bundled Manifest**: Check `skills/.bundled_manifest`. It contains the complete, authoritative list of out-of-the-box skills (e.g. `arxiv`, `github`, `hermes-agent`). If a skill is absent, it was not bundled.
+- **Lifecycle Metadata (`.usage.json`)**: Check the skill's entry in `skills/.usage.json`:
+  - `"created_by": "bundled"` = bundled default.
+  - `"created_by": "installed"` = installed via `hermes skills install` or marketplace.
+  - Inspect `"created_at"` and `"author"` in frontmatter (e.g. community authors like `gamedevCloudy`) to confirm install history.
+- **Windows Platform Gating**: If a skill exists in `skills/` on disk but is absent from `hermes skills list` or `<available_skills>`, check its `SKILL.md` frontmatter `platforms:`. If it specifies only `[linux, macos]` without `windows`, Hermes automatically and silently excludes it on Windows hosts without raising errors.
+
 
 

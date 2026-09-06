@@ -11,7 +11,7 @@ claude-code:11185c8a90b5600cafe267fff856c427
 claude-design:a839ed75e38167058cb363f63b64c6a3
 codebase-inspection:1775b8518df273a4d671c4afe54696b4
 codex:8822d280c3de7ad5827937b83afa0a88
-competitor-news-monitor:1fe587a5a000cd68ca8b9742b2c2df9b
+competitor-news-monitor:c9852e669f65b7015a90512fdb6593db
 computer-use:71427f1788e9bb83494610aebfdfb92c
 design-md:b2077c0e0a2414078b14d862f50c49b0
 document-to-action-items:ddd27a7470703b3f90cd188af9ac3f02
@@ -22,7 +22,7 @@ findmy:1d7dd3ae39cf25357a374c6bfb956442
 gif-search:12dbdb5d4a04f05aeb20bebcb7d3f60a
 github:1183b1c0561ace55cc5c353404641922
 google-workspace:7e307aaca1d54706e954220e66c196e3
-grounded-citations:e76813f73ca6eea7523d77a66895e18e
+grounded-citations:76ed8145e85b30f9b9580cad047742fe
 hermes-agent:a68ec1e919511f33aafa0d066ab276b0
 hermes-agent-skill-authoring:2ac48f56c490196e4275b5c5f3eed687
 himalaya:c08e32ca75e273d79773266f514c5b23
@@ -43,7 +43,9 @@ popular-web-designs:265b89848275df6a039e8ea2b466fc1f
 powerpoint:2817222f3b5b5d836ed58953b51e1ed8
 product-price-monitor:7dd11fd1609f3bec2486d925ad924714
 python-debugpy:76a10139bbd9860b863c16bb987c60d8
+reddit-reading:6d2a01378ec82b7f72ef8266617c0af7
 requesting-code-review:6853f2192a20f13f2fb3f63486db53a1
+rss-feeds:a765d9b29cfe2a3fa1343f172d5a7ba4
 sdlc-review:4a4be11e979ac444fdc9c277b8500a81
 simplify-code:39e505ca71f8ecc74be6acec1dc0a4de
 songsee:644dc0f267b6661a3df6c76ce80d7f1f

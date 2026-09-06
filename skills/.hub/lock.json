@@ -469,73 +469,6 @@
       "installed_at": "2026-09-03T13:29:02.666274+00:00",
       "updated_at": "2026-09-03T13:29:02.666274+00:00"
     },
-    "duckduckgo-search": {
-      "source": "official",
-      "identifier": "official/research/duckduckgo-search",
-      "trust_level": "builtin",
-      "scan_verdict": "safe",
-      "content_hash": "sha256:6c569cf10b19693a",
-      "install_path": "research/duckduckgo-search",
-      "files": [
-        "SKILL.md",
-        "scripts\\duckduckgo.sh"
-      ],
-      "metadata": {},
-      "scan_provenance": {
-        "source": "official",
-        "source_url": "official/research/duckduckgo-search",
-        "bundle_hash": "sha256:6c569cf10b19693ab4619c88c66c3816a1fe3224b458bb19b8dd121cd302bc57",
-        "scanner_version": "skills-guard-v2",
-        "verdict": "safe",
-        "trust_level": "builtin",
-        "findings": [
-          {
-            "pattern_id": "unpinned_pip_install",
-            "severity": "medium",
-            "category": "supply_chain",
-            "file": "SKILL.md",
-            "line": 47,
-            "match": "pip install ddgs",
-            "description": "pip install without version pinning"
-          },
-          {
-            "pattern_id": "unpinned_pip_install",
-            "severity": "medium",
-            "category": "supply_chain",
-            "file": "SKILL.md",
-            "line": 232,
-            "match": "- **Package name**: The package is `ddgs` (previously `duckduckgo-search`). Install with `pip install ddgs`.",
-            "description": "pip install without version pinning"
-          },
-          {
-            "pattern_id": "unpinned_pip_install",
-            "severity": "medium",
-            "category": "supply_chain",
-            "file": "scripts\\duckduckgo.sh",
-            "line": 18,
-            "match": "echo \"Requires: pip install ddgs\"",
-            "description": "pip install without version pinning"
-          },
-          {
-            "pattern_id": "unpinned_pip_install",
-            "severity": "medium",
-            "category": "supply_chain",
-            "file": "scripts\\duckduckgo.sh",
-            "line": 24,
-            "match": "echo \"Error: ddgs not found. Install with: pip install ddgs\"",
-            "description": "pip install without version pinning"
-          }
-        ],
-        "rules": [
-          "unpinned_pip_install"
-        ],
-        "scanned_at": "2026-09-03T13:29:03.513860+00:00",
-        "summary": "duckduckgo-search: safe — 4 finding(s) in supply_chain",
-        "fresh": true
-      },
-      "installed_at": "2026-09-03T13:29:03.523361+00:00",
-      "updated_at": "2026-09-03T13:29:03.523361+00:00"
-    },
     "scrapling": {
       "source": "official",
       "identifier": "official/research/scrapling",
@@ -2888,46 +2821,6 @@
       },
       "installed_at": "2026-09-03T13:49:43.999164+00:00",
       "updated_at": "2026-09-03T13:49:43.999164+00:00"
-    },
-    "searxng-search": {
-      "source": "official",
-      "identifier": "official/research/searxng-search",
-      "trust_level": "builtin",
-      "scan_verdict": "safe",
-      "content_hash": "sha256:fc4a0fec5244ad6a",
-      "install_path": "research/searxng-search",
-      "files": [
-        "SKILL.md",
-        "scripts\\searxng.sh"
-      ],
-      "metadata": {},
-      "scan_provenance": {
-        "source": "official",
-        "source_url": "official/research/searxng-search",
-        "bundle_hash": "sha256:fc4a0fec5244ad6a8c7b3869765e906acea398ae7f84c1f5ce55668574b2d23c",
-        "scanner_version": "skills-guard-v2",
-        "verdict": "safe",
-        "trust_level": "builtin",
-        "findings": [
-          {
-            "pattern_id": "unpinned_pip_install",
-            "severity": "medium",
-            "category": "supply_chain",
-            "file": "SKILL.md",
-            "line": 143,
-            "match": "pip install searxng",
-            "description": "pip install without version pinning"
-          }
-        ],
-        "rules": [
-          "unpinned_pip_install"
-        ],
-        "scanned_at": "2026-09-03T13:49:44.833871+00:00",
-        "summary": "searxng-search: safe — 1 finding(s) in supply_chain",
-        "fresh": true
-      },
-      "installed_at": "2026-09-03T13:49:44.843873+00:00",
-      "updated_at": "2026-09-03T13:49:44.843873+00:00"
     },
     "qmd": {
       "source": "official",

@@ -50,6 +50,21 @@ Upon being awakened by the handoff signal:
   - Subagent 3: IPC command mapping / API bijection audit (`invoke` calls vs registered handlers) and Git tree sanity check.
 - **Produce Structured Review Output**: Synthesize the subagents' findings into a concise, ready-to-forward review report for the user to pass back to the external agent.
 
-## 4. Operational Boundaries & Conflict Prevention
+## 4. Reverse Direction: ZCode Waiting for Hermes
+ZCode has NO built-in process-exit wake mechanism (no `notify` hook; `zcode --help` confirms). The equivalent is a **turn-blocking handshake-file poll**: ZCode runs a foreground polling script inside its Bash tool that checks a Windows-native handshake file every second and continues autonomously once Hermes writes it.
+- Handshake file path MUST be Windows-native (e.g. `%TEMP%\hermes_handshake.txt`) — git-bash `/tmp` and Python resolve to different directories on Windows; a bash-written `/tmp/file` is invisible to Python's `os.path.exists`.
+- Hermes side: after finishing its work, write the handshake file (`open(path,'w').write(msg)`) as the last action; ZCode's poll picks it up on the next 1s tick.
+- Caveat: ZCode's blocking poll keeps its session turn active (chat UI shows "working"), and long waits must be split into segments to respect Bash tool timeouts.
+
+## 5. Headless Cross-Agent Probes (`zcode.cjs -p`)
+ZCode's runtime lives at `D:/zcode/resources/glm/zcode.cjs`; `node zcode.cjs -p "<prompt>" --cwd <dir>` runs a one-shot headless agent session — use it to have ZCode independently execute probes (curl endpoints, compute checks) for cross-verification.
+- **Gateway dependency**: ZCode's main model routes via `cpa-gui` (EasyCLIProxyAPI, port 18080). If that gateway is down, headless runs fail instantly with `ECONNREFUSED 127.0.0.1:18080` — restart EasyCLIProxyAPI.exe first.
+- **Quota exhaustion surfaces as APICallError**: Gemini 429s read "All credentials ... are cooling down ... Resets in Xm". When this fires, no ZCode headless work is possible until reset or the user switches ZCode's provider in its Desktop UI (never edit ZCode's `config.json` programmatically).
+
+## 6. Delegation Model Routing (User Rule)
+`delegate_task` subagents inherit the parent chat model by default. The user deliberately keeps `delegation.provider`/`delegation.model` EMPTY in config.yaml: they may switch the chat model at any time and will explicitly state when subagents should use a different model. NEVER pin delegation to a fixed model — if the user did not name a model for subagents, subagents run on the current chat model. (For quality-sensitive single tasks, Hermes' kanban per-task model override exists, but respect the user's stated model choice first.)
+
+## 7. Operational Boundaries & Conflict Prevention
 - **Producer-Reviewer Separation**: When one agent is editing a codebase, the other agent acts exclusively as reviewer, tester, or CI monitor. Never edit working tree files simultaneously to prevent file lock collisions.
+- **Parallel memory-file edits**: both agents may append to the same `shared-agent-memory` files in the same session; git merges handle it, but expect a possible fast-forward push and never force-push.
 - **Shared Memory Invariant**: Ground truth facts, architectural decisions, and handoff contracts must be committed to the shared repository (`shared-agent-memory` `main` branch).

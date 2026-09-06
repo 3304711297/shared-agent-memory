@@ -15,3 +15,5 @@ Telegram 频道 @emoegg（蛋总的圈）已绑定专属管理员机器人 @Herm
 ZCode 跨端测试规范（09-05 用户拍板）：严禁用 zcode.cjs headless CLI 代开测试会话——①会话落 proj_d-ai-coding，GUI 主区是 -.zcode-workspace-default，用户看不见；②CLI 与 GUI 模型体系分离，CLI 只认 cli/config.json；③跨端验证由用户在 GUI 手动建会话，Hermes 只做 db.sqlite 只读监听与验收；④CLI 撞 429 时不得擅自改 ZCode 配置。
 §
 Hermes 桌面 token 双口径：会话列表数字=该会话累计消耗（input+output 按轮累加，缓存读不计入）；状态栏 xk/1M=当前上下文占用（下一轮 prompt，压缩阈值看它）。多轮后左侧必然≥状态栏，100k vs 38k 属正常。
+§
+Hermes 检索与抽取全量接管为 Exa 独享（EXA_API_KEY 已入库 .env，web.backend/search_backend/extract_backend=exa，避开公共免密限流）；EasyCLIProxyAPI(18080) 的 gemini-web-search 仅为 gemini-3.1-flash-lite 别名无实时搜索（无 Grounding 工具），不可作搜索源；已卸载冗余社区技能 duckduckgo-search 与 searxng-search。
