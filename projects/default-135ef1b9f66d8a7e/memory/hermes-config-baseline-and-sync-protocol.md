@@ -467,7 +467,43 @@ model_aliases:
 
 ---
 
-## 五、 关键实施与检索指南
+## 五、 工具集 (Toolsets) 与能力体系启用基准矩阵 (2026-09-06 实机快照)
+
+根据 Hermes Desktop 客户端实机控制台与 `platform_toolsets.cli` 严格对齐，当前已完成全量治理与精简定案：
+
+### 1. 活跃启用工具集 (Enabled Toolsets - 11 类)
+| 工具集分类 | 包含能力 / 原子工具 | 调用历史 / 定位 | 状态与策略 |
+| :--- | :--- | :--- | :--- |
+| **Terminal & Processes** | terminal, process_manage | 172 次 | **开启**。原生 Bash 执行主力 |
+| **File Operations** | read_file, write_file, patch, search_files | 122 次 | **开启**。文件读写与精准修补 |
+| **Web Search & Scraping** | web_search, web_extract | 14 次 | **开启**。已全量锁定 Exa 独享后端 |
+| **Skills** | skills_list, skill_view, skill_manage | 10 次 | **开启**。业务技能与工作流引擎 |
+| **Vision / Image Analysis** | vision_analyze | 9 次 | **开启**。多模态截图与界面审查 |
+| **Session Search** | session_search | 6 次 | **开启**。跨会话历史检索 (FTS5) |
+| **Task Delegation** | delegate_task | 2 次 | **开启**。多 Agent 并发编排（上限 10） |
+| **Memory** | memory | 1 次 | **开启**。系统常驻记忆与用户画像 |
+| **Clarifying Questions** | clarify | 1 tool | **开启**。决策前多选/表单式澄清 |
+| **Code Execution** | execute_code | 1 tool | **开启**。Python 复杂脚本执行内核 |
+| **Computer Use** | computer_use (cua) | 1 tool | **开启**。桌面 GUI 控制备用 |
+| **Cron Jobs** | cronjob_manage | 1 tool | **开启**。计划任务编排 |
+| **Image Generation** | image_gen | 1 tool | **开启**。图像生成对接 |
+
+### 2. 裁撤与停用工具集 (Disabled Toolsets - 5 类)
+| 工具集分类 | 包含工具数量 | 停用原因与安全防护决议 |
+| :--- | :--- | :--- |
+| **Browser Automation** | 13 tools (browser_*) | **显式关闭**。曾因无头启动踩踏真实 Edge Dev Profile 导致扩展被删，且网页抓取已由 Exa 独享完美覆盖，彻底关停以杜绝隐患 |
+| **A2A (Agent-to-Agent)** | 5 tools | **关闭**。当前场景无需跨智能体局域网 A2A 协议 |
+| **Home Assistant** | 4 tools | **关闭**。无智能家居集成需求 |
+| **Speech-to-Text (STT)** | 0 tools | **关闭**。停用以避免不必要的麦克风占用 |
+| **Spotify** | 7 tools | **关闭**。多媒体播放非工作流核心能力 |
+
+### 3. Edge 浏览器接管彻底加固铁律
+- **MCP 纯连接模式**：`chrome-devtools` 严格剔除 `--user-data-dir` 参数，仅保留 `--autoConnect`。若用户未启动 Edge Dev，MCP 立即抛出连接等待异常，严禁擅自在后台拉起带自动化参数的无头实例破坏用户 Profile。
+- **数据解耦与秒级复活**：扩展安装包与用户数据解耦（脚本及配置保存在 `Local Extension Settings` 中不受影响）。若发生异常，重新在 Edge 商店点击获取对应扩展，因全球唯一 Extension ID 恒定，所有脚本与设置将瞬间自动重新挂载，100% 原地满血复活。
+
+---
+
+## 六、 关键实施与检索指南
 
 - **Why**: Hermes 拥有复杂的桌面与多模型配置，且随版本持续迭代。将软件构建指纹与全量配置快照绑定，不仅杜绝跨端协作时的信息差，还能在未来版本升级出现配置兼容性问题时秒级追溯回滚。
 - **How to apply**: 当用户提及「我改了设置 / 看一下我改的 / 同步一下设置」时，立即执行 `read_file(C:/Users/VOS-User/AppData/Local/hermes/config.yaml)`，同步核对 `hermes --version`，对比变动点后覆写更新本文件与 `hermes-config.yaml` 并提交推送 `main`。

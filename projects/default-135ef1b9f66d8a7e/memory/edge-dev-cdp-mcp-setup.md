@@ -48,3 +48,13 @@ metadata:
 2026-09-01 更新：BewlyCat 已从 D:\extensions\BewlyCat-chrome-extension（1.6.9 本地解压版）更换为 1.7.8 Edge 商店版。1.6.9 实测会瞬时注入 #bewly-bottom-comment-style（与 AveMujica 共享 id），1.7.8 无此 id——mbgt 项目的 avemujica 标记停用裁定基于 1.6.9，对新版无影响。
 
 **加载解压缩扩展的自动化教训（2026-09-01，mbgt Plan3 冒烟）**：computer-use 驱动 edge://extensions「加载解压缩的扩展」的原生文件夹选择框失败——`type` 报内部错误 `Cannot read properties of undefined (reading 'timeoutMs')`，坐标点击频报 "frame is stale"，且页面出现「无法加载扩展」横幅（很可能选错目录：应选**含 manifest.json 的子目录本身**，如 `packages\extension\dist`，勿选其父目录）。可行节奏：按钮用 AXPress 元素点击（element target，勿用坐标）；文件夹手选这类原生 UI **直接请用户代劳**——用户明确表示愿意手动完成并回报结果（截图自动化读取太慢），这是顺畅路径，勿硬磕自动化。
+
+**2026-09-06 扩展消失复发定性与彻底根治终局（血泪教训）**：
+- **故障现象**：用户日常 Edge 中的 ScriptCat、翻译等扩展再次消失，`Default\Extensions` 目录被物理清空。
+- **作案现场实证**：Windows 应用程序事件日志捕获两起 `Edge Dev: Garbage collection for extensions on file thread is complete.`（20:29 与 21:26）。
+- **事故根因**：`mcp_servers.chrome-devtools` 配置中包含了 `--user-data-dir=C:\Users\...\User Data`。在用户未打开 Edge 时触发该 MCP，它会自作主张以自动化无头模式拉起该真实目录，并在退出时将“未加载扩展”的空状态刷入 `Secure Preferences`。Edge 真实进程启动后垃圾回收器将其认定为孤儿残留并物理删除安装包。
+- **数据安全性验证**：`Local Extension Settings` 中 ScriptCat（`liilgpjgabokdklappibcjfablkpcekh`）的全部油猴脚本（HuggingFace、SteamDB、OpenRouter 等）100% 完好无损，解压版源码完好。
+- **永久根治动作**：
+  1. 用户在 Hermes Desktop 设置中彻底关闭 **Browser Automation** 工具集（`platform_toolsets.cli` 剔除 `browser`，网页抓取全量走 Exa 独享）；
+  2. `config.yaml` 严格剔除 `chrome-devtools` 的 `--user-data-dir` 参数，只保留 `--autoConnect`，绝不在 Edge 没开时自启实例；
+  3. 商店扩展（ScriptCat 等）只需在 Edge 商店点击获取，因 ID 恒定，数据瞬间满血挂载恢复，无需重新导入脚本。
