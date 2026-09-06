@@ -56,5 +56,5 @@
 - [Hermes Config Baseline and Sync Protocol](hermes-config-baseline-and-sync-protocol.md) — Hermes 权威完整配置基准快照（双本地网关/自适应上下文/glm-5.3+hy4两级容灾梯队/MoA显式停用）与改动设置模型自识别自动同步记忆库铁律（双端协同规范）
 - [OpenViking VLM Dynamic Follow](openviking-vlm-dynamic-follow.md) — OpenViking 记忆提炼模型动态跟随当前聊天模型（token-stats /ovlm 端点+自动跟随；生效机制=改 ov.conf 踢 1934；E2E 已验提炼落 glm@8787、Gemini 零消耗）
 - [ToolRush Evaluation and Latency Optimization](toolrush-evaluation-and-latency-optimization.md) — OnlyTerp/toolrush (ToolRush v2) 针对 Hermes 本地工具调用延迟的深度技术评估、加速机制剖析与暂不安装观望决策
-- [Hermes Bots Mode Team Practice](hermes-bots-mode-team-practice.md) — Hermes Desktop Bot Mode 实践落地：channel-ops、devops、researcher 三专业智能体构建、专属 SOUL.md 人设与共享记忆库无缝链接
+- [Hermes Bots Mode Team Practice](hermes-bots-mode-team-practice.md) — Hermes Desktop Bot Mode（YanXbt @IBuzovskyi 指南）机制剖析、实践验证回滚与用户偏好（明确仅用普通会话模式）沉淀
 

@@ -16,6 +16,7 @@ metadata:
 - Skills 筛选偏好：偏好 100% 免费开源、无付费 API/订阅且无功能冲突的上位技能；语音转录（Whisper）明确偏好 small 模型（见 [[bilibili-video-transcription-pipeline]]）；技能安装走各 Agent 官方技能机制，严禁擅自用 pip/npm 替代原生安装。
 - 上游同步看门（upstream-watch）及常规评估类 GitHub Issue：完成比对评估无须代码改动或移植后，可直接自动在 GitHub 上留言并关闭 Issue，无需每次询问确认。
 - **组件更新不留本地旧版残留**（2026-09-05 明确）：升级软件/核心后无需保留旧版本备份（.bak/旧安装包），有问题直接从 GitHub Releases 重装旧版本即可；安装目录保持干净。
+- **会话管理与模式偏好（2026-09-06 明确）**：用户日常**明确只使用普通会话模式（default profile 一体化协作）**。虽然已完整验证并通过 Hermes Bots (Bot Mode) 多 profile 协同与 Junction 记忆共享链路（见 [[hermes-bots-mode-team-practice]]），但用户排斥常驻维护多 profile 带来的多头切换与环境分散负担；所有开发、调研、运维工作流统一在默认普通会话中流转，会话累计 ≥1M tokens 时总结记忆后直接清理重建新会话。
 - 订阅与模型偏好：持有 Google 个人 Pro 订阅（非企业/开发者付费 AI Studio）；偏好高响应速度模型，主力模型走本地 EasyCLIProxyAPI 桥接的 Gemini 3.8 Flash（Ultra 思考模式），见 [[user-windows-environment]]。
 - **UI/状态栏审美**：高度注重界面与微交互体验——严禁简陋文本折行与单调着色；要求键值分层、核心数值等宽加粗高亮；交互必须具备加载动效、完成提示与数据变动即时反馈；桌面端偏好沉浸式 ZCode 风格暗黑 IDE 美学（哑光深炭底色、细微描边、悬浮底栏与琥珀金点缀，已通过 desktop-plugins/zcode-theme 原生闭环）。
 - **桌面工具内嵌化强偏好**：桌面工具与代理控制台采用完全内嵌交互——严禁后台启动反代时弹出外部黑色 CMD 终端窗口（必须默认静默无黑框）；所有 Debug 信息、运行输出与错误日志直接内嵌在控制台「实时日志」页面查看。
