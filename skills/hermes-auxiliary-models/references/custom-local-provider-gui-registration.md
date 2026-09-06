@@ -218,8 +218,17 @@ When integrating OpenViking (`volcengine/OpenViking`) as an external memory prov
   OPENVIKING_RECALL_SCORE_THRESHOLD=0.35
   OPENVIKING_RECALL_PREFER_ABSTRACT=true
   OPENVIKING_RECALL_RESOURCES=true
+  OPENVIKING_RECALL_TIMEOUT_SECONDS=15.0
   ```
   **The `recall_resources` Invariant**: In `plugins/memory/openviking`, `recall_resources` defaults to `False`. When shared repository topics are staged under `viking://resources/shared-memory/`, Hermes automatic prefetch will completely ignore repository topics unless `recall_resources: true` is explicitly configured in `config.yaml` or `.env`.
+- **Serverless On-Demand Auto-Wake & Idle Auto-Sleep Gateway Pattern (Zero-Touch Invariant)**:
+  - **User Workflow Preference**: Users strongly dislike having to manually start/stop daemon scripts or having permanent background processes consuming GPU VRAM when not in use. The memory infrastructure must be completely self-governing: zero GPU/CPU consumption during idle periods, automatic transparent wake-up when memory is accessed, and automatic shutdown after inactivity.
+  - **Socket-Activation Architecture (`openviking_lazy_gateway.py`)**:
+    - A lightweight stdlib HTTP gateway listens on the expected port `127.0.0.1:1933` (consuming ~15MB RAM, 0% CPU, 0 MB GPU VRAM).
+    - **On-Demand Auto-Wake**: When Hermes initiates a prefetch query, browse, or tool call against 1933, the gateway checks if backends are sleeping. If sleeping, it silently spawns both `llama-server.exe` (port 18082, CUDA BGE-M3) and `openviking-server.exe` (internal port 1934) with `CREATE_NO_WINDOW`, waits for health readiness (~4–6s), and transparently proxies the HTTP request.
+    - **Idle Auto-Sleep & VRAM Reclamation**: A background monitor thread tracks request timestamps. When no requests are received for `OPENVIKING_IDLE_TIMEOUT` (default: 900s / 15 minutes), the gateway automatically kills the backend processes on ports 18082 and 1934, **100% freeing the 800MB GPU VRAM** and returning the GPU to idle.
+    - **Timeout Calibration**: Extend `OPENVIKING_RECALL_TIMEOUT_SECONDS=15.0` in Hermes `.env` / `config.yaml` so the initial cold-start wake-up does not hit the default 4.0s recall timeout.
+    - **Session-Independent Boot Persistence on Windows**: Launching the gateway via `pythonw.exe` from `shell:startup` (`OpenVikingGateway.vbs` with `WshShell.Run ..., 0, False`) guarantees it starts silently on Windows login with no console windows, remaining 100% resilient to chat session deletions, profile resets, or GUI restarts.
 
 
 

@@ -26,7 +26,7 @@ LISTEN_PORT = 1933
 BACKEND_PORT = 1934
 EMBEDDING_PORT = 18082
 
-IDLE_TIMEOUT_SECONDS = int(os.environ.get("OPENVIKING_IDLE_TIMEOUT", "900"))  # 15 minutes
+IDLE_TIMEOUT_SECONDS = int(os.environ.get("OPENVIKING_IDLE_TIMEOUT", "120"))  # 2 minutes
 CREATE_NO_WINDOW = 0x08000000
 
 LLAMA_SERVER_EXE = Path("D:/HermesRuntimes/llamacpp/b10679/cuda/llama-server.exe")
