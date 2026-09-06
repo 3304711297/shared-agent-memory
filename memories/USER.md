@@ -20,4 +20,4 @@ MCP 精简终态（2026-09-06）：Hermes 端 MCP 仅留 chrome-devtools（纯�
 §
 Hermes 配置自同步铁律（2026-09-06）：用户通知改设置时，主动读取 config.yaml 识别最新配置附带 Git SHA 指纹，脱敏后自动更新共享记忆库 hermes-config-baseline-and-sync-protocol.md 与 hermes-config.yaml 并推 main。改 config.yaml 须用 python ruamel.yaml。
 §
-会话归档与清理闭环铁律（2026-09-06 用户拍板）：日常普通会话模式；若用户要求删除/归档当前会话或累计 ≥1M tokens，必须严格执行三步收尾闭环 SOP——① 提炼有价值记忆上传至 shared-agent-memory 共享库及 youshouldknow 知识库；② 彻底扫描并物理删除本会话产生的全部无用临时文件（测试脚本、临时日志、调试中间产物等）；③ 自动提交推送并盯 Actions CI 全绿后方可收尾。
+会话归档与清理闭环铁律（2026-09-06 用户拍板）：日常普通会话模式；若用户要求删除/归档当前会话或累计 ≥1M tokens，必须严格执行三步收尾闭环 SOP——① 提炼记忆上传 shared-agent-memory 共享库；ysk 内容严禁擅自写入，必先列出包含理由的候选清单供用户勾选拍板；② 彻底物理清理本会话全部无用临时文件（测试脚本/探针/日志）；③ 自动提交推送并盯 Actions CI 全绿收尾。
