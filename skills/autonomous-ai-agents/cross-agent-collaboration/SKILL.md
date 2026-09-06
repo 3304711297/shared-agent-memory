@@ -125,8 +125,22 @@ The user strictly enforces tool execution efficiency and minimal round-trip over
 - **config.yaml Security Exception**: Hermes core prevents `patch`/`write_file` edits on its own `config.yaml` as a security-sensitive guard. For this file specifically, use `python` with `ruamel.yaml` (`preserve_quotes=True`) to maintain structural fidelity without clobbering formatting.
 - **ZCode config.json Schema Guard**: Whenever editing ZCode's `config.json` (such as modifying `plugins.enabledPlugins`), ALWAYS run `node "D:/zcode/resources/glm/zcode.cjs" plugins list --json` immediately afterwards to verify schema compliance and prevent silent configuration drop.
 
-## 11. Real-Browser Automation Boundary (chrome-devtools vs Native Browser)
-- **Irreplaceable Capability**: `chrome-devtools` MCP is preserved in Hermes (and ZCode) specifically because it drives the user's **daily Edge Dev profile** (via `--user-data-dir`, `--autoConnect`, and `--ignore-default-chrome-arg=--disable-extensions`).
-- **Native Browser Incompatibility**: Hermes' built-in `browser` toolset cannot replace this workflow: its `browser.use_real_profile` flag hard-rejects Chromium pre-release channels (Beta/Dev/Canary) via `_real_profile_unsupported_reason()`, and runs in an isolated disposable sandbox.
-- **autoConnect Prerequisite**: The `--autoConnect` flag attaches to an **already-running** Edge Dev browser (version 144+) with remote debugging enabled (`edge://inspect/#remote-debugging`). It does NOT launch Edge. Edge Dev must be running; each fresh session may prompt a one-time security dialog ("是否允许远程调试？") requiring user confirmation.
+## 11. Real-Browser Automation Boundary & Edge Profile Protection Invariant
+- **Strictly Omit `--user-data-dir` (The Cold-Launch Trap)**: Previously, `--user-data-dir` was mistakenly supplied to `chrome-devtools-mcp` under the assumption of seamless extension profile reuse. In reality, triggering the MCP while Edge Dev is closed forces Chromium to cold-launch in headless/automation mode without loading regular extensions; exiting writes an empty registry back to `Secure Preferences`, causing Chromium's internal `ExtensionGarbageCollector` on subsequent starts to classify installed extension folders as orphans and **physically delete extension binaries from disk**. In `config.yaml`, **strictly omit `--user-data-dir`** and pass only `--autoConnect` (plus `--ignore-default-chrome-arg=--disable-extensions`).
+- **Prune Built-in Browser Automation**: Native Hermes `browser` toolset (`browser_*`) cannot drive user profile extensions. Explicitly disable the \"Browser Automation\" toolset in the Hermes Desktop settings (`platform_toolsets.cli` removes `browser`) whenever dedicated search backends (e.g. Exa) are active to eliminate accidental profile stamping by background agents.
+- **autoConnect Prerequisite**: The `--autoConnect` flag attaches to an **already-running** Edge Dev browser (version 144+) with remote debugging enabled (`edge://inspect/#remote-debugging`). If Edge is closed, the MCP must fail fast and wait for the user to launch it, never autonomously spinning up headless background instances.
+- **Instant Decoupled Extension Recovery**: Extension code and data are decoupled. User scripts and configurations reside safely in `Default/Local Extension Settings/<id>` (unaffected by garbage collection). Re-installing the extension from Microsoft Edge Add-ons (or loading unpacked extensions with pinned `key` attributes) instantly rebinds the existing local database, achieving 100% in-place recovery without re-importing scripts.
+
+## 12. Session Archive & Teardown Protocol (User Rule)
+When the user issues a directive to delete or archive the active session, or when session consumption approaches the reset threshold (≥1M tokens):
+1. **Curate High-Value Knowledge & Dual-Store Sync**:
+   - Extract all critical technical decisions, verified failure root causes, configuration baseline changes, and debugging invariants discovered during the turn.
+   - Commit operational facts and cross-agent invariants to the shared repository (`shared-agent-memory`, `main` branch).
+   - Author or update applicable domain articles, system guides, or hardware knowledge in the `youshouldknow` (YSK) documentation repository.
+2. **Physical Teardown of Ephemeral Session Artifacts**:
+   - Perform an exhaustive scan of the workspace, temporary directories (`%LOCALAPPDATA%\\Temp`), and repository trees.
+   - Physically delete all ephemeral test scripts (e.g. temporary `.py`, `.cjs`, `.sh` probes), scratch output logs, and transient scraper outputs generated during the conversation. Zero untracked diagnostic clutter must remain on disk.
+3. **Automated Remote Push & Continuous CI Confirmation**:
+   - Stage and commit all persistent knowledge updates, pushing to their authoritative remote branches (`main` for shared repositories, `hermes` for profile-local state).
+   - Actively monitor and poll remote GitHub Actions workflows (`gh run watch` / `gh run list`) until 100% green (Success ✓) before completing the turn. Never conclude an archive request without remote CI verification.
 
