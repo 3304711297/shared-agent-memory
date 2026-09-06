@@ -2,9 +2,9 @@ Hermes 主力模型 gemini-3.8-flash，经 EasyCLIProxyAPI（网关 18080，prov
 §
 WorkBuddy 经本地 codebuddy2openai 反代（已迁移至桌面 C:\Users\VOS-User\Desktop\codebuddy2openai，fork=3304711297/codebuddy2openai，Release 桌面快捷方式 CodeBuddy2OpenAI.lnk）暴露 OpenAI 兼容端点 http://127.0.0.1:8787/v1。Tauri v2 客户端已对标 EasyCLIProxyAPI 重构闭环：支持全量 28 官方模型矩阵、纯净倍率（去除 credits）、自定义上下文上限、思考强度调节/关闭、多账号切换管理、内嵌积分看板与实时 Debug 日志（UTF-8 容错、无黑框后台静默）；右键托盘对标 GUI.for.Cores 风格（内核状态/启停/重启/退出并双向事件广播）；Hermes/ZCode 配置一键写入（兼容驼峰与下划线）。旧批处理与 vbs 已删。venv=C:\Users\VOS-User\.workbuddy\binaries\python\envs\default。
 §
-Windows 运行环境：本地代理 127.0.0.1:3067；GitHub CLI 账号 3304711297；浏览器接管 Edge Dev + chrome-devtools MCP；4 大插件（context7/desktop-commander/serena/superpowers）有 Windows 定制，upstream-watch 巡检严禁全量覆盖。
+Windows 运行环境：本地代理 127.0.0.1:3067；GitHub CLI 账号 3304711297；浏览器接管 Edge Dev + chrome-devtools MCP；superpowers 插件有 Windows 定制。
 §
-ScriptCat Edge154 若复发：用 scripts/cdp_live.py 排查（scriptscat#1724，registerContentScripts 补注册）。
+浏览器防护与扩展治理终局（09-06）：已关闭 Browser Automation（网页抓取全走 Exa），chrome-devtools 剔除 --user-data-dir 仅留 --autoConnect（防误拉实例清空扩展）；脚本与配置在 Local Extension Settings 完好，商店点击获取即自动无损满血挂载。
 §
 token-stats=用户自建配额插件（Pulse导航、/quota看板、8787积分、18080额度）；已升级多账号并发监控与动态路由感知（直读 usage.db/log 跟随真实调用账号，展示多账号池与轮询负载）；集成 /ovlm 提炼动态跟随。
 §
