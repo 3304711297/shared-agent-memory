@@ -57,7 +57,10 @@ OpenViking 摄入长 Markdown 文档时输入常超过 2000 tokens。llama-serve
 `-c 8192 -b 8192 --ubatch-size 8192 -ngl 99`
 
 ### 4. Serverless 懒人网关（按需拉起 + 空闲休眠与 Venv 隔离）
-脚本位于 `C:\Users\VOS-User\AppData\Local\hermes\scripts\openviking_lazy_gateway.py`，并在 `Startup` 目录配置 `OpenVikingGateway.vbs` 开机静默拉起：
+脚本位于 `C:\Users\VOS-User\AppData\Local\hermes\scripts\openviking_lazy_gateway.py`。
+依用户指令（2026-09-06），已移除 `Startup` 开机自启动项，改为按需手动启停：
+- 桌面提供 `启动 OpenViking.lnk`（点击静默拉起 1933 懒网关）与 `停止 OpenViking.lnk`（点击一键杀掉网关与模型进程释放显存与内存）；
+- 统一运维脚本 `python C:/Users/VOS-User/AppData/Local/hermes/scripts/openviking_service.py [start|stop|restart|status]`。
 - **运行环境严格隔离**：必须使用 OpenViking 独立虚拟环境 `C:\Users\VOS-User\.openviking\venv\Scripts\pythonw.exe` 驱动，严禁借用 `hermes-agent\venv`，规避 Windows 文件锁拦截 Hermes 桌面更新；
 - 平时状态：0% GPU、0 MB 显存、0% CPU；
 - 收到提问时：自动在后台 5~6 秒内静默拉起 18082 与 1934，无任何黑框终端弹出；
