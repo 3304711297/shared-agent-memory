@@ -84,7 +84,7 @@ display:
   busy_input_mode: interrupt
   bell_on_complete: true
   bell_on_prompt: false
-  show_reasoning: true
+  show_reasoning: false
   background_process_notifications: concise
   streaming: true
   skin: default
