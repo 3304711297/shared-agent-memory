@@ -94,3 +94,13 @@ When orchestrating internal specialized bots (profiles under `~/.hermes/profiles
 - **Specialized SOUL.md Contracts**: Replace the default prompt in `profiles/<name>/SOUL.md` with explicit role boundaries: Identity, Mandates & Rules, Cross-Bot Handoffs (@mentions / Agent Inbox protocols), and Shared Memory Protocols.
 - **In-Session Handoffs**: Use `@<bot-name>` in conversation turns for synchronous task handoffs, or rely on Agent Inbox for asynchronous batch deliveries.
 
+## 9. Windows MCP Process Tree & Orphan Teardown Invariant
+In Windows, Agent GUIs (Hermes Desktop / ZCode) spawn stdio MCP servers through deep process trees:
+`Agent GUI -> cmd.exe -> npx/uvx -> node.exe / serena.exe`.
+Because Windows does not cascade process termination to grandchildren upon GUI window close without an explicit Windows Job Object, grandchildren become orphaned background zombies (CPU 0%, but holding 300MB~500MB RAM across multiple restarts).
+- **Targeted Whitelist Reaper**: When cleaning up or automating post-exit shutdown, never blindly `taskkill /IM node.exe` (which kills user web servers, Vite, Next.js). Target exclusively verified MCP signatures:
+  - Node MCPs: `commandline` matching `chrome-devtools-mcp`, `desktop-commander`, `context7-mcp`.
+  - Python MCPs: `serena.exe` and `cmdline` containing `serena`.
+  - Implementation: canonical safe reaper at `C:/Users/VOS-User/AppData/Local/hermes/scripts/cleanup_agent_orphans.py`.
+- **OpenViking Service Decoupling**: OpenViking is the shared dual-agent memory service, decoupled from OS auto-start (per user preference: on-demand via `openviking_service.py` or Desktop shortcuts `启动 OpenViking.lnk` / `停止 OpenViking.lnk`). Never couple its lifecycle to a single agent's startup.
+

@@ -20,7 +20,7 @@ Hermes 检索与抽取全量接管为 Exa 独享（EXA_API_KEY 已入库 .env，
 §
 本机硬件：RTX 4070 Laptop (8GB 显存) + 24GB 内存；C 盘空间紧张 (~50GB)，Hermes 本地模型与运行时已建立 NTFS Junction 映射至 D 盘（models -> D:\HermesModels，runtimes -> D:\HermesRuntimes）；OpenViking 独立虚拟环境位于 C:\Users\VOS-User\.openviking\venv。
 §
-OpenViking 智能记忆检索已全面闭环（09-06）：物理真源 shared-agent-memory (main) 唯一；D:\HermesModels 挂载本地 BGE-M3 + 动态跟随 VLM 提炼；1933 懒网关与守护严格使用 .openviking\venv 独立环境（严禁借用 hermes-agent\venv 防 Windows 文件锁拦截更新）；双驱动防漂移；召回保守配置。
+OpenViking 智能记忆检索已全面闭环（09-06）：物理真源 shared-agent-memory (main) 唯一；D:\HermesModels 挂载本地 BGE-M3 + 动态跟随 VLM 提炼；已依用户要求移除开机自启（Startup/OpenVikingGateway.vbs 已撤），改为桌面快捷方式/openviking_service.py 按需启停；1933 懒网关与守护严格使用 .openviking\venv 独立环境防锁更新，2分钟闲置休眠；配套 cleanup_agent_orphans.py 治理深层 MCP 孤儿进程。
 §
 会话习惯：Hermes 会话列表累计 ≥1M 时让 AI 总结记忆后删会话、开新聊。配置改动流程：先列候选+官方默认+代价清单，等用户拍板再动手，严禁擅自改。
 §
