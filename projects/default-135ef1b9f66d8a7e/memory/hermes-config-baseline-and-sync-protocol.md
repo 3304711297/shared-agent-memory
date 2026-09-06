@@ -213,20 +213,11 @@ approvals:
   mode: false
 plugins:
   enabled:
-    - context7
-    - desktop-commander
-    - serena
     - superpowers
     - token-stats
   disabled: []
   entries:
-    desktop-commander:
-      allow_tool_override: false
     superpowers:
-      allow_tool_override: false
-    serena:
-      allow_tool_override: false
-    context7:
       allow_tool_override: false
 security:
   allow_private_urls: true
@@ -266,40 +257,11 @@ mcp_servers:
     timeout: 300
     enabled: true
   desktop-commander:
-    command: cmd
-    args:
-      - /c
-      - npx
-      - -y
-      - '@wonderwhy-er/desktop-commander@latest'
-    timeout: 300
-    enabled: true
+    REMOVED_2026-09-06: true
   serena:
-    command: cmd
-    args:
-      - /c
-      - uvx
-      - --from
-      - serena-agent
-      - serena
-      - start-mcp-server
-      - --enable-web-dashboard
-      - 'false'
-      - --open-web-dashboard
-      - 'false'
-      - --enable-gui-log-window
-      - 'false'
-    timeout: 300
-    enabled: true
+    REMOVED_2026-09-06: true
   context7:
-    command: cmd
-    args:
-      - /c
-      - npx
-      - -y
-      - '@upstash/context7-mcp'
-    timeout: 300
-    enabled: true
+    REMOVED_2026-09-06: true
   deepwiki:
     url: https://mcp.deepwiki.com/mcp
     enabled: true
