@@ -31,6 +31,11 @@ jobs:
         run: |
           python scripts/check-plugin-upstream.py --report
 
+      - name: Ensure upstream-watch label exists
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh label create upstream-watch --color "5319e7" --description "上游插件更新待评估" --force || true
+
       - name: Create or update GitHub Issue
         if: steps.check.outputs.has_updates == 'true'
         env:
