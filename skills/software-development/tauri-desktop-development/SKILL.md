@@ -167,8 +167,15 @@ When desktop plugins or panels depend on a background microservice running on a 
 - **Ghost Socket Hangs**: If a background process is terminated improperly during update cycles or file-lock clearance, Windows may leave the socket unresponsive or hung in `TIME_WAIT`/deadlock, surfacing UI alerts like `刷新配额失败：本地微服务未响应`.
 - **Clean Recovery Workflow**: Query the port owner (`netstat -ano | grep <port>`), kill lingering PIDs (`Stop-Process -Force`), relaunch via detached silent `pythonw.exe <script> --serve`, and immediately probe `/quota?force=1` for an HTTP 200 payload.
 
+### 8. Network Exposure Security Boundaries & Authentication Enforcing
+When a local desktop proxy/daemon exposes an HTTP API (e.g. converting upstream services to an OpenAI-compatible API):
+- **Host Header Defense-in-Depth vs Access Control**: `Host` header inspection (like rejecting non-loopback Host values) defends solely against web browser DNS rebinding attacks. It does NOT provide network access control, as any remote attacker in the local network can spoof `Host: 127.0.0.1`.
+- **Enforce Mandatory Authentication on Non-Loopback Binding**: When the server binds to `0.0.0.0` or a public/LAN interface, refuse to start without an API key unless an explicit flag like `--unsafe-expose` is provided.
+- **Unified Credential Source of Truth**: When both a desktop UI multi-account store (`accounts.json`) and an auth file (`.info`) exist, prioritize the active account in the UI store to prevent credential drift between chat forwarding and billing/quota summary endpoints.
+- **Log Sanitation & Log Levels**: Avoid dumping raw prompt/completion payloads by default. Use a 3-tier log level (`info` for latency/summary, `debug` for error bodies, `trace` for raw streams) and apply regex masks on tokens, authorization headers, and cookies to prevent credential leakage to disk.
+
 ## References & Deep-Dives
-- `references/proxy-console-architecture-and-pitfalls.md` — Detailed recipes and code patterns for subprocess window suppression (`CREATE_NO_WINDOW`), full-stack UTF-8 stream decoding, 3-tier daemon tray management with bi-directional event broadcast, Tauri v2 snake_case IPC deserialization, and upstream model matrix reverse-engineering.
+- `references/proxy-console-architecture-and-pitfalls.md` — Detailed recipes and code patterns for subprocess window suppression (`CREATE_NO_WINDOW`), full-stack UTF-8 stream decoding, 3-tier daemon tray management with bi-directional event broadcast, Tauri v2 snake_case IPC deserialization, upstream model matrix reverse-engineering, and local network security boundary enforcement.
 
 
 

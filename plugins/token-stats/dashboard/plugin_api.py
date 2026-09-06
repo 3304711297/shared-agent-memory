@@ -320,10 +320,307 @@ def format_quota_markdown(data: dict) -> str:
 
 @router.get("/quota")
 async def quota(force: str = Query("", description="force=1 bypasses the 30s cache")):
+    # 顺路做 OpenViking 提炼模型自动跟随（模型没变时是零开销幂等检查）
+    _auto_ovlm_follow()
     data = fetch_google_quota(force=force in ("1", "true", "yes"))
     if "error" in data:
         return JSONResponse(status_code=502, content=data)
     return data
+
+
+# ==================== OpenViking VLM 联动（记忆提炼跟随当前聊天模型） ====================
+#
+# 机制（为什么改 ov.conf 能“动态”生效）:
+#   OpenViking 的 VLM 实例在服务进程启动时按 ov.conf 创建并缓存；
+#   本机 1933 懒唤醒网关会在空闲 2 分钟后杀掉真实服务(1934)，
+#   下次请求重新拉起并重读 ov.conf —— 因此写入 ov.conf 的改动
+#   最迟在“空闲 2 分钟 + 下次唤醒”后生效，无需重启任何常驻进程。
+
+import re as _re  # noqa: E402
+import sqlite3 as _sqlite3  # noqa: E402
+
+_HERMES_CONFIG_YAML = _hermes_home() / "config.yaml"
+_OV_CONF = Path.home() / ".openviking" / "ov.conf"
+_OVLM_STATE_FILE = _hermes_home() / "desktop-plugins" / "token-stats" / "ovlm-state.json"
+_OV_BACKEND_PORT = 1934
+
+
+def _load_ovlm_state() -> dict:
+    try:
+        return json.loads(_OVLM_STATE_FILE.read_text(encoding="utf-8"))
+    except Exception:
+        return {"follow_enabled": True, "last_sync": None}
+
+
+def _save_ovlm_state(state: dict) -> None:
+    try:
+        _OVLM_STATE_FILE.parent.mkdir(parents=True, exist_ok=True)
+        _OVLM_STATE_FILE.write_text(
+            json.dumps(state, ensure_ascii=False, indent=2), encoding="utf-8"
+        )
+    except Exception:
+        pass
+
+
+def _redact_key(key: str) -> str:
+    return (key[:4] + "****" + key[-4:]) if key and len(key) > 8 else "****"
+
+
+def _read_current_chat_route() -> dict[str, Any]:
+    """当前聊天模型真源：state.db.sessions 最新活跃一行（只读连接）。
+
+    billing_provider 形如 custom:workbuddy-(127.0.0.1:8787) = "custom:" + provider名小写空格转横线。
+    """
+    out: dict[str, Any] = {"model": None, "provider": None, "session_id": None, "last_activity": None}
+    db_path = _hermes_home() / "state.db"
+    if not db_path.exists():
+        out["error"] = "state.db not found"
+        return out
+    try:
+        db = _sqlite3.connect(f"file:{db_path.as_posix()}?mode=ro", uri=True)
+        try:
+            row = db.execute(
+                "SELECT id, model, billing_provider, last_activity_at FROM sessions "
+                "WHERE model IS NOT NULL ORDER BY last_activity_at DESC LIMIT 1"
+            ).fetchone()
+        finally:
+            db.close()
+        if row:
+            out.update(session_id=row[0], model=row[1], provider=row[2], last_activity=row[3])
+    except Exception as exc:
+        out["error"] = str(exc)
+    return out
+
+
+def _map_provider(provider_slug: Optional[str]) -> dict[str, Any]:
+    """把 billing_provider slug 映射到 config.yaml custom_providers 条目。
+
+    匹配顺序: ①名字 slug 精确匹配 ②括号内 host:port 与 base_url 兜底（兼容改名前的旧 slug）。
+    """
+    fail = {"resolved": False}
+    if not provider_slug or not provider_slug.startswith("custom:"):
+        fail["reason"] = f"非 custom 类型 provider（{provider_slug or '空'}），无本地凭据可映射"
+        return fail
+    try:
+        import yaml
+
+        cfg = yaml.safe_load(_HERMES_CONFIG_YAML.read_text(encoding="utf-8")) or {}
+    except Exception as exc:
+        fail["reason"] = f"config.yaml 读取失败: {exc}"
+        return fail
+    providers = cfg.get("custom_providers") or []
+    want = "custom:" + _re.sub(r"\s+", "-", provider_slug[len("custom:"):].strip().lower())
+    port_m = _re.search(r"\(([\d.]+:\d+)\)", provider_slug)
+    for p in providers:
+        name = str(p.get("name") or "")
+        name_slug = "custom:" + _re.sub(r"\s+", "-", name.strip().lower())
+        base_url = str(p.get("base_url") or "")
+        matched = name_slug == want
+        if not matched and port_m and port_m.group(1) in base_url:
+            matched = True
+        if matched:
+            api_key = str(p.get("api_key") or "")
+            if not api_key:
+                return {"resolved": False, "reason": f"provider「{name}」缺 api_key"}
+            return {
+                "resolved": True,
+                "name": name,
+                "base_url": base_url.rstrip("/"),
+                "api_key": api_key,
+                "models": list((p.get("models") or {}).keys()),
+            }
+    fail["reason"] = f"custom_providers 中找不到匹配 {provider_slug}"
+    return fail
+
+
+def _ov_backend_awake() -> bool:
+    import urllib.request
+
+    try:
+        opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+        with opener.open(f"http://127.0.0.1:{_OV_BACKEND_PORT}/api/v1/system/status", timeout=1.0) as r:
+            return r.status in (200, 401)
+    except Exception:
+        return False
+
+
+def _read_ov_conf() -> dict:
+    try:
+        return json.loads(_OV_CONF.read_text(encoding="utf-8"))
+    except Exception:
+        return {}
+
+
+def compute_ovlm_status() -> dict[str, Any]:
+    """聚合面板所需状态：ov.conf 当前值 vs 当前聊天模型目标值。"""
+    state = _load_ovlm_state()
+    chat = _read_current_chat_route()
+    conf = _read_ov_conf()
+    vlm = conf.get("vlm") or {}
+    mapped = _map_provider(chat.get("provider")) if chat.get("provider") else {"resolved": False, "reason": "无活跃会话模型记录"}
+
+    target = None
+    if mapped.get("resolved"):
+        target = {"api_base": mapped["base_url"], "model": chat.get("model")}
+
+    current = {"api_base": vlm.get("api_base"), "model": vlm.get("model"), "key": _redact_key(str(vlm.get("api_key") or ""))}
+    in_sync = bool(target and current["api_base"] == target["api_base"] and current["model"] == target["model"])
+
+    return {
+        "current": current,
+        "chat": {
+            "session_id": chat.get("session_id"),
+            "model": chat.get("model"),
+            "provider": chat.get("provider"),
+            "last_activity": chat.get("last_activity"),
+        },
+        "mapped": {
+            "resolved": mapped.get("resolved", False),
+            "name": mapped.get("name"),
+            "base_url": mapped.get("base_url"),
+            "key_tail": _redact_key(mapped["api_key"]) if mapped.get("resolved") else None,
+            "reason": None if mapped.get("resolved") else mapped.get("reason"),
+            "model_in_catalog": bool(
+                mapped.get("resolved") and (not mapped.get("models") or chat.get("model") in mapped["models"])
+            ),
+        },
+        "target": target,
+        "in_sync": in_sync,
+        "follow_enabled": bool(state.get("follow_enabled", True)),
+        "last_sync": state.get("last_sync"),
+        "backend_awake": _ov_backend_awake(),
+        "ov_conf_path": str(_OV_CONF),
+        "mechanism_note": "写入 ov.conf 后，OpenViking 服务(1934)在空闲 2 分钟自动休眠、下次请求唤醒时按新配置拉起",
+    }
+
+
+def apply_ovlm_sync(force: bool = False) -> dict[str, Any]:
+    """把 ov.conf 的 vlm 段改写为当前聊天模型（幂等；目标未变时不落盘）。"""
+    status = compute_ovlm_status()
+    if not force and not status["follow_enabled"]:
+        return {"synced": False, "reason": "联动已暂停（面板开关关闭）", "status": status}
+    if not status["mapped"]["resolved"]:
+        return {"synced": False, "reason": status["mapped"]["reason"], "status": status}
+    if not status["chat"]["model"]:
+        return {"synced": False, "reason": "无可用会话模型记录", "status": status}
+    if status["in_sync"]:
+        return {"synced": True, "changed": False, "reason": "已是目标状态", "status": status}
+
+    conf = _read_ov_conf()
+    if not conf:
+        return {"synced": False, "reason": f"ov.conf 读取失败 ({_OV_CONF})", "status": status}
+
+    # status 里的 key 已脱敏，这里重新映射拿真实凭据（不回传、不落日志）
+    mapped = _map_provider(status["chat"]["provider"])
+    if not mapped.get("resolved"):
+        return {"synced": False, "reason": mapped.get("reason"), "status": status}
+    conf["vlm"] = {
+        "provider": "openai",
+        "api_base": mapped["base_url"],
+        "api_key": mapped["api_key"],
+        "model": status["chat"]["model"],
+    }
+
+    try:
+        tmp = _OV_CONF.with_suffix(".conf.tmp")
+        tmp.write_text(json.dumps(conf, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        tmp.replace(_OV_CONF)
+    except Exception as exc:
+        return {"synced": False, "reason": f"ov.conf 写入失败: {exc}", "status": status}
+
+    state = _load_ovlm_state()
+    state["last_sync"] = {
+        "at": time.strftime("%Y-%m-%dT%H:%M:%S"),
+        "model": status["target"]["model"],
+        "api_base": status["target"]["api_base"],
+        "session_id": status["chat"]["session_id"],
+    }
+    _save_ovlm_state(state)
+
+    status2 = compute_ovlm_status()
+    return {"synced": True, "changed": True, "backend_awake": status2["backend_awake"], "status": status2}
+
+
+def _bounce_ov_backend() -> dict[str, Any]:
+    """立即生效：杀掉 awake 状态的 1934，下次请求由懒网关按新配置重新拉起。"""
+    import subprocess
+
+    out = subprocess.run(["netstat", "-ano"], capture_output=True).stdout.decode("gbk", errors="ignore")
+    pids = set()
+    for line in out.splitlines():
+        if str(_OV_BACKEND_PORT) in line and "LISTENING" in line:
+            pids.add(line.strip().split()[-1])
+    killed = []
+    for pid in pids:
+        r = subprocess.run(["taskkill", "/F", "/PID", pid], capture_output=True)
+        if r.returncode == 0:
+            killed.append(pid)
+    return {"killed_pids": killed, "awake_after": _ov_backend_awake()}
+
+
+_auto_follow_lock = threading.Lock()
+_auto_follow_last = 0.0
+
+
+def _auto_ovlm_follow() -> None:
+    """跟随式自动同步：聊天模型变化 → 写 ov.conf + 踢 1934 立即生效。
+
+    每次 /quota 轮询（面板 15s 一次）顺路调用；模型未变化时是零开销检查。
+    follow_enabled=false 时完全不动作（手动同步按钮仍可用）。
+    """
+    global _auto_follow_last
+    if not _auto_follow_lock.acquire(blocking=False):
+        return
+    try:
+        if time.time() - _auto_follow_last < 30:  # 冷却：多个轮询源并发时只处理一次
+            return
+        _auto_follow_last = time.time()
+        state = _load_ovlm_state()
+        if not state.get("follow_enabled", True):
+            return
+        status = compute_ovlm_status()
+        if status["in_sync"] or not status["mapped"]["resolved"]:
+            return
+        # 聊天会话刚结束（>90s 无活动）时不自动切换，避免污染下一次会话的目标
+        chat = status["chat"]
+        last_activity = chat.get("last_activity")
+        if isinstance(last_activity, (int, float)) and (time.time() - last_activity) > 90:
+            return
+        result = apply_ovlm_sync(force=False)
+        if result.get("synced") and result.get("changed"):
+            bounced = _bounce_ov_backend()
+            state["last_auto"] = {
+                "at": time.strftime("%Y-%m-%dT%H:%M:%S"),
+                "model": result["status"]["target"]["model"],
+                "bounced": bool(bounced.get("killed_pids")),
+            }
+            _save_ovlm_state(state)
+            log.info("OVLM auto-follow: switched to %s, backend bounced=%s",
+                     result["status"]["target"]["model"], bool(bounced.get("killed_pids")))
+    except Exception:
+        log.exception("OVLM auto-follow failed (non-fatal)")
+    finally:
+        _auto_follow_lock.release()
+
+
+@router.get("/ovlm")
+async def ovlm(
+    sync: str = Query("", description="sync=1 执行同步写 ov.conf"),
+    force: str = Query("", description="force=1 忽略 follow_enabled 开关强制同步"),
+    apply: str = Query("", description="apply=1 同步成功后立即重启 1934 使配置生效"),
+    toggle: str = Query("", description="toggle=1 翻转 follow_enabled 开关"),
+):
+    if toggle in ("1", "true", "yes"):
+        state = _load_ovlm_state()
+        state["follow_enabled"] = not bool(state.get("follow_enabled", True))
+        _save_ovlm_state(state)
+    if sync in ("1", "true", "yes"):
+        result = apply_ovlm_sync(force=force in ("1", "true", "yes"))
+        applied = None
+        if result.get("synced") and result.get("changed") and apply in ("1", "true", "yes"):
+            applied = _bounce_ov_backend()
+        return {**result, "applied": applied}
+    return compute_ovlm_status()
 
 
 @router.get("/health")
