@@ -212,12 +212,14 @@ When integrating OpenViking (`volcengine/OpenViking`) as an external memory prov
 - **Zero-Cost Fully Local RAG Pipeline**:
   - **Embedding**: Use Hermes Desktop's managed `llama.cpp` runtime with GPU CUDA acceleration (e.g. RTX 4070 Laptop) to serve lightweight GGUF embeddings (e.g. `bge-small-zh` or `bge-m3`) via `/v1/embeddings`, eliminating cloud API dependency and preventing privacy leaks.
   - **L0/L1 Extraction**: Route OpenViking's VLM/LLM configuration to existing local OpenAI gateways (e.g. WorkBuddy `127.0.0.1:8787/v1` with `glm-5.3-flash`), achieving 100% free local execution.
-- **Prompt Contamination Defense**: Hermes prefetch automatically injects recalled context into upcoming user turns. To prevent answer drift in reasoning models (Gemini 3.8 Flash), enforce conservative settings:
+- **Prompt Contamination Defense & Resource Recall Activation**: Hermes prefetch automatically injects recalled context into upcoming user turns. To prevent answer drift in reasoning models (Gemini 3.8 Flash), enforce conservative settings:
   ```env
   OPENVIKING_RECALL_LIMIT=3
   OPENVIKING_RECALL_SCORE_THRESHOLD=0.35
   OPENVIKING_RECALL_PREFER_ABSTRACT=true
+  OPENVIKING_RECALL_RESOURCES=true
   ```
+  **The `recall_resources` Invariant**: In `plugins/memory/openviking`, `recall_resources` defaults to `False`. When shared repository topics are staged under `viking://resources/shared-memory/`, Hermes automatic prefetch will completely ignore repository topics unless `recall_resources: true` is explicitly configured in `config.yaml` or `.env`.
 
 
 
