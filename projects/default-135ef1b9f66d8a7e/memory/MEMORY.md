@@ -58,4 +58,5 @@
 - [OpenViking VLM Dynamic Follow](openviking-vlm-dynamic-follow.md) — OpenViking 记忆提炼模型动态跟随当前聊天模型（token-stats /ovlm 端点+自动跟随；生效机制=改 ov.conf 踢 1934；E2E 已验提炼落 glm@8787、Gemini 零消耗）
 - [ToolRush Evaluation and Latency Optimization](toolrush-evaluation-and-latency-optimization.md) — OnlyTerp/toolrush (ToolRush v2) 针对 Hermes 本地工具调用延迟的深度技术评估、加速机制剖析与暂不安装观望决策
 - [Hermes Bots Mode Team Practice](hermes-bots-mode-team-practice.md) — Hermes Desktop Bot Mode（YanXbt @IBuzovskyi 指南）机制剖析、实践验证回滚与用户偏好（明确仅用普通会话模式）沉淀
+- [EasyCLIProxyAPI Multi Account Routing and Token Stats Monitor](easycliproxyapi-multi-account-routing-and-token-stats-monitor.md) — EasyCLIProxyAPI 多账号轮询调度机制与优先级桶实测闭环（平级 10 进入轮询池+会话粘性命中缓存）、token-stats 插件多凭据池并发监控与动态活跃路由感知升级全貌
 

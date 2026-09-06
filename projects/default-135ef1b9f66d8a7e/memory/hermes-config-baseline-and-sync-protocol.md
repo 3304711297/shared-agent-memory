@@ -134,8 +134,8 @@ prompt_caching:
   cache_ttl: 5m
 auxiliary:
   vision:
-    provider: auto
-    model: ''
+    provider: cpa-gui
+    model: gemini-3.8-flash
 display:
   compact: false
   busy_input_mode: interrupt
