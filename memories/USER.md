@@ -17,3 +17,5 @@ TG 频道 @emoegg（蛋总的圈：网络代理协议、延迟测评、TUN 与�
 本地模型使用偏好：对话模型由用户随时按需切换，严禁在设定中固定死主力对话模型；Hermes 客户端「已安装 llama.cpp 运行时」开关必须显式保持关闭（local_runtime.enabled: false），严禁常驻吃 3GB+ 内存；模型与运行时存 D 盘；记忆向量（BGE-M3）仅由 2 分钟空闲自动休眠网关按需拉起。
 §
 Hermes 配置自同步铁律（2026-09-06）：用户通知改动设置时，模型须自行读取 C:\Users\VOS-User\AppData\Local\hermes\config.yaml 识别最新配置，附带当前 Hermes 构建版本与 Git Commit SHA 指纹，脱敏后自动更新共享记忆库 hermes-config-baseline-and-sync-protocol.md 与 hermes-config.yaml 并推 main。
+§
+会话模式习惯（2026-09-06）：日常明确只用普通会话模式（default profile 一体化），不常驻维护多 profile/Bot Mode；工作流集中统一，会话累计 ≥1M tokens 时总结记忆后重建新会话。

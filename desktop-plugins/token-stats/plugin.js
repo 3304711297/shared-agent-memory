@@ -1034,6 +1034,9 @@ function QuotaPage({ ctx }) {
         ],
       }),
 
+      // OpenViking 记忆提炼联动
+      jsx(OvlmCard, { ctx }),
+
       // 主卡片 3：显示偏好与架构规范
       jsxs('div', {
         className: 'rounded-2xl border border-(--ui-stroke-secondary) bg-(--ui-bg-elevated) p-6 shadow-xl flex flex-col gap-4',
@@ -1082,6 +1085,227 @@ function QuotaPage({ ctx }) {
           jsx('p', {
             className: 'text-[11px] text-(--ui-text-tertiary) leading-relaxed',
             children: '💡 提示：本插件采用 Hermes 官方内嵌插件体系，随 Hermes 桌面端后端自动启闭，不依赖外部 18088 独立微服务与计划任务。会话 Token 速率与上下文容量由 Hermes 原生状态栏托管。可在终端任意会话中输入 /quota 查看实时配额报告。',
+          }),
+        ],
+      }),
+    ],
+  })
+}
+
+// ==================== OpenViking 记忆提炼联动卡片 ====================
+
+function OvlmCard({ ctx }) {
+  const [ov, setOv] = useState(null)
+  const [busy, setBusy] = useState(false)
+
+  const rest = (ctx && ctx.rest) || (pluginCtx && pluginCtx.rest)
+
+  const load = async () => {
+    if (!rest) return
+    try {
+      const r = await rest.call(ctx || pluginCtx, '/ovlm')
+      if (r && r.current) setOv(r)
+    } catch {}
+  }
+
+  const doSync = async (withApply) => {
+    setBusy(true)
+    try {
+      const r = await rest.call(ctx || pluginCtx, '/ovlm?sync=1' + (withApply ? '&apply=1' : ''))
+      await load()
+      if (r && r.synced) {
+        haptic?.('success') || haptic?.('tap')
+        host.notify({
+          kind: 'info',
+          message: r.changed
+            ? `✅ 提炼模型已切换 → ${r.status?.target?.model || '目标模型'}`
+            : 'ℹ️ 提炼配置已是目标状态，无需变更',
+        })
+      } else {
+        host.notify({ kind: 'error', message: `同步未执行: ${r?.reason || '未知原因'}` })
+      }
+    } catch {
+      host.notify({ kind: 'error', message: '同步失败，请确认后端服务正常' })
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const doToggle = async () => {
+    setBusy(true)
+    try {
+      await rest.call(ctx || pluginCtx, '/ovlm?toggle=1')
+      await load()
+    } catch {} finally {
+      setBusy(false)
+    }
+  }
+
+  useEffect(() => {
+    load()
+    const t = setInterval(load, 30000)
+    return () => clearInterval(t)
+  }, [])
+
+  if (!ov) return null
+
+  const hostPort = (ov.current.api_base || '').replace(/^https?:\/\//, '').replace(/\/v1\/?$/, '')
+  const targetHost = (ov.target?.api_base || '').replace(/^https?:\/\//, '').replace(/\/v1\/?$/, '')
+  const statePill = ov.in_sync
+    ? { label: '已同步', cls: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' }
+    : ov.mapped.resolved
+      ? { label: '待同步', cls: 'bg-amber-500/10 text-amber-400 border-amber-500/20' }
+      : { label: '未映射', cls: 'bg-zinc-800 text-zinc-400 border-white/5' }
+
+  return jsxs('div', {
+    className: 'rounded-2xl border border-(--ui-stroke-secondary) bg-(--ui-bg-elevated) p-6 shadow-xl flex flex-col gap-4',
+    children: [
+      // 卡头
+      jsxs('div', {
+        className: 'flex flex-col sm:flex-row sm:items-center justify-between gap-2',
+        children: [
+          jsxs('div', {
+            className: 'flex items-center gap-3',
+            children: [
+              jsx('div', {
+                className: 'w-8 h-8 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-base',
+                children: '🧠',
+              }),
+              jsxs('div', {
+                children: [
+                  jsx('h2', {
+                    className: 'text-sm font-semibold text-(--foreground)',
+                    children: 'OpenViking 记忆提炼联动',
+                  }),
+                  jsx('p', {
+                    className: 'text-xs font-mono text-(--ui-text-tertiary)',
+                    children: ov.ov_conf_path,
+                  }),
+                ],
+              }),
+            ],
+          }),
+          jsxs('div', {
+            className: 'flex items-center gap-2',
+            children: [
+              jsx('span', {
+                className: cn('px-2.5 py-1 text-xs font-mono font-semibold rounded-lg border', statePill.cls),
+                children: statePill.label,
+              }),
+              jsx('button', {
+                type: 'button',
+                disabled: busy,
+                onClick: doToggle,
+                className: cn(
+                  'px-2.5 py-1 text-xs font-mono rounded-lg border transition-all cursor-pointer active:scale-95',
+                  ov.follow_enabled
+                    ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/15'
+                    : 'bg-zinc-800 text-zinc-400 border-white/5 hover:bg-zinc-700/50',
+                  busy && 'opacity-60 cursor-wait'
+                ),
+                title: '开启后，面板每次同步会把提炼模型改写为当前聊天模型',
+                children: ov.follow_enabled ? '跟随中' : '已暂停',
+              }),
+            ],
+          }),
+        ],
+      }),
+
+      // 指标两列
+      jsxs('div', {
+        className: 'grid grid-cols-1 md:grid-cols-2 gap-3',
+        children: [
+          // 当前提炼端点
+          jsxs('div', {
+            className: 'p-4 rounded-xl bg-black/20 border border-white/5 flex flex-col gap-2',
+            children: [
+              jsxs('div', {
+                className: 'flex items-center justify-between',
+                children: [
+                  jsx('span', { className: 'text-xs text-(--ui-text-secondary) font-medium', children: '当前提炼端点' }),
+                  jsxs('span', {
+                    className: 'flex items-center gap-1.5 text-[10px] font-mono text-(--ui-text-tertiary)',
+                    children: [
+                      jsx('span', {
+                        className: cn('w-1.5 h-1.5 rounded-full', ov.backend_awake ? 'bg-emerald-400 animate-pulse' : 'bg-zinc-500'),
+                      }),
+                      ov.backend_awake ? '运行中' : '休眠中',
+                    ],
+                  }),
+                ],
+              }),
+              jsx('div', {
+                className: 'font-mono text-sm font-bold text-(--foreground) truncate',
+                title: ov.current.model,
+                children: ov.current.model || '—',
+              }),
+              jsxs('div', {
+                className: 'font-mono text-[11px] text-(--ui-text-tertiary) flex items-center gap-2',
+                children: [hostPort || '—', jsx('span', { className: 'text-white/20', children: '|' }), `key ${ov.current.key}`],
+              }),
+            ],
+          }),
+
+          // 目标（当前聊天模型）
+          jsxs('div', {
+            className: 'p-4 rounded-xl bg-black/20 border border-white/5 flex flex-col gap-2',
+            children: [
+              jsx('span', { className: 'text-xs text-(--ui-text-secondary) font-medium', children: '目标 = 当前聊天模型' }),
+              jsx('div', {
+                className: 'font-mono text-sm font-bold text-(--foreground) truncate',
+                title: ov.chat.model,
+                children: ov.chat.model || '—',
+              }),
+              jsxs('div', {
+                className: 'font-mono text-[11px] text-(--ui-text-tertiary) flex items-center gap-2',
+                children: [
+                  targetHost || ov.mapped.reason || '—',
+                  ov.mapped.model_in_catalog === false &&
+                    jsx('span', { className: 'text-amber-400', children: '⚠ 模型不在目录' }),
+                ],
+              }),
+            ],
+          }),
+        ],
+      }),
+
+      // 底行：上次同步 + 操作
+      jsxs('div', {
+        className: 'px-4 py-3 rounded-xl bg-black/20 border border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs',
+        children: [
+          jsx('span', {
+            className: 'text-[11px] text-(--ui-text-tertiary) font-mono',
+            children: ov.last_sync
+              ? `上次写入: ${ov.last_sync.at} → ${ov.last_sync.model}`
+              : '尚未写入过 · 空闲 2 分钟后服务休眠，下次唤醒自动加载新配置',
+          }),
+          jsxs('div', {
+            className: 'flex items-center gap-2',
+            children: [
+              jsx('button', {
+                type: 'button',
+                disabled: busy || !ov.mapped.resolved,
+                onClick: () => doSync(false),
+                className: cn(
+                  'px-3 py-1.5 rounded-lg bg-(--ui-bg-elevated) hover:bg-(--chrome-action-hover) border border-(--ui-stroke-secondary)',
+                  'text-xs font-medium text-(--foreground) transition-all cursor-pointer active:scale-95',
+                  (busy || !ov.mapped.resolved) && 'opacity-60 cursor-wait'
+                ),
+                children: '仅写入配置',
+              }),
+              jsx('button', {
+                type: 'button',
+                disabled: busy || !ov.mapped.resolved,
+                onClick: () => doSync(true),
+                className: cn(
+                  'px-3.5 py-1.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30',
+                  'text-xs font-semibold text-amber-400 transition-all cursor-pointer active:scale-95',
+                  busy && 'opacity-60 cursor-wait'
+                ),
+                title: '写入 ov.conf 并立刻重启 OpenViking 后端(1934)使其生效',
+                children: busy ? '同步中…' : '立即同步并生效',
+              }),
+            ],
           }),
         ],
       }),

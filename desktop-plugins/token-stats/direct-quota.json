@@ -2,15 +2,15 @@
   "status": "ok",
   "account": "jimygod114514@gmail.com",
   "plan": "Google AI Pro",
-  "quota5h": 9.1,
-  "reset5h": "2026-09-06T06:57:00Z",
-  "quotaWeekly": 23.8,
+  "quota5h": 36.9,
+  "reset5h": "2026-09-06T11:57:00Z",
+  "quotaWeekly": 12.8,
   "resetWeekly": "2026-09-11T01:03:50Z",
   "claudeQuota5h": 100,
   "claudeQuotaWeekly": 100,
   "source": "Google 官方直连 (Hermes 内置)",
-  "updatedAt": "2026-09-06T05:14:25Z",
-  "updatedAtLocal": "13:14:25",
+  "updatedAt": "2026-09-06T10:09:47Z",
+  "updatedAtLocal": "18:09:47",
   "workbuddy": {
     "id": "workbuddy",
     "name": "WorkBuddy (codebuddy2openai)",
@@ -18,20 +18,20 @@
     "statusLabel": "运行中",
     "endpoint": "http://127.0.0.1:8787/v1",
     "modelsCount": 28,
-    "note": "账号「晚街」· 积分 2849/3809 (74.8%)",
+    "note": "账号「晚街」· 积分 2428/3809 (63.7%)",
     "usage": {
       "nickname": "晚街",
       "total": 3809.0,
-      "remain": 2848.84000065,
-      "used": 960.15999935,
-      "remainPercent": 74.8,
+      "remain": 2427.6500007699997,
+      "used": 1381.3499992299999,
+      "remainPercent": 63.7,
       "isPaidUser": false,
       "packages": [
         {
           "code": "TCACA_code_007_nzdH5h4Nl0",
           "total": 2309.0,
-          "remain": 1848.84000065,
-          "used": 460.15999935,
+          "remain": 1427.65000077,
+          "used": 881.34999923,
           "unit": "credits"
         },
         {
@@ -61,12 +61,12 @@
       "windows": [
         {
           "label": "Gemini 5h 滚动额度",
-          "remaining": 9.1,
-          "reset": "2026-09-06T06:57:00Z"
+          "remaining": 36.9,
+          "reset": "2026-09-06T11:57:00Z"
         },
         {
           "label": "Gemini 每周总配额",
-          "remaining": 23.8,
+          "remaining": 12.8,
           "reset": "2026-09-11T01:03:50Z"
         },
         {
@@ -83,20 +83,20 @@
       "statusLabel": "运行中",
       "endpoint": "http://127.0.0.1:8787/v1",
       "modelsCount": 28,
-      "note": "账号「晚街」· 积分 2849/3809 (74.8%)",
+      "note": "账号「晚街」· 积分 2428/3809 (63.7%)",
       "usage": {
         "nickname": "晚街",
         "total": 3809.0,
-        "remain": 2848.84000065,
-        "used": 960.15999935,
-        "remainPercent": 74.8,
+        "remain": 2427.6500007699997,
+        "used": 1381.3499992299999,
+        "remainPercent": 63.7,
         "isPaidUser": false,
         "packages": [
           {
             "code": "TCACA_code_007_nzdH5h4Nl0",
             "total": 2309.0,
-            "remain": 1848.84000065,
-            "used": 460.15999935,
+            "remain": 1427.65000077,
+            "used": 881.34999923,
             "unit": "credits"
           },
           {

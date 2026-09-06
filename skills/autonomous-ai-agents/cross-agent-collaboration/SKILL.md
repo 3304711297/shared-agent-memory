@@ -41,10 +41,12 @@ terminal(
 4. The runtime notification (`[PROCESS EXITED]`) automatically re-enters the conversation and awakens Hermes.
 5. **OS Notification Independence**: The `notify=True` parameter in Hermes relies strictly on the internal application event bus (Process Exit Event detected by the Hermes runtime gateway). It is 100% self-contained within Hermes and is completely independent of Windows 11 OS Toast Notifications (which can remain globally disabled in Windows Settings without affecting agent wake-up).
 
-## 3. Takeover & Parallel Execution
+## 3. Takeover & Parallel Execution (Multi-Repo & Multi-Task Fan-out)
 
-Upon being awakened by the handoff signal:
-- **Mandatory Proactive Fan-out**: The user strictly enforces parallel execution for all multi-step verifications and audits. Immediately dispatch parallel subagents via `delegate_task` (batch 3~6, up to 10 concurrent workers) rather than executing sequentially. Never execute verification steps one-by-one in the foreground. Typical verification split:
+Upon being awakened by a handoff signal, or when presented with multi-repository / multi-domain audit findings and fix items:
+- **Mandatory Proactive Fan-out (Anti-Serialization Rule)**: The user strictly enforces parallel execution for all multi-step tasks, verifications, and multi-repo fixes. Immediately group independent tasks by domain/repository and dispatch parallel subagents via `delegate_task` (batch 3~6, up to 10 concurrent workers).
+- **Strict Anti-Pattern — "Subsetting & Tentative Deferral"**: NEVER artificially pick 2~3 items to serialize in the foreground while kicking others into a backlog or asking "if you agree, I'll do X first". If tasks are independent, actionable, and verified, dispatch them in parallel in one turn.
+- Typical verification & multi-repo split:
   - Subagent 1: Frontend dependency closure & production build (`npm run build`).
   - Subagent 2: Backend compilation, type check, and unit tests (`cargo check --locked -D warnings`, `cargo test`).
   - Subagent 3: IPC command mapping / API bijection audit (`invoke` calls vs registered handlers) and Git tree sanity check.
@@ -69,3 +71,14 @@ ZCode's runtime lives at `D:/zcode/resources/glm/zcode.cjs`; `node zcode.cjs -p 
 - **Parallel memory-file edits**: both agents may append to the same `shared-agent-memory` files in the same session; git merges handle it, but expect a possible fast-forward push and never force-push.
 - **Shared Memory Invariant**: Ground truth facts, architectural decisions, and handoff contracts must be committed to the shared repository (`shared-agent-memory` `main` branch).
 - **Skill Directory Physical Isolation**: Unlike shared memory (`memories/topics` which is a unified physical store via NTFS junction), the skill directories (`~/.zcode/skills` and `~/.hermes/skills`) are completely independent physical directories. Uninstalling or cleaning skills on one agent (e.g. `hermes skills uninstall`) does NOT propagate to the other. When deprecating or removing skills, both sides must be inspected and aligned to prevent orphaned redundant skills from lingering on one agent.
+
+## 8. Hermes Native Bot Mode & Multi-Profile Orchestration
+When orchestrating internal specialized bots (profiles under `~/.hermes/profiles/<name>/`) alongside the default agent:
+- **CLI Creation Pattern**: Always use `hermes profile create --clone-from default <name> --description "<role description>"` to inherit current gateway endpoints, `.env` API keys, and essential baseline configurations.
+- **Shared Memory Junction (CRITICAL)**: Newly created profiles instantiate an isolated `memories/` directory. To prevent memory fragmentation and state divergence, immediately establish an NTFS Directory Junction pointing `memories/topics` directly to the shared memory single physical source of truth:
+  ```cmd
+  cmd.exe /c "mklink /J C:\Users\VOS-User\AppData\Local\hermes\profiles\<name>\memories\topics C:\Users\VOS-User\.zcode\cli\memories\projects\default-135ef1b9f66d8a7e\memory"
+  ```
+- **Specialized SOUL.md Contracts**: Replace the default prompt in `profiles/<name>/SOUL.md` with explicit role boundaries: Identity, Mandates & Rules, Cross-Bot Handoffs (@mentions / Agent Inbox protocols), and Shared Memory Protocols.
+- **In-Session Handoffs**: Use `@<bot-name>` in conversation turns for synchronous task handoffs, or rely on Agent Inbox for asynchronous batch deliveries.
+

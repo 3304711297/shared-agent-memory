@@ -1,0 +1,9 @@
+{
+  "follow_enabled": true,
+  "last_sync": {
+    "at": "2026-09-06T16:52:59",
+    "model": "gemini-3.8-flash",
+    "api_base": "http://127.0.0.1:18080/v1",
+    "session_id": "20260906_152634_86d849"
+  }
+}
