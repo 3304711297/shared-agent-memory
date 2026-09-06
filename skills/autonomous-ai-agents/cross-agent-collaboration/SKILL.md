@@ -75,7 +75,14 @@ ZCode's runtime lives at `D:/zcode/resources/glm/zcode.cjs`; `node zcode.cjs -p 
 - **Producer-Reviewer Separation**: When one agent is editing a codebase, the other agent acts exclusively as reviewer, tester, or CI monitor. Never edit working tree files simultaneously to prevent file lock collisions.
 - **Parallel memory-file edits**: both agents may append to the same `shared-agent-memory` files in the same session; git merges handle it, but expect a possible fast-forward push and never force-push.
 - **Shared Memory Invariant**: Ground truth facts, architectural decisions, and handoff contracts must be committed to the shared repository (`shared-agent-memory` `main` branch).
-- **Skill Directory Physical Isolation**: Unlike shared memory (`memories/topics` which is a unified physical store via NTFS junction), the skill directories (`~/.zcode/skills` and `~/.hermes/skills`) are completely independent physical directories. Uninstalling or cleaning skills on one agent (e.g. `hermes skills uninstall`) does NOT propagate to the other. When deprecating or removing skills, both sides must be inspected and aligned to prevent orphaned redundant skills from lingering on one agent.
+- **Skill Directory Physical Isolation & Unified Retirement Protocol**: Unlike shared memory (`memories/topics` which is a unified physical store via NTFS junction), the skill directories (`~/.zcode/skills` and `~/.hermes/skills`) are completely independent physical directories. Uninstalling or cleaning skills on one agent (e.g. `hermes skills uninstall`) does NOT propagate to the other. When deprecating or retiring a skill across agents, execute this mandatory 7-step closure:
+  1. *Hermes Uninstall*: Run `hermes skills uninstall --yes <name>` to clean profile registration and lock files.
+  2. *ZCode Cleanup*: Physically remove directory `rm -rf C:/Users/VOS-User/.zcode/skills/<name>`.
+  3. *Sync Documentation*: Update `hermes-to-zcode-capability-sync.md` in shared memory with retirement rationale and updated count.
+  4. *Watcher Inventory*: Update `capability-inventory.json` (decrement skill replica counts under `hermes-hub-skills`).
+  5. *Local Smoke Test*: Run `python C:/Users/VOS-User/.zcode/cli/memories/scripts/check_capability_upstream.py` to ensure 0 outdated / 0 drift.
+  6. *Dual-Branch Commit & Push*: Commit and push `main` on `~/.zcode/cli/memories` and `hermes` on `~/.hermes`.
+  7. *CI & Memory Re-Index*: Watch GitHub Actions (`Capability Upstream Watch` / `Plugin Upstream Watcher`) until 100% green, then trigger `sync_shared_memory_openviking.py`.
 
 ## 8. Hermes Native Bot Mode & Multi-Profile Orchestration
 When orchestrating internal specialized bots (profiles under `~/.hermes/profiles/<name>/`) alongside the default agent:

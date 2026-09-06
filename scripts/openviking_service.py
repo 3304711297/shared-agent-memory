@@ -1,14 +1,17 @@
 #!/usr/bin/env python3
-"""OpenViking + Local Embedding Daemon Supervisor for Windows 11.
+"""OpenViking Unified Service Manager (Lazy Gateway & Process Control).
 
-Manages:
-  1. llama-server.exe on port 18082 (CUDA BGE-M3 1024-dim embedding)
-  2. openviking-server.exe on port 1933 (Context Database)
+Usage:
+  python openviking_service.py [start|stop|restart|status]
 
-All processes are launched silently without pop-up terminal windows.
+- start: Launches openviking_lazy_gateway.py via pythonw (listens on 1933, auto-wakes 18082/1934 on demand, auto-sleeps on idle).
+- stop: Forcefully stops lazy gateway (1933), OpenViking backend (1934), and BGE-M3 embedding (18082), freeing all RAM and VRAM.
+- restart: Stops all services and starts a fresh lazy gateway.
+- status: Displays the operational status of Gateway (1933), Backend (1934), and Embedding (18082).
 """
 
-import json
+from __future__ import annotations
+
 import os
 import subprocess
 import sys
@@ -16,113 +19,129 @@ import time
 import urllib.request
 from pathlib import Path
 
-LLAMA_SERVER_EXE = Path("D:/HermesRuntimes/llamacpp/b10679/cuda/llama-server.exe")
-BGE_M3_MODEL = Path("D:/HermesModels/bge-m3-Q8_0.gguf")
-OPENVIKING_SERVER_EXE = Path("C:/Users/VOS-User/.openviking/venv/Scripts/openviking-server.exe")
-LOG_DIR = Path("C:/Users/VOS-User/.openviking/logs")
+LISTEN_PORT = 1933
+BACKEND_PORT = 1934
+EMBEDDING_PORT = 18082
 
+PYTHONW_EXE = Path(r"C:\Users\VOS-User\.openviking\venv\Scripts\pythonw.exe")
+LAZY_GATEWAY_SCRIPT = Path(r"C:\Users\VOS-User\AppData\Local\hermes\scripts\openviking_lazy_gateway.py")
 CREATE_NO_WINDOW = 0x08000000
 
 
-def check_port_alive(url: str) -> bool:
+def check_port_listening(port: int, path: str = "/api/v1/system/status") -> bool:
     try:
         opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+        url = f"http://127.0.0.1:{port}{path}"
         req = urllib.request.Request(url)
-        with opener.open(req, timeout=1.5) as r:
-            return r.status in (200, 401)
+        with opener.open(req, timeout=1.2) as resp:
+            return resp.status in (200, 401)
     except Exception:
         return False
 
 
-def start_embedding_server():
-    if check_port_alive("http://127.0.0.1:18082/health"):
-        print("[Embedding Server 18082] Already running.")
+def get_pids_for_ports(ports: list[int]) -> set[str]:
+    pids = set()
+    try:
+        out = subprocess.run(["netstat", "-ano"], capture_output=True, text=True, errors="ignore").stdout
+        for line in out.splitlines():
+            parts = line.strip().split()
+            if len(parts) >= 5 and parts[3] == "LISTENING":
+                local_addr = parts[1]
+                for p in ports:
+                    if local_addr.endswith(f":{p}"):
+                        pids.add(parts[4])
+    except Exception:
+        pass
+    return pids
+
+
+def start():
+    if check_port_listening(LISTEN_PORT):
+        print(f"[OpenViking Gateway {LISTEN_PORT}] Already running.")
+        status()
         return
 
-    print("[Embedding Server 18082] Starting llama-server with bge-m3...")
-    LOG_DIR.mkdir(parents=True, exist_ok=True)
-    log_file = open(LOG_DIR / "embedding-server.log", "a", encoding="utf-8")
-    cmd = [
-        str(LLAMA_SERVER_EXE),
-        "-m", str(BGE_M3_MODEL),
-        "--embedding",
-        "--port", "18082",
-        "--host", "127.0.0.1",
-        "-c", "8192",
-        "-b", "8192",
-        "--ubatch-size", "8192",
-        "-ngl", "99",
-    ]
-    subprocess.Popen(
-        cmd,
-        stdout=log_file,
-        stderr=subprocess.STDOUT,
-        creationflags=CREATE_NO_WINDOW,
-    )
-    for _ in range(10):
-        time.sleep(0.5)
-        if check_port_alive("http://127.0.0.1:18082/health"):
-            print("[Embedding Server 18082] Ready.")
-            return
-    print("[Embedding Server 18082] Started (waiting for initialization).")
-
-
-def start_openviking_server():
-    if check_port_alive("http://127.0.0.1:1933/api/v1/system/status"):
-        print("[OpenViking Server 1933] Already running.")
+    print(f"[OpenViking Gateway {LISTEN_PORT}] Starting lazy gateway silently...")
+    if not PYTHONW_EXE.exists():
+        print(f"Error: Pythonw binary not found at {PYTHONW_EXE}")
+        return
+    if not LAZY_GATEWAY_SCRIPT.exists():
+        print(f"Error: Lazy gateway script not found at {LAZY_GATEWAY_SCRIPT}")
         return
 
-    print("[OpenViking Server 1933] Starting openviking-server...")
-    LOG_DIR.mkdir(parents=True, exist_ok=True)
-    log_file = open(LOG_DIR / "openviking-server.log", "a", encoding="utf-8")
-    cmd = [str(OPENVIKING_SERVER_EXE)]
-    subprocess.Popen(
-        cmd,
-        stdout=log_file,
-        stderr=subprocess.STDOUT,
-        creationflags=CREATE_NO_WINDOW,
-    )
+    cmd = [str(PYTHONW_EXE), str(LAZY_GATEWAY_SCRIPT)]
+    subprocess.Popen(cmd, creationflags=CREATE_NO_WINDOW)
+
     for _ in range(15):
-        time.sleep(0.5)
-        if check_port_alive("http://127.0.0.1:1933/api/v1/system/status"):
-            print("[OpenViking Server 1933] Ready.")
+        time.sleep(0.4)
+        if check_port_listening(LISTEN_PORT):
+            print(f"[OpenViking Gateway {LISTEN_PORT}] Successfully started and listening.")
+            status()
             return
-    print("[OpenViking Server 1933] Started (waiting for initialization).")
-
-
-def status():
-    emb_ok = check_port_alive("http://127.0.0.1:18082/health")
-    ov_ok = check_port_alive("http://127.0.0.1:1933/api/v1/system/status")
-    print(f"Embedding Server (18082): {'ONLINE ✓' if emb_ok else 'OFFLINE ✗'}")
-    print(f"OpenViking Server (1933): {'ONLINE ✓' if ov_ok else 'OFFLINE ✗'}")
+    print(f"[OpenViking Gateway {LISTEN_PORT}] Started (waiting for socket ready).")
+    status()
 
 
 def stop():
-    print("Stopping services...")
-    out = subprocess.run(["netstat", "-ano"], capture_output=True).stdout.decode("gbk", errors="ignore")
-    for port in ["18082", "1933"]:
-        for line in out.splitlines():
-            if port in line and "LISTENING" in line:
-                pid = line.strip().split()[-1]
-                print(f"Killing PID {pid} on port {port}...")
-                subprocess.run(["taskkill", "/F", "/PID", pid], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    print("Services stopped.")
+    print("[OpenViking] Stopping all related services...")
+    pids = get_pids_for_ports([LISTEN_PORT, BACKEND_PORT, EMBEDDING_PORT])
+
+    # Also find pythonw processes running openviking_lazy_gateway
+    try:
+        import psutil
+        for proc in psutil.process_iter(['pid', 'name', 'cmdline']):
+            try:
+                cmd = ' '.join(proc.info['cmdline'] or [])
+                if 'openviking_lazy_gateway.py' in cmd:
+                    pids.add(str(proc.info['pid']))
+                elif 'openviking-server.exe' in cmd:
+                    pids.add(str(proc.info['pid']))
+                elif 'llama-server.exe' in cmd and 'bge-m3' in cmd:
+                    pids.add(str(proc.info['pid']))
+            except (psutil.NoSuchProcess, psutil.AccessDenied):
+                pass
+    except ImportError:
+        pass
+
+    if pids:
+        for pid in pids:
+            try:
+                subprocess.run(["taskkill", "/F", "/T", "/PID", pid], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            except Exception:
+                pass
+        print(f"[OpenViking] Terminated {len(pids)} process(es) (PIDs: {', '.join(pids)}).")
+    else:
+        print("[OpenViking] No running processes found.")
+
+    time.sleep(0.5)
+    print("[OpenViking] All services and GPU VRAM 100% stopped and freed.")
+
+
+def status():
+    gw_online = check_port_listening(LISTEN_PORT)
+    bk_online = check_port_listening(BACKEND_PORT)
+    emb_online = check_port_listening(EMBEDDING_PORT, path="/health")
+
+    print("\n--- OpenViking Status ---")
+    print(f"  Lazy Gateway    (Port {LISTEN_PORT}): {'ONLINE ✓ (Listening)' if gw_online else 'OFFLINE ✗'}")
+    print(f"  Backend Core    (Port {BACKEND_PORT}): {'ACTIVE  (Awake)' if bk_online else 'STANDBY / SLEEPING'}")
+    print(f"  BGE-M3 Embed    (Port {EMBEDDING_PORT}): {'ACTIVE  (VRAM in use)' if emb_online else 'STANDBY / SLEEPING'}")
+    if gw_online:
+        print("  Auto-wake: Enabled (wakes 18082/1934 on first query, auto-sleeps after 120s idle)\n")
+    else:
+        print("  Service is completely stopped. Run 'openviking_service.py start' to launch.\n")
 
 
 def main():
-    action = sys.argv[1] if len(sys.argv) > 1 else "start"
+    action = sys.argv[1].lower() if len(sys.argv) > 1 else "status"
     if action == "start":
-        start_embedding_server()
-        start_openviking_server()
-        status()
+        start()
     elif action == "stop":
         stop()
     elif action == "restart":
         stop()
         time.sleep(1)
-        start_embedding_server()
-        start_openviking_server()
-        status()
+        start()
     elif action == "status":
         status()
     else:

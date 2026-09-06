@@ -70,7 +70,7 @@ metadata:
   - `OPENVIKING_RECALL_SCORE_THRESHOLD=0.35`
   - `OPENVIKING_RECALL_PREFER_ABSTRACT=true`（优先拉取 L0 一句话摘要，按需用 `viking_read` 钻取 L2 全文）
   - `OPENVIKING_RECALL_RESOURCES=true`
-  - **Serverless 懒加载与按需唤醒**：网关 `openviking_lazy_gateway.py` 监听 1933 端口，提问时秒级按需唤醒 18082 与 1934，**连续 2 分钟无请求自动休眠释放 800MB 显存**，系统级开机静默启动（Startup/OpenVikingGateway.vbs）。
+  - **Serverless 懒加载与按需唤醒**：网关 `openviking_lazy_gateway.py` 监听 1933 端口，提问时秒级按需唤醒 18082 与 1934，**连续 2 分钟无请求自动休眠释放 800MB 显存**；依用户偏好已移除开机自启，由桌面快捷方式或运维脚本按需启停。
 - **后台服务守护与运维**：
   - 查看状态：`python C:/Users/VOS-User/AppData/Local/hermes/scripts/openviking_service.py status`
   - 启停服务：`python C:/Users/VOS-User/AppData/Local/hermes/scripts/openviking_service.py [start|stop|restart]`
