@@ -62,10 +62,10 @@ OpenViking 摄入长 Markdown 文档时输入常超过 2000 tokens。llama-serve
 1. **解除开机自启**：已从 `Startup` 移除 `OpenVikingGateway.vbs`；
 2. **全自动退出清理（方案 A）**：部署 `scripts/agent_guard.py`（开机启动项 `Startup/AgentGuard.vbs`，经 `.openviking\venv\Scripts\pythonw.exe` 驱动，占用 ~18MB 内存，CPU 0%）。静默监控 `Hermes.exe` 与 `ZCode.exe`：
    - 当检测到所有 Agent GUI 均已关闭后，防抖 2.5 秒，自动连根清除 MCP 孙子孤儿进程（`chrome-devtools-mcp`、`desktop-commander`、`context7-mcp`、`serena`）、残留后台 Python 进程，并自动执行 `openviking_service.py stop` 完全释放 GPU 显存与内存；
-3. **桌面快捷辅助**：
-   - `启动 OpenViking.lnk`（点击后台静默开启 1933 懒网关）；
-   - `停止 OpenViking.lnk`（点击一键杀掉网关与模型进程）；
-   - `清理孤儿进程.lnk`（一键手动强制清扫孤儿进程）。
+3. **按需自启闭环（100% 自动化，桌面零快捷方式负担）**：
+   - 部署 PATH shim（`C:\Users\VOS-User\.openviking\shim-bin\openviking-server.bat`）；当 Hermes 需检索记忆时自动静默唤醒懒网关栈（1933 + 1934 + 18082 BGE-M3）；
+   - 闲置 2 分钟网关自动休眠退显存；关闭 Agent 后 `agent_guard` 自动清理全栈与孤儿进程；
+   - 早期过渡用的桌面快捷方式（启动/停止/清理）已全部移除，达成桌面零残留。
 4. **运行环境严格隔离**：必须使用 OpenViking 独立虚拟环境 `C:\Users\VOS-User\.openviking\venv\Scripts\pythonw.exe` 驱动，严禁借用 `hermes-agent\venv`，规避 Windows 文件锁拦截 Hermes 桌面更新。
 - 平时状态：0% GPU、0 MB 显存、0% CPU；
 - 收到提问时：自动在后台 5~6 秒内静默拉起 18082 与 1934，无任何黑框终端弹出；
