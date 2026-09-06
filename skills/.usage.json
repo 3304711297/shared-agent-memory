@@ -498,16 +498,16 @@
     "archived_at": null,
     "created_at": "2026-09-03T06:33:36.402523+00:00",
     "created_by": "agent",
-    "last_patched_at": "2026-09-06T03:10:05.042736+00:00",
-    "last_reused_patch_generation": 35,
-    "last_used_at": "2026-09-06T03:09:47.600768+00:00",
-    "last_viewed_at": "2026-09-06T03:09:47.598767+00:00",
-    "patch_count": 38,
-    "patch_generation": 38,
+    "last_patched_at": "2026-09-06T03:18:30.927560+00:00",
+    "last_reused_patch_generation": 38,
+    "last_used_at": "2026-09-06T03:18:02.309203+00:00",
+    "last_viewed_at": "2026-09-06T03:18:02.307200+00:00",
+    "patch_count": 39,
+    "patch_generation": 39,
     "pinned": false,
     "state": "active",
-    "use_count": 52,
-    "view_count": 52
+    "use_count": 54,
+    "view_count": 54
   },
   "hermes-desktop-theme-authoring": {
     "archived_at": null,
@@ -605,14 +605,14 @@
     "created_by": "installed",
     "last_patched_at": null,
     "last_reused_patch_generation": 0,
-    "last_used_at": "2026-09-06T02:31:40.752697+00:00",
-    "last_viewed_at": "2026-09-06T02:31:40.750189+00:00",
+    "last_used_at": "2026-09-06T03:18:06.463442+00:00",
+    "last_viewed_at": "2026-09-06T03:18:06.461442+00:00",
     "patch_count": 0,
     "patch_generation": 0,
     "pinned": false,
     "state": "active",
-    "use_count": 2,
-    "view_count": 2
+    "use_count": 3,
+    "view_count": 3
   },
   "mcporter": {
     "archived_at": null,

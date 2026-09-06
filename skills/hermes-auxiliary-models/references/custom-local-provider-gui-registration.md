@@ -188,7 +188,15 @@ When using Hermes Desktop's integrated **Local Models** (`本地模型`) feature
 - **Managed Router Architecture & `/v1/embeddings` 501 Trap**:
   - The supervised process (`llama-server.exe`) runs as a multi-model chat router (`--models-autoload`, `--jinja`, `--models-dir`) listening on a loopback port (typically `18434`), recorded in `%LOCALAPPDATA%\hermes\runtimes\llamacpp\server.json` alongside an ephemeral `api_key`.
   - Chat completions (`/v1/chat/completions`) work natively with full thinking/reasoning streaming (`reasoning_content`).
-  - **The Router Embedding 501 Pitfall**: The router instance is started without the `--embedding` flag. Sending requests to `/v1/embeddings` against the managed router returns `HTTP 501: Not Implemented`. To serve vector models like `bge-m3` for RAG/OpenViking, spawn a dedicated background `llama-server.exe` instance with `-m <model.gguf> --embedding --port <port>` or use `fastembed` in Python.
+  - **The Router Embedding 501 Pitfall & Context Batch Tuning**:
+  - The router instance is started without the `--embedding` flag. Sending requests to `/v1/embeddings` against the managed router returns `HTTP 501: Not Implemented`. To serve vector models like `bge-m3` for RAG/OpenViking, spawn a dedicated background `llama-server.exe` instance with `-m <model.gguf> --embedding --port <port>`.
+  - **The Context/Physical Batch Size Trap**: By default, `llama-server.exe` in embedding mode sets `-c 512 -b 512`. Passing text or markdown chunks >512 tokens fails with `HTTP 500: input (X tokens) is too large to process. increase the physical batch size`. Always launch embedding instances with explicit extended batch and context bounds:
+    ```cmd
+    llama-server.exe -m <model.gguf> --embedding --port 18082 --host 127.0.0.1 -c 8192 -b 8192 --ubatch-size 8192 -ngl 99
+    ```
+- **Background Daemon Session Decoupling on Windows**:
+  - Spawning background daemons (`openviking-server`, `llama-server`) via `terminal(background=true)` binds the process to the specific Hermes chat session (`session_id`). This leaves visible terminal tabs in the desktop GUI and risks process termination during session deletion/cleanup.
+  - **The Decoupled Supervisor Invariant**: Long-lived background servers must be spawned as detached system-level background processes via an independent supervisor script using `creationflags=CREATE_NO_WINDOW` (0x08000000). Use `close_terminal(process_id)` to drop the UI tab while keeping the underlying process active, ensuring services survive session deletion, client restarts, and window switching.
 - **Laptop GPU VRAM Sizing Invariant (8GB Class)**:
   - Dense models >9B (e.g. 14B, 27B, 35B) overflow 8GB VRAM and spill into system RAM across PCIe, throttling throughput down to ~4–8 tokens/s with high thermal load.
   - Sub-9B Q4/Q5 models (e.g. `Qwen3.5-9B-Q4_K_M` at ~5.3GB, `DeepSeek-R1-Distill-Qwen-7B-Q4_K_M` at ~4.4GB) fit 100% in 8GB VRAM with ~2.5GB reserved for KV cache, yielding full CUDA acceleration (~20–60 tokens/s).
