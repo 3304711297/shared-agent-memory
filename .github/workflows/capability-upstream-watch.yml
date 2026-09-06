@@ -51,7 +51,7 @@ jobs:
           fi
 
       - name: Auto-close when inventory caught up
-        if: steps.check.outputs.has_updates == 'false' && steps.check.outputs.skipped_count == '0'
+        if: steps.check.outputs.has_updates == 'false'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
