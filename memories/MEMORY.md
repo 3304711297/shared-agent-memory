@@ -19,3 +19,5 @@ Hermes 桌面 token 双口径：会话列表数字=该会话累计消耗（input
 Hermes 检索与抽取全量接管为 Exa 独享（EXA_API_KEY 已入库 .env，web.backend/search_backend/extract_backend=exa，避开公共免密限流）；EasyCLIProxyAPI(18080) 的 gemini-web-search 仅为 gemini-3.1-flash-lite 别名无实时搜索（无 Grounding 工具），不可作搜索源；已卸载冗余社区技能 duckduckgo-search 与 searxng-search。
 §
 本机硬件：RTX 4070 Laptop (8GB 显存) + 24GB 内存；C 盘空间紧张 (~50GB)，Hermes 本地模型与运行时已建立 NTFS Junction 映射至 D 盘（models -> D:\HermesModels，runtimes -> D:\HermesRuntimes）；OpenViking 独立虚拟环境位于 C:\Users\VOS-User\.openviking\venv。
+§
+OpenViking 智能记忆检索已全面接入闭环（09-06）：物理真源 shared-agent-memory (main) 保持唯一真源；D:\HermesModels 经 Junction 挂载本地 BGE-M3 (CUDA 18082，1024维向量) + 18080 VLM 提炼，通过 1933 端口 OpenViking 建立 viking://resources/shared-memory 虚拟文件系统；ZCode Git Hook (post-commit/merge) + HEAD SHA 探活双驱动防漂移；Hermes memory provider 已激活并配置保守召回 (limit=3, threshold=0.35, prefer_abstract=true, resources=true)；守护服务见 scripts/openviking_service.py。
