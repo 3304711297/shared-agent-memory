@@ -1,12 +1,12 @@
 {
   "status": "ok",
-  "account": "jimygod114514@gmail.com",
-  "activeAccount": "jimygod114514@gmail.com",
-  "plan": "Google AI",
-  "quota5h": 59.3,
-  "reset5h": "2026-09-06T18:41:07Z",
-  "quotaWeekly": 0.1,
-  "resetWeekly": "2026-09-11T01:03:50Z",
+  "account": "2964251404@qq.com",
+  "activeAccount": "2964251404@qq.com",
+  "plan": "Google AI Pro",
+  "quota5h": 93.4,
+  "reset5h": "2026-09-06T17:55:45Z",
+  "quotaWeekly": 98.9,
+  "resetWeekly": "2026-09-13T12:55:45Z",
   "claudeQuota5h": 100,
   "claudeQuotaWeekly": 100,
   "accounts": [
@@ -15,32 +15,32 @@
       "email": "2964251404@qq.com",
       "plan": "Google AI Pro",
       "priority": 10,
-      "quota5h": 96.1,
+      "quota5h": 93.4,
       "reset5h": "2026-09-06T17:55:45Z",
-      "quotaWeekly": 99.3,
+      "quotaWeekly": 98.9,
       "resetWeekly": "2026-09-13T12:55:45Z",
       "claudeQuota5h": 100,
       "claudeQuotaWeekly": 100,
-      "isActive": false
+      "isActive": true
     },
     {
       "account": "jimygod114514@gmail.com",
       "email": "jimygod114514@gmail.com",
       "plan": "Google AI",
       "priority": 10,
-      "quota5h": 59.3,
+      "quota5h": 58.8,
       "reset5h": "2026-09-06T18:41:07Z",
-      "quotaWeekly": 0.1,
+      "quotaWeekly": 0,
       "resetWeekly": "2026-09-11T01:03:50Z",
       "claudeQuota5h": 100,
       "claudeQuotaWeekly": 100,
-      "isActive": true
+      "isActive": false
     }
   ],
   "accountsCount": 2,
   "source": "Google 官方直连 (Hermes 内置)",
-  "updatedAt": "2026-09-06T15:23:07Z",
-  "updatedAtLocal": "23:23:07",
+  "updatedAt": "2026-09-06T15:25:27Z",
+  "updatedAtLocal": "23:25:27",
   "workbuddy": {
     "id": "workbuddy",
     "name": "WorkBuddy (codebuddy2openai)",
@@ -84,20 +84,20 @@
   "providers": [
     {
       "id": "antigravity_2964251404@qq.com",
-      "name": "Google AI",
+      "name": "Google AI (当前活跃)",
       "plan": "Google AI Pro",
       "account": "2964251404@qq.com",
-      "status": "standby",
+      "status": "active",
       "priority": 10,
       "windows": [
         {
           "label": "Gemini 5h 滚动额度",
-          "remaining": 96.1,
+          "remaining": 93.4,
           "reset": "2026-09-06T17:55:45Z"
         },
         {
           "label": "Gemini 每周总配额",
-          "remaining": 99.3,
+          "remaining": 98.9,
           "reset": "2026-09-13T12:55:45Z"
         },
         {
@@ -109,20 +109,20 @@
     },
     {
       "id": "antigravity_jimygod114514@gmail.com",
-      "name": "Google AI (当前活跃)",
+      "name": "Google AI",
       "plan": "Google AI",
       "account": "jimygod114514@gmail.com",
-      "status": "active",
+      "status": "standby",
       "priority": 10,
       "windows": [
         {
           "label": "Gemini 5h 滚动额度",
-          "remaining": 59.3,
+          "remaining": 58.8,
           "reset": "2026-09-06T18:41:07Z"
         },
         {
           "label": "Gemini 每周总配额",
-          "remaining": 0.1,
+          "remaining": 0,
           "reset": "2026-09-11T01:03:50Z"
         },
         {
