@@ -55,7 +55,12 @@ metadata:
 - `c9da638` 开发机硬编码路径全量环境变量化：集中工具区 env_nonempty/local_appdata/user_home + `C2O_PYTHON`/`C2O_CONVERTER`/`HERMES_HOME`，原 VOS-User 路径仅剩最终兜底（本机行为不变）；**Agent 路径检测已核实通用**：Hermes 候选=官方 Windows 默认 %LOCALAPPDATA%\hermes + HERMES_HOME + ~/.hermes（官方文档三 者 皆 认），ZCode=~/.zcode/cli（官方约定），他人机器可正常检测；
 - `b23c2d5` /health 收窄为 {status, authenticated} 并新增 LocalHostOnlyMiddleware（Host 头校验防 DNS rebinding，[::1]:port 方括号解析已处理）；前端昵称改走 accounts_list 并移除硬编码"晚街"；
 - `d79fd4f` 补基础 CI（windows-latest：npm ci+vite build+cargo check --locked+rust-cache，timeout 30min，首跑 4m26s 绿）+ dependabot.yml（npm+cargo）；
-- 已知存量风险（未修，设计内）：accounts.json 明文 token（与桌面端同级）、converter --api-key 默认空时零鉴权（GUI 不传 key）、proxy_stop 按命令行匹配可能误杀其他 converter.py 进程、脱敏功能=绕过上游合规词检测（合规风险用户自担）。
+- 已知存量风险与技术债：
+  - accounts.json 明文 token（与桌面端同级）；
+  - converter --api-key 默认空时零鉴权（GUI 不传 key）；
+  - proxy_stop 按命令行匹配可能误杀其他 converter.py 进程；
+  - 脱敏功能=绕过上游合规词检测（合规风险用户自担）；
+  - **`/v1/models` 动态拉取可观测性不足（技术债）**：`_fetch_remote_models()` 中取凭据、读文件与请求云端模型失败时均使用 `except Exception: pass` 吞没异常，虽然保证了对前端的优雅降级（不挂断、兜底返回基础模型），但在 `debug` 日志中缺乏失败原因输出，导致上游接口协议变更、网络超时或 Token 过期难以直接排查。后续重构需补齐 `_log(..., level="debug")` 细粒度观测。
 
 **2026-09-05 ZCode 一键接入根因确认（实测）**：c2o 写 `~/.zcode/cli/config.json` 与 `v2/config.json` 的 provider.workbuddy 结构正确（与生效过的 cpa-gui provider 同构），但 **ZCode Desktop 的"模型设置"自定义供应商列表存在其内部压缩 leveldb（%APPDATA%/ZCode/session，UTF-16LE+snappy，无法程序化读写），只认 UI 添加，直接写 JSON 它不读**——写入后状态显示"已接入配置"但模型永不出现（c2o 的状态判定只是"文件里有 key"，属假阳性）。**已验证的可用路径**：Desktop 模型设置 → 添加供应商 → Chat Completions 格式 + baseURL http://127.0.0.1:8787/v1 + key `local` + 手动加模型 → 连接成功，聊天模型选择器即可选（用户已跑通）。**c2o 待改→已完成（`18c3e00`，同日）**：configure_zcode 改引导式（不再写文件，返回 JSON 引导信息；前端复制到剪贴板+展开步骤文本框+按钮改「复制接入配置」）；agent_detect 加 loopback_port_open（TcpStream 800ms 探测）真实可达性探测，徽章改报「服务在线·可接入/服务离线」，假阳性消除；remove_zcode 保留文件清理并提示 Desktop 内条目需手动删。用户 rebuild 后需 developerPrivate 无关——Tauri 应用需重新构建安装包或 cargo tauri dev 生效。ECP 官方文档亦无 ZCode 接入页（claude-code/codex/droid/grok-build/opencode/pi 有），此坑业界通用。
 
