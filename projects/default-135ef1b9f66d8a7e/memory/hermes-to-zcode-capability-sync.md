@@ -11,6 +11,7 @@ metadata:
 
 **Skills（复制 87 个到 `~/.zcode/skills/`，扁平化，零重名冲突）**：creative 22、research 12、productivity 11、software-development 10、autonomous-ai-agents 5、devops 5、mlops 5、security 4、media 3、web-development 3、email 2、mcp 2（fastmcp/mcporter）、note-taking 1（obsidian）、social-media 1（xurl）、web 1（blocked-page-recovery）。新 skill 下次 ZCode 会话生效。
 - **2026-09-06 增量迁入**：上游 `NousResearch/hermes-agent` skills 引入 `reddit-reading` 与 `rss-feeds`（HEAD@`ee5b5ec2`），同步优化 `competitor-news-monitor` 与 `grounded-citations`；已完整同步至 `~/.zcode/skills/`，ZCode 技能副本增至 89 个。
+- **2026-09-06 闲置退役**：双端卸载清理 `antigravity-cli`（本地未安装 `agy` 独立 CLI 二进制，编程工作流已由底层工具链及子代理闭环，保留属冗余空置）。Hermes 端经 `hermes skills uninstall` 移除，ZCode 端同步删除 `~/.zcode/skills/antigravity-cli` 目录，ZCode 迁入技能副本收敛至 88 个。
 
 **跳过-重复**：zcode-custom 6 项（与 ZCode 现有逐字节一致）；superpowers 14 项（ZCode 插件同为 obra/superpowers v6.3.0，含相同 14 skills）；productivity 的 docx/pdf/powerpoint/xlsx（document-skills 插件已有）；software-development/github（github 插件已有）；autonomous-ai-agents/computer-use（computer-use 插件已有，且重名会遮蔽插件 skill）。
 
