@@ -41,6 +41,13 @@ NousResearch hermes-agent v0.21.0 于 2026-09-02 23 时重装完成并验证（d
   - 现象：更新过程中弹窗警告：`关闭其他进程以更新 Hermes · Hermes 无法安全地自动关闭这些进程。请关闭拥有这些进程的应用、终端或服务，然后重试更新`，技术详情指向 `pythonw.exe (PID 4032) ... fetch_quota.py --serve`。
   - 根因：更新安装器需要覆盖更新 `hermes-agent\venv` 下的依赖与执行模块，但后台常驻的配额服务或辅助脚本（如 `fetch_quota.py`）仍在运行并独占句柄，触发 Windows 进程文件锁，导致更新器出于安全策略暂停并弹出拦截。
   - 处理：任务管理器或命令行 `taskkill /F /PID <pid>` 结束占用进程，再执行更新即可；当手动 `hermes update` 已经执行完成并显示最新（`f1ccf436a2`）后，该弹窗仅为历史残留阻断提示，直接点击「暂不」或「×」关闭即可。
+- **Hermes 桌面更新拦截「关闭其他进程以更新 Hermes」根治与常驻进程隔离铁律（2026-09-06 彻底闭环）**：
+  - 现象：点击桌面更新无反应，或弹窗提示「关闭其他进程以更新 Hermes」，详情显示 `pythonw.exe (PID 4336) ... openviking_lazy_gateway.py` 且界面仅有「暂不」按钮（点击即取消）。
+  - 根因：更新前置探针 `python -m hermes_cli._scan_venv_blockers` 扫描到开机启动项 `OpenVikingGateway.vbs` 与历史脚本借用了 Hermes 自身的解释器（`hermes-agent\venv\Scripts\pythonw.exe`），Windows 底层文件锁导致更新器判定 `blocked: true`。
+  - 根治措施：
+    1. 进程环境彻底隔离：将开机自启脚本 `Startup\OpenVikingGateway.vbs` 和 `quota_service.cmd` 内的解释器全部改为独立虚拟环境 `C:\Users\VOS-User\.openviking\venv\Scripts\pythonw.exe`，终止旧进程并重启网关；
+    2. 探针验证：`python -m hermes_cli._scan_venv_blockers` 返回 `{"ok": true, "blocked": false, "processes": []}`，阻断彻底归零；
+    3. 【架构铁律】：Windows 下任何开机自启、常驻后台守护或辅助微服务，严禁借用 `hermes-agent\venv` 解释器，必须严格使用独立 Venv，确保 Hermes 自身 Venv 零占用。
 
 - **Hermes 端无 ZCode 式「配置静默丢弃」风险（2026-09-05 排查）**：ZCode 曾因 cli/config.json 的 provider.npm 字段触发 schema 拒绝、整份配置被静默丢弃（见 [[capability-upstream-watch]]）；对照排查 Hermes 端——config.yaml 无任何 npm 类字段，`hermes doctor` 全项通过（仅浏览器工具 2 个既有 npm 依赖漏洞与若干可选系统依赖警告，与配置校验无关）。结论：该雷区为 ZCode CLI 专属，Hermes 端无需处理。
 
