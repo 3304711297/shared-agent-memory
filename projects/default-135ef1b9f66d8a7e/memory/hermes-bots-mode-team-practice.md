@@ -1,33 +1,48 @@
 ---
 name: hermes-bots-mode-team-practice
-description: Hermes Desktop Bot Mode 实践落地——channel-ops、devops、researcher 三专业智能体构建、专属 SOUL.md 人设与共享记忆库无缝链接
+description: Hermes Desktop Bot Mode 核心机制拆解、实践验证、出处归档与用户偏好（仅用普通会话模式）沉淀
 metadata:
   type: project
 ---
 
-# Hermes Desktop Bot Mode 团队实践落地（2026-09-06）
+# Hermes Desktop Bot Mode 深度解析、实践归档与出处（2026-09-06）
 
-## 一、 实践背景与目标
-- 用户在 Hermes Desktop 启用官方 `Hermes Bots` 插件（Bot Mode）；
-- 将通用单一环境按核心业务拆分为三个专有 Bot（Profile），降低上下文杂质与提示词稀释，实现多 Agent 模块化协同。
+## 一、 来源与权威出处
+- **原作者与推文**：YanXbt (`@IBuzovskyi`) 在 X 发布的深度专栏《HERMES AGENT BOT MODE: Full Guide to Building Your AI Team》
+- **推文链接**：`https://x.com/IBuzovskyi/status/2089701386887868653`
+- **X Article ID**：`2089647871666671616`
+- **官方源码与文档位置**：
+  - Hermes 桌面文档：`https://hermes-agent.nousresearch.com/docs/desktop`
+  - 内置插件源码路径：`NousResearch/hermes-agent` 仓库中的 `apps/desktop/src/plugins/hermes-bots/`
+  - 底层 CLI 命令集：`hermes profile [list|create|delete|describe]`
 
-## 二、 三大专业 Bot 架构清单
+## 二、 Bot Mode 核心机制与三大协作链路
+1. **本质即 Profile**：
+   - 每个 Bot 本质对应宿主环境中的独立 Profile（位于 `~/.hermes/profiles/[name]/`）；
+   - 具备完全隔离的 `config.yaml`、`.env`、`SOUL.md`、`skills`、`memories` 与会话历史。
+   - Desktop 端通过内置插件将其渲染为左侧团队花名册（Roster），免除命令行切换摩擦。
+2. **多智能体协作机制**：
+   - **`@Mentions`（同窗口实时交接）**：在与 Bot A 的对话中直接 `@bot_b 做某事`，Bot A 自动派发子任务并在返回后向用户汇报；
+   - **`Agent Inbox`（异步收发信箱）**：每个 Bot 具备独立的入站邮箱，以 `[Message from agent 'xxx']` 格式投递，目标 Bot 在下一次任务开始时统一批处理；
+   - **`Group Chat`（团队群聊）**：创建 Team 房间，支持 `@botname` 单独触发，或输入 `everyone` 广播给团队内所有 Agent。
+3. **高阶设计模式**：
+   - **Bot HR 模式**：设置专职 HR Bot，由它分析项目需求 Spec，自动配置合适模型并编写队员的 `SOUL.md`；
+   - **Interpreter 模式**：封装 SSH/远程 VPS 的代理 Bot；
+   - **独立 Cronjobs 流**：各 Bot 绑定专属定时流水线。
 
-| Bot 标识 (Profile) | 核心定位与职责 | 关键纪律与约束 | 协同角色 (Handoffs) |
-| :--- | :--- | :--- | :--- |
-| **`channel-ops`** | Telegram 频道 `@emoegg`（蛋总的圈）运维 | 严格走 `127.0.0.1:3067` 代理与 `tg_channel.py` 脚本；纯暗黑等宽加粗排版风格；保护密钥凭据 | 接收 researcher 调研结论与 devops 发版简报，转为频道速递 |
-| **`devops`** | 五大开源项目看门与 GitHub Actions CI 闭环 | **CI 全绿方能收尾（铁律）**；TDD 测试驱动实证；常规提交中文规范；tag-only 自动发版 | 项目发版后交接 channel-ops；架构选型向 researcher 咨询 |
-| **`researcher`** | 技术前沿调研与严谨事实核查 (Fact-checking) | **零幻觉与联网真源（铁律）**；三级核查（Confirmed / Unverified / Contradicted）；严谨出处引用 | 向 channel-ops 输出干货速报；向 devops 提供依赖安全性与兼容性评估 |
+## 三、 本地实践验证与安全回滚（2026-09-06 验收）
+1. **实践验证**：
+   - 创建了 3 个对应核心场景的专职 Bot（`channel-ops`、`devops`、`researcher`）；
+   - 各自注入针对性的 `SOUL.md`（明确排版美学、CI 全绿铁律、事实核查要求与协作契约）；
+   - 解决多 Profile 记忆割裂问题：通过在各 Profile 的 `memories/topics` 建立 NTFS Junction，无缝打通全局唯一真源 `shared-agent-memory`。
+2. **清理与回滚**：
+   - 验证流程完全跑通后，安全解除 Junction 并通过 `hermes profile delete -y` 彻底清理上述 3 个 Profile；
+   - 本地 Profile 列表已恢复为纯净的单一 `◆default`。
 
-## 三、 底层工程实现与记忆共享保证
-1. **Profile 自动化创建**：
-   - 经 `hermes profile create --clone-from default <name> --description "..."` 快速构建；
-   - 继承默认环境变量、API 密钥与网关配置（`gemini-3.8-flash` / 18080 与 8787 反代）。
-2. **共享记忆物理真源贯通**：
-   - 针对各 Profile 隔离目录（`AppData\Local\hermes\profiles\<name>\memories\topics`），全部建立 NTFS Junction 软链接，直通 `C:\Users\VOS-User\.zcode\cli\memories\projects\default-135ef1b9f66d8a7e\memory\`；
-   - 确保三个 Bot 与 default 共享同一份知识库与项目记录，同时各自保持独立的会话上下文。
-3. **专属 SOUL.md 落地**：
-   - 编写结构化人设与交付契约（Identity, Mandates & Rules, Cross-Bot Collaboration & Handoffs, Shared Memory Protocol）。
+## 四、 用户习惯与偏好确立（铁律）
+- **仅使用普通会话模式**：用户在日常使用中**明确偏好单一普通会话模式（default profile 一体化流转）**，无需在本地常驻维护多 Profile / 多 Bot；
+- 避免多 Profile 带来的环境分散、配置漂移与维护负担；
+- 本文档作为技术储备留档，后续如需临时创建专用多智能体团队或研究相关协作协议时，按本文档规范操作即可。
 
-**Why:** 将用户的三大核心使用场景具象化为专职智能体，实现提示词隔离、精简工具集与结构化协同。
-**How to apply:** 在 Hermes Desktop 侧边栏的 Bots 面板中直接选择对应 Bot 开展专项工作，或通过 `@channel-ops`、`@devops`、`@researcher` 实现跨智能体协作。
+**Why:** 用户验证了 Bot Mode 的功能可行性与记忆打通路径，但确认自身更偏好集中一体化的单一会话，需将要点、出处与偏好统一入库归档。
+**How to apply:** 保持默认普通会话模式运作，不主动创建分散的 profiles；后续若有大型复杂团队协作需求，查阅本文档的机制设计。
