@@ -258,5 +258,15 @@ When integrating OpenViking (`volcengine/OpenViking`) as an external memory prov
     2. Terminate the supervised router process PID recorded in `%LOCALAPPDATA%\\hermes\\runtimes\\llamacpp\\server.json` and delete the state file.
     3. Verify via `tasklist` / `psutil` that physical RAM drops immediately (e.g. 42% -> 30.9%, freeing ~3GB RAM), ensuring zero memory leaks remain.
 
+## 19. Hermes Desktop Toolsets Enablement Invariants & Config Sync Protocol
+When modifying or reviewing Hermes settings in Desktop GUI or CLI:
+- **Desktop Toolsets State Auditing**: Hermes Desktop GUI (`工具集 / Toolsets`) directly manages `platform_toolsets.cli` in `config.yaml`. Whenever a toolset is enabled or disabled (e.g. explicitly disabling `Browser Automation` to prune `browser_*` tools after migrating web extraction to Exa), never treat it as an isolated toggle.
+- **Mandatory Memory & Matrix Baseline Sync**:
+  1. Audit `platform_toolsets.cli` against the full toolset catalog to establish the exact active enablement matrix (e.g. 11 enabled toolsets vs. 5 disabled toolsets).
+  2. Update the shared memory topic `hermes-config-baseline-and-sync-protocol.md` with the latest toolsets enablement table and document the rationale for any disabled categories.
+  3. Re-export the sanitized full configuration snapshot `hermes-config.yaml` with private tokens/keys strictly masked (`<REDACTED_LOCAL_KEY>`).
+  4. Query `git -C <hermes-agent-path> log -1` to capture the current upstream Git Commit SHA and bind the baseline to that specific software build version.
+  5. Commit and push to `shared-agent-memory` `main` branch before concluding the turn, actively monitoring remote GitHub Actions CI until all jobs pass green.
+
 
 
