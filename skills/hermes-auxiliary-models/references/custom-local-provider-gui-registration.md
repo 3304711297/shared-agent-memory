@@ -164,6 +164,39 @@ When determining whether a skill on disk was shipped with Hermes or installed la
   - `"created_by": "installed"` = installed via `hermes skills install` or marketplace.
   - Inspect `"created_at"` and `"author"` in frontmatter (e.g. community authors like `gamedevCloudy`) to confirm install history.
 - **Windows Platform Gating**: If a skill exists in `skills/` on disk but is absent from `hermes skills list` or `<available_skills>`, check its `SKILL.md` frontmatter `platforms:`. If it specifies only `[linux, macos]` without `windows`, Hermes automatically and silently excludes it on Windows hosts without raising errors.
+- **Skill Uninstallation & Cleanup Invariants**:
+  - `hermes skills uninstall` accepts only **one** positional argument `name`. Passing multiple names raises `unrecognized arguments`. To remove multiple skills, chain commands: `hermes skills uninstall -y <name1> && hermes skills uninstall -y <name2>`.
+  - Always pass `-y` (or `--yes`) in non-interactive/scripted contexts; omitting it triggers an interactive `[y/N]` confirmation that auto-cancels on EOF/closed stdin.
+
+## 17. Hermes Desktop Managed Local Models & Runtime Storage Relocation on Windows (C Drive Space Protection)
+When using Hermes Desktop's integrated **Local Models** (`本地模型`) feature (powered by managed `llama.cpp` runtime):
+- **Hardcoded Path Invariant**: In `hermes_cli/local_runtime/bootstrap.py`, models are staged at `bootstrap.models_dir()` (`%LOCALAPPDATA%\hermes\models`), and engine binaries land at `runtimes_root()` (`%LOCALAPPDATA%\hermes\runtimes\llamacpp`). The download manager streams `.gguf` and `.part` files directly into `models_dir()` without utilizing Hugging Face Hub cache.
+- **The C: Drive Exhaustion Pitfall**: Local GGUF models range from 16 GB (Qwen 27B) to 150+ GB (DeepSeek V4). On Windows systems where the C: drive partition is limited (e.g. ~150 GB total, 40-50 GB free), downloading even a single medium agent model can immediately exhaust system disk space, triggering OS instability or failed downloads.
+- **The Non-Invasive NTFS Junction Solution**:
+  Because `models_dir()` lacks a config-level override knob, redirect the directories to a secondary drive (e.g. `D:\`) using standard NTFS Directory Junctions (`mklink /J`, which requires **no** administrator privileges):
+  ```cmd
+  cmd.exe /c "if not exist D:\HermesModels mkdir D:\HermesModels && mklink /J %LOCALAPPDATA%\hermes\models D:\HermesModels"
+  cmd.exe /c "if not exist D:\HermesRuntimes mkdir D:\HermesRuntimes && mklink /J %LOCALAPPDATA%\hermes\runtimes D:\HermesRuntimes"
+  ```
+  - Windows handles transparent kernel-level I/O redirection: all `.part` downloads, completed `.gguf` weights, companion `assets/` (e.g. `mmproj` vision projectors), and `llama-server` engine binaries physically reside on `D:\`, consuming **0 bytes** on C:.
+  - Fully transparent to the Hermes Desktop GUI, progress bars, and supervised `llama-server` process; survives Hermes application updates and profile resets.
+
+## 18. OpenViking Context Database & Local Model Dual-Drive Memory Architecture
+When integrating OpenViking (`volcengine/OpenViking`) as an external memory provider for Hermes Agent (`hermes memory setup openviking`):
+- **Dual-Drive Synchronization Invariant (Git SSOT)**: Git `main` is the Single Source of Truth (SSOT); OpenViking's vector index and L0/L1 summaries are strictly rebuildable derived caches. To prevent index drift across clones, rebases, or direct file edits, employ dual-drive synchronization:
+  1. **Instant Trigger**: `.git/hooks/post-commit` and `post-merge` trigger incremental `ov add-resource` or reindex calls.
+  2. **Reconciliation Fallback**: Hermes startup and turn probes compare the local/remote HEAD commit SHA against the last indexed SHA and reindex upon drift.
+  3. **Strict One-Way Flow**: Content flows exclusively `Markdown/Git -> OpenViking`. OpenViking data must NEVER write back directly to shared Markdown without explicit human/agent review.
+- **Namespace Isolation**: Map shared repository knowledge exclusively to `viking://resources/shared-memory`. Keep user-private profile facts, preferences, and agent states strictly isolated within `viking://user/...` namespaces.
+- **Zero-Cost Fully Local RAG Pipeline**:
+  - **Embedding**: Use Hermes Desktop's managed `llama.cpp` runtime with GPU CUDA acceleration (e.g. RTX 4070 Laptop) to serve lightweight GGUF embeddings (e.g. `bge-small-zh` or `bge-m3`) via `/v1/embeddings`, eliminating cloud API dependency and preventing privacy leaks.
+  - **L0/L1 Extraction**: Route OpenViking's VLM/LLM configuration to existing local OpenAI gateways (e.g. WorkBuddy `127.0.0.1:8787/v1` with `glm-5.3-flash`), achieving 100% free local execution.
+- **Prompt Contamination Defense**: Hermes prefetch automatically injects recalled context into upcoming user turns. To prevent answer drift in reasoning models (Gemini 3.8 Flash), enforce conservative settings:
+  ```env
+  OPENVIKING_RECALL_LIMIT=3
+  OPENVIKING_RECALL_SCORE_THRESHOLD=0.35
+  OPENVIKING_RECALL_PREFER_ABSTRACT=true
+  ```
 
 
 
