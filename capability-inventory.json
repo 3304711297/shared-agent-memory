@@ -150,7 +150,7 @@
         }
       ],
       "installed": [
-        { "where": "hermes skills/（50 项）+ ZCode ~/.zcode/skills（89 项副本）", "version": "HEAD@ee5b5ec2", "sha": "ee5b5ec21e576ccf9b941f9ff71330418415a5cb" }
+        { "where": "hermes skills/（49 项）+ ZCode ~/.zcode/skills（88 项副本）", "version": "HEAD@ee5b5ec2", "sha": "ee5b5ec21e576ccf9b941f9ff71330418415a5cb" }
       ]
     }
   ],
