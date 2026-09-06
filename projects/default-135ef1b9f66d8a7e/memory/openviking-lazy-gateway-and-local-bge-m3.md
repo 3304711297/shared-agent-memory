@@ -71,6 +71,12 @@ OpenViking 摄入长 Markdown 文档时输入常超过 2000 tokens。llama-serve
 - `OPENVIKING_RECALL_RESOURCES=true`
 - `OPENVIKING_RECALL_TIMEOUT_SECONDS=15.0`
 
+### 6. Hermes 客户端「本地运行时」常驻内存陷阱与关闭规范
+Hermes 桌面端「提供方 → 本地模型」下的「已安装 llama.cpp 运行时」开关（对应 `local_runtime.enabled`）属于**全量加载本地聊天大模型（如 Qwen/DeepSeek）**，一旦开启会常驻霸占 **2.9 GB ~ 5 GB 物理内存与显存**。
+- **定位分工原则**：日常主力对话由云端旗舰（Gemini 3.8 Flash 等）承担，零本地内存负担；该开关必须显式保持关闭（`local_runtime.enabled: false`）；
+- **解耦独立**：向量嵌入（BGE-M3）完全交由上述 2 分钟 Serverless 懒加载网关托管，绝不通过常驻客户端大模型吃内存。
+
+
 ## 三、双驱动防漂移机制
 - **即时驱动**：在 `C:\Users\VOS-User\.zcode\cli\memories\.git\hooks\post-commit` 与 `post-merge` 挂载自动同步脚本 `scripts/sync_shared_memory_openviking.py`；
 - **探活对比**：记录 `C:\Users\VOS-User\.openviking\last_synced_commit.txt`，对比 HEAD SHA，重复提交秒级跳过，新提交触发增量重扫。
