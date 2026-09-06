@@ -84,5 +84,13 @@ metadata:
 - **日志分级与自动脱敏**：新增 `--log-level {info,debug,trace}`（默认 info 仅记录请求耗时与摘要，不落盘 prompt/response 正文）；`_sanitize_log_text` 对 Token/Key/Bearer 字段自动做掩码脱敏。
 - **验证通过**：新增 5 项单测（共 38 项 pytest 100% pass），cargo check/test 与前端构建全绿，GitHub Actions Run `34025146502` 绿灯。
 
+**2026-09-06 批次二后巡检收敛与全仓闭环（P1.5 隐私剥离、回环 Host 修正、真源明确与动态模型，提交 74be1cf）**：
+- **P1.5 请求日志隐私闭环**：`last_user` 摘要从默认 `info` 级别完全剥离，降为独立的 `debug` 日志，默认日志仅保留模型/流式/消息数等无敏元数据，兑现「默认日志不落盘 Prompt」承诺；
+- **P2 回环 Host 判定统一**：`LocalHostOnlyMiddleware` 将硬编码白名单修正为 `_is_loopback_host(_extract_hostname(host_header))`，彻底放行 `127.0.0.2`、`127.0.1.1` 等合法回环 IP 访问并补充回归单测；
+- **P2 凭据真源架构明确**：确立 `accounts.json` 为 Single Source of Truth，`.info` 仅作为兼容镜像，`_save_tokens()` 捕获并明确记录 accounts 写入异常日志；
+- **P2 `/v1/models` 动态合并**：支持动态拉取云端模型列表并与本地 `DEFAULT_MODELS` 及自定义配置智能去重合并；
+- **P2 文档环境基线升级**：`README.md` 环境要求更新为 `Node.js 24+ 与 npm`；
+- **CI 与全量测试**：pytest 44 项全量通过（新增 6 项测试），CI Run `34026572223` 全绿。同批闭环 openrouter/huggingface/steamdb 词库工作流测试门禁及 shared-agent-memory 供应链 SHA-Pin。
+
 **Why:** 用户要求模型列表全量覆盖官方模型库，并补全 WorkBuddy 核心的倍率显示、上下文限制与思考强度调节能力。
 **How to apply:** 维护 `C:\Users\VOS-User\Desktop\codebuddy2openai`，后续所有跨端 Agent 配置及客户端演进均以此架构为基准。
