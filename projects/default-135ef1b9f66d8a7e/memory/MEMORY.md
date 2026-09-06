@@ -50,3 +50,4 @@
 - [Hermes Ecosystem Evaluation and YSK Sync](hermes-ecosystem-evaluation-and-ysk-sync.md) — 社区 Hermes 资源评估（1/2/4/6 安装价值辨析）与 3/5（高阶指令速查+官方生态进阶）整理落入 youshouldknow 项目全流程闭环（commit abcc8f8，CI 全绿部署）
 - [Telegram Channel Emoegg Ops](telegram-channel-emoegg-ops.md) — 用户个人 Telegram 频道 @emoegg（蛋总的圈）专属 Bot (@HermesAgentByjieBot) 管理体系、主号风控背景与 14 款纯暗黑精选主题落地
 - [Hermes Studio Evaluation and Desktop Theming](hermes-studio-evaluation-and-desktop-theming.md) — 第三方客户端 hermes-studio 深度评估（插件SDK缺失/数据库裂脑/双重代理）与官方桌面端 ZCode Dark 沉浸式 IDE 主题 1:1 复刻落地
+- [Hermes Search Provider Exa and Cleanup](hermes-search-provider-exa-and-cleanup.md) — Hermes 检索与抽取全量锁定为 Exa 独享（EXA_API_KEY 固化于 .env）、解构 EasyCLIProxyAPI 网关 gemini-web-search 伪联网本质、清理 duckduckgo 与 searxng 冗余技能
