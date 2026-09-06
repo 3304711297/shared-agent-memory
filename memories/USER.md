@@ -14,7 +14,7 @@ TG 频道 @emoegg（蛋总的圈：网络代理协议、延迟测评、TUN 与�
 §
 并发优先最大化效率；多任务/多仓库/批量检查修复优先并行子代理（Hermes+Gemini 实测单批上限 10 并发，日常 3~6/批，已解除旧 2 并发限制）；2026-09-05 深夜：WorkBuddy glm-5.3-flash 实测（max_tokens≥300、10 并发 6.61s、15 并发 4.07s 全绿）无 429；该模型属思考型，max_tokens<100 思考链吃光配额致 content=null（测试须给足 max_tokens 或读 reasoning 字段）。
 §
-本地模型与后台偏好：对话模型由用户随时按需切换，严禁在设定中固定死主力对话模型；Hermes 客户端「已安装 llama.cpp 运行时」开关必须显式保持关闭（local_runtime.enabled: false），严禁常驻吃 3GB+ 内存；模型与运行时存 D 盘；OpenViking 记忆服务已依偏好移除开机自启，由桌面快捷方式/openviking_service.py 按需启停（懒网关 2 分钟空闲自动休眠）；Agent 客户端关闭后由 agent_guard 守护（Startup 自启，.openviking\venv pythonw 驱动）自动清扫 MCP 孤儿进程（Node/Python）并联动停 OpenViking 释放显存。
+本地模型与后台偏好：对话模型由用户随时按需切换，严禁在设定中固定死主力对话模型；Hermes 客户端「已安装 llama.cpp 运行时」开关必须显式保持关闭（local_runtime.enabled: false），严禁常驻吃 3GB+ 内存；模型与运行时存 D 盘；OpenViking 记忆服务已依偏好移除开机自启，由 Hermes 插件按需自动唤醒懒网关（2 分钟空闲自动休眠退显存，桌面无冗余快捷方式）；Agent 客户端关闭后由 agent_guard 守护（Startup 自启，.openviking\venv pythonw 驱动）自动清扫 MCP 孤儿进程（Node/Python）并联动停 OpenViking 释放显存。
 §
 MCP 精简终态（2026-09-06 双端拍板）：Hermes 端 MCP 仅留 chrome-devtools（用户定制：扩展保护参数 + 驱动真实 Edge Dev，原生 browser 不支持 Dev 渠道且 use_real_profile=false，系不可再生能力）与 deepwiki（远端零进程）；context7/serena 双端物理裁撤（Hermes 全程 0 调用、ZCode 仅初始化 8 次），desktop-commander 退出 Hermes 端（原生 terminal/patch/read_file 全覆盖）但 ZCode 端保留（205 次高频调用）；四大 MCP 已配 lazy:true + idle_timeout_seconds:60（不调用零进程，调用冷启 1~2s，闲置 60s 自动回收）。
 §
