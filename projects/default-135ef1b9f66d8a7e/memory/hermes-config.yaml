@@ -1,64 +1,7 @@
----
-name: hermes-config-baseline-and-sync-protocol
-description: Hermes 完整配置基准快照、版本构建指纹与改动自识别同步记忆库铁律（双端协同规范）
-metadata:
-  type: reference
----
+# Hermes Configuration Baseline Snapshot
+# Version: Hermes Agent v0.21.0 (2026.8.31) · upstream 245e4800
+# Git Commit: 245e48008fa814b3251f50755eb656bd9fb86cb1 (Sat Sep 5 17:00:18 2026 -0700)
 
-# Hermes 完整配置基准、版本指纹与自动同步规约 (2026-09-06)
-
-## 一、 当前 Hermes 构建版本指纹 (Version Fingerprint)
-
-为防止未来 Hermes 版本更新导致配置项语法（Schema）、默认行为或新特性（如 MoA 规范、Guardrails 策略等）发生差异，所有配置快照均严格绑定当前软件构建指纹：
-
-| 组件 / 维度 | 当前版本与标识 | 来源 / 验证方式 |
-| :--- | :--- | :--- |
-| **Hermes Agent 版本** | `v0.21.0 (2026.8.31)` | `hermes --version` |
-| **上游 Git Commit SHA** | `245e48008fa814b3251f50755eb656bd9fb86cb1` (Sat Sep 5 17:00:18 2026) | `git -C hermes-agent log -1` |
-| **Desktop 桌面客户端** | `v0.17.0` | `apps/desktop/package.json` |
-| **配置规范版本** | `_config_version: 40` | `config.yaml` 根字段 |
-| **Python 运行时** | `Python 3.11.16` / `OpenAI SDK 2.24.0` | 内部运行时依赖 |
-| **安装目录与方式** | `C:\Users\VOS-User\AppData\Local\hermes\hermes-agent` (Git source checkout) | 源码检出并可热更新 |
-
-> **版本演进铁律**：后续 Hermes 升级（如执行 `hermes update` 或上游拉取新 commit）时，若检测到 `_config_version` 升级或新增/废弃了配置字段，同步记忆库时必须一并刷新上方表格中的版本号与 Git SHA，并简要记录该版本下的配置变迁（Changelog diff）。
-
----
-
-## 二、 双 Agent 协同铁律：改动设置自识别与同步机制
-
-1. **核心工作流触发**：
-   - 当用户在日常对话中告知修改了 Hermes 的界面设置（或发截图、发通知）时，当前接待的 Agent（Hermes 或 ZCode）**严禁仅作口头附和**，必须**主动读取并自行识别最新配置**（源文件：`C:\Users\VOS-User\AppData\Local\hermes\config.yaml`）。
-   - 提取最新变动要点与全量配置快照，更新本专题文档以及同目录下的独立配置文件 `hermes-config.yaml`，并同步提交推送到双端共享记忆库 GitHub `main` 分支（`https://github.com/3304711297/shared-agent-memory`）。
-2. **脱敏保护铁律**：
-   - 由于共享记忆库为公开仓库，写入与同步 YAML 快照时，必须严格将私有 API Key 或敏感 Token 过滤脱敏为 `<REDACTED_*>`，严禁明文凭据入库。
-
----
-
-## 三、 当前核心模型与系统策略基准（实测拍板）
-
-1. **主力交互模型**：
-   - `cpa-gui` · `gemini-3.8-flash`（经本地 EasyCLIProxyAPI `127.0.0.1:18080` 桥接 Antigravity / Google 个人 Pro 订阅）。
-   - 原生支持 1M~2M 上下文、极速吞吐、免商业额外计费。
-2. **上下文窗口 (Context Window)**：
-   - 显式设为 `0`（自适应读取模型原生窗口）。配合内置 `compression.threshold: 0.5` 自动智能压缩，避免人工固定数值造成长文档意外截断。
-3. **备用模型 (Fallback Models) 容灾梯队**：
-   - **备用 1**：`custom:workbuddy-(127.0.0.1:8787)` · `glm-5.3-flash`
-     - 本地实测 15 并发无 429、毫秒级响应、工具调用稳定，为抗 429 瞬间接管主力。
-   - **备用 2**：`custom:workbuddy-(127.0.0.1:8787)` · `hy4-preview`
-     - 二级综合推理容灾模型。
-   - **严禁挂载项**：坚决剔除 `claude-opus-4-6-thinking` 等高延迟、高消耗的深度思考模型，防止自动静默降级导致 Agent 卡死或吃光贵重配额。
-4. **Mixture of Agents (MoA)**：
-   - 全局与预设 `enabled: false` 显式关闭。
-   - 避免在 Agent 编程和工具调用（Tool Calling / Function Calling）场景下引入多模型扇出造成的格式破坏、多倍延迟和积分浪费；清理了原残留的 `OpenCode Free` 和 `OpenRouter` 无效通道。
-
----
-
-## 四、 独立配置文件与全量配置快照
-
-* **同目录下独立配置文件**：[`hermes-config.yaml`](./hermes-config.yaml)（可直接供脚本解析或一键恢复）
-* **本地源文件路径**：`C:\Users\VOS-User\AppData\Local\hermes\config.yaml` (450行全量)
-
-```yaml
 model:
   default: gemini-3.8-flash
   provider: cpa-gui
@@ -509,11 +452,3 @@ model_aliases:
 # fallback_model:
 #   provider: openrouter
 #   model: anthropic/claude-sonnet-4
-```
-
----
-
-## 五、 关键实施与检索指南
-
-- **Why**: Hermes 拥有复杂的桌面与多模型配置，且随版本持续迭代。将软件构建指纹与全量配置快照绑定，不仅杜绝跨端协作时的信息差，还能在未来版本升级出现配置兼容性问题时秒级追溯回滚。
-- **How to apply**: 当用户提及「我改了设置 / 看一下我改的 / 同步一下设置」时，立即执行 `read_file(C:/Users/VOS-User/AppData/Local/hermes/config.yaml)`，同步核对 `hermes --version`，对比变动点后覆写更新本文件与 `hermes-config.yaml` 并提交推送 `main`。
