@@ -1,4 +1,5 @@
 - [Auto Backup Memories to GitHub](auto-backup-memories-to-github.md) — 记忆文件变动或新增后必须自动静默提交并推送 shared-agent-memory 的 main 分支（严禁等待用户提醒，无需询问用户）
+- [Karing Gemini Node Test](karing-gemini-node-test.md) — **暂停待续**：Karing 测两组订阅（liangxin 59+搅局者 11）哪些节点能用 Gemini；已验证判定逻辑（403 location not supported=封/400 key 无效=放行）、Clash API 3057 坐标、自建 sing-box selector 测试方案与环境变量残留代理两大坑，恢复时按记忆直接续
 - [Adobe MCP Authentication](adobe-mcp-authentication.md) — Adobe for creativity MCP server requires OAuth authentication; 403 errors indicate missing Authorization headers
 - [Five Repo Task Book v42](five-repo-task-book-v42.md) — 五仓库任务书 v4.2（15 条）**全部完成推送、五仓 CI 全绿**；tweak 已发 **v0.2.21**（tag-only 流程三步+包内版本注入实测）；脚本猫更新检测人工验收通过；含 BOM/mkdocs-tags/lock 提锁契约与待用户拍板事项（orc dependabot.yml 等）
 - [Bilibili Great Together Project](bilibili-great-together-project.md) — make-bilibili-great-together：**v0.3.5 已发版（09-05 bump，本地 dist 已重建待用户 reload）；用户日常已切换=仅 BewlyCat+mbgt 扩展启用**；bump 后扩展 dist 需本地重建+developerPrivate.reload；卡片「错误」=playinfo WARN 非故障；铁律：钩子读被 mock 全局走闭包原引用
