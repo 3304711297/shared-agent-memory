@@ -6,6 +6,9 @@
   - Direct API requests to `generativelanguage.googleapis.com` with AI Studio API keys strictly enforce geographical whitelisting. Requests from unsupported IP locations (e.g. mainland China/Hong Kong proxy exit nodes) fail with:
     `400 FAILED_PRECONDITION: User location is not supported for the API use.`
   - AI Studio API keys require developer/enterprise billing projects and do NOT automatically inherit consumer Google One AI Premium / Gemini Pro subscriptions.
+  - **Hermes Auxiliary Task Trap**: In default Hermes configuration (`auxiliary.vision.provider: auto`), Hermes resolves auxiliary tasks to key-backed providers (like `gemini` with AI Studio API key) rather than custom local bridges. When vision calls trigger in restricted regions, they immediately fail with `400 FAILED_PRECONDITION`. Fix by explicitly routing to the local Antigravity bridge:
+    `hermes config set auxiliary.vision.provider cpa-gui`
+    `hermes config set auxiliary.vision.model gemini-3.8-flash`
 - **Consumer Google Pro via Antigravity Bridge (`127.0.0.1:18080`)**:
   - Bridges the user's logged-in Google account OAuth token (`antigravity-*.json`) to a local OpenAI-compatible endpoint.
   - Automatically handles upstream OAuth tokens and bypassing API-level geographical barriers, exposing models like `gemini-3.7-flash` (supporting Ultra reasoning effort) with zero incremental API token cost.

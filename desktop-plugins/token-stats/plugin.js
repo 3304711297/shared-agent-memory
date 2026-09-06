@@ -129,6 +129,8 @@ function AntigravityQuotaChip({ ctx }) {
           source: data.source || 'Google 官方直连 (EasyCLIProxyAPI)',
           plan: data.plan || 'Google AI Pro',
           account: data.account || '...',
+          accounts: data.accounts || [],
+          activeAccount: data.activeAccount || data.account,
           claude5h: data.claudeQuota5h != null ? Math.round(data.claudeQuota5h) : 100,
           claudeWeekly: data.claudeQuotaWeekly != null ? Math.round(data.claudeQuotaWeekly) : 100,
           workbuddy: data.workbuddy || { status: 'offline', statusLabel: '未启动' },
@@ -261,9 +263,13 @@ function AntigravityQuotaChip({ ctx }) {
                 className: 'flex items-center gap-1.5',
                 children: [
                   jsx('span', {
-                    className:
-                      'px-1.5 py-0.5 text-[0.625rem] font-medium rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20',
-                    children: 'Pro 订阅',
+                    className: cn(
+                      'px-1.5 py-0.5 text-[0.625rem] font-medium rounded-md border',
+                      quotaData.plan === 'Google AI Pro'
+                        ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                        : 'bg-white/10 text-zinc-300 border-white/10'
+                    ),
+                    children: quotaData.plan === 'Google AI Pro' ? 'Pro 订阅' : '标准方案',
                   }),
                   justUpdated
                     ? jsxs('span', {
@@ -334,7 +340,7 @@ function AntigravityQuotaChip({ ctx }) {
                 children: [
                   jsx('span', {
                     className: 'text-emerald-400/90 font-mono',
-                    children: '● EasyCLIProxy 直连',
+                    children: '● 当前活跃路由',
                   }),
                   lastSyncTime &&
                     jsxs('span', {
@@ -345,6 +351,47 @@ function AntigravityQuotaChip({ ctx }) {
               }),
             ],
           }),
+
+          // 多账号凭据池明细卡（多账号时展示）
+          quotaData.accounts && quotaData.accounts.length > 1 &&
+            jsxs('div', {
+              className: 'flex flex-col gap-1 p-2 rounded-lg bg-black/30 border border-white/5 text-[10px] font-mono',
+              children: [
+                jsxs('div', {
+                  className: 'flex items-center justify-between text-(--ui-text-quaternary) pb-0.5 border-b border-white/5',
+                  children: [
+                    jsx('span', { children: `凭据池 (${quotaData.accounts.length} 账号)` }),
+                    jsx('span', { className: 'text-emerald-400/90 font-sans', children: '轮询负载中' }),
+                  ],
+                }),
+                quotaData.accounts.map((acc) =>
+                  jsxs('div', {
+                    key: acc.account,
+                    className: cn(
+                      'flex items-center justify-between py-0.5 px-1 rounded transition-colors',
+                      acc.isActive ? 'bg-emerald-500/10 text-emerald-300 font-semibold' : 'text-(--ui-text-tertiary)'
+                    ),
+                    children: [
+                      jsxs('div', {
+                        className: 'flex items-center gap-1 truncate max-w-[130px]',
+                        children: [
+                          acc.isActive && jsx('span', { className: 'w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0' }),
+                          jsx('span', { className: 'truncate', children: acc.account }),
+                        ],
+                      }),
+                      jsxs('div', {
+                        className: 'flex items-center gap-1 shrink-0 text-[9px]',
+                        children: [
+                          jsxs('span', { children: ['5h: ', acc.quota5h, '%'] }),
+                          jsx('span', { className: 'text-white/20', children: '|' }),
+                          jsxs('span', { children: ['周: ', acc.quotaWeekly, '%'] }),
+                        ],
+                      }),
+                    ],
+                  })
+                ),
+              ],
+            }),
 
           // 配额核心指标区
           jsxs('div', {
@@ -646,6 +693,8 @@ function QuotaPage({ ctx }) {
           source: res.source || 'Google 官方直连 (EasyCLIProxyAPI)',
           plan: res.plan || 'Google AI Pro',
           account: res.account || '...',
+          accounts: res.accounts || [],
+          activeAccount: res.activeAccount || res.account,
           claude5h: res.claudeQuota5h != null ? Math.round(res.claudeQuota5h) : 100,
           claudeWeekly: res.claudeQuotaWeekly != null ? Math.round(res.claudeQuotaWeekly) : 100,
           workbuddy: res.workbuddy || { status: 'offline', statusLabel: '未启动', note: '本地反代服务待机中' },
@@ -794,6 +843,69 @@ function QuotaPage({ ctx }) {
               }),
             ],
           }),
+
+          // 多账号池卡（多账号时展示）
+          data.accounts && data.accounts.length > 1 &&
+            jsxs('div', {
+              className: 'p-4 rounded-xl bg-black/20 border border-white/5 flex flex-col gap-2.5',
+              children: [
+                jsxs('div', {
+                  className: 'flex items-center justify-between text-xs font-medium',
+                  children: [
+                    jsxs('span', {
+                      className: 'text-(--ui-text-secondary)',
+                      children: [`Antigravity 凭据池 (${data.accounts.length}个账号)`],
+                    }),
+                    jsx('span', {
+                      className: 'text-xs font-mono text-emerald-400/90',
+                      children: '● 轮询调度 · 会话粘性',
+                    }),
+                  ],
+                }),
+                jsxs('div', {
+                  className: 'grid grid-cols-1 sm:grid-cols-2 gap-2.5',
+                  children: data.accounts.map((acc) =>
+                    jsxs('div', {
+                      key: acc.account,
+                      className: cn(
+                        'p-2.5 rounded-lg border text-xs flex flex-col gap-1.5 transition-all font-mono',
+                        acc.isActive
+                          ? 'bg-emerald-500/10 border-emerald-500/30 text-(--foreground)'
+                          : 'bg-white/5 border-white/5 text-(--ui-text-secondary)'
+                      ),
+                      children: [
+                        jsxs('div', {
+                          className: 'flex items-center justify-between text-[11px]',
+                          children: [
+                            jsxs('div', {
+                              className: 'flex items-center gap-1.5 truncate',
+                              children: [
+                                acc.isActive && jsx('span', { className: 'w-2 h-2 rounded-full bg-emerald-400 shrink-0 animate-pulse' }),
+                                jsx('span', { className: 'font-semibold truncate', children: acc.account }),
+                              ],
+                            }),
+                            jsx('span', {
+                              className: cn(
+                                'text-[10px] px-1.5 py-0.5 rounded font-sans',
+                                acc.isActive ? 'bg-emerald-500/20 text-emerald-300 font-medium' : 'bg-white/10 text-zinc-400'
+                              ),
+                              children: acc.isActive ? '当前活跃路由' : '待机轮询',
+                            }),
+                          ],
+                        }),
+                        jsxs('div', {
+                          className: 'flex items-center justify-between text-[11px] pt-1 border-t border-white/5',
+                          children: [
+                            jsxs('span', { children: ['5h 滚动: ', jsx('span', { className: cn('font-bold', getTextColor(acc.quota5h)), children: `${acc.quota5h}%` })] }),
+                            jsxs('span', { children: ['周总额度: ', jsx('span', { className: cn('font-bold', getTextColor(acc.quotaWeekly)), children: `${acc.quotaWeekly}%` })] }),
+                          ],
+                        }),
+                      ],
+                    })
+                  ),
+                }),
+              ],
+            }),
 
           // 核心两列指标：5h 与 每周总配额
           jsxs('div', {
