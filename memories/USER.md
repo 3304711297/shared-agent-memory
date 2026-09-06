@@ -2,7 +2,7 @@
 §
 主力 Hermes（ZCode 备用）；共享库 shared-agent-memory（3304711297/shared-agent-memory）main=双端共享真源（topics 挂 junction 直通），变动当轮必自动推 main，Hermes 专属推 hermes 分支；复杂任务严格优先 Skills（superpowers 等）+专业 MCP 引导。
 §
-持 Google 个人 Pro 订阅；主力走本地 EasyCLIProxyAPI 桥接的 Gemini 3.8 Flash（Ultra 思考）；Skills 官方机制安装、100% 免费开源上位；Whisper 偏好 small；上游 watch 类 Issue 评估无需改动可直接留言关闭。
+持 Google 个人 Pro 订阅；主力走本地 EasyCLIProxyAPI 桥接的 Gemini 3.8 Flash（Ultra 思考）；检索主力走 Exa 独享，排斥需绑定外币信用卡的海外商业服务；Skills 官方机制安装、100% 免费开源上位；Whisper 偏好 small；上游 watch 类 Issue 评估无需改动可直接留言关闭。
 §
 铁律：技术细节不确定必严格优先联网实证（官方文档/知识库），严禁臆测；代码/文档推 GitHub 后必盯 Actions CI 全绿方能收尾，严禁未等 CI 提前结束。
 §
