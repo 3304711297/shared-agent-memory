@@ -273,7 +273,10 @@ def main():
             rec_loc = comp.get("installed", [{}])[0]
             rec_total = rec_loc.get("totalSkills", 0)
             rec_date = rec_loc.get("extractedAt", "")
-            behind = bool(total != rec_total or (extracted_at and rec_date and extracted_at > rec_date))
+            # 误报治理（09-07）：上游索引每日重跑，extractedAt 必然刷新，而本工作流无
+            # contents:write 无法回写清单日期，日期差不可作为更新信号；仅技能总数增长
+            # （有新技能上架）才计为待跟进，总数缩量属上游数据波动，无需本地动作。
+            behind = total > rec_total
             diff_str = f"+{total - rec_total}" if total > rec_total else (f"{total - rec_total}" if total < rec_total else "0")
             state = "🔴 有更新" if behind else "✅ 最新"
             rows.append(f"| {comp['display']} | `{cid}` | {total:,} ({extracted_at}) | {state} |")
