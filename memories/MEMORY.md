@@ -17,3 +17,7 @@ Hermes 检索与抽取=Exa 独享（EXA_API_KEY 在 .env，web/search/extract ba
 Git push 卡住排查：github.com 直连被墙需走 Karing；ALL_PROXY=127.0.0.1:3067 仅在 Karing 已开出站节点时才监听（Karing 进程自身另监听 127.0.0.1:1666），3067 未监听即无路由，先确认节点开启再 push。
 §
 用户工作方式：外部AI交叉审查产出任务书并严格分级（P0/P1/P2），限定修改范围严禁顺手重构；执行Local-First铁律（本地先跑完整CI等价验证链与Release构建，本地全绿推后严禁在主会话卡等CI拖慢节奏，直接继续后续会话）；补回归测试闭环。
+§
+待执行拍板（09-07）：用户已选定「nudge 置 0」方案但明确暂缓执行。经源码核查后细化方案：A) memory.nudge_interval: 10→0 + skills.creation_nudge_interval: 15→0；B) 追加 auxiliary.background_review.enabled: false 总闸（官方 operator 开关，不碰 provider/model 路由，不违反 auxiliary auto 铁律）——B 单独即生效但为 fail-open 设计（配置读取异常会自动复活 fork），故 A+B 双保险。write_approval 门控方案已否决（fork 仍烧 ~30K token/次）。待用户发话后一次性落盘并同步共享记忆库基线；未执行前严禁擅自动手。
+§
+Hermes Desktop「会话运行不了」假死=切模型注入 user 角色系统消息+客户端带截断参数重试被网关拒绝（上游 #94486，已评论补充证据）；重启不自愈，修复 SOP 见共享库 topics/hermes-desktop-rewind-deadlock.md。

@@ -4,6 +4,6 @@
   "last_run_duration_seconds": null,
   "last_run_summary": "deferred first run — curator seeded, will run after one interval; use `hermes curator run --dry-run` to preview now",
   "last_run_summary_shown_at": "2026-09-02T15:36:00.852965+00:00",
-  "paused": false,
+  "paused": true,
   "run_count": 0
 }
