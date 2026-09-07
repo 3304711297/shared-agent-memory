@@ -150,7 +150,7 @@
         }
       ],
       "installed": [
-        { "where": "hermes skills/（49 项）+ ZCode ~/.zcode/skills（88 项副本）", "version": "HEAD@ee5b5ec2", "sha": "ee5b5ec21e576ccf9b941f9ff71330418415a5cb" }
+        { "where": "Hermes skills/（80 项）+ ZCode ~/.zcode/skills（44 项精简副本）", "version": "HEAD@ee5b5ec2", "sha": "ee5b5ec21e576ccf9b941f9ff71330418415a5cb" }
       ]
     },
     {
@@ -252,6 +252,8 @@
     }
   ],
   "notWatched": [
+    "【评估否决 2026-09-07】JuliusBrussee/caveman：经技术评估确认存在破坏 Prefix Prompt Cache 缓存与每轮 1k+ 输入 Token 倒挂缺陷，未实装，不纳入看门",
+    "【二八瘦身 2026-09-07】44 项长尾娱乐/小众设计/重型微调与重叠劣质技能已彻底物理删除（Hermes 现存 80 项，ZCode 现存 44 项），不纳入单独看门，由 hermes-hub-skills 聚合跟踪",
     "【用户拍板 2026-09-05】hermes-agent 与 ZCode CLI 本体永久不纳入看门（各自自带更新机制：hermes update --check / ZCode 客户端自更新）",
     "【用户拍板 2026-09-07】TokenRhythm/opensquilla：Agent 独立框架（非 Skill/Plugin 技能库，同 agent 本体免看门规则），不纳入技能看门",
     "【去重优化 2026-09-07】claude-plugins-official 整仓：superpowers 与 chrome-devtools-mcp 组件内已自带 claudeMarketplaceSha 精确比对，避免整仓提交导致 Issue 重复告警，予以去重排除",
