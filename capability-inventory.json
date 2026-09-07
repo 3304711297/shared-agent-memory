@@ -212,20 +212,11 @@
       "installed": [
         { "where": "开源技能雷达（书签真源）", "version": "HEAD@ca185ef5", "sha": "ca185ef5f7667078a1e70a763bd3a9c71c48acf0" }
       ]
-    },
-    {
-      "id": "opensquilla",
-      "display": "OpenSquilla 高效 Agent 框架",
-      "checks": [
-        { "type": "gh-release", "repo": "TokenRhythm/opensquilla" }
-      ],
-      "installed": [
-        { "where": "前沿架构雷达（书签真源）", "version": "v0.5.4" }
-      ]
     }
   ],
   "notWatched": [
     "【用户拍板 2026-09-05】hermes-agent 与 ZCode CLI 本体永久不纳入看门（各自自带更新机制：hermes update --check / ZCode 客户端自更新）",
+    "【用户拍板 2026-09-07】TokenRhythm/opensquilla：Agent 独立框架（非 Skill/Plugin 技能库，同 agent 本体免看门规则），不纳入技能看门",
     "Pester 6.1.0 与 PSScriptAnalyzer 1.25.0：刻意钉在与 tweak CI 一致的版本上，升级反而破坏本地校验一致性，不纳入",
     "handle.exe（Sysinternals live 版本无稳定版本号）、rip grep/ugrep（ZCode 客户端内置随客户端分发）",
     "context7-mcp：自动跟随最新——hermes config.yaml npx 未钉版 + 插件为 http 远端托管（mcp.context7.com），2026-09-05 从受监控清单移出",
