@@ -131,15 +131,18 @@ metadata:
   - 实现 `atomic_write_file`：先写入临时文件（`<file_name>.tmp`）并调用 `sync_all` 确保数据完全落盘，关闭句柄后执行 `rename` 覆盖替换；
   - 失败时自动清理 `.tmp` 临时文件，确保原文件保留完整且无垃圾残留；
   - 改造 `save_accounts_state`（包含 `accounts.json` 与 `workbuddy-desktop.info`）统一接入原子写；新增 3 项原子写覆盖与锁定保护单测；
-- **P1-2 proxy_stop 精确停止与淘汰 WMI 扫描 (proxy.rs)**：
+- **P1-2 proxy_stop 精确停止、淘汰 WMI 扫描与失败安全回退 (proxy.rs)**：
   - 彻底移除 `Get-CimInstance Win32_Process` 与模糊脚本名匹配，消除多秒级启动延迟与误杀风险；
-  - 优先利用 `proxy_start` 保存的 `child.id()`，Windows 下使用 `taskkill /F /T /PID <pid>` 精确终止整个子进程树；
-  - 妥善处理进程提前自退、不存在 PID 及重复 stop 等边界场景，新增 2 项真实与虚构 PID 进程树停止单测；
-- **P1-3 窗口 resize 防抖与线程风暴消除 (lib.rs)**：
+  - 优先利用 `proxy_start` 保存的 `child.id()`，Windows 下使用 `taskkill /F /T /PID <pid>` 精确终止整个子进程树，非零退出码明确视为失败返回 `Err`；
+  - 引入 `wait_timeout` 有界非阻塞轮询（最多 600ms），彻底杜绝直接阻塞在 `child.wait()` 导致的无限死锁；
+  - 增加安全 fallback：若 taskkill 失败或未在时限内退出，触发原生 `child.kill()` 二次确认；若仍无法杀死则保留句柄于 State 中确保自洽并报错；
+  - 妥善处理进程提前自退、不存在 PID 及重复 stop 等边界场景，补齐 4 项停止测试；
+- **P1-3 窗口 resize 防抖、线程风暴消除与 latest 唯一真源落盘 (lib.rs)**：
   - 消除每次收到 `Resized` 事件均 `thread::spawn` 导致的系统线程风暴；
-  - 重构为单一持久后台 Worker + Channel 模型（`WindowSizeState`），高频拖动经非阻塞 `try_send` 连续重置倒计时，500ms 静默窗口期满后由 Worker 触发最终尺寸落盘；
-  - 退出时安全终止 Worker；新增 3 项去抖与最终尺寸单测；
-- **全量验证通过**：全量 62 项 pytest、2 项前端测试、Vite build、10 项 cargo test 100% 通过；本地产出基于最新 main 的 Release NSIS 安装包 `codebuddy2openai_0.2.0_x64-setup.exe` 与 exe；PR #3 经 Windows CI 绿灯验证后合入 main。
+  - 重构为单一持久后台 Worker + 通知 Channel 模型（`WindowSizeState`），`latest` Mutex 确立为落盘尺寸的唯一真源；
+  - Channel 仅传递通知信号 `()`，高频拖拽下即使队列满丢弃通知，静默 500ms 后落盘的仍 100% 为最后一次 `update()` 的真实尺寸；
+  - 增加 capacity=1 极致丢包场景下的压力测试，验证丢弃大量通知后最终落盘尺寸仍严格精准；
+- **全量验证通过**：全量 62 项 pytest、2 项前端测试、Vite build、13 项 cargo test 100% 通过；本地产出基于最新 main 的 Release NSIS 安装包 `codebuddy2openai_0.2.0_x64-setup.exe` 与 exe；PR #4 已合入 main（Commit `f2cc94c`）。
 
 **Why:** 用户要求模型列表全量覆盖官方模型库，并补全 WorkBuddy 核心的倍率显示、上下文限制与思考强度调节能力。
 **How to apply:** 维护 `C:\Users\VOS-User\Desktop\codebuddy2openai`，后续所有跨端 Agent 配置及客户端演进均以此架构为基准。
