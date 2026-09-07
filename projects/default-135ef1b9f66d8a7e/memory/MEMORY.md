@@ -67,5 +67,6 @@
 - [Browser Automation and Ego Lite Evaluation](browser-automation-and-ego-lite-evaluation.md) — 真实浏览器接管与自动化方案对比及 ego-lite 深度评估：ego-lite 仅限 Mac 暂不适用；提炼「Heredoc 批量执行+压缩语义快照」降 Token 思维；现有成熟开箱即用 Skill 选型（dev-browser、attach-to-browser-skill、faster-chrome-devtools）与 Edge Dev 安全边界
 - [NCSI Active Probing and DNS Hijack Defense](ncsi-active-probing-and-dns-hijack-defense.md) — 2026-07-21 中国移动 DNS 劫持复盘与 Windows NCSI 主动探测防御体系：Captive Portal 热点认证机制武器化剖析、EnableActiveProbing=0 系统级阻断、DoH 与 TUN Fake-IP 治本方案及 tweak/ysk 双仓工程化闭环
 - [Hermes and ZCode Session Storage Paths](hermes-and-zcode-session-storage-paths.md) — Hermes 与 ZCode 会话存储物理路径、桌面工作区锚定与快捷方式启动规范（state.db、projects.db 与 D:/ai coding 对齐全貌）
+- [Ponytail Anti Bloat Skills](ponytail-anti-bloat-skills.md) — 引入 Ponytail 极简编程与反过度工程技能套件（v4.9.0，按需 Skill 架构而非常驻 Plugin，双端 6 项落地），纳入看门狗 capability-inventory.json 追踪
 
 
