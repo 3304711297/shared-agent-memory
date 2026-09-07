@@ -332,11 +332,31 @@ def fetch_google_quota(force: bool = False) -> dict:
                 pass
 
     if not parsed_accounts:
-        # Fall back to disk cache
+        # Google 拉取全失败（网络不可达 / token 过期 401 等）：降级而非整体失败。
+        # WorkBuddy 积分是独立数据源，必须保持实时 —— 旧实现整端点退回磁盘缓存，
+        # 导致 force 刷新后 WorkBuddy 积分永远钉在缓存快照（用户可见 bug）。
+        wb_status = check_workbuddy_status()
+        degraded: dict[str, Any] = {
+            "status": "degraded",
+            "degraded": True,
+            "degradedReason": "Google 官方配额接口拉取失败（token 过期或网络不可达，可检查 EasyCLIProxyAPI 网关是否运行）；Google 额度为磁盘缓存快照，WorkBuddy 积分为实时探测",
+            "workbuddy": wb_status,
+            "providers": [wb_status],
+            "source": f"⚠️ 降级模式：Google 配额不可用 · WorkBuddy 实时 · {time.strftime('%H:%M:%S')}",
+            "updatedAt": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+            "updatedAtLocal": time.strftime("%H:%M:%S"),
+        }
         old = _stale_disk_cache()
         if old is not None:
-            return old
-        return {"error": "Request to Google failed (network) and no disk cache available"}
+            for k in ("account", "activeAccount", "plan", "quota5h", "reset5h", "quotaWeekly",
+                      "resetWeekly", "claudeQuota5h", "claudeQuotaWeekly", "accounts", "accountsCount"):
+                if k in old:
+                    degraded[k] = old[k]
+        # 清掉内存缓存：降级期间每次轮询都重新实时探测，恢复后无缝回到正常路径
+        with _cache_lock:
+            _cache_data = None
+            _cache_time = 0.0
+        return degraded
 
     for acc in parsed_accounts:
         acc["isActive"] = (acc.get("account") == active_email)
@@ -426,6 +446,9 @@ def format_quota_markdown(data: dict) -> str:
         }]
 
     lines = [f"### 📊 模型配额与本地网关监控 (`{sync}`)\n"]
+
+    if data.get("degraded"):
+        lines.append(f"> ⚠️ **降级模式**：{data.get('degradedReason', 'Google 配额不可用')}\n")
     lines.append("**Google AI (EasyCLIProxyAPI 官方直连)**")
 
     for acc in accounts:

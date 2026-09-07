@@ -120,7 +120,7 @@ function AntigravityQuotaChip({ ctx }) {
       const rest = (ctx && ctx.rest) || (pluginCtx && pluginCtx.rest)
       if (!rest) throw new Error('plugin context unavailable')
       const data = await rest.call(ctx || pluginCtx, path)
-      if (data && data.status === 'ok') {
+      if (data && (data.status === 'ok' || data.status === 'degraded')) {
         setQuotaData({
           quota5h: data.quota5h != null ? Math.round(data.quota5h * 10) / 10 : 100,
           quotaWeekly: data.quotaWeekly != null ? Math.round(data.quotaWeekly * 10) / 10 : 100,
@@ -134,6 +134,8 @@ function AntigravityQuotaChip({ ctx }) {
           claude5h: data.claudeQuota5h != null ? Math.round(data.claudeQuota5h) : 100,
           claudeWeekly: data.claudeQuotaWeekly != null ? Math.round(data.claudeQuotaWeekly) : 100,
           workbuddy: data.workbuddy || { status: 'offline', statusLabel: '未启动' },
+          degraded: !!data.degraded,
+          degradedReason: data.degradedReason || '',
         })
         const syncTime =
           data.updatedAtLocal ||
@@ -144,8 +146,10 @@ function AntigravityQuotaChip({ ctx }) {
           setJustUpdated(true)
           haptic?.('success') || haptic?.('tap')
           host.notify({
-            kind: 'info',
-            message: `✅ 配额与网关状态已同步 (${syncTime})`,
+            kind: data.degraded ? 'warning' : 'info',
+            message: data.degraded
+              ? `⚠️ 已刷新（降级模式：Google 配额不可用，WorkBuddy 为实时值）(${syncTime})`
+              : `✅ 配额与网关状态已同步 (${syncTime})`,
           })
           setTimeout(() => setJustUpdated(false), 2400)
         }
@@ -242,6 +246,19 @@ function AntigravityQuotaChip({ ctx }) {
           'text-(--foreground) font-sans select-none flex flex-col gap-3.5 z-50'
         ),
         children: [
+          // 降级模式横幅：Google 配额不可用（token 过期/网关未运行），Google 数字为缓存快照
+          quotaData.degraded &&
+            jsxs('div', {
+              className:
+                'flex items-start gap-2 px-2.5 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/25 text-amber-300',
+              children: [
+                jsx('span', { className: 'text-xs leading-4', children: '⚠️' }),
+                jsx('span', {
+                  className: 'text-[0.6875rem] leading-4',
+                  children: '降级模式：Google 配额接口不可用，额度为缓存快照；WorkBuddy 积分为实时值',
+                }),
+              ],
+            }),
           // 标题行
           jsxs('div', {
             className: 'flex items-center justify-between',
@@ -250,8 +267,12 @@ function AntigravityQuotaChip({ ctx }) {
                 className: 'flex items-center gap-2',
                 children: [
                   jsx('div', {
-                    className:
-                      'w-2 h-2 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/50 animate-pulse',
+                    className: cn(
+                      'w-2 h-2 rounded-full shadow-sm animate-pulse',
+                      quotaData.degraded
+                        ? 'bg-amber-400 shadow-amber-400/50'
+                        : 'bg-emerald-500 shadow-emerald-500/50'
+                    ),
                   }),
                   jsx('span', {
                     className: 'text-xs font-semibold tracking-wide text-(--ui-text-primary)',
@@ -684,7 +705,7 @@ function QuotaPage({ ctx }) {
       const rest = (ctx && ctx.rest) || (pluginCtx && pluginCtx.rest)
       if (!rest) return
       const res = await rest.call(ctx || pluginCtx, path)
-      if (res && res.status === 'ok') {
+      if (res && (res.status === 'ok' || res.status === 'degraded')) {
         setData({
           quota5h: res.quota5h != null ? Math.round(res.quota5h * 10) / 10 : 100,
           quotaWeekly: res.quotaWeekly != null ? Math.round(res.quotaWeekly * 10) / 10 : 100,
@@ -698,16 +719,20 @@ function QuotaPage({ ctx }) {
           claude5h: res.claudeQuota5h != null ? Math.round(res.claudeQuota5h) : 100,
           claudeWeekly: res.claudeQuotaWeekly != null ? Math.round(res.claudeQuotaWeekly) : 100,
           workbuddy: res.workbuddy || { status: 'offline', statusLabel: '未启动', note: '本地反代服务待机中' },
+          degraded: !!res.degraded,
+          degradedReason: res.degradedReason || '',
         })
         const sync =
           res.updatedAtLocal ||
           new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
         setLastSyncTime(sync)
         if (isManual) {
-          haptic?.('success') || haptic?.('tap')
+          haptic?.(res.degraded ? 'tap' : 'success') || haptic?.('tap')
           host.notify({
-            kind: 'info',
-            message: `✅ 模型配额已强制同步 (${sync})`,
+            kind: res.degraded ? 'warning' : 'info',
+            message: res.degraded
+              ? `⚠️ 已刷新（降级模式：Google 配额不可用，WorkBuddy 为实时值）(${sync})`
+              : `✅ 模型配额已强制同步 (${sync})`,
           })
         }
       }
@@ -748,12 +773,30 @@ function QuotaPage({ ctx }) {
                     className: 'px-2 py-0.5 text-xs font-mono rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20',
                     children: 'Live Quota',
                   }),
+                  data.degraded &&
+                    jsx('span', {
+                      className: 'px-2 py-0.5 text-xs font-mono rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/25',
+                      children: '⚠ 降级模式',
+                    }),
                 ],
               }),
               jsx('p', {
                 className: 'text-xs text-(--ui-text-secondary)',
                 children: '实时监控 Google / Antigravity 官方高阶额度池与本地 WorkBuddy 推理网关状态',
               }),
+              data.degraded &&
+                jsxs('div', {
+                  className:
+                    'flex items-start gap-2 px-3 py-2 rounded-lg bg-amber-500/10 border border-amber-500/25 text-amber-300',
+                  children: [
+                    jsx('span', { className: 'text-sm leading-5', children: '⚠️' }),
+                    jsx('span', {
+                      className: 'text-xs leading-5',
+                      children: data.degradedReason ||
+                        'Google 配额接口不可用（token 过期或 EasyCLIProxyAPI 网关未运行），额度为缓存快照；WorkBuddy 积分为实时值',
+                    }),
+                  ],
+                }),
             ],
           }),
 
