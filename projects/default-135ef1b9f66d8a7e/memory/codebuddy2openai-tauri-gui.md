@@ -109,5 +109,22 @@ metadata:
 - **全量测试与 CI 闭环**：新增 7 项专用测试（全库 52 项 pytest 100% 通过），cargo check/test 与前端构建全绿，GitHub Actions Run `34099938803` 绿灯；
 - **上游生态互动**：已在 upstream Issue #3（tool_calls 损坏）、Issue #4（模型矩阵动态拉取）、PR #7（WSL 穿透）下提交专业技术回复并提供本仓库工程化解决方案。
 
+**2026-09-07 P0 批次核心修复与协议闭环（交叉审查产出，PR #2 合入 main，提交 837f75c）**：
+- **P0-1 流式协议三路独立下发与思考过程隔离**：
+  - `_collect_stream` 独立收集 `reasoning_content` / `reasoning`，与 `content` 严格隔离，聚合结果仅在存在思考内容时写入 `message["reasoning_content"]`（绝不并入 `content`，杜绝不支持折叠的客户端将内部推理污染正文）；
+  - `_pseudo_stream_response` 彻底拆除 `if tool_calls: ... elif content:` 的互斥结构，改为 reasoning → content → tool_calls 顺序独立下发，三者并存时互不吞没；
+  - 引入 `_chunk()` 构造器与 `_with_role()`，确保 `role: "assistant"` 仅在首个实际下发分片出现一次，保持无 reasoning 模型的既有行为完全一致；
+- **P0-2 accounts.json 启动加载闭环**：
+  - `CredentialManager` 接受 `path=None`，`_read_raw` 在无 `.info` 时抛出明确可读错误；
+  - 新增 `init_cred()`：优先以 `accounts.json` 为多账号唯一真源构造凭据，消除「纯新环境仅 OAuth 登录无 .info 时启动直接抛 503」的架构断链；`.info` 降级为 legacy fallback；
+- **P0-3 前端账号模块 DOM 与事件隔离**：
+  - 账户卡片积分刷新按钮更名为唯一 ID `btn-refresh-account-quota`，`btn-refresh-usage` 严格归属用量统计模块；
+  - 事件绑定由全局 `document.getElementById` 改为 `container.querySelector` 局部监听，杜绝误绑与重复加载导致的事件监听器累积；
+- **Local-First 验证纪律与 CI 强化**：
+  - 新增 `tests/test_p0_fixes.py`（10 项 Python 回归测试）与 `tests/test_accounts_p0.test.js`（2 项前端静态校验），全量 62 项 pytest 100% 通过；
+  - `package.json` 新增 `npm test` 脚本，`.github/workflows/ci.yml` 接入前端测试；
+  - 固化 Local-First 验证纪律（本地先跑构建、pytest、npm test、cargo test 等价验证链后再推远程），本地同时产出最新 Release NSIS 安装包与 exe；
+- **技能与门禁联动**：`github` 技能加入 `gh pr checks --watch` 纪律，`tauri-desktop-development` 加入本地优先验证链，并双端同步至 ZCode 技能库与看门狗名单。
+
 **Why:** 用户要求模型列表全量覆盖官方模型库，并补全 WorkBuddy 核心的倍率显示、上下文限制与思考强度调节能力。
 **How to apply:** 维护 `C:\Users\VOS-User\Desktop\codebuddy2openai`，后续所有跨端 Agent 配置及客户端演进均以此架构为基准。
