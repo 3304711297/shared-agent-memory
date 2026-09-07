@@ -1,24 +1,28 @@
 ---
 name: skill-plugin-resources
-description: 用户书签 skill hub 文件夹的 6 个 Skills/插件资源站与仓库（需要技能/插件时调取下载）
+description: 用户书签 skill hub 文件夹的 10 个 Skills/插件/Agent 资源站与仓库（需要技能/插件时调取下载，并作为看门狗技能雷达真源）
 metadata:
   type: reference
+---
 
-用户浏览器书签「skill hub」文件夹（2026-09-05 记入，用户授权后续需要时可调取/下载）：
+用户浏览器书签「skill hub」文件夹（2026-09-07 实查本地 Edge Dev 书签，全量 10 项）：
 
 **市场/目录类**
 1. **SkillHub** — https://skillhub.cn/ （腾讯云镜像 https://skillhub.cloud.tencent.com/skills）：专为中国用户优化的 AI Skills 社区，精选 Top 50、宣称经安全审核；国内访问友好，优先从这里找。
 2. **Cola Skill** — https://colaskill.com/ ：Claude/Agent skills 策展市场，中文描述+按行业打包（电商/设计/一人公司等），善用"Smart install"按需挑技能；不直接托管代码，安装前看原始仓库。
 3. **Hermes Agent Skills Hub** — https://hermes-agent.nousresearch.com/docs/user-guide/features/skills （附技能目录 https://hermes-agent.nousresearch.com/docs/reference/skills-catalog ）：Hermes 官方技能系统与内置目录（装到 ~/.hermes/skills/），给 hermes-agent 装技能走这里。
 
-**GitHub 仓库类（已验证存在，2026-09-05）**
+**GitHub 仓库类（已验证存在，2026-09-07 全量对齐）**
 4. **affaan-m/ECC** — https://github.com/affaan-m/ECC ：agent harness 性能优化系统（Skills/instincts/memory/security/研究优先开发），适用 Claude Code/Codex/Opencode/Cursor 等。
 5. **google-gemini/gemini-skills** — https://github.com/google-gemini/gemini-skills ：Google 官方，Gemini API/SDK 与模型交互技能。
 6. **zai-org/zcode-plugins** — https://github.com/zai-org/zcode-plugins ：ZCode 插件市场官方仓库（内置+社区插件），ZCode 组件升级/排查市场问题时对照它（关联 [[capability-upstream-watch]] 的两层市场架构）。
 
-**Anthropic 官方仓库（2026-09-05 补充，用户书签追加）**
+**Anthropic 官方仓库**
 7. **anthropics/skills** — https://github.com/anthropics/skills ：Agent Skills 官方公共仓库（Claude 系技能的源头真源）。
 8. **anthropics/claude-plugins-official** — https://github.com/anthropics/claude-plugins-official ：Anthropic 官方管理的高质量 Claude Code 插件目录。
 9. **anthropics/knowledge-work-plugins** — https://github.com/anthropics/knowledge-work-plugins ：面向知识工作者的开源插件集（主要供 Claude Cowork 使用）。
 
-**How to apply:** 用户要找某类能力（如 PPT/SEO/安全审计技能）或 ZCode/Hermes 缺功能时，先查 1/2 的中文目录定位技能名，再回 GitHub 拿源码审读后安装；Claude 系官方技能/插件直接用 7/8/9（源头真源，优先于第三方转译）；Gemini/ZCode 官方需求直接用 5/6。第三方 skill 安装前必须人工审内容（提示词注入面），不盲装。
+**前沿 Agent 架构类（2026-09-07 书签最新实查扩充）**
+10. **TokenRhythm/opensquilla** — https://github.com/TokenRhythm/opensquilla ：OpenSquilla，高 Token 效率与高智能密度 Agent 框架，具有前沿 Session 隔离与任务裁决机制。
+
+**How to apply:** 用户要找某类能力（如 PPT/SEO/安全审计技能）或 ZCode/Hermes 缺功能时，先查 1/2 的中文目录定位技能名，再回 GitHub 拿源码审读后安装；Claude 系官方技能/插件直接用 7/8/9（源头真源，优先于第三方转译）；Gemini/ZCode 官方需求直接用 5/6；Token 优化与架构借鉴看 10。第三方 skill 安装前必须人工审内容（提示词注入面），不盲装。

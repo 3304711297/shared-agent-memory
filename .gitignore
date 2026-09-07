@@ -9,3 +9,4 @@ $RECYCLE.BIN/
 *.tmp
 *.bak
 *.swp
+__pycache__/

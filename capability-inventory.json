@@ -1,7 +1,7 @@
 {
   "version": 2,
   "description": "本地能力组件清单（skill/mcp/plugin/工具核心的已装版本与上游源）。由 capability-upstream-watch 工作流每日比对远端源；本地源组件用 watch-capability.cmd 或任意 Agent 会话跑脚本比对。【维护铁律】升级或新装任何组件后，必须同步更新本清单并随共享库推 main，看门自动收口对应 Issue。",
-  "updatedAt": "2026-09-05",
+  "updatedAt": "2026-09-07",
   "components": [
     {
       "id": "chrome-devtools-mcp",
@@ -63,7 +63,7 @@
         { "type": "gh-release", "repo": "router-for-me/CLIProxyAPI" }
       ],
       "installed": [
-        { "where": "D:\\EasyCLIProxyAPI-v0.2.71-Windows-amd64\\cpa-core", "version": "7.2.151" }
+        { "where": "D:\\EasyCLIProxyAPI-v0.2.71-Windows-amd64\\cpa-core", "version": "7.2.152" }
       ]
     },
     {
@@ -151,6 +151,76 @@
       ],
       "installed": [
         { "where": "hermes skills/（49 项）+ ZCode ~/.zcode/skills（88 项副本）", "version": "HEAD@ee5b5ec2", "sha": "ee5b5ec21e576ccf9b941f9ff71330418415a5cb" }
+      ]
+    },
+    {
+      "id": "anthropic-skills",
+      "display": "Anthropic 官方技能库（skills/ 目录提交）",
+      "checks": [
+        {
+          "type": "github-commits-path",
+          "repo": "anthropics/skills",
+          "path": "skills",
+          "note": "Anthropic 官方 Agent Skills 公共仓库；监控 skills/ 路径新提交。"
+        }
+      ],
+      "installed": [
+        { "where": "官方技能雷达（书签真源）", "version": "HEAD@41bbe19d", "sha": "41bbe19d1a1a7eaab5e7bb9050a417e5c6cffc8f" }
+      ]
+    },
+    {
+      "id": "gemini-skills",
+      "display": "Google Gemini 官方技能库（skills/ 目录提交）",
+      "checks": [
+        {
+          "type": "github-commits-path",
+          "repo": "google-gemini/gemini-skills",
+          "path": "skills",
+          "note": "Google Gemini 官方 API/SDK 与模型交互技能库；监控 skills/ 路径新提交。"
+        }
+      ],
+      "installed": [
+        { "where": "官方技能雷达（书签真源）", "version": "HEAD@0fa937a5", "sha": "0fa937a5b79e902b86be5792e8bc7188747286ae" }
+      ]
+    },
+    {
+      "id": "claude-plugins-official",
+      "display": "Claude 官方插件与技能市场（plugins/ 目录提交）",
+      "checks": [
+        {
+          "type": "github-commits-path",
+          "repo": "anthropics/claude-plugins-official",
+          "path": "plugins",
+          "note": "Anthropic 官方管理的高质量 Claude Code 插件与技能目录；监控 plugins/ 路径新提交。"
+        }
+      ],
+      "installed": [
+        { "where": "官方技能雷达（书签真源）", "version": "HEAD@0e3f501d", "sha": "0e3f501d0f4acb2a3406f645b1e0f80056c22e8c" }
+      ]
+    },
+    {
+      "id": "ecc-skills",
+      "display": "ECC Agent 优化技能库（skills/ 目录提交）",
+      "checks": [
+        {
+          "type": "github-commits-path",
+          "repo": "affaan-m/ECC",
+          "path": "skills",
+          "note": "affaan-m/ECC 性能与工程化调优技能系统；监控 skills/ 路径新提交。"
+        }
+      ],
+      "installed": [
+        { "where": "开源技能雷达（书签真源）", "version": "HEAD@ca185ef5", "sha": "ca185ef5f7667078a1e70a763bd3a9c71c48acf0" }
+      ]
+    },
+    {
+      "id": "opensquilla",
+      "display": "OpenSquilla 高效 Agent 框架",
+      "checks": [
+        { "type": "gh-release", "repo": "TokenRhythm/opensquilla" }
+      ],
+      "installed": [
+        { "where": "前沿架构雷达（书签真源）", "version": "v0.5.4" }
       ]
     }
   ],
