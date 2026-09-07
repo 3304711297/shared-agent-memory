@@ -1,6 +1,6 @@
 ---
 name: verification-before-completion
-description: Use when about to claim work is complete, fixed, or passing, before committing or creating PRs - requires running verification commands and confirming output before making any success claims; evidence before assertions always
+description: "宣称完成/收尾工作/提PR前必用。先出示命令绿灯证据，禁止口头空标通过。Use when about to claim work is complete, fixed, or passing; evidence before assertions always."
 ---
 
 # Verification Before Completion
@@ -46,6 +46,14 @@ Skip any step = lying, not verifying
 | Regression test works | Red-green cycle verified | Test passes once |
 | Agent completed | VCS diff shows changes | Agent reports "success" |
 | Requirements met | Line-by-line checklist | Tests passing |
+| CI ready / pushed | Full local CI-equivalent pipeline passed | Push-and-pray, letting remote CI find basic test/build failures |
+
+## CI-Local Parity & Monitoring Rules
+
+1. **Local-First Parity before Push:**
+   Inspect the project's CI workflow (e.g. `.github/workflows/ci.yml`). Every step with a local equivalent (`build`, `test`, `typecheck`, `lint`) MUST be executed locally before `git push`. Pushing unverified commits to let remote CI catch build breaks wastes multiple minutes per cycle.
+2. **Official Watcher over Hand-Rolled Loops:**
+   When monitoring remote CI or PR checks, execute `gh pr checks <PR> --watch` or `gh run watch <RUN_ID>` directly. Never construct ad-hoc bash `while/for + sleep` polling loops that block the session or flood conversational context.
 
 ## Red Flags - STOP
 

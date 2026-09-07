@@ -126,3 +126,78 @@ When desktop plugins or panels depend on a background microservice running on a 
      pythonw.exe fetch_quota.py --serve
      ```
    - Validate HTTP 200 response with live payload probe (`/quota?force=1`) before reporting health.
+
+---
+
+## 6. Loopback and Direct Upstream Network Isolation (`no_proxy`)
+
+### The Environmental Proxy Hijacking Trap
+`reqwest` and many HTTP libraries inspect `HTTP_PROXY`, `HTTPS_PROXY`, and `ALL_PROXY` by default (`trust_env = true`).
+When developers or users have a local mixed proxy (e.g. Karing on `127.0.0.1:3067`), health probes to `127.0.0.1:8787` or OAuth calls to domestic upstream endpoints get routed through `3067`. If the external proxy is disconnected or slow:
+- `/health` probes hang for 10-30 seconds.
+- The UI reports "内核启动失败" even though the Python/backend process is running normally.
+
+### Solution: Explicit `no_proxy()` Clients
+```rust
+pub fn local_client(timeout_secs: u64) -> reqwest::Client {
+    reqwest::Client::builder()
+        .no_proxy()
+        .timeout(std::time::Duration::from_secs(timeout_secs))
+        .build()
+        .unwrap_or_else(|_| reqwest::Client::new())
+}
+```
+
+---
+
+## 7. Atomic JSON State Management Across Rust & Python
+
+Direct writes to state files (`accounts.json`, `settings.json`) are prone to truncation and race conditions. Always write to a temporary file in the same directory and atomically replace:
+
+### Rust Pattern
+```rust
+let tmp_path = path.with_extension("json.tmp");
+let raw = serde_json::to_string_pretty(&state).map_err(|e| e.to_string())?;
+std::fs::write(&tmp_path, raw).map_err(|e| e.to_string())?;
+std::fs::rename(&tmp_path, &path).map_err(|e| e.to_string())?;
+```
+
+### Python Pattern
+```python
+tmp_path = path.with_suffix(path.suffix + ".tmp")
+with open(tmp_path, "w", encoding="utf-8") as f:
+    json.dump(state, f, ensure_ascii=False, indent=2)
+os.replace(tmp_path, path)
+```
+
+---
+
+## 8. High-Performance Subprocess Tree Termination (`taskkill`)
+
+When stopping background helper processes on Windows, avoid `Get-CimInstance Win32_Process` via PowerShell (1-2s delay, CPU spike, name-based miskills).
+Use native `taskkill /F /T /PID` using the known child process ID:
+
+```rust
+#[cfg(target_os = "windows")]
+if let Some(child) = guard.as_mut() {
+    let pid = child.id();
+    let _ = std::process::Command::new("taskkill")
+        .args(["/F", "/T", "/PID", &pid.to_string()])
+        .output();
+    *guard = None;
+}
+```
+
+---
+
+## 9. Dual-Channel SSE Streaming: Reasoning, Content & Tool Calls Coexistence
+
+In custom OpenAI-compatible SSE proxy adapters:
+- **Never** branch with `if tool_calls: ... elif content:`.
+- Models frequently return explanation text before tool execution, and thinking models produce `reasoning_content`.
+- Stream in order:
+  1. `reasoning_content` delta chunks (if present).
+  2. `content` delta chunks (if present).
+  3. `tool_calls` structure & slice argument chunks.
+  4. Final finish chunk with `finish_reason` and `usage`.
+

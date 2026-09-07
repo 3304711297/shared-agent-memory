@@ -1,6 +1,6 @@
 ---
 name: using-superpowers
-description: Use when starting any conversation - establishes how to find and use skills, requiring skill invocation before ANY response including clarifying questions
+description: "技能自检总纲：对话开启或任务匹配时必用。只要有1%可能适用必须先调用技能。Use when starting tasks; enforces skill invocation before responses."
 ---
 
 <SUBAGENT-STOP>

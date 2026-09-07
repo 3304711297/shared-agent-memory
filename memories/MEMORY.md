@@ -13,3 +13,7 @@ Hermes 检索与抽取=Exa 独享（EXA_API_KEY 在 .env，web/search/extract ba
 记忆架构（09-07 拍板）：memory.provider=openviking 仅为叠加检索层，内置 MEMORY.md/USER.md（3000/2000 字符限额，随系统提示词全量注入）仍并行存在；低频细节用 viking_remember 存 OpenViking 检索召回，内置只留高频必带事实，双库 99% 顶格时优先做减法不是调限额。
 §
 配置改动流程：先列候选+官方默认+代价清单，等用户拍板再动手，严禁擅自改。
+§
+Git push 卡住排查：github.com 直连被墙需走 Karing；ALL_PROXY=127.0.0.1:3067 仅在 Karing 已开出站节点时才监听（Karing 进程自身另监听 127.0.0.1:1666），3067 未监听即无路由，先确认节点开启再 push。
+§
+用户工作方式：会让外部 AI 交叉审查产出修复任务书并严格分级（P0/P1/P2），明确要求限定修改范围、禁止顺手重构或扩展需求；每批完成后必须补回归测试并盯 CI 全绿后才收尾。

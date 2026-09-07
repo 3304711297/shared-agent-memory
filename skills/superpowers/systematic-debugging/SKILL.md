@@ -1,6 +1,6 @@
 ---
 name: systematic-debugging
-description: Use when encountering any bug, test failure, error, or when user asks to "修bug", "排错", "测试失败", "查原因", "报错了", "排查问题", before proposing fixes. Enforces root cause investigation first.
+description: "报错排查/测试失败/排查异常时必用。严禁猜测，先调查根因再提方案。Use when encountering any bug, test failure, error, or debugging. Enforces root cause investigation first."
 ---
 
 # Systematic Debugging

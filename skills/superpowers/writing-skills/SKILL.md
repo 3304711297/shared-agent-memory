@@ -1,6 +1,6 @@
 ---
 name: writing-skills
-description: Use when creating new skills, editing existing skills, or verifying skills work before deployment
+description: "新建技能/修改技能/沉淀工作流时必用。规范frontmatter与截断格式。Use when creating or editing skills; standardizes frontmatter and trigger layout."
 ---
 
 # Writing Skills
