@@ -25,7 +25,14 @@ A class-level operating procedure for evaluating, auditing, admitting, and trigg
 
 ## 1. Five-Step Evaluation & Admission Procedure
 
-When evaluating candidate skills or toolkits, execute this audit sequentially:
+When evaluating candidate skills, toolkits, or repos provided by user, execute this audit sequentially:
+
+### Step 0: Upstream Registry & Duplicate Defense Gate (Pre-Evaluation)
+- **Check Resource Index First**: Prioritize searching the shared registry `skill-plugin-resources.md` and `capability-inventory.json` before starting audit.
+- **De-duplication Check**: If the user submits a repo or skill set that was already evaluated or admitted (e.g. `cangjie-skill`), immediately notify the user with existing evaluation/admission records, preventing redundant duplicate cycles.
+- **Index Admission Judgment**:
+  - If a submitted library or tool is deemed **valuable** (whether adopted directly or cataloged as reference material), formally append it to `skill-plugin-resources.md` under its appropriate category so all future agent turns can prioritize indexing from it.
+  - If deemed **unworthy / disqualified**, do NOT add to `skill-plugin-resources.md`, but explicitly record its technical disqualification reason under `capability-inventory.json`'s `notWatched` array, explaining why to prevent repeat evaluations if re-submitted later.
 
 ### Step 1: Core Value & Pain-Point Penetration
 - Identify the exact failure mode the tool claims to address (e.g. LLM code bloat, runaway verbosity).
