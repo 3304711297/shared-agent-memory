@@ -36,7 +36,10 @@ metadata:
 - **覆盖盲区**（清单 notWatched 同步维护）：hermes hub 技能（hermes GUI 自带提示）、http 远端 MCP（永远最新）、zcode-custom 自有 skill（无上游）。
 
 **Why:** 更新源分散在 npm/GitHub/两个市场/客户端种子，人工逐个查不可持续；统一看门 + Issue 通知让用户及时用上新版本。
-**How to apply:** 任何 Agent 升级/新装受监控组件后，顺手更新 capability-inventory.json 并推 main；ZCode 客户端更新后跑 watch-capability.cmd 检测内置插件换代；新增组件时在清单登记检查源。相关：[[hermes-to-zcode-capability-sync]] [[multi-branch-memory-backup]]
+
+**How to apply:**
+- **技能与看门联动铁律（2026-09-07 用户严正纠偏）**：技能变动与看门狗绝对同步——凡技能有任何新装、升级、瘦身裁撤或评估否决，第一动作必须本能同步更新 `capability-inventory.json`（基线版本、已装统计数、`notWatched` 排除说明）并推 main 跑 CI，严禁改完技能漏看门、严禁等用户提醒补漏。
+- 任何 Agent 升级/新装受监控组件后，顺手更新 capability-inventory.json 并推 main；ZCode 客户端更新后跑 watch-capability.cmd 检测内置插件换代；新增组件时在清单登记检查源。相关：[[hermes-to-zcode-capability-sync]] [[multi-branch-memory-backup]]
 
 **2026-09-07 上游 Issue 闭环跟进（scriptscat/scriptcat#1724）**：
 - 用户反馈在 Edge Dev 154 上 ScriptCat 所有用户脚本静默失效（`#1724`）：根因在于 `registerUserscripts()` 早退守卫只校验了 `chrome.userScripts` 注册，未校验 `chrome.scripting` 侧，导致 `scriptcat-scripting` 广播者丢失后无法自愈；且 Edge 154 isolated world 中 `chrome.extension` 为 undefined；
