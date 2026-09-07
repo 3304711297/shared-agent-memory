@@ -21,3 +21,7 @@ MCP 精简终态（2026-09-06）：Hermes 端 MCP 仅留 chrome-devtools（纯�
 Hermes 配置自同步铁律（2026-09-06）：用户通知改设置时，主动读取 config.yaml 识别最新配置附带 Git SHA 指纹，脱敏后自动更新共享记忆库 hermes-config-baseline-and-sync-protocol.md 与 hermes-config.yaml 并推 main。改 config.yaml 须用 python ruamel.yaml。
 §
 会话归档与清理闭环铁律（2026-09-06 用户拍板）：日常普通会话模式；若用户要求删除/归档当前会话或累计 ≥1M tokens，必须严格执行三步收尾闭环 SOP——① 提炼记忆上传 shared-agent-memory 共享库；ysk 内容严禁擅自写入，必先列出包含理由的候选清单供用户勾选拍板；② 彻底物理清理本会话全部无用临时文件（测试脚本/探针/日志）；③ 自动提交推送并盯 Actions CI 全绿收尾。
+§
+手机端控制 Hermes：已装 hermes-android (8642) 与 hermes-mobile (9119)；偏好全中文界面与会话闭环。
+§
+技能与工具库偏好（09-07 用户拍板）：被裁撤技能直接物理删除（不留本地归档残余），仅在记忆库记录替代逻辑；高度关注官方与高星技能库生态（Anthropic/Gemini等多源监控储备），真源参阅 Edge Dev 书签 skill hub 目录。

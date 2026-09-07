@@ -3,9 +3,9 @@
   "account": "2964251404@qq.com",
   "activeAccount": "2964251404@qq.com",
   "plan": "Google AI Pro",
-  "quota5h": 66.1,
-  "reset5h": "2026-09-06T17:55:45Z",
-  "quotaWeekly": 94.4,
+  "quota5h": 86.4,
+  "reset5h": "2026-09-07T07:32:19Z",
+  "quotaWeekly": 87.5,
   "resetWeekly": "2026-09-13T12:55:45Z",
   "claudeQuota5h": 100,
   "claudeQuotaWeekly": 100,
@@ -15,9 +15,9 @@
       "email": "2964251404@qq.com",
       "plan": "Google AI Pro",
       "priority": 10,
-      "quota5h": 66.1,
-      "reset5h": "2026-09-06T17:55:45Z",
-      "quotaWeekly": 94.4,
+      "quota5h": 86.4,
+      "reset5h": "2026-09-07T07:32:19Z",
+      "quotaWeekly": 87.5,
       "resetWeekly": "2026-09-13T12:55:45Z",
       "claudeQuota5h": 100,
       "claudeQuotaWeekly": 100,
@@ -28,9 +28,9 @@
       "email": "jimygod114514@gmail.com",
       "plan": "Google AI",
       "priority": 10,
-      "quota5h": 58.8,
-      "reset5h": "2026-09-06T18:41:07Z",
-      "quotaWeekly": 0.0,
+      "quota5h": 100,
+      "reset5h": "2026-09-07T07:33:13Z",
+      "quotaWeekly": 0,
       "resetWeekly": "2026-09-11T01:03:50Z",
       "claudeQuota5h": 100,
       "claudeQuotaWeekly": 100,
@@ -39,47 +39,16 @@
   ],
   "accountsCount": 2,
   "source": "Google 官方直连 (Hermes 内置)",
-  "updatedAt": "2026-09-06T15:54:20Z",
-  "updatedAtLocal": "23:54:20",
+  "updatedAt": "2026-09-07T03:16:07Z",
+  "updatedAtLocal": "11:16:07",
   "workbuddy": {
     "id": "workbuddy",
     "name": "WorkBuddy (codebuddy2openai)",
-    "status": "online",
-    "statusLabel": "运行中",
+    "status": "offline",
+    "statusLabel": "未启动",
     "endpoint": "http://127.0.0.1:8787/v1",
-    "modelsCount": 28,
-    "note": "账号「晚街」· 积分 2173/3809 (57.1%)",
-    "usage": {
-      "nickname": "晚街",
-      "total": 3809.0,
-      "remain": 2173.1700008899998,
-      "used": 1635.82999911,
-      "remainPercent": 57.1,
-      "isPaidUser": false,
-      "packages": [
-        {
-          "code": "TCACA_code_007_nzdH5h4Nl0",
-          "total": 2309.0,
-          "remain": 1173.17000089,
-          "used": 1135.82999911,
-          "unit": "credits"
-        },
-        {
-          "code": "TCACA_code_008_cfWoLwvjU4",
-          "total": 500.0,
-          "remain": 0.0,
-          "used": 500.0,
-          "unit": "credits"
-        },
-        {
-          "code": "TCACA_code_030_BjSt89qTvr",
-          "total": 1000.0,
-          "remain": 1000.0,
-          "used": 0.0,
-          "unit": "credits"
-        }
-      ]
-    }
+    "modelsCount": 0,
+    "note": "本地反代服务待机中 (端口 8787)"
   },
   "providers": [
     {
@@ -92,12 +61,12 @@
       "windows": [
         {
           "label": "Gemini 5h 滚动额度",
-          "remaining": 66.1,
-          "reset": "2026-09-06T17:55:45Z"
+          "remaining": 86.4,
+          "reset": "2026-09-07T07:32:19Z"
         },
         {
           "label": "Gemini 每周总配额",
-          "remaining": 94.4,
+          "remaining": 87.5,
           "reset": "2026-09-13T12:55:45Z"
         },
         {
@@ -117,12 +86,12 @@
       "windows": [
         {
           "label": "Gemini 5h 滚动额度",
-          "remaining": 58.8,
-          "reset": "2026-09-06T18:41:07Z"
+          "remaining": 100,
+          "reset": "2026-09-07T07:33:13Z"
         },
         {
           "label": "Gemini 每周总配额",
-          "remaining": 0.0,
+          "remaining": 0,
           "reset": "2026-09-11T01:03:50Z"
         },
         {
@@ -135,42 +104,11 @@
     {
       "id": "workbuddy",
       "name": "WorkBuddy (codebuddy2openai)",
-      "status": "online",
-      "statusLabel": "运行中",
+      "status": "offline",
+      "statusLabel": "未启动",
       "endpoint": "http://127.0.0.1:8787/v1",
-      "modelsCount": 28,
-      "note": "账号「晚街」· 积分 2173/3809 (57.1%)",
-      "usage": {
-        "nickname": "晚街",
-        "total": 3809.0,
-        "remain": 2173.1700008899998,
-        "used": 1635.82999911,
-        "remainPercent": 57.1,
-        "isPaidUser": false,
-        "packages": [
-          {
-            "code": "TCACA_code_007_nzdH5h4Nl0",
-            "total": 2309.0,
-            "remain": 1173.17000089,
-            "used": 1135.82999911,
-            "unit": "credits"
-          },
-          {
-            "code": "TCACA_code_008_cfWoLwvjU4",
-            "total": 500.0,
-            "remain": 0.0,
-            "used": 500.0,
-            "unit": "credits"
-          },
-          {
-            "code": "TCACA_code_030_BjSt89qTvr",
-            "total": 1000.0,
-            "remain": 1000.0,
-            "used": 0.0,
-            "unit": "credits"
-          }
-        ]
-      }
+      "modelsCount": 0,
+      "note": "本地反代服务待机中 (端口 8787)"
     }
   ]
 }

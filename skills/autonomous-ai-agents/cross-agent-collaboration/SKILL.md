@@ -75,14 +75,21 @@ ZCode's runtime lives at `D:/zcode/resources/glm/zcode.cjs`; `node zcode.cjs -p 
 - **Producer-Reviewer Separation**: When one agent is editing a codebase, the other agent acts exclusively as reviewer, tester, or CI monitor. Never edit working tree files simultaneously to prevent file lock collisions.
 - **Parallel memory-file edits**: both agents may append to the same `shared-agent-memory` files in the same session; git merges handle it, but expect a possible fast-forward push and never force-push.
 - **Shared Memory Invariant**: Ground truth facts, architectural decisions, and handoff contracts must be committed to the shared repository (`shared-agent-memory` `main` branch).
-- **Skill Directory Physical Isolation & Unified Retirement Protocol**: Unlike shared memory (`memories/topics` which is a unified physical store via NTFS junction), the skill directories (`~/.zcode/skills` and `~/.hermes/skills`) are completely independent physical directories. Uninstalling or cleaning skills on one agent (e.g. `hermes skills uninstall`) does NOT propagate to the other. When deprecating or retiring a skill across agents, execute this mandatory 7-step closure:
-  1. *Hermes Uninstall*: Run `hermes skills uninstall --yes <name>` to clean profile registration and lock files.
-  2. *ZCode Cleanup*: Physically remove directory `rm -rf C:/Users/VOS-User/.zcode/skills/<name>`.
-  3. *Sync Documentation*: Update `hermes-to-zcode-capability-sync.md` in shared memory with retirement rationale and updated count.
-  4. *Watcher Inventory*: Update `capability-inventory.json` (decrement skill replica counts under `hermes-hub-skills`).
-  5. *Local Smoke Test*: Run `python C:/Users/VOS-User/.zcode/cli/memories/scripts/check_capability_upstream.py` to ensure 0 outdated / 0 drift.
-  6. *Dual-Branch Commit & Push*: Commit and push `main` on `~/.zcode/cli/memories` and `hermes` on `~/.hermes`.
-  7. *CI & Memory Re-Index*: Watch GitHub Actions (`Capability Upstream Watch` / `Plugin Upstream Watcher`) until 100% green, then trigger `sync_shared_memory_openviking.py`.
+- **Skill Directory Physical Isolation, Slimming & Physical Teardown Protocol**: Unlike shared memory (`memories/topics` which is a unified physical store via NTFS junction), the skill directories (`~/.zcode/skills` and `~/.hermes/skills`) are completely independent physical directories. Modifying skills on one agent does NOT propagate to the other.
+  - **Two-Stage Slimming & Physical Deletion (User Rule)**:
+    1. *Stage 1 (Staged Isolation)*: When pruning candidate skills, temporarily move them out of active `skills/` into staging (`skills-archived/`) to immediately reduce prompt token overhead and verify zero functional regressions.
+    2. *Stage 2 (Physical Deletion on User Confirmation)*: Upon user confirmation, **physically delete (`rm -rf`) the archived skill directories** from disk. Never let offline archive directories hoard redundant files locally; open-source and upstream skills can be cleanly re-installed on demand.
+    3. *Memory-as-Traceability Invariant*: Record the slimming rationale, pruned category mapping, and superior replacement tools directly in `shared-agent-memory` (`topics/<name>.md` and `topics/MEMORY.md`). The shared memory is the durable audit trail, not obsolete file trees.
+  - **Four High-Noise / Inefficient Skill Categories to Prune**:
+    1. *Local Crawlers*: Custom scraper scripts (`smart-web-crawler`, `scrapling`) that get blocked by Cloudflare/WAF/proxy TLS timeouts; replace with high-throughput cloud-cleaned `web_search`/`web_extract` (Exa backend).
+    2. *Heavy / Unsupported Local MLOps*: Local LLM fine-tuning/inference (`llama-cpp`, `comfyui`, `dspy`, `huggingface-*`, `qdrant`) when local runtimes are disabled or hardware VRAM is constrained (e.g. 8GB laptop); vector retrieval is handled on-demand by OpenViking.
+    3. *Uncredentialed SaaS Integrations*: Cloud SaaS suites (`airtable`, `box`, `notion`, `google-workspace`, `teams-meeting-pipeline`, `himalaya`, `1password`) where local API keys/OAuth do not exist, preventing hallucinated tool probes.
+    4. *Redundant External Agent Wrappers*: Standalone CLI delegators (`claude-code`, `codex`, `opencode`) when native `delegate_task` parallel subagents or cross-agent watch patterns are the standard.
+  - **Unified Dual-Agent Retirement & Cleanup Closure**:
+    1. *Dual-End Pruning*: Remove target directories on both Hermes and ZCode, followed by physical cleanup of `skills-archived/`.
+    2. *Shared Memory & Index*: Record the slimming/retirement rationale in `topics/<name>.md` and update `topics/MEMORY.md`.
+    3. *Dual Commit & Push*: Commit and push `main` on `~/.zcode/cli/memories` (and `hermes` on `~/.hermes` if Hermes profile state changed).
+    4. *CI & OpenViking Re-Index*: Confirm GitHub Actions CI passes green, and ensure `sync_shared_memory_openviking.py` synchronizes the new commit.
 
 ## 8. Hermes Native Bot Mode & Multi-Profile Orchestration
 When orchestrating internal specialized bots (profiles under `~/.hermes/profiles/<name>/`) alongside the default agent:
