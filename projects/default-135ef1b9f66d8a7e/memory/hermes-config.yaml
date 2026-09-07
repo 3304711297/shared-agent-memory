@@ -179,7 +179,7 @@ computer_use:
   backend: cua
 local_runtime:
   enabled: false
-_config_version: 40
+_config_version: 41
 mcp_servers:
   chrome-devtools:
     command: cmd
@@ -246,17 +246,17 @@ custom_providers:
   base_url: http://127.0.0.1:18080/v1
   model: gemini-3.8-flash
   models:
+    claude-sonnet-4-6: {}
+    gemini-3.8-flash: {}
     gemini-3.1-flash-image: {}
     gemini-pro-agent: {}
-    gpt-oss-120b-medium: {}
     gemini-web-search: {}
-    claude-opus-4-6-thinking: {}
-    claude-sonnet-4-6: {}
-    gemini-3-flash: {}
-    gemini-3.1-pro-low: {}
     gemini-3.6-flash: {}
     gemini-3.7-flash: {}
-    gemini-3.8-flash: {}
+    gemini-3-flash: {}
+    gemini-3.1-pro-low: {}
+    gpt-oss-120b-medium: {}
+    claude-opus-4-6-thinking: {}
   models_discovered: true
   name: cpa-gui
 - name: WorkBuddy (127.0.0.1:8787)
@@ -402,3 +402,5 @@ model_aliases:
 # fallback_model:
 #   provider: openrouter
 #   model: anthropic/claude-sonnet-4
+curator:
+  enabled: false
