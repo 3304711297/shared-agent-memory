@@ -63,8 +63,9 @@
 - [Skills and Tools Slimming and EasyCLIProxy Update Troubleshooting](skills-and-tools-slimming-and-easycliproxy-update-troubleshooting.md) — EasyCLIProxyAPI 更新报错根因诊断（3067 瞬时拒绝连接与上游 EOF）与双端 (Hermes & ZCode) 技能库深度精简与物理清理（移除冗余技能，Exa 独享接管爬虫，Prompt 减负）
 - [Hermes Android Clients and Gateway Topology](hermes-android-clients-and-gateway-topology.md) — Hermes Agent 两款开源 Android 客户端（hermes-android 与 hermes-mobile）协议选型差异（JSON-RPC vs Dashboard WS）、原生中文支持与双端多进程隔离拓扑实录
 - [Browser Bookmarks Taxonomy and Search](browser-bookmarks-taxonomy-and-search.md) — 用户 Edge Dev 浏览器 9000+ 书签分类地图、本地极速检索工具与 OpenViking 语义知识库集成规范（三位一体安全检索体系，双端 browser-bookmarks 技能）
-66|- [Hardware Laptop Undervolt ThrottleStop](hardware-laptop-undervolt-throttlestop.md) — 机械革命极光 X (i7-12800HX) ThrottleStop 调优配置（Core/Cache 均锁定 -180mV、C-State BIOS 关、单轨 Cache 决定论）与 0x0000000A (IRQL=255 HIGH_LEVEL) 黑屏死机根因排障闭环
-67|- [Browser Automation and Ego Lite Evaluation](browser-automation-and-ego-lite-evaluation.md) — 真实浏览器接管与自动化方案对比及 ego-lite 深度评估：ego-lite 仅限 Mac 暂不适用；提炼「Heredoc 批量执行+压缩语义快照」降 Token 思维；现有成熟开箱即用 Skill 选型（dev-browser、attach-to-browser-skill、faster-chrome-devtools）与 Edge Dev 安全边界
-68|- [NCSI Active Probing and DNS Hijack Defense](ncsi-active-probing-and-dns-hijack-defense.md) — 2026-07-21 中国移动 DNS 劫持复盘与 Windows NCSI 主动探测防御体系：Captive Portal 热点认证机制武器化剖析、EnableActiveProbing=0 系统级阻断、DoH 与 TUN Fake-IP 治本方案及 tweak/ysk 双仓工程化闭环
+- [Hardware Laptop Undervolt ThrottleStop](hardware-laptop-undervolt-throttlestop.md) — 机械革命极光 X (i7-12800HX) ThrottleStop 调优配置（Core/Cache 均锁定 -180mV、C-State BIOS 关、单轨 Cache 决定论）与 0x0000000A (IRQL=255 HIGH_LEVEL) 黑屏死机根因排障闭环
+- [Browser Automation and Ego Lite Evaluation](browser-automation-and-ego-lite-evaluation.md) — 真实浏览器接管与自动化方案对比及 ego-lite 深度评估：ego-lite 仅限 Mac 暂不适用；提炼「Heredoc 批量执行+压缩语义快照」降 Token 思维；现有成熟开箱即用 Skill 选型（dev-browser、attach-to-browser-skill、faster-chrome-devtools）与 Edge Dev 安全边界
+- [NCSI Active Probing and DNS Hijack Defense](ncsi-active-probing-and-dns-hijack-defense.md) — 2026-07-21 中国移动 DNS 劫持复盘与 Windows NCSI 主动探测防御体系：Captive Portal 热点认证机制武器化剖析、EnableActiveProbing=0 系统级阻断、DoH 与 TUN Fake-IP 治本方案及 tweak/ysk 双仓工程化闭环
+- [Hermes and ZCode Session Storage Paths](hermes-and-zcode-session-storage-paths.md) — Hermes 与 ZCode 会话存储物理路径、桌面工作区锚定与快捷方式启动规范（state.db、projects.db 与 D:/ai coding 对齐全貌）
 
 
