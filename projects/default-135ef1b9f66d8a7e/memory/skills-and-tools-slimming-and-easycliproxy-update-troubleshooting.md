@@ -57,6 +57,11 @@ metadata:
    - 裁撤 44 项：包括低频玩具娱乐（ascii/comic/draw-your-font/p5js/pixel-art 等 18 项）、重型训练微调框架（unsloth/vllm/evaluating-llms 等 4 项）、社工情报（osint/sherlock 等 6 项）、低频个人工具（maps/memento/product-price/weekly 等 10 项）、平台不适用或重叠劣质项（sdlc-review/setup-wizard/watchers/qmd/powerpoint/docx 等 6 项）；
    - 优选保留同类真强项：保留暗黑极客 SVG 真神 `architecture-diagram`（裁撤 excalidraw/sketch）、保留 Tailwind/React 前端真神 `frontend-design`、保留数据处理核心 `pdf` 与 `xlsx`、保留 `OpenViking` 本地知识检索与自建 CI 看门；
    - 技能总数从 123 降至 79 项，Prompt 信噪比提升 2 倍以上，双端已完成物理删除与对齐。
+5. **第三轮治理：Superpowers 研发纪律套件 14 项技能中文高频动作前置重构（2026-09-07 激活沉睡技能）**：
+   - **痛点与根因排查**：Superpowers 是公认最强的工程纪律套件，但日常对话中模型极少主动触发。根因在于 Hermes 系统 Prompt 在生成 `<available_skills>` 列表时，将 `description` 强制截断至前 57 字符加 `...`；原版长英文前缀导致中文口语别名被物理切除，模型无法识别中文意图。
+   - **全面重构策略**：对 14 项技能的 frontmatter description 进行紧凑化重构，将中文高频动词（「写代码/修Bug/TDD红绿循环」、「报错排查/先找根因」、「收到评审/禁止盲从迎合」、「执行任务书/逐项校验」、「宣称完成/先出示绿灯证据」等）严格置于前 30~36 字符内，确保在截断视窗内 100% 完整露出，同时兼顾原版英文核心关键词。
+   - **双端同步与对齐**：同步更新 Hermes 端（`skills/superpowers/`）与 ZCode 端（`claude-plugins-official/superpowers/6.3.0/skills/`）全部 14 份 `SKILL.md`，并在看门狗名单 `capability-inventory.json` 中记入 notWatched 排除项，形成完整闭环。
+
 - **Hermes 端**：由 **121 个** 技能精简至 **102 个**（剔除 19 项 / 21 个子目录）。
 - **ZCode 端**：由 **92 个** 技能精简至 **75 个**（剔除 17 个子目录）。
 - **核心保留**：Superpowers 研发纪律套件（14个）、`shared-agent-memory`、`hermes-agent`、`telegram-channel-ops`、`ast-grep`、`frontend-design`、`chinese-copywriting` 等核心能力 100% 完整保留。
