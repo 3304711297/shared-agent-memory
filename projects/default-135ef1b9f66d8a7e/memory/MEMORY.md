@@ -21,7 +21,7 @@
 - [Cross-Repo Coverage Audit](cross-repo-coverage-audit.md) — Coverage 审计契约（逐份与 manifest 完全一致，现 48 项含 GAMEQOS 类）；审计器 ID 正则硬编码前缀，新增清单类别必须同步扩正则；09-05 策略变更：lock 校验收敛至 tag 发版，日常审计直连 ysk/main（严格同步作废）
 - [Tweak Upstream Watch](tweak-upstream-watch.md) — tweakbyjie 上游看门 v2.1（多分支+全 commit 明细+新分支自动发现+API 不可达跳过不误报）四源清单；用户拍板：永远看完整提交不做路径过滤，新来源基线取当时最新避免误报
 - [Skill Plugin Resources](skill-plugin-resources.md) — 书签 skill hub 十资源（2026-09-07 实查全量对齐）：SkillHub.cn/ColaSkill/Hermes Skills Hub + ECC/gemini-skills/zcode-plugins + Anthropic 官方三仓（skills/claude-plugins-official/knowledge-work-plugins）+ TokenRhythm/opensquilla；作为 CI 技能雷达真源
-- [GitHub Stars Organization](github-stars-organization.md) — **任务完成（09-05）**：星标 539 个/29 个 Lists；AI 细分为 Agent 端 21 + Plugin 和 Skill 库 14 + AI 其他 19，原「AI·大模型与工具」拆完删除；未归档仅 HelloGitHub；GraphQL 坑 deleteUserList=listId；用户拍板永远看完整提交
+- [GitHub Stars Organization](github-stars-organization.md) — 星标 Lists 分类整理（29 个 Lists）；2026-09-07 插件与技能库 17 仓全量审计（16 项吻合，toolrush 按运行时调度加速器本质移至 Agent 端，GraphQL updateUserListsForItem 完成调表）
 - [OpenRouter Chinese Scripts Comparison](openrouter-chinese-scripts-comparison.md) — 三个 OpenRouter 汉化脚本对比结论与 datou1996+LynnGuo666 共存配置方案
 - [OpenRouter Chinese Plus Project](openrouter-chinese-plus-project.md) — 桌面 openrouter-chinese 三合一脚本项目；用户用 ScriptCat；React 拆分价格节点 DOM 特性；两轮工程复审已全部修复；**v1.3.2 tag 已对齐产物，build 防倒退已加（56 测试）**
 - [Three Project Audit 2026-08-28](three-project-audit-2026-08-28.md) — 08-28 清单已全部收口；09-05 全账号审计修复批（GameQos fail-closed/看门退出码/c2o 三 P1/alerts 全开/stale 清零/遗留批回填含 Power 往返+汉化 build 防倒退+mbgt 0.3.5+漏洞清零）及低优先遗留（c2o 凭据明文/零 CI 之外已补 dependabot）
