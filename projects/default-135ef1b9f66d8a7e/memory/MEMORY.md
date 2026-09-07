@@ -63,4 +63,6 @@
 - [Skills and Tools Slimming and EasyCLIProxy Update Troubleshooting](skills-and-tools-slimming-and-easycliproxy-update-troubleshooting.md) — EasyCLIProxyAPI 更新报错根因诊断（3067 瞬时拒绝连接与上游 EOF）与双端 (Hermes & ZCode) 技能库深度精简与物理清理（移除冗余技能，Exa 独享接管爬虫，Prompt 减负）
 - [Hermes Android Clients and Gateway Topology](hermes-android-clients-and-gateway-topology.md) — Hermes Agent 两款开源 Android 客户端（hermes-android 与 hermes-mobile）协议选型差异（JSON-RPC vs Dashboard WS）、原生中文支持与双端多进程隔离拓扑实录
 - [Browser Bookmarks Taxonomy and Search](browser-bookmarks-taxonomy-and-search.md) — 用户 Edge Dev 浏览器 9000+ 书签分类地图、本地极速检索工具与 OpenViking 语义知识库集成规范（三位一体安全检索体系，双端 browser-bookmarks 技能）
+- [Hardware Laptop Undervolt ThrottleStop](hardware-laptop-undervolt-throttlestop.md) — 机械革命极光 X (i7-12800HX) ThrottleStop 调优配置（Core/Cache 均锁定 -180mV、C-State BIOS 关、单轨 Cache 决定论）与 0x0000000A (IRQL=255 HIGH_LEVEL) 黑屏死机根因排障闭环
+
 

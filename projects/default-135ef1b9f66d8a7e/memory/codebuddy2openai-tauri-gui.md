@@ -102,5 +102,12 @@ metadata:
 - **动态模型缓存按 UID 严格隔离**：`_MODELS_CACHE` 升级为 `dict[str, dict]` 按当前活跃 `uid` 分区存储，彻底杜绝多账号切换时不同账号/套餐/灰度模型矩阵串读；
 - **双向验证通过**：新增 2 项原子阻断与多账号隔离单测（共 45 项 pytest 100% 通过），CI Run `34027062730` 全绿通过。
 
+**2026-09-07 Dependabot 治理、WSL 穿透与流式工具损坏防御（提交 94ea894 -> da9e726）**：
+- **Dependabot Alert #1 (glib < 0.20) 闭环**：确认 glib 为 Linux GTK3 跨平台 lockfile 残留，Windows 目标不参与编译。通过 GitHub API 标记为 `dismissed (not_used)`，并在 `.github/dependabot.yml` 中锁定 `ignore: glib (< 0.20.0)`，彻底消除每周误报；
+- **WSL 宿主凭据环境自适应（源自 PR #7 优化）**：新增 `_is_wsl()` 自动检测与 Windows 用户目录扫描，在 Linux/WSL 环境下免参数自适应挂载 Windows 桌面端登录凭据与 `accounts.json`，多账号无感切换（亦支持 `--wsl` 显式开启）；
+- **流式 tool_calls 损坏防御机制（解决 upstream Issue #3）**：针对腾讯后端在 `stream=true` 偶发置空 `function.name` 或截断 `arguments` 导致 Claude Code / Codex 陷入死循环的缺陷，实现 `--repair-stream-tools`（默认开启）：纯文本保持零延迟 SSE 直通，带 tools 请求时自动聚合校验、损坏自动静默重试、平滑转标准 OpenAI SSE 下发；
+- **全量测试与 CI 闭环**：新增 7 项专用测试（全库 52 项 pytest 100% 通过），cargo check/test 与前端构建全绿，GitHub Actions Run `34099938803` 绿灯；
+- **上游生态互动**：已在 upstream Issue #3（tool_calls 损坏）、Issue #4（模型矩阵动态拉取）、PR #7（WSL 穿透）下提交专业技术回复并提供本仓库工程化解决方案。
+
 **Why:** 用户要求模型列表全量覆盖官方模型库，并补全 WorkBuddy 核心的倍率显示、上下文限制与思考强度调节能力。
 **How to apply:** 维护 `C:\Users\VOS-User\Desktop\codebuddy2openai`，后续所有跨端 Agent 配置及客户端演进均以此架构为基准。
