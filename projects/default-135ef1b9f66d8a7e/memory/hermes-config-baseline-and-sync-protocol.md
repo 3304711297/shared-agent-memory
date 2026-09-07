@@ -59,6 +59,13 @@ metadata:
 
 ---
 
+6. **后台自我改进学习循环 (Background Review)**：
+   - 三重禁用：`memory.nudge_interval: 0`、`skills.creation_nudge_interval: 0`、`auxiliary.background_review.enabled: false`（双保险防 fail-open 复活）。
+   - **核心考量**：每 10 轮/15 次工具调用自动 fork 重放会话烧 ~30K token，且擅自写记忆/建技能，违反用户拍板制与看门同步铁律；禁用后 memory 工具、OpenViking、/refine 手动审查均不受影响。
+   - serena 与 cliproxyapi 已于同日退出 capability-inventory.json 看门（插件已删/用户手动更新）。
+
+---
+
 ## 四、 独立配置文件与全量配置快照
 
 * **同目录下独立配置文件**：[`hermes-config.yaml`](./hermes-config.yaml)（可直接供脚本解析或一键恢复）
@@ -138,6 +145,8 @@ auxiliary:
   vision:
     provider: auto
     model: ''
+  background_review:
+    enabled: false
 display:
   compact: false
   busy_input_mode: interrupt
@@ -170,7 +179,7 @@ memory:
   user_profile_enabled: true
   memory_char_limit: 3000
   user_char_limit: 2000
-  nudge_interval: 10
+  nudge_interval: 0
   provider: openviking
   openviking:
     endpoint: http://127.0.0.1:1933
@@ -209,8 +218,10 @@ moa:
   fanout: user_turn
   enabled: false
 skills:
-  creation_nudge_interval: 15
+  creation_nudge_interval: 0
   disabled: []
+curator:
+  enabled: false
 approvals:
   mode: 'off'
 plugins:
@@ -313,6 +324,10 @@ custom_providers:
   base_url: http://127.0.0.1:18080/v1
   model: gemini-3.8-flash
   models:
+    gemini-3-flash: {}
+    gemini-3.1-pro-low: {}
+    gpt-oss-120b-medium: {}
+    claude-opus-4-6-thinking: {}
     claude-sonnet-4-6: {}
     gemini-3.8-flash: {}
     gemini-3.1-flash-image: {}
@@ -320,10 +335,6 @@ custom_providers:
     gemini-web-search: {}
     gemini-3.6-flash: {}
     gemini-3.7-flash: {}
-    gemini-3-flash: {}
-    gemini-3.1-pro-low: {}
-    gpt-oss-120b-medium: {}
-    claude-opus-4-6-thinking: {}
   models_discovered: true
   name: cpa-gui
 - name: WorkBuddy (127.0.0.1:8787)
@@ -469,8 +480,6 @@ model_aliases:
 # fallback_model:
 #   provider: openrouter
 #   model: anthropic/claude-sonnet-4
-curator:
-  enabled: false
 ```
 
 ---
