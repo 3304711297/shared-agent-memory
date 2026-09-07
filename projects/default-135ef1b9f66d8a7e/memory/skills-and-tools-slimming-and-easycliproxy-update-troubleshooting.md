@@ -64,7 +64,7 @@ metadata:
 
 - **Hermes 端**：由 **121 个** 技能精简至 **102 个**（剔除 19 项 / 21 个子目录）。
 - **ZCode 端**：由 **92 个** 技能精简至 **75 个**（剔除 17 个子目录）。
-- **核心保留**：Superpowers 研发纪律套件（14个）、`shared-agent-memory`、`hermes-agent`、`telegram-channel-ops`、`ast-grep`、`frontend-design`、`chinese-copywriting` 等核心能力 100% 完整保留。
+- **核心保留**：Superpowers 研发纪律套件（14个）、`cangjie-distill`（仓颉内容方法论蒸馏元技能）、`shared-agent-memory`、`hermes-agent`、`telegram-channel-ops`、`ast-grep`、`frontend-design`、`chinese-copywriting` 等核心能力 100% 完整保留。
 
 **Why:** 降低系统 Prompt 的 Token 损耗与意图匹配噪音，杜绝无凭据/低效爬虫工具对模型的误导。
 **How to apply:** 日常对话与研发中，网页抓取一律使用原生 Exa 驱动的 `web_extract` / `web_search`；多任务优先 `delegate_task` 并发；被裁撤技能已依用户指令彻底物理清理（`skills-archived` 已整体移除），杜绝无用残余。
