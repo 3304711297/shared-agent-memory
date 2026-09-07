@@ -60,8 +60,18 @@ metadata:
   - `auxiliary.vision.model: ''`
   - 辅助模型默认随主聊天模型动态解析/自动跟随，未经用户提议与明确拍板，严禁人工改动。
 
-**Why:**
-避免多账号环境下因优先级配置与监控单文件硬编码导致的流量倾斜认知偏差与配额监控脱节，确保轮询调度与上下文缓存兼顾，并在桌面端直观呈现真实凭据负载全貌。
+---
 
-**How to apply:**
-新增或调整 EasyCLIProxyAPI 多账号时，必须保证同池账号优先级数值一致方可轮询；桌面端查看额度时以 token-stats 凭据池明细卡中的「● 当前活跃」账号为实际消耗准绳；辅助模型严格保持 `auto` 缺省状态。
+## 四、 3067 链路断流与 CPA 冷却假死机制辨析与改进储备（2026-09-07 沉淀，暂不改动）
+
+- **故障现象复盘**：偶发 `503 auth_unavailable: no auth available (providers=antigravity)` 且伴随 event-loop stall。
+- **底层物理根因**：
+  1. 真正首发的异常是底层 Windows Socket `wsasend / wsarecv` 被远端强制断开（`WSAECONNRESET 10054`）或 TLS 超时，发生在 `18080 → 3067 (Karing) → daily-cloudcode-pa.googleapis.com` 链路上。
+  2. **网关冷却放大机制（关键真凶）**：CPA 核心配置 `transient-error-cooldown-seconds: 0`（官方默认值代表 60 秒冷却封锁）。当底层发生一次短暂断流时，CPA 误将网络瞬态抖动判定为凭据故障，将当前 Antigravity 凭据封锁 60 秒（blackout window）；当两个轮询账号均遭遇抖动，整个凭据池全被拉黑，后续请求全部被 CPA 直接阻断并返回 `503 auth_unavailable`，造成长达数分钟的“假死”。
+- **后续可选改进方案（用户拍板：暂不改动，留作储备）**：
+  1. *CPA 冷却解绑*：将 CPA `config.yaml` 的 `transient-error-cooldown-seconds` 设为 `-1`（禁用瞬态错误冷却）或 `disable-cooling: true`，网络恢复后请求秒级放行，杜绝假死。
+  2. *代理协议优化*：CPA `proxy-url` 由 HTTP CONNECT 改为纯 4 层 TCP 隧道的 `socks5://127.0.0.1:3067`，规避 HTTP 状态机断流重置。
+  3. *Hermes 容灾兜底*：在 `config.yaml` 配置 `fallback_providers` 接入本地直连的 WorkBuddy (GLM-5.3-flash)。
+
+**Why:** 明确区分底层网络断流与网关冷却假死机理，为后续链路稳定性优化提供事实储备，严禁擅自改动。
+**How to apply:** 保持现有配置现状不变；当用户明确需要治理代理断流假死时，按上述储备方案逐步推进。
