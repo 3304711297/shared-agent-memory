@@ -37,3 +37,7 @@ metadata:
 
 **Why:** 更新源分散在 npm/GitHub/两个市场/客户端种子，人工逐个查不可持续；统一看门 + Issue 通知让用户及时用上新版本。
 **How to apply:** 任何 Agent 升级/新装受监控组件后，顺手更新 capability-inventory.json 并推 main；ZCode 客户端更新后跑 watch-capability.cmd 检测内置插件换代；新增组件时在清单登记检查源。相关：[[hermes-to-zcode-capability-sync]] [[multi-branch-memory-backup]]
+
+**2026-09-07 上游 Issue 闭环跟进（scriptscat/scriptcat#1724）**：
+- 用户反馈在 Edge Dev 154 上 ScriptCat 所有用户脚本静默失效（`#1724`）：根因在于 `registerUserscripts()` 早退守卫只校验了 `chrome.userScripts` 注册，未校验 `chrome.scripting` 侧，导致 `scriptcat-scripting` 广播者丢失后无法自愈；且 Edge 154 isolated world 中 `chrome.extension` 为 undefined；
+- **当前状态**：**Closed**。维护者 CodFrm 已合并 PR #1725（提交 `b75124c`），补齐了双向注册校验与 `chrome.extension` 容错，相关问题已在上游彻底收口。
