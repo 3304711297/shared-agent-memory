@@ -39,8 +39,8 @@
   ],
   "accountsCount": 2,
   "source": "Google 官方直连 (Hermes 内置)",
-  "updatedAt": "2026-09-07T15:44:06Z",
-  "updatedAtLocal": "23:44:06",
+  "updatedAt": "2026-09-07T15:47:36Z",
+  "updatedAtLocal": "23:47:36",
   "workbuddy": {
     "id": "workbuddy",
     "name": "WorkBuddy (codebuddy2openai)",
@@ -48,20 +48,20 @@
     "statusLabel": "运行中",
     "endpoint": "http://127.0.0.1:8787/v1",
     "modelsCount": 28,
-    "note": "账号「晚街」· 积分 2145/3909 (54.9%)",
+    "note": "账号「晚街」· 积分 2138/3909 (54.7%)",
     "usage": {
       "nickname": "晚街",
       "total": 3909.0,
-      "remain": 2144.71000094,
-      "used": 1764.28999906,
-      "remainPercent": 54.9,
+      "remain": 2138.1500009399997,
+      "used": 1770.84999906,
+      "remainPercent": 54.7,
       "isPaidUser": false,
       "packages": [
         {
           "code": "TCACA_code_007_nzdH5h4Nl0",
           "total": 2409.0,
-          "remain": 1144.71000094,
-          "used": 1264.28999906,
+          "remain": 1138.15000094,
+          "used": 1270.84999906,
           "unit": "credits"
         },
         {
@@ -139,20 +139,20 @@
       "statusLabel": "运行中",
       "endpoint": "http://127.0.0.1:8787/v1",
       "modelsCount": 28,
-      "note": "账号「晚街」· 积分 2145/3909 (54.9%)",
+      "note": "账号「晚街」· 积分 2138/3909 (54.7%)",
       "usage": {
         "nickname": "晚街",
         "total": 3909.0,
-        "remain": 2144.71000094,
-        "used": 1764.28999906,
-        "remainPercent": 54.9,
+        "remain": 2138.1500009399997,
+        "used": 1770.84999906,
+        "remainPercent": 54.7,
         "isPaidUser": false,
         "packages": [
           {
             "code": "TCACA_code_007_nzdH5h4Nl0",
             "total": 2409.0,
-            "remain": 1144.71000094,
-            "used": 1264.28999906,
+            "remain": 1138.15000094,
+            "used": 1270.84999906,
             "unit": "credits"
           },
           {
