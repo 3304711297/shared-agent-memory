@@ -16,4 +16,4 @@ Hermes 检索与抽取=Exa 独享（EXA_API_KEY 在 .env，web/search/extract ba
 §
 Git push 卡住排查：github.com 直连被墙需走 Karing；ALL_PROXY=127.0.0.1:3067 仅在 Karing 已开出站节点时才监听（Karing 进程自身另监听 127.0.0.1:1666），3067 未监听即无路由，先确认节点开启再 push。
 §
-用户工作方式：会让外部 AI 交叉审查产出修复任务书并严格分级（P0/P1/P2），明确要求限定修改范围、禁止顺手重构或扩展需求；每批完成后必须补回归测试并盯 CI 全绿后才收尾。
+用户工作方式：外部AI交叉审查产出任务书并严格分级（P0/P1/P2），限定修改范围严禁顺手重构；执行Local-First铁律（本地先跑完整CI等价构建测试与桌面端release后再push，不盲目等CI）；补回归测试并盯CI全绿收尾。
