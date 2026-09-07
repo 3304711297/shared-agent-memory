@@ -158,5 +158,18 @@ metadata:
   - 新增 `tests/test_p2_fixes.py`（5 例回归单测）覆盖网络异常、HTTP 错误、非法 JSON、结构残缺与敏感凭据脱敏；
 - **全量验证通过**：全量 67 项 pytest、2 项前端测试、Vite build、20 项 cargo test 100% 通过；本地产出基于最新 main 的 Release NSIS 安装包 `codebuddy2openai_0.2.0_x64-setup.exe` 与 exe；PR #5 已合入 main（Commit `174d21d`）。
 
+**2026-09-07 P2-1 边界补强与 alias 完整三字段校正（PR #6 合入 main，提交 10d51de）**：
+- **YAML block 边界识别彻底消除空行截断 (agents.rs)**：
+  - 重构 `find_item_extent`：不再以空行判定 block 结束，改由“同级缩进的下一项 / 顶层 key / 更浅缩进”严格判定边界；
+  - 允许 block 内部自由包含空行和各类注释，替换或移除时完整覆盖 block 全体字段与注释，绝无残余；
+  - `remove_hermes_config_content` 统一采用相同边界规则，实现全 block 纯净剔除；
+- **已有 alias 完整三字段强校验与按需补齐 (agents.rs)**：
+  - `model` 必须匹配预期模型，错误时仅原位更新 model 字段；
+  - `provider` 必须为 `custom`，错误时仅原位更新 provider 字段；
+  - `base_url` 必须匹配当前端口的 `http://127.0.0.1:<port>/v1`，错误时仅原位更新 base_url；
+  - 缺失任意字段时在 block 内部原位补齐；保留内部无关注释、空行与其他字段；保持全流程零全量反序列化；
+- **补齐 9 项边界回归测试全绿**：覆盖 3 字段全部正确零修改、model/provider/base_url 错误各单修、缺少字段补齐、内含空行+注释、三轮反复幂等、configure-remove-configure 循环及 block 含空行注释无残余替换与移除；
+- **全量验证全绿**：全量 67 项 pytest、2 项前端测试、Vite build、29 项 cargo test 100% 通过。
+
 **Why:** 用户要求模型列表全量覆盖官方模型库，并补全 WorkBuddy 核心的倍率显示、上下文限制与思考强度调节能力。
 **How to apply:** 维护 `C:\Users\VOS-User\Desktop\codebuddy2openai`，后续所有跨端 Agent 配置及客户端演进均以此架构为基准。
