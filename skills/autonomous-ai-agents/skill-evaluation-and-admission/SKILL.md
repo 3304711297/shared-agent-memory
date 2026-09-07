@@ -1,6 +1,6 @@
 ---
 name: skill-evaluation-and-admission
-description: Use when evaluating new agent skills, tools, or repos.
+description: Use when evaluating new agent skills, tools, or repos, or when user asks "值得安装吗", "评估技能", "新技能评估". Five-step audit SOP.
 version: 1.0.0
 author: Hermes Agent
 license: MIT
