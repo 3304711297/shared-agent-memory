@@ -25,7 +25,13 @@ up to date. When the user asks "把本地构建到最新版了吗", answer direc
 real artifact status: distinguish frontend `dist/` from full release installer/exe.
 Before building, `taskkill /IM <app>.exe /F` (see Pitfall 3 on os error 32).
 
-Only after local is green: commit → push → `gh pr checks --watch`.
+Only after local is green: commit → push → merge.
+**Non-blocking CI Discipline**: Do NOT block the conversation synchronously
+waiting for remote CI (`gh pr checks --watch` in foreground) when the local
+equivalent suite has already verified 100% green — local and CI test pipelines
+are identical. Remote CI is an asynchronous sanity check; run it in the
+background via `terminal(command="gh pr checks <PR> --watch", background=true, notify=true)`
+and proceed immediately with subsequent tasks instead of freezing the chat.
 
 ## Core Patterns & Pitfalls
 
@@ -200,16 +206,13 @@ When a local desktop proxy/daemon exposes an HTTP API (e.g. converting upstream 
   reqwest::Client::builder().no_proxy().timeout(Duration::from_secs(10)).build()
   ```
 
-### 10. Atomic Multi-Process State Persistence (`.tmp` + Rename)
+### 10. Atomic Multi-Process State Persistence (`.tmp` + sync_all + Rename)
 Direct file overwriting via `std::fs::write(&path, ...)` or Python `open(path, 'w')` risks file truncation and JSON parse corruption if the app crashes, reboots, or is read concurrently by backend daemons.
-- **Rule**: Always write to a `.tmp` file in the same directory first, then execute an atomic rename (`std::fs::rename` in Rust / `os.replace` in Python).
+- **Rule**: Write to a `.tmp` file in the same directory, flush to disk media via `file.sync_all()`, close the file handle (releasing Windows locks), then execute an atomic rename (`std::fs::rename` in Rust / `os.replace` in Python). On error, remove the `.tmp` file to leave no residue and preserve the original intact.
 
-### 11. Subprocess Termination: Direct PID Tree Kill vs WMI / PowerShell Scan
+### 11. Subprocess Termination: Direct PID Tree Kill & Bounded Wait
 Never use `powershell Get-CimInstance Win32_Process ... Where-Object CommandLine -like '*name*'` to kill background daemons on Windows. WMI scanning takes 1-2s and risks killing other projects running same-named scripts.
-- **Rule**: Track the child PID from `child.id()` and terminate the exact process tree instantly via native `taskkill`:
-  ```rust
-  Command::new("taskkill").args(["/F", "/T", "/PID", &child.id().to_string()]).output();
-  ```
+- **Rule**: Track the child PID from `child.id()` and terminate the exact process tree via native `taskkill /F /T /PID <pid>`. Check exit status (non-zero is Err). Never call indefinite `child.wait()` on an alive process; use a bounded polling loop (`try_wait()` with timeout ~600ms), fallback to `child.kill()` if needed, and retain the Child in state if termination fails so the process remains tracked.
 
 ### 12. Dual-Channel SSE Streaming: Reasoning, Content & Tool Calls Coexistence
 In streaming / SSE adapters, never use exclusive branching like `if tool_calls: ... elif content:`.
@@ -218,6 +221,10 @@ In streaming / SSE adapters, never use exclusive branching like `if tool_calls: 
 ### 13. DOM ID Scoping Across Static & Dynamic Tabs
 In vanilla JS desktop webviews, giving the same `id` (e.g. `btn-refresh-usage`) to both a static tab button and a dynamically rendered card element in another tab causes `document.getElementById` to target the first element in DOM, attaching duplicate or conflicting listeners.
 - **Rule**: Scope element IDs per domain (`btn-refresh-account-quota` vs `btn-refresh-usage`) or use `data-action` with container-level event delegation.
+
+### 14. Window Resize Debouncing: Single-Worker with `latest` Mutex Source of Truth
+Spawning a new thread on every `WindowEvent::Resized` causes severe thread storming during rapid drag operations on Windows.
+- **Rule**: Use a persistent background Worker thread coupled with a notification Channel (`SyncSender<()>`). The latest dimensions are stored in an `Arc<Mutex<(f64, f64)>>`. The channel carries only lightweight signals (`()`) to reset the ~500ms debounce timer. Even if rapid resize events overflow the channel and drop notifications, the worker strictly reads from the `latest` Mutex upon debounce timeout, guaranteeing 100% final state consistency with zero thread churn.
 
 ## References & Deep-Dives
 - `references/proxy-console-architecture-and-pitfalls.md` — Detailed recipes and code patterns for subprocess window suppression (`CREATE_NO_WINDOW`), full-stack UTF-8 stream decoding, 3-tier daemon tray management with bi-directional event broadcast, Tauri v2 snake_case IPC deserialization, upstream model matrix reverse-engineering, and local network security boundary enforcement.
