@@ -558,15 +558,15 @@ def _read_current_chat_route() -> dict[str, Any]:
     return out
 
 
-def _map_provider(provider_slug: Optional[str]) -> dict[str, Any]:
+def _map_provider(provider_slug: Optional[str], model_name: Optional[str] = None) -> dict[str, Any]:
     """把 billing_provider slug 映射到 config.yaml custom_providers 条目。
 
-    匹配顺序: ①名字 slug 精确匹配 ②括号内 host:port 与 base_url 兜底（兼容改名前的旧 slug）。
+    匹配顺序:
+    ① 若 slug 形如 custom:name 或纯 name，先按名字 slug / 端口匹配；
+    ② 若 slug 为 "custom" 或未按名称直接命中，通过当前聊天模型 model_name 在各 provider 的 models 目录中反查；
+    ③ 若仍未命中，当 slug 为 custom 或空时兜底使用 config.yaml 的 model.provider 字段定位默认 custom_provider。
     """
     fail = {"resolved": False}
-    if not provider_slug or not provider_slug.startswith("custom:"):
-        fail["reason"] = f"非 custom 类型 provider（{provider_slug or '空'}），无本地凭据可映射"
-        return fail
     try:
         import yaml
 
@@ -574,28 +574,83 @@ def _map_provider(provider_slug: Optional[str]) -> dict[str, Any]:
     except Exception as exc:
         fail["reason"] = f"config.yaml 读取失败: {exc}"
         return fail
-    providers = cfg.get("custom_providers") or []
-    want = "custom:" + _re.sub(r"\s+", "-", provider_slug[len("custom:"):].strip().lower())
-    port_m = _re.search(r"\(([\d.]+:\d+)\)", provider_slug)
-    for p in providers:
-        name = str(p.get("name") or "")
-        name_slug = "custom:" + _re.sub(r"\s+", "-", name.strip().lower())
-        base_url = str(p.get("base_url") or "")
-        matched = name_slug == want
-        if not matched and port_m and port_m.group(1) in base_url:
-            matched = True
-        if matched:
-            api_key = str(p.get("api_key") or "")
-            if not api_key:
-                return {"resolved": False, "reason": f"provider「{name}」缺 api_key"}
-            return {
-                "resolved": True,
-                "name": name,
-                "base_url": base_url.rstrip("/"),
-                "api_key": api_key,
-                "models": list((p.get("models") or {}).keys()),
-            }
-    fail["reason"] = f"custom_providers 中找不到匹配 {provider_slug}"
+
+    providers: list[dict] = cfg.get("custom_providers") or []
+    if not providers:
+        fail["reason"] = "config.yaml 中未配置任何 custom_providers"
+        return fail
+
+    clean_slug = (provider_slug or "").strip()
+
+    # 1. 尝试按名称/端口匹配（当 slug 明确指定了具体 provider 名称或包含端口时）
+    if clean_slug and clean_slug.lower() != "custom":
+        slug_body = clean_slug[7:].strip() if clean_slug.lower().startswith("custom:") else clean_slug
+        want = "custom:" + _re.sub(r"\s+", "-", slug_body.lower())
+        port_m = _re.search(r"\(([\d.]+:\d+)\)", clean_slug)
+        for p in providers:
+            name = str(p.get("name") or "")
+            name_slug = "custom:" + _re.sub(r"\s+", "-", name.strip().lower())
+            base_url = str(p.get("base_url") or "")
+            matched = (name_slug == want) or (name.strip().lower() == slug_body.lower())
+            if not matched and port_m and port_m.group(1) in base_url:
+                matched = True
+            if matched:
+                api_key = str(p.get("api_key") or "")
+                if not api_key:
+                    return {"resolved": False, "reason": f"provider「{name}」缺 api_key"}
+                models_raw = p.get("models") or {}
+                models_list = list(models_raw.keys()) if isinstance(models_raw, dict) else list(models_raw)
+                return {
+                    "resolved": True,
+                    "name": name,
+                    "base_url": base_url.rstrip("/"),
+                    "api_key": api_key,
+                    "models": models_list,
+                }
+
+    # 2. 当 slug 为 "custom" 或未按名称直接命中：通过当前聊天模型 model_name 反查哪个 provider 支持它
+    if model_name:
+        for p in providers:
+            name = str(p.get("name") or "")
+            models_raw = p.get("models") or {}
+            models_list = list(models_raw.keys()) if isinstance(models_raw, dict) else list(models_raw)
+            if model_name in models_list:
+                api_key = str(p.get("api_key") or "")
+                if not api_key:
+                    return {"resolved": False, "reason": f"provider「{name}」缺 api_key"}
+                return {
+                    "resolved": True,
+                    "name": name,
+                    "base_url": str(p.get("base_url") or "").rstrip("/"),
+                    "api_key": api_key,
+                    "models": models_list,
+                }
+
+    # 3. 兜底匹配：当且仅当 slug 是 "custom" 或空时，使用 config.yaml 中配置的主模型 provider
+    if clean_slug.lower() in ("custom", ""):
+        default_provider_name = cfg.get("model", {}).get("provider") if isinstance(cfg.get("model"), dict) else None
+        if default_provider_name:
+            for p in providers:
+                name = str(p.get("name") or "")
+                if name.strip().lower() == str(default_provider_name).strip().lower():
+                    api_key = str(p.get("api_key") or "")
+                    if not api_key:
+                        return {"resolved": False, "reason": f"默认 provider「{name}」缺 api_key"}
+                    models_raw = p.get("models") or {}
+                    models_list = list(models_raw.keys()) if isinstance(models_raw, dict) else list(models_raw)
+                    return {
+                        "resolved": True,
+                        "name": name,
+                        "base_url": str(p.get("base_url") or "").rstrip("/"),
+                        "api_key": api_key,
+                        "models": models_list,
+                    }
+
+    # 4. 无法映射时的明确原因
+    if clean_slug and clean_slug.lower() not in ("custom", ""):
+        fail["reason"] = f"非本地 custom 类型 provider（{clean_slug}），无本地凭据可映射"
+    else:
+        fail["reason"] = f"custom_providers 中找不到支持模型「{model_name or '未知'}」的本地凭据"
     return fail
 
 
@@ -623,7 +678,11 @@ def compute_ovlm_status() -> dict[str, Any]:
     chat = _read_current_chat_route()
     conf = _read_ov_conf()
     vlm = conf.get("vlm") or {}
-    mapped = _map_provider(chat.get("provider")) if chat.get("provider") else {"resolved": False, "reason": "无活跃会话模型记录"}
+    mapped = (
+        _map_provider(chat.get("provider"), chat.get("model"))
+        if (chat.get("provider") or chat.get("model"))
+        else {"resolved": False, "reason": "无活跃会话模型记录"}
+    )
 
     target = None
     if mapped.get("resolved"):
@@ -677,7 +736,7 @@ def apply_ovlm_sync(force: bool = False) -> dict[str, Any]:
         return {"synced": False, "reason": f"ov.conf 读取失败 ({_OV_CONF})", "status": status}
 
     # status 里的 key 已脱敏，这里重新映射拿真实凭据（不回传、不落日志）
-    mapped = _map_provider(status["chat"]["provider"])
+    mapped = _map_provider(status["chat"]["provider"], status["chat"]["model"])
     if not mapped.get("resolved"):
         return {"synced": False, "reason": mapped.get("reason"), "status": status}
     conf["vlm"] = {

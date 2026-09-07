@@ -8,7 +8,8 @@ description: Hermes 配额监控内置化架构与排障路径（token-stats 后
 ## 架构
 - 数据源：Google 官方 `daily-cloudcode-pa.googleapis.com/v1internal:retrieveUserQuotaSummary`，凭据读 `D:\EasyCLIProxyAPI\auth\antigravity-*.json`，经本地代理 127.0.0.1:3067。
 - 服务形态：Hermes 后端**用户插件** `~/.hermes/plugins/token-stats/`，FastAPI 路由挂载在 `/api/plugins/token-stats/`（quota / health），随桌面端后端进程启停，无独立进程；并在 `__init__.py` 注册 `/quota` 会话内斜杠指令（支持 `/quota` 或 `/quota refresh`）。
-- 前端：`~/.hermes/desktop-plugins/token-stats/plugin.js` 经 `ctx.rest('/quota')` 命名空间门读取，无 CORS/固定端口依赖。支持状态栏 Chip（含 Popover）、左侧导航栏 Pulse 入口（`SIDEBAR_NAV_AREA`）、独立全景看板（`ROUTES_AREA: /quota`）与命令面板（`PALETTE_AREA`）；基于 `ctx.storage` 实现时间格式（相对/绝对）本地持久化。
+- 前端：`~/.hermes/desktop-plugins/token-stats/plugin.js` 经 `ctx.rest('/quota')` 命名空间门读取，无 CORS/固定端口依赖。支持状态栏 Chip（含 Popover）、左侧导航栏 Pulse 入口（`SIDEBAR_NAV_AREA`）、独立全景看板（`ROUTES_AREA: /quota`）与命令面板（`PALETTE_AREA`）；基于 `ctx.storage` 实现时间格式（相对/绝对）与左侧导航栏配额入口开关持久化（默认隐藏侧栏入口，避免误认为 Hermes 原生自带，用户可在状态栏 Popover 底部或看板一键启闭并热生效）。
+- 多账号与待机账号重置监控（2026-09-07 升级）：多账号凭据池在 Popover 列表和 /quota 看板卡片均直接内联展示各个账号（包括非活跃/待机轮询账号）独立的 5h 滚动与周配额重置倒计时（支持 compact 紧凑与相对/绝对格式），并支持点击任意账号卡片将核心指标大卡（进度条、绝对时刻）切换为该账号的待机聚焦预览。
 - 数据聚合：直连 Google Antigravity 官方配额，并集成 WorkBuddy (codebuddy2openai 8787 端口) 本地网关无感探测。
 
 ## 降级模式（2026-09-07 修复）
