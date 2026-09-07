@@ -21,3 +21,5 @@ Git push 卡住排查：github.com 直连被墙需走 Karing；ALL_PROXY=127.0.0
 后台学习循环禁用（09-07 已落盘）：memory.nudge_interval=0 + skills.creation_nudge_interval=0 + auxiliary.background_review.enabled=false 三重禁用（防 fail-open 复活）；前台 memory 工具/OpenViking//refine 不受影响。serena、cliproxyapi 已退出 capability-inventory.json 看门（用户拍板：cliproxyapi 软件内手动更新）；serena 残留已清理（uv tool 卸载 + ~/.serena 587MB 删除）。
 §
 Hermes Desktop「会话运行不了」假死=切模型注入 user 角色系统消息+客户端带截断参数重试被网关拒绝（上游 #94486，已评论补充证据）；重启不自愈，修复 SOP 见共享库 topics/hermes-desktop-rewind-deadlock.md。
+§
+UI 消歧（09-07 实证）：①「已保存到记忆 N entries」橙色徽章=前台 memory 工具调用标题（zh.ts L3807），非后台 fork；后台审查写入走 display.memory_notifications 的 💾 行且已禁用（三重开关见另一条）。②工具批次并行性：_PARALLEL_SAFE_TOOLS 白名单（纯只读 read/search/web/skill_view 等）才并发；terminal/patch/write_file/memory 等=顺序屏障逐条串行——主会话看到 terminal 一条条出来是安全设计不是故障，勿再当 bug 排查或向用户误报「已并行」。config.yaml 改动无需重启：spawn 时实时重读（mtime 签名缓存）。
