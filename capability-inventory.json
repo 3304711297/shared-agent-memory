@@ -79,42 +79,6 @@
       }
     },
     {
-      "id": "serena",
-      "display": "Serena 语义代码分析",
-      "checks": [
-        {
-          "type": "gh-release",
-          "repo": "oraios/serena"
-        }
-      ],
-      "installed": [
-        {
-          "where": "Hermes 插件 upstream.json 记录",
-          "version": "1.7.0"
-        },
-        {
-          "where": "ZCode 插件 claude-plugins-official（版本号 0.0.0 无意义，随 hermes 评估）",
-          "version": "1.7.0"
-        }
-      ]
-    },
-    {
-      "id": "cliproxyapi",
-      "display": "EasyCLIProxyAPI 网关核心",
-      "checks": [
-        {
-          "type": "gh-release",
-          "repo": "router-for-me/CLIProxyAPI"
-        }
-      ],
-      "installed": [
-        {
-          "where": "D:\\EasyCLIProxyAPI-v0.2.71-Windows-amd64\\cpa-core",
-          "version": "7.2.152"
-        }
-      ]
-    },
-    {
       "id": "zcode-github",
       "display": "ZCode 插件：github",
       "checks": [
@@ -361,8 +325,8 @@
       "installed": [
         {
           "where": "国内社区雷达（书签真源）",
-          "version": "1405",
-          "totalSkills": 1405,
+          "version": "1420",
+          "totalSkills": 1420,
           "extractedAt": "2026-09-07"
         }
       ]
@@ -434,6 +398,8 @@
     "zcode-custom 六个自有 skill（用户原创，无上游）",
     "deepwiki 等 http 远端 MCP（服务端永远最新）",
     "hermes token-stats 插件（hermes 专有后端，随 hermes 本体分发，无公开上游）",
-    "【本地已改技能 2026-09-07】github、tauri-desktop-development 与 superpowers（14项技能frontmatter中文高频动作词前置紧凑化，突破前57字符截断瓶颈）为本地自有/深度定制技能；本次仅补操作纪律与截断优化，非上游版本变动"
+    "【本地已改技能 2026-09-07】github、tauri-desktop-development 与 superpowers（14项技能frontmatter中文高频动作词前置紧凑化，突破前57字符截断瓶颈）为本地自有/深度定制技能；本次仅补操作纪律与截断优化，非上游版本变动",
+    "【用户拍板 2026-09-07】serena：插件已物理删除（双端均无），uv tool 中 serena-agent 与 ~/.serena 残留另行处置，不再纳入看门",
+    "【用户拍板 2026-09-07】cliproxyapi（EasyCLIProxyAPI 网关核心）：退出看门，用户自行在软件内手动检查并更新"
   ]
 }
