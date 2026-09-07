@@ -1,6 +1,6 @@
 中文交流，默认中文回复；主力 Hermes（ZCode 备用）；共享库 shared-agent-memory（3304711297/shared-agent-memory）main=双端共享真源（topics 挂 junction 直通），变动当轮必自动推 main，Hermes 专属推 hermes 分支；复杂任务严格优先 Skills（superpowers 等）+专业 MCP 引导。
 §
-持 Google 个人 Pro 订阅；具备 EasyCLIProxyAPI 与 WorkBuddy 双网关动态切模型；检索主力走 Exa 独享；Skills 官方机制安装且开源免费优先；Whisper 偏好 small；watch 类 Issue 评估无需改动直接关闭。
+持 Google 个人 Pro 订阅；EasyCLIProxyAPI 与 WorkBuddy 双网关切模型；Exa 独享检索；Skills 官方机制且开源免费优先；Whisper 偏好 small；watch Issue 无需改动直接关。
 §
 铁律：技术细节不确定必严格优先联网实证（官方文档/知识库），严禁臆测；代码/文档推 GitHub 后必盯 Actions CI 全绿方能收尾，严禁未等 CI 提前结束。
 §
@@ -22,6 +22,6 @@ Hermes 配置自同步铁律（2026-09-06）：用户通知改设置时，主动
 §
 会话归档与清理闭环铁律（2026-09-06 用户拍板）：日常普通会话模式；若用户要求删除/归档当前会话或累计 ≥1M tokens，必须严格执行三步收尾闭环 SOP——① 提炼记忆上传 shared-agent-memory 共享库；ysk 内容严禁擅自写入，必先列出包含理由的候选清单供用户勾选拍板；② 彻底物理清理本会话全部无用临时文件（测试脚本/探针/日志）；③ 自动提交推送并盯 Actions CI 全绿收尾。
 §
-手机端控制 Hermes：已装 hermes-android (8642) 与 hermes-mobile (9119)；偏好全中文界面与会话闭环。
+移动端：已装 hermes-android (8642) 与 hermes-mobile (9119)；全中文。
 §
-技能与工具库偏好（09-07 用户拍板）：被裁撤技能直接物理删除（不留本地归档残余），仅在记忆库记录替代逻辑；高度关注官方与高星技能库生态（Anthropic/Gemini等多源监控储备），真源参阅 Edge Dev 书签 skill hub 目录。
+技能与资源偏好（2026-09-07）：裁撤技能物理删除不留本地残余；视 Edge Dev 9k+ 个人书签为核心资源库，找工具/推荐优先本地检索（search_bookmarks/OpenViking）；能力看门狗严格去重防重复 Issue，非 GitHub 爬虫异常优雅降级不误报。
