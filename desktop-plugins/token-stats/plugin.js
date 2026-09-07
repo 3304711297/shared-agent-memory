@@ -16,7 +16,6 @@ import {
   ROUTES_AREA,
   Separator,
   SIDEBAR_NAV_AREA,
-  Tip,
   useValue,
 } from '@hermes/plugin-sdk'
 import { useEffect, useState } from 'react'
@@ -24,10 +23,39 @@ import { jsx, jsxs } from 'react/jsx-runtime'
 
 const ID = 'token-stats'
 const STORAGE_KEY_FORMAT = 'quota_reset_format' // 'relative' | 'absolute'
+const STORAGE_KEY_SHOW_NAV = 'quota_show_sidebar_nav' // boolean
 
 let pluginCtx = null
 
-function formatResetTime(isoString, formatMode = 'relative') {
+function getStoredShowNav(ctx) {
+  try {
+    const val = (ctx && ctx.storage && ctx.storage.get(STORAGE_KEY_SHOW_NAV))
+    if (val === undefined || val === null) {
+      return false // 默认关闭，避免误以为是 Hermes 原生自带功能
+    }
+    return Boolean(val)
+  } catch {
+    return false
+  }
+}
+
+function syncSidebarNav(show) {
+  const c = pluginCtx
+  if (!c || !c.register) return
+  c.register({
+    id: 'nav',
+    area: SIDEBAR_NAV_AREA,
+    order: 80,
+    enabled: Boolean(show),
+    data: {
+      path: '/quota',
+      label: '配额',
+      codicon: 'pulse',
+    },
+  })
+}
+
+function formatResetTime(isoString, formatMode = 'relative', compact = false) {
   if (!isoString) return '--'
   try {
     const target = new Date(isoString).getTime()
@@ -49,6 +77,12 @@ function formatResetTime(isoString, formatMode = 'relative') {
     const minutes = totalMinutes % 60
     const days = Math.floor(hours / 24)
     const remainHours = hours % 24
+
+    if (compact) {
+      if (days > 0) return `${days}天${remainHours}h后`
+      if (hours > 0) return `${hours}h${minutes}m后`
+      return `${minutes}m后`
+    }
 
     if (days > 0) {
       return `${days}天 ${remainHours}小时后 (${m}/${d} ${hm})`
@@ -89,6 +123,24 @@ function AntigravityQuotaChip({ ctx }) {
       return 'relative'
     }
   })
+  const [selectedEmail, setSelectedEmail] = useState(null)
+  const [showSidebarNav, setShowSidebarNav] = useState(() => getStoredShowNav(ctx || pluginCtx))
+
+  const toggleSidebarNav = (e) => {
+    if (e) e.stopPropagation()
+    const next = !showSidebarNav
+    setShowSidebarNav(next)
+    try {
+      const storage = (ctx && ctx.storage) || (pluginCtx && pluginCtx.storage)
+      if (storage) storage.set(STORAGE_KEY_SHOW_NAV, next)
+    } catch {}
+    syncSidebarNav(next)
+    haptic?.('tap')
+    host.notify?.({
+      kind: 'info',
+      message: next ? '已开启左侧导航配额入口' : '已关闭左侧导航配额入口（默认状态）',
+    })
+  }
 
   const [quotaData, setQuotaData] = useState({
     quota5h: 100,
@@ -172,45 +224,43 @@ function AntigravityQuotaChip({ ctx }) {
     return () => clearInterval(timer)
   }, [])
 
+  const accountsList = quotaData.accounts || []
+  const activeAccountObj = accountsList.find((a) => a.isActive) || accountsList[0] || quotaData
+  const viewingAccount = (selectedEmail && accountsList.find((a) => a.account === selectedEmail)) || activeAccountObj
+
   return jsxs(Popover, {
     open,
     onOpenChange: setOpen,
     children: [
-      jsx(Tip, {
-        label: `Google 官方配额 · 5h: ${quotaData.quota5h}% | 周: ${quotaData.quotaWeekly}% (点击展开)`,
-        children: jsx(PopoverTrigger, {
-          asChild: true,
-          children: jsxs('button', {
-            className: cn(
-              'inline-flex h-full items-center gap-1.5 px-2 text-[0.6875rem] font-mono transition-colors select-none cursor-pointer',
-              'text-(--ui-text-secondary) hover:bg-(--chrome-action-hover) hover:text-(--foreground)',
-              busy && 'text-(--ui-accent) animate-pulse',
-              open && 'bg-(--chrome-action-hover) text-(--foreground)'
-            ),
-            type: 'button',
-            onClick: () => haptic?.('tap'),
-            children: [
-              jsx('span', {
-                className: 'text-[0.75rem] mr-0.5 select-none leading-none',
-                children: '🔋',
-              }),
-              jsxs('span', {
-                className: 'inline-flex items-baseline gap-0.5',
-                children: [
-                  jsx('span', {
-                    className: 'text-[10px] font-sans font-medium text-(--ui-text-secondary)',
-                    children: '5h',
-                  }),
-                  jsx('span', {
-                    className: 'text-[10px] text-(--ui-text-quaternary) font-mono',
-                    children: ':',
-                  }),
-                  jsxs('span', {
-                    className: cn('font-mono font-bold tracking-tight', getTextColor(quotaData.quota5h)),
-                    children: [quotaData.quota5h, '%'],
-                  }),
-                ],
-              }),
+      jsx(PopoverTrigger, {
+        asChild: true,
+        children: jsxs('button', {
+          className: cn(
+            'inline-flex h-full items-center gap-1.5 px-2 text-[0.6875rem] font-mono transition-colors select-none cursor-pointer',
+            'text-(--ui-text-secondary) hover:bg-(--chrome-action-hover) hover:text-(--foreground)',
+            busy && 'text-(--ui-accent) animate-pulse',
+            open && 'bg-(--chrome-action-hover) text-(--foreground)'
+          ),
+          type: 'button',
+          onClick: () => haptic?.('tap'),
+          children: [
+            jsxs('span', {
+              className: 'inline-flex items-baseline gap-0.5',
+              children: [
+                jsx('span', {
+                  className: 'text-[10px] font-sans font-medium text-(--ui-text-secondary)',
+                  children: '5h',
+                }),
+                jsx('span', {
+                  className: 'text-[10px] text-(--ui-text-quaternary) font-mono',
+                  children: ':',
+                }),
+                jsxs('span', {
+                  className: cn('font-mono font-bold tracking-tight', getTextColor(quotaData.quota5h)),
+                  children: [quotaData.quota5h, '%'],
+                }),
+              ],
+            }),
               jsx('span', {
                 className: 'text-[10px] text-white/15 select-none font-mono mx-0.5',
                 children: '·',
@@ -235,7 +285,6 @@ function AntigravityQuotaChip({ ctx }) {
             ],
           }),
         }),
-      }),
 
       jsxs(PopoverContent, {
         align: 'end',
@@ -352,17 +401,40 @@ function AntigravityQuotaChip({ ctx }) {
             className:
               'px-2.5 py-1.5 rounded-lg bg-black/20 border border-white/5 flex items-center justify-between text-[0.6875rem]',
             children: [
-              jsx('span', {
-                className: 'text-(--ui-text-tertiary) truncate max-w-44 font-mono text-[11px]',
-                children: quotaData.account,
+              jsxs('div', {
+                className: 'flex items-center gap-1.5 truncate max-w-44',
+                children: [
+                  jsx('span', {
+                    className: cn(
+                      'w-1.5 h-1.5 rounded-full shrink-0',
+                      viewingAccount.isActive ? 'bg-emerald-400 shadow-sm shadow-emerald-400/50' : 'bg-amber-400'
+                    ),
+                  }),
+                  jsx('span', {
+                    className: 'text-(--ui-text-tertiary) truncate font-mono text-[11px]',
+                    title: viewingAccount.account,
+                    children: viewingAccount.account,
+                  }),
+                ],
               }),
               jsxs('div', {
                 className: 'flex items-center gap-1.5 text-[0.625rem]',
                 children: [
-                  jsx('span', {
-                    className: 'text-emerald-400/90 font-mono',
-                    children: '● 当前活跃路由',
-                  }),
+                  viewingAccount.isActive
+                    ? jsx('span', {
+                        className: 'text-emerald-400/90 font-mono',
+                        children: '● 当前活跃路由',
+                      })
+                    : jsxs('button', {
+                        type: 'button',
+                        onClick: () => {
+                          setSelectedEmail(activeAccountObj.account)
+                          haptic?.('tap')
+                        },
+                        title: '点击切回当前活跃路由账户',
+                        className: 'text-amber-300 hover:text-amber-200 font-mono underline cursor-pointer transition-colors',
+                        children: ['待机预览 (切回活跃)'],
+                      }),
                   lastSyncTime &&
                     jsxs('span', {
                       className: 'text-(--ui-text-quaternary) font-mono',
@@ -381,36 +453,79 @@ function AntigravityQuotaChip({ ctx }) {
                 jsxs('div', {
                   className: 'flex items-center justify-between text-(--ui-text-quaternary) pb-0.5 border-b border-white/5',
                   children: [
-                    jsx('span', { children: `凭据池 (${quotaData.accounts.length} 账号)` }),
+                    jsx('span', { children: `凭据池 (${quotaData.accounts.length} 账号 · 点击切换)` }),
                     jsx('span', { className: 'text-emerald-400/90 font-sans', children: '轮询负载中' }),
                   ],
                 }),
-                quotaData.accounts.map((acc) =>
-                  jsxs('div', {
+                quotaData.accounts.map((acc) => {
+                  const isSelected = acc.account === viewingAccount.account
+                  return jsxs('button', {
+                    type: 'button',
                     key: acc.account,
+                    onClick: () => {
+                      setSelectedEmail(acc.account)
+                      haptic?.('tap')
+                    },
                     className: cn(
-                      'flex items-center justify-between py-0.5 px-1 rounded transition-colors',
-                      acc.isActive ? 'bg-emerald-500/10 text-emerald-300 font-semibold' : 'text-(--ui-text-tertiary)'
+                      'w-full text-left flex flex-col gap-0.5 py-1 px-1.5 rounded transition-all cursor-pointer',
+                      isSelected
+                        ? 'bg-emerald-500/15 ring-1 ring-emerald-500/30 text-(--foreground)'
+                        : 'hover:bg-white/5 text-(--ui-text-tertiary)'
                     ),
                     children: [
                       jsxs('div', {
-                        className: 'flex items-center gap-1 truncate max-w-[130px]',
+                        className: 'flex items-center justify-between w-full',
                         children: [
-                          acc.isActive && jsx('span', { className: 'w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0' }),
-                          jsx('span', { className: 'truncate', children: acc.account }),
+                          jsxs('div', {
+                            className: 'flex items-center gap-1.5 truncate max-w-[150px]',
+                            children: [
+                              acc.isActive
+                                ? jsx('span', { className: 'w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0 shadow-sm shadow-emerald-400/50' })
+                                : jsx('span', { className: 'w-1.5 h-1.5 rounded-full bg-zinc-600 shrink-0' }),
+                              jsx('span', {
+                                className: cn('truncate text-[10px]', isSelected ? 'font-semibold text-white' : 'text-zinc-300'),
+                                children: acc.account,
+                              }),
+                              acc.isActive &&
+                                jsx('span', {
+                                  className: 'text-[9px] px-1 py-0.2 rounded bg-emerald-500/20 text-emerald-300 shrink-0',
+                                  children: '活跃',
+                                }),
+                              isSelected && !acc.isActive &&
+                                jsx('span', {
+                                  className: 'text-[9px] px-1 py-0.2 rounded bg-amber-500/20 text-amber-300 shrink-0',
+                                  children: '查看',
+                                }),
+                            ],
+                          }),
+                          jsxs('div', {
+                            className: 'flex items-center gap-1 shrink-0 text-[9px]',
+                            children: [
+                              jsxs('span', { className: getTextColor(acc.quota5h), children: ['5h: ', acc.quota5h, '%'] }),
+                              jsx('span', { className: 'text-white/20', children: '|' }),
+                              jsxs('span', { className: getTextColor(acc.quotaWeekly), children: ['周: ', acc.quotaWeekly, '%'] }),
+                            ],
+                          }),
                         ],
                       }),
                       jsxs('div', {
-                        className: 'flex items-center gap-1 shrink-0 text-[9px]',
+                        className: 'flex items-center justify-between text-[8.5px] text-(--ui-text-quaternary) pt-0.5 border-t border-white/5',
                         children: [
-                          jsxs('span', { children: ['5h: ', acc.quota5h, '%'] }),
-                          jsx('span', { className: 'text-white/20', children: '|' }),
-                          jsxs('span', { children: ['周: ', acc.quotaWeekly, '%'] }),
+                          jsxs('span', {
+                            className: 'truncate max-w-[145px]',
+                            title: `5h 滚动重置: ${acc.reset5h || '--'}`,
+                            children: ['⏳5h: ', formatResetTime(acc.reset5h, formatMode, true)],
+                          }),
+                          jsxs('span', {
+                            className: 'truncate max-w-[145px] text-right',
+                            title: `周额度重置: ${acc.resetWeekly || '--'}`,
+                            children: ['⏳周: ', formatResetTime(acc.resetWeekly, formatMode, true)],
+                          }),
                         ],
                       }),
                     ],
                   })
-                ),
+                }),
               ],
             }),
 
@@ -425,13 +540,23 @@ function AntigravityQuotaChip({ ctx }) {
                   jsxs('div', {
                     className: 'flex items-center justify-between text-xs',
                     children: [
-                      jsx('span', {
-                        className: 'text-(--ui-text-secondary) font-medium',
-                        children: 'Gemini 5h 滚动额度',
+                      jsxs('div', {
+                        className: 'flex items-center gap-1.5',
+                        children: [
+                          jsx('span', {
+                            className: 'text-(--ui-text-secondary) font-medium',
+                            children: 'Gemini 5h 滚动额度',
+                          }),
+                          !viewingAccount.isActive &&
+                            jsx('span', {
+                              className: 'text-[9px] px-1 py-0.2 rounded bg-amber-500/20 text-amber-300 font-mono',
+                              children: '待机预览',
+                            }),
+                        ],
                       }),
                       jsxs('span', {
-                        className: cn('font-mono font-semibold', getTextColor(quotaData.quota5h)),
-                        children: [quotaData.quota5h, '%'],
+                        className: cn('font-mono font-semibold', getTextColor(viewingAccount.quota5h)),
+                        children: [viewingAccount.quota5h, '%'],
                       }),
                     ],
                   }),
@@ -440,9 +565,9 @@ function AntigravityQuotaChip({ ctx }) {
                     children: jsx('div', {
                       className: cn(
                         'h-full rounded-full transition-all duration-500',
-                        getProgressColor(quotaData.quota5h)
+                        getProgressColor(viewingAccount.quota5h)
                       ),
-                      style: { width: `${Math.min(100, Math.max(0, quotaData.quota5h))}%` },
+                      style: { width: `${Math.min(100, Math.max(0, viewingAccount.quota5h))}%` },
                     }),
                   }),
                   jsxs('div', {
@@ -454,7 +579,7 @@ function AntigravityQuotaChip({ ctx }) {
                         onClick: toggleFormat,
                         title: '点击切换 相对/绝对 显示格式',
                         className: 'font-mono text-zinc-300 hover:text-white cursor-pointer transition-colors',
-                        children: formatResetTime(quotaData.reset5h, formatMode),
+                        children: formatResetTime(viewingAccount.reset5h, formatMode),
                       }),
                     ],
                   }),
@@ -470,13 +595,23 @@ function AntigravityQuotaChip({ ctx }) {
                   jsxs('div', {
                     className: 'flex items-center justify-between text-xs',
                     children: [
-                      jsx('span', {
-                        className: 'text-(--ui-text-secondary) font-medium',
-                        children: 'Gemini 本周总配额',
+                      jsxs('div', {
+                        className: 'flex items-center gap-1.5',
+                        children: [
+                          jsx('span', {
+                            className: 'text-(--ui-text-secondary) font-medium',
+                            children: 'Gemini 本周总配额',
+                          }),
+                          !viewingAccount.isActive &&
+                            jsx('span', {
+                              className: 'text-[9px] px-1 py-0.2 rounded bg-amber-500/20 text-amber-300 font-mono',
+                              children: '待机预览',
+                            }),
+                        ],
                       }),
                       jsxs('span', {
-                        className: cn('font-mono font-semibold', getTextColor(quotaData.quotaWeekly)),
-                        children: [quotaData.quotaWeekly, '%'],
+                        className: cn('font-mono font-semibold', getTextColor(viewingAccount.quotaWeekly)),
+                        children: [viewingAccount.quotaWeekly, '%'],
                       }),
                     ],
                   }),
@@ -485,9 +620,9 @@ function AntigravityQuotaChip({ ctx }) {
                     children: jsx('div', {
                       className: cn(
                         'h-full rounded-full transition-all duration-500',
-                        getProgressColor(quotaData.quotaWeekly)
+                        getProgressColor(viewingAccount.quotaWeekly)
                       ),
-                      style: { width: `${Math.min(100, Math.max(0, quotaData.quotaWeekly))}%` },
+                      style: { width: `${Math.min(100, Math.max(0, viewingAccount.quotaWeekly))}%` },
                     }),
                   }),
                   jsxs('div', {
@@ -499,7 +634,7 @@ function AntigravityQuotaChip({ ctx }) {
                         onClick: toggleFormat,
                         title: '点击切换 相对/绝对 显示格式',
                         className: 'font-mono text-zinc-300 hover:text-white cursor-pointer transition-colors',
-                        children: formatResetTime(quotaData.resetWeekly, formatMode),
+                        children: formatResetTime(viewingAccount.resetWeekly, formatMode),
                       }),
                     ],
                   }),
@@ -507,7 +642,7 @@ function AntigravityQuotaChip({ ctx }) {
               }),
 
               // 3P 协同池 (Claude / GPT)
-              quotaData.claude5h != null &&
+              (viewingAccount.claudeQuota5h != null || quotaData.claude5h != null) &&
                 jsxs('div', {
                   className:
                     'mt-0.5 p-2 rounded-lg bg-white/5 border border-white/5 flex items-center justify-between text-[0.6875rem]',
@@ -521,12 +656,12 @@ function AntigravityQuotaChip({ ctx }) {
                       children: [
                         jsxs('span', {
                           className: 'text-emerald-400',
-                          children: ['5h: ', quotaData.claude5h, '%'],
+                          children: ['5h: ', viewingAccount.claudeQuota5h != null ? viewingAccount.claudeQuota5h : quotaData.claude5h, '%'],
                         }),
                         jsx('span', { className: 'text-white/20', children: '|' }),
                         jsxs('span', {
                           className: 'text-emerald-400',
-                          children: ['周: ', quotaData.claudeWeekly, '%'],
+                          children: ['周: ', viewingAccount.claudeQuotaWeekly != null ? viewingAccount.claudeQuotaWeekly : quotaData.claudeWeekly, '%'],
                         }),
                       ],
                     }),
@@ -631,15 +766,34 @@ function AntigravityQuotaChip({ ctx }) {
 
           jsx(Separator, { className: 'bg-white/5' }),
 
-          // 底部导航直达按钮
+          // 底部控制与导航直达按钮
           jsxs('div', {
-            className: 'flex items-center justify-between pt-0.5',
+            className: 'flex items-center justify-between pt-0.5 text-[0.625rem]',
             children: [
-              jsx('button', {
-                type: 'button',
-                onClick: toggleFormat,
-                className: 'text-[0.625rem] text-(--ui-text-tertiary) hover:text-(--foreground) transition-colors cursor-pointer',
-                children: `时间格式: ${formatMode === 'relative' ? '倒计时' : '绝对时刻'}`,
+              jsxs('div', {
+                className: 'flex items-center gap-1.5',
+                children: [
+                  jsx('button', {
+                    type: 'button',
+                    onClick: toggleFormat,
+                    title: '点击切换时间格式：相对倒计时 / 绝对具体时刻',
+                    className: 'text-(--ui-text-tertiary) hover:text-(--foreground) transition-colors cursor-pointer',
+                    children: formatMode === 'relative' ? '⏱ 倒计时' : '📅 时刻',
+                  }),
+                  jsx('span', { className: 'text-white/10 select-none', children: '|' }),
+                  jsx('button', {
+                    type: 'button',
+                    onClick: toggleSidebarNav,
+                    title: '切换左侧导航列表是否显示配额入口（默认关闭，避免误认为 Hermes 原生自带功能）',
+                    className: cn(
+                      'transition-colors cursor-pointer',
+                      showSidebarNav
+                        ? 'text-emerald-400 hover:text-emerald-300 font-medium'
+                        : 'text-(--ui-text-tertiary) hover:text-zinc-300'
+                    ),
+                    children: showSidebarNav ? '侧栏: 显示' : '侧栏: 隐藏',
+                  }),
+                ],
               }),
               jsxs('button', {
                 type: 'button',
@@ -675,6 +829,23 @@ function QuotaPage({ ctx }) {
       return 'relative'
     }
   })
+  const [selectedEmail, setSelectedEmail] = useState(null)
+  const [showSidebarNav, setShowSidebarNav] = useState(() => getStoredShowNav(ctx || pluginCtx))
+
+  const toggleSidebarNav = () => {
+    const next = !showSidebarNav
+    setShowSidebarNav(next)
+    try {
+      const storage = (ctx && ctx.storage) || (pluginCtx && pluginCtx.storage)
+      if (storage) storage.set(STORAGE_KEY_SHOW_NAV, next)
+    } catch {}
+    syncSidebarNav(next)
+    haptic?.('tap')
+    host.notify?.({
+      kind: 'info',
+      message: next ? '已开启左侧导航配额入口' : '已关闭左侧导航配额入口（默认状态）',
+    })
+  }
 
   const [data, setData] = useState({
     quota5h: 100,
@@ -751,6 +922,10 @@ function QuotaPage({ ctx }) {
     return () => clearInterval(timer)
   }, [])
 
+  const accountsList = data.accounts || []
+  const activeAccountObj = accountsList.find((a) => a.isActive) || accountsList[0] || data
+  const viewingAccount = (selectedEmail && accountsList.find((a) => a.account === selectedEmail)) || activeAccountObj
+
   return jsxs('div', {
     className: 'h-full overflow-y-auto p-6 md:p-8 flex flex-col gap-6 max-w-5xl mx-auto text-(--foreground) font-sans select-none',
     children: [
@@ -811,6 +986,20 @@ function QuotaPage({ ctx }) {
                 }),
               jsxs('button', {
                 type: 'button',
+                onClick: toggleSidebarNav,
+                title: '切换左侧导航列表是否显示配额入口（默认关闭，避免误以为是 Hermes 原生功能）',
+                className: cn(
+                  'px-3 py-1.5 rounded-lg border text-xs font-medium transition-all cursor-pointer shadow-sm',
+                  showSidebarNav
+                    ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/25 hover:bg-emerald-500/15'
+                    : 'bg-(--ui-bg-elevated) text-(--ui-text-tertiary) border-(--ui-stroke-secondary) hover:text-(--foreground) hover:bg-(--chrome-action-hover)'
+                ),
+                children: [
+                  showSidebarNav ? '侧栏: 显示中' : '侧栏: 已隐藏',
+                ],
+              }),
+              jsxs('button', {
+                type: 'button',
                 disabled: refreshing,
                 onClick: () => loadData(true),
                 className: cn(
@@ -865,13 +1054,24 @@ function QuotaPage({ ctx }) {
                           }),
                           jsx('span', {
                             className: 'px-2 py-0.5 text-[10px] font-mono font-medium rounded bg-emerald-500/15 text-emerald-400 border border-emerald-500/20',
-                            children: data.plan,
+                            children: viewingAccount.plan || data.plan,
                           }),
+                          !viewingAccount.isActive &&
+                            jsxs('button', {
+                              type: 'button',
+                              onClick: () => {
+                                setSelectedEmail(activeAccountObj.account)
+                                haptic?.('tap')
+                              },
+                              title: '点击切回当前活跃路由账户',
+                              className: 'px-2 py-0.5 text-[10px] font-mono rounded bg-amber-500/15 text-amber-300 border border-amber-500/25 hover:bg-amber-500/25 transition-colors cursor-pointer',
+                              children: ['待机预览 · 点击切回活跃'],
+                            }),
                         ],
                       }),
                       jsx('p', {
                         className: 'text-xs font-mono text-(--ui-text-tertiary)',
-                        children: data.account,
+                        children: viewingAccount.account,
                       }),
                     ],
                   }),
@@ -897,7 +1097,7 @@ function QuotaPage({ ctx }) {
                   children: [
                     jsxs('span', {
                       className: 'text-(--ui-text-secondary)',
-                      children: [`Antigravity 凭据池 (${data.accounts.length}个账号)`],
+                      children: [`Antigravity 凭据池 (${data.accounts.length}个账号 · 点击卡片切换下方指标)`],
                     }),
                     jsx('span', {
                       className: 'text-xs font-mono text-emerald-400/90',
@@ -907,14 +1107,19 @@ function QuotaPage({ ctx }) {
                 }),
                 jsxs('div', {
                   className: 'grid grid-cols-1 sm:grid-cols-2 gap-2.5',
-                  children: data.accounts.map((acc) =>
-                    jsxs('div', {
+                  children: data.accounts.map((acc) => {
+                    const isSelected = acc.account === viewingAccount.account
+                    return jsxs('div', {
                       key: acc.account,
+                      onClick: () => {
+                        setSelectedEmail(acc.account)
+                        haptic?.('tap')
+                      },
                       className: cn(
-                        'p-2.5 rounded-lg border text-xs flex flex-col gap-1.5 transition-all font-mono',
-                        acc.isActive
-                          ? 'bg-emerald-500/10 border-emerald-500/30 text-(--foreground)'
-                          : 'bg-white/5 border-white/5 text-(--ui-text-secondary)'
+                        'p-3 rounded-lg border text-xs flex flex-col gap-2 transition-all font-mono cursor-pointer',
+                        isSelected
+                          ? 'bg-emerald-500/15 border-emerald-500/40 shadow-md ring-1 ring-emerald-500/30 text-(--foreground)'
+                          : 'bg-white/5 border-white/5 hover:border-white/20 text-(--ui-text-secondary)'
                       ),
                       children: [
                         jsxs('div', {
@@ -924,28 +1129,76 @@ function QuotaPage({ ctx }) {
                               className: 'flex items-center gap-1.5 truncate',
                               children: [
                                 acc.isActive && jsx('span', { className: 'w-2 h-2 rounded-full bg-emerald-400 shrink-0 animate-pulse' }),
-                                jsx('span', { className: 'font-semibold truncate', children: acc.account }),
+                                !acc.isActive && jsx('span', { className: 'w-2 h-2 rounded-full bg-zinc-600 shrink-0' }),
+                                jsx('span', { className: cn('font-semibold truncate', isSelected ? 'text-white' : 'text-zinc-300'), children: acc.account }),
                               ],
                             }),
-                            jsx('span', {
-                              className: cn(
-                                'text-[10px] px-1.5 py-0.5 rounded font-sans',
-                                acc.isActive ? 'bg-emerald-500/20 text-emerald-300 font-medium' : 'bg-white/10 text-zinc-400'
-                              ),
-                              children: acc.isActive ? '当前活跃路由' : '待机轮询',
+                            jsxs('div', {
+                              className: 'flex items-center gap-1 shrink-0',
+                              children: [
+                                jsx('span', {
+                                  className: cn(
+                                    'text-[10px] px-1.5 py-0.5 rounded font-sans',
+                                    acc.isActive ? 'bg-emerald-500/20 text-emerald-300 font-medium' : 'bg-white/10 text-zinc-400'
+                                  ),
+                                  children: acc.isActive ? '当前活跃路由' : '待机轮询',
+                                }),
+                                isSelected && jsx('span', {
+                                  className: 'text-[10px] px-1.5 py-0.5 rounded font-sans bg-amber-500/20 text-amber-300 font-medium',
+                                  children: '当前展示',
+                                }),
+                              ],
                             }),
                           ],
                         }),
                         jsxs('div', {
-                          className: 'flex items-center justify-between text-[11px] pt-1 border-t border-white/5',
+                          className: 'grid grid-cols-2 gap-2 pt-1.5 border-t border-white/5 text-[11px]',
                           children: [
-                            jsxs('span', { children: ['5h 滚动: ', jsx('span', { className: cn('font-bold', getTextColor(acc.quota5h)), children: `${acc.quota5h}%` })] }),
-                            jsxs('span', { children: ['周总额度: ', jsx('span', { className: cn('font-bold', getTextColor(acc.quotaWeekly)), children: `${acc.quotaWeekly}%` })] }),
+                            jsxs('div', {
+                              className: 'flex flex-col gap-0.5',
+                              children: [
+                                jsxs('div', {
+                                  className: 'flex items-center justify-between',
+                                  children: [
+                                    jsx('span', { className: 'text-(--ui-text-tertiary) text-[10px]', children: '5h 滚动' }),
+                                    jsx('span', { className: cn('font-bold font-mono', getTextColor(acc.quota5h)), children: `${acc.quota5h}%` }),
+                                  ],
+                                }),
+                                jsxs('div', {
+                                  className: 'flex items-center gap-1 text-[9.5px] text-(--ui-text-quaternary) truncate',
+                                  title: `5h 重置时间: ${acc.reset5h || '--'}`,
+                                  children: [
+                                    jsx('span', { children: '⏳' }),
+                                    jsx('span', { className: 'truncate', children: formatResetTime(acc.reset5h, formatMode) }),
+                                  ],
+                                }),
+                              ],
+                            }),
+                            jsxs('div', {
+                              className: 'flex flex-col gap-0.5 border-l border-white/5 pl-2',
+                              children: [
+                                jsxs('div', {
+                                  className: 'flex items-center justify-between',
+                                  children: [
+                                    jsx('span', { className: 'text-(--ui-text-tertiary) text-[10px]', children: '周总配额' }),
+                                    jsx('span', { className: cn('font-bold font-mono', getTextColor(acc.quotaWeekly)), children: `${acc.quotaWeekly}%` }),
+                                  ],
+                                }),
+                                jsxs('div', {
+                                  className: 'flex items-center gap-1 text-[9.5px] text-(--ui-text-quaternary) truncate',
+                                  title: `周额度重置时间: ${acc.resetWeekly || '--'}`,
+                                  children: [
+                                    jsx('span', { children: '⏳' }),
+                                    jsx('span', { className: 'truncate', children: formatResetTime(acc.resetWeekly, formatMode) }),
+                                  ],
+                                }),
+                              ],
+                            }),
                           ],
                         }),
                       ],
                     })
-                  ),
+                  }),
                 }),
               ],
             }),
@@ -961,18 +1214,28 @@ function QuotaPage({ ctx }) {
                   jsxs('div', {
                     className: 'flex items-center justify-between',
                     children: [
-                      jsx('span', { className: 'text-xs text-(--ui-text-secondary) font-medium', children: 'Gemini 5h 滚动额度' }),
+                      jsxs('div', {
+                        className: 'flex items-center gap-2',
+                        children: [
+                          jsx('span', { className: 'text-xs text-(--ui-text-secondary) font-medium', children: 'Gemini 5h 滚动额度' }),
+                          !viewingAccount.isActive &&
+                            jsx('span', {
+                              className: 'text-[10px] font-mono px-1.5 py-0.2 rounded bg-amber-500/15 text-amber-300',
+                              children: '待机预览',
+                            }),
+                        ],
+                      }),
                       jsxs('span', {
-                        className: cn('font-mono text-2xl font-bold tracking-tight', getTextColor(data.quota5h)),
-                        children: [data.quota5h, '%'],
+                        className: cn('font-mono text-2xl font-bold tracking-tight', getTextColor(viewingAccount.quota5h)),
+                        children: [viewingAccount.quota5h, '%'],
                       }),
                     ],
                   }),
                   jsx('div', {
                     className: 'h-2 w-full rounded-full bg-white/10 overflow-hidden',
                     children: jsx('div', {
-                      className: cn('h-full rounded-full transition-all duration-500', getProgressColor(data.quota5h)),
-                      style: { width: `${Math.min(100, Math.max(0, data.quota5h))}%` },
+                      className: cn('h-full rounded-full transition-all duration-500', getProgressColor(viewingAccount.quota5h)),
+                      style: { width: `${Math.min(100, Math.max(0, viewingAccount.quota5h))}%` },
                     }),
                   }),
                   jsxs('div', {
@@ -984,7 +1247,7 @@ function QuotaPage({ ctx }) {
                         onClick: toggleFormat,
                         className: 'font-mono text-zinc-300 hover:text-white transition-colors cursor-pointer',
                         title: '点击切换 相对倒计时 / 绝对具体时刻',
-                        children: formatResetTime(data.reset5h, formatMode),
+                        children: formatResetTime(viewingAccount.reset5h, formatMode),
                       }),
                     ],
                   }),
@@ -998,18 +1261,28 @@ function QuotaPage({ ctx }) {
                   jsxs('div', {
                     className: 'flex items-center justify-between',
                     children: [
-                      jsx('span', { className: 'text-xs text-(--ui-text-secondary) font-medium', children: 'Gemini 每周总配额' }),
+                      jsxs('div', {
+                        className: 'flex items-center gap-2',
+                        children: [
+                          jsx('span', { className: 'text-xs text-(--ui-text-secondary) font-medium', children: 'Gemini 每周总配额' }),
+                          !viewingAccount.isActive &&
+                            jsx('span', {
+                              className: 'text-[10px] font-mono px-1.5 py-0.2 rounded bg-amber-500/15 text-amber-300',
+                              children: '待机预览',
+                            }),
+                        ],
+                      }),
                       jsxs('span', {
-                        className: cn('font-mono text-2xl font-bold tracking-tight', getTextColor(data.quotaWeekly)),
-                        children: [data.quotaWeekly, '%'],
+                        className: cn('font-mono text-2xl font-bold tracking-tight', getTextColor(viewingAccount.quotaWeekly)),
+                        children: [viewingAccount.quotaWeekly, '%'],
                       }),
                     ],
                   }),
                   jsx('div', {
                     className: 'h-2 w-full rounded-full bg-white/10 overflow-hidden',
                     children: jsx('div', {
-                      className: cn('h-full rounded-full transition-all duration-500', getProgressColor(data.quotaWeekly)),
-                      style: { width: `${Math.min(100, Math.max(0, data.quotaWeekly))}%` },
+                      className: cn('h-full rounded-full transition-all duration-500', getProgressColor(viewingAccount.quotaWeekly)),
+                      style: { width: `${Math.min(100, Math.max(0, viewingAccount.quotaWeekly))}%` },
                     }),
                   }),
                   jsxs('div', {
@@ -1021,7 +1294,7 @@ function QuotaPage({ ctx }) {
                         onClick: toggleFormat,
                         className: 'font-mono text-zinc-300 hover:text-white transition-colors cursor-pointer',
                         title: '点击切换 相对倒计时 / 绝对具体时刻',
-                        children: formatResetTime(data.resetWeekly, formatMode),
+                        children: formatResetTime(viewingAccount.resetWeekly, formatMode),
                       }),
                     ],
                   }),
@@ -1031,7 +1304,7 @@ function QuotaPage({ ctx }) {
           }),
 
           // 3P 协同模型池
-          data.claude5h != null &&
+          (viewingAccount.claudeQuota5h != null || data.claude5h != null) &&
             jsxs('div', {
               className: 'p-3 rounded-xl bg-white/5 border border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs',
               children: [
@@ -1045,9 +1318,9 @@ function QuotaPage({ ctx }) {
                 jsxs('div', {
                   className: 'flex items-center gap-3 font-mono font-medium',
                   children: [
-                    jsxs('span', { className: 'text-emerald-400', children: ['5h 额度: ', data.claude5h, '%'] }),
+                    jsxs('span', { className: 'text-emerald-400', children: ['5h 额度: ', viewingAccount.claudeQuota5h != null ? viewingAccount.claudeQuota5h : data.claude5h, '%'] }),
                     jsx('span', { className: 'text-white/20', children: '|' }),
-                    jsxs('span', { className: 'text-emerald-400', children: ['周额度: ', data.claudeWeekly, '%'] }),
+                    jsxs('span', { className: 'text-emerald-400', children: ['周额度: ', viewingAccount.claudeQuotaWeekly != null ? viewingAccount.claudeQuotaWeekly : data.claudeWeekly, '%'] }),
                   ],
                 }),
               ],
@@ -1414,8 +1687,17 @@ function OvlmCard({ ctx }) {
               jsxs('div', {
                 className: 'font-mono text-[11px] text-(--ui-text-tertiary) flex items-center gap-2',
                 children: [
-                  targetHost || ov.mapped.reason || '—',
-                  ov.mapped.model_in_catalog === false &&
+                  ov.mapped.resolved
+                    ? jsxs('span', {
+                        className: 'inline-flex items-center gap-2',
+                        children: [
+                          targetHost || '—',
+                          ov.mapped.key_tail && jsx('span', { className: 'text-white/20', children: '|' }),
+                          ov.mapped.key_tail && `key ${ov.mapped.key_tail}`,
+                        ],
+                      })
+                    : (ov.mapped.reason || '—'),
+                  ov.mapped.resolved && ov.mapped.model_in_catalog === false &&
                     jsx('span', { className: 'text-amber-400', children: '⚠ 模型不在目录' }),
                 ],
               }),
@@ -1492,11 +1774,12 @@ export default {
       render: () => jsx(QuotaPage, { ctx }),
     })
 
-    // 3. 左侧导航栏 Pulse 入口
+    // 3. 左侧导航栏 Pulse 入口（默认关闭，避免与原生菜单混淆，可随时在状态栏或看板开关）
     ctx.register({
       id: 'nav',
       area: SIDEBAR_NAV_AREA,
       order: 80,
+      enabled: getStoredShowNav(ctx),
       data: {
         path: '/quota',
         label: '配额',
