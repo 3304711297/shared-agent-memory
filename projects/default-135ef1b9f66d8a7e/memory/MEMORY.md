@@ -68,5 +68,6 @@
 - [NCSI Active Probing and DNS Hijack Defense](ncsi-active-probing-and-dns-hijack-defense.md) — 2026-07-21 中国移动 DNS 劫持复盘与 Windows NCSI 主动探测防御体系：Captive Portal 热点认证机制武器化剖析、EnableActiveProbing=0 系统级阻断、DoH 与 TUN Fake-IP 治本方案及 tweak/ysk 双仓工程化闭环
 - [Hermes and ZCode Session Storage Paths](hermes-and-zcode-session-storage-paths.md) — Hermes 与 ZCode 会话存储物理路径、桌面工作区锚定与快捷方式启动规范（state.db、projects.db 与 D:/ai coding 对齐全貌）
 - [Ponytail Anti Bloat Skills](ponytail-anti-bloat-skills.md) — 引入 Ponytail 极简编程与反过度工程技能套件（v4.9.0，按需 Skill 架构而非常驻 Plugin，双端 6 项落地），纳入看门狗 capability-inventory.json 追踪
+- [Hermes Desktop Rewind Deadlock](hermes-desktop-rewind-deadlock.md) — Desktop 会话假死（切模型+中断→refusing truncation 拒绝循环，上游 #94486）根因链、重启不自愈机理与手工修复 SOP（备份→删毒尾行→校准计数→Esc 清挂起态）
 
 
