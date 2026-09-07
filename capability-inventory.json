@@ -402,6 +402,23 @@
           "sha": "974d940a1c5344210874150b98ff0d2c861fab6a"
         }
       ]
+    },
+    {
+      "id": "cangjie-distill",
+      "display": "Cangjie 仓颉内容方法论蒸馏技能",
+      "checks": [
+        {
+          "type": "gh-release",
+          "repo": "kangarooking/cangjie-skill",
+          "tag_strip": "^v"
+        }
+      ],
+      "installed": [
+        {
+          "where": "Hermes skills/productivity/cangjie-distill + ZCode ~/.zcode/skills/cangjie-distill",
+          "version": "2.5.0"
+        }
+      ]
     }
   ],
   "notWatched": [
