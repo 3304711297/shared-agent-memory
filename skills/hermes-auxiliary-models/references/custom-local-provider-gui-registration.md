@@ -266,7 +266,27 @@ When modifying or reviewing Hermes settings in Desktop GUI or CLI:
   2. Update the shared memory topic `hermes-config-baseline-and-sync-protocol.md` with the latest toolsets enablement table and document the rationale for any disabled categories.
   3. Re-export the sanitized full configuration snapshot `hermes-config.yaml` with private tokens/keys strictly masked (`<REDACTED_LOCAL_KEY>`).
   4. Query `git -C <hermes-agent-path> log -1` to capture the current upstream Git Commit SHA and bind the baseline to that specific software build version.
-  5. Commit and push to `shared-agent-memory` `main` branch before concluding the turn, actively monitoring remote GitHub Actions CI until all jobs pass green.
+  - Commit and push to `shared-agent-memory` `main` branch before concluding the turn, actively monitoring remote GitHub Actions CI until all jobs pass green.
+
+  ## 20. EasyCLIProxyAPI Portable In-Place Upgrade, Log Diagnostics & Shell Safety Rules
+  When upgrading, inspecting, or troubleshooting EasyCLIProxyAPI (`18080`) on Windows:
+  - **In-Place Portable Upgrade Architecture**:
+    - The portable update helper (`EasyCLIProxyAPI-updater.exe` staged in `%LOCALAPPDATA%\\Temp\\EasyCLIProxyAPI-update-*`) extracts the payload and overwrites the executable (`EasyCLIProxyAPI.exe`), `core-version.txt`, and `portable-app.json` directly within the existing application folder.
+    - **The Folder Name Misconception**: In-place updates do NOT rename the parent folder (e.g. `D:\\EasyCLIProxyAPI-v0.2.71-Windows-amd64`). The folder name reflects the initial installation archive; the actual running version is determined solely by `portable-app.json` (e.g. `0.2.75`) and `cpa-core/core-version.txt` (e.g. `7.2.152`).
+  - **Log Truth Source & Diagnostic Paths**:
+    - **Core Gateway Log**: The definitive operational log is located at `D:/EasyCLIProxyAPI/auth/logs/main.log`.
+    - **Startup Crash & Warning Triad**:
+      1. **Proxy Connect Refusal (`dial tcp 127.0.0.1:3067: connectex: ... refused it`)**: When `proxy-url = "http://127.0.0.1:3067"` is configured in `config.toml`, an in-flight gateway restart can trigger connection refused warnings during the millisecond window where the local proxy tunnel is renegotiating. This resolves automatically once the proxy tunnel stabilizes.
+      2. **Quota Exhaustion & Upstream EOF Cascades**: If an account exhausts its quota (e.g. 104-hour cooldown) and the backup credential encounters an upstream Google disconnect (`streamGenerateContent: EOF`), the gateway returns `500` / `503 Service Unavailable`.
+      3. **Tauri Instance Mutex Collision**: The GUI enforces a named Windows mutex `Local\\EasyCLIProxyAPI-instance-{sha256}`. If the old process takes longer than expected to terminate, the newly spawned binary aborts with `"当前 EasyCLIProxyAPI 目录已经有一个软件实例在运行"` or port 18080 binding failure.
+  - **Self-Hosting Agent Inspection Iron Law**:
+    - If the agent's active chat session relies on EasyCLIProxyAPI (e.g. `provider: cpa-gui`, `base_url: http://127.0.0.1:18080/v1`), **STRICTLY FORBID** restarting, terminating, or writing configuration overrides to EasyCLIProxyAPI during that session. Only read-only inspections (`read_file`, `search_files`, `netstat`, `tasklist`) are permitted.
+  - **Windows Bash Shell `$_.Property` Expansion Trap**:
+    - In git-bash / MSYS, running `powershell -NoProfile -Command "Get-Process | Where-Object { $_.ProcessName ... }"` with double quotes causes bash to expand `$_` as the last argument of the preceding shell command (e.g. `/d/ai coding`), producing cascading `CommandNotFoundException` errors (`无法将“/d/ai”项识别为 cmdlet`).
+    - **Rule**: Always wrap PowerShell inline scripts in single quotes `'...'` or use native `read_file` / `search_files` (ripgrep) to inspect state without shell quoting hazards.
+  - **Skill Library Bloat & Token Hygiene Invariant**:
+    - The names and descriptions of all enabled skills in `<available_skills>` are permanently injected into the system prompt on every single turn.
+    - Avoid accumulating unused MLOps/local-runtime skills when `local_runtime.enabled: false`, credential-less SaaS wrapper skills, or local scrapers that duplicate dedicated key-backed extractors (Exa `web_extract`). Keeping the active skill catalog lean preserves prompt cache efficiency and reduces routing ambiguity.
 
 
 
