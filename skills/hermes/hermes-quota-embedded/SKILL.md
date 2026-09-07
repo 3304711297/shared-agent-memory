@@ -11,6 +11,12 @@ description: Hermes 配额监控内置化架构与排障路径（token-stats 后
 - 前端：`~/.hermes/desktop-plugins/token-stats/plugin.js` 经 `ctx.rest('/quota')` 命名空间门读取，无 CORS/固定端口依赖。支持状态栏 Chip（含 Popover）、左侧导航栏 Pulse 入口（`SIDEBAR_NAV_AREA`）、独立全景看板（`ROUTES_AREA: /quota`）与命令面板（`PALETTE_AREA`）；基于 `ctx.storage` 实现时间格式（相对/绝对）本地持久化。
 - 数据聚合：直连 Google Antigravity 官方配额，并集成 WorkBuddy (codebuddy2openai 8787 端口) 本地网关无感探测。
 
+## 降级模式（2026-09-07 修复）
+- 根因链：EasyCLIProxyAPI 网关(18080)未运行 → auth/*.json 的 access_token 无人续期（1h 有效期，字段 `expired`）→ retrieveUserQuotaSummary 401 → 旧代码整体退回磁盘缓存，WorkBuddy 积分被冻结在旧快照且 force=1 也刷不动。
+- 现行为：Google 拉取全败时返回 `status=degraded`（非 error），Google 数字=磁盘缓存快照并附 `degradedReason`；WorkBuddy 8787 积分独立实时探测，与 Google 成败解耦；降级时清内存缓存，恢复后自动回到全实时。
+- 前端 plugin.js 接受 ok|degraded 两态，Chip 呼吸灯/看板徽章转琥珀色并出横幅。
+- 改 plugin_api.py / plugin.js 后必须重启桌面端进程才生效（模块级加载，无热重载）。
+
 ## 关键机制（排障必读）
 - 用户插件后端代码被挂载的**硬性安全门**：插件名必须在 `config.yaml` 的 `plugins.enabled` 列表（GHSA-mcfc-hp25-cjv7）。漏掉 → 404。
 - 插件发现：扫 `<plugins root>/*/dashboard/manifest.json`，`api` 字段必须是 dashboard 目录内相对路径；`tab.hidden: true` 可只挂 API 不出标签页。
