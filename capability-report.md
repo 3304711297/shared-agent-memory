@@ -1,6 +1,6 @@
 # 🔔 本地能力组件上游更新报告
 
-> 生成时间：2026-09-07 18:17（北京时间） · 清单：`capability-inventory.json`
+> 生成时间：2026-09-07 18:41（北京时间） · 清单：`capability-inventory.json`
 >
 > **跟进方式**：升级对应组件后，把清单里的 `installed.version` 更新为新版本并随共享库推 `main`，本看门会在下次运行时自动收口本 Issue。
 
