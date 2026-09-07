@@ -184,21 +184,6 @@
       ]
     },
     {
-      "id": "claude-plugins-official",
-      "display": "Claude 官方插件与技能市场（plugins/ 目录提交）",
-      "checks": [
-        {
-          "type": "github-commits-path",
-          "repo": "anthropics/claude-plugins-official",
-          "path": "plugins",
-          "note": "Anthropic 官方管理的高质量 Claude Code 插件与技能目录；监控 plugins/ 路径新提交。"
-        }
-      ],
-      "installed": [
-        { "where": "官方技能雷达（书签真源）", "version": "HEAD@0e3f501d", "sha": "0e3f501d0f4acb2a3406f645b1e0f80056c22e8c" }
-      ]
-    },
-    {
       "id": "ecc-skills",
       "display": "ECC Agent 优化技能库（skills/ 目录提交）",
       "checks": [
@@ -226,11 +211,40 @@
       "installed": [
         { "where": "官网 Skills Hub 聚合索引（书签真源）", "version": "90698", "totalSkills": 90698, "extractedAt": "2026-09-06" }
       ]
+    },
+    {
+      "id": "skillhub-market",
+      "display": "SkillHub 社区精选技能库",
+      "checks": [
+        {
+          "type": "skillhub-market",
+          "url": "https://api.skillhub.cn/api/v1/contest/skills?page=1&pageSize=1",
+          "note": "SkillHub 国内精选技能社区（腾讯云生态）；监控社区审核上架技能总数。"
+        }
+      ],
+      "installed": [
+        { "where": "国内社区雷达（书签真源）", "version": "1393", "totalSkills": 1393 }
+      ]
+    },
+    {
+      "id": "colaskill-market",
+      "display": "Cola Skill 精品技能策展市场",
+      "checks": [
+        {
+          "type": "colaskill-market",
+          "url": "https://colaskill.com/zh/",
+          "note": "Cola Skill 优质 Claude/Agent 实战技能策展站点；监控精品技能数量与新增列表。"
+        }
+      ],
+      "installed": [
+        { "where": "精品策展雷达（书签真源）", "version": "16", "totalSkills": 16 }
+      ]
     }
   ],
   "notWatched": [
     "【用户拍板 2026-09-05】hermes-agent 与 ZCode CLI 本体永久不纳入看门（各自自带更新机制：hermes update --check / ZCode 客户端自更新）",
     "【用户拍板 2026-09-07】TokenRhythm/opensquilla：Agent 独立框架（非 Skill/Plugin 技能库，同 agent 本体免看门规则），不纳入技能看门",
+    "【去重优化 2026-09-07】claude-plugins-official 整仓：superpowers 与 chrome-devtools-mcp 组件内已自带 claudeMarketplaceSha 精确比对，避免整仓提交导致 Issue 重复告警，予以去重排除",
     "Pester 6.1.0 与 PSScriptAnalyzer 1.25.0：刻意钉在与 tweak CI 一致的版本上，升级反而破坏本地校验一致性，不纳入",
     "handle.exe（Sysinternals live 版本无稳定版本号）、rip grep/ugrep（ZCode 客户端内置随客户端分发）",
     "context7-mcp：自动跟随最新——hermes config.yaml npx 未钉版 + 插件为 http 远端托管（mcp.context7.com），2026-09-05 从受监控清单移出",
