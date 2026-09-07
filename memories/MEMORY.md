@@ -22,4 +22,4 @@ Git push 卡住排查：github.com 直连被墙需走 Karing；ALL_PROXY=127.0.0
 §
 Hermes Desktop「会话运行不了」假死=切模型注入 user 角色系统消息+客户端带截断参数重试被网关拒绝（上游 #94486，已评论补充证据）；重启不自愈，修复 SOP 见共享库 topics/hermes-desktop-rewind-deadlock.md。
 §
-UI 消歧（09-07 实证）：①「已保存到记忆 N entries」橙色徽章=前台 memory 工具调用标题（zh.ts L3807），非后台 fork；后台审查写入走 display.memory_notifications 的 💾 行且已禁用（三重开关见另一条）。②工具批次并行性：_PARALLEL_SAFE_TOOLS 白名单（纯只读 read/search/web/skill_view 等）才并发；terminal/patch/write_file/memory 等=顺序屏障逐条串行——主会话看到 terminal 一条条出来是安全设计不是故障，勿再当 bug 排查或向用户误报「已并行」。config.yaml 改动无需重启：spawn 时实时重读（mtime 签名缓存）。
+【铁律】terminal 严禁宣称/暗示并行（09-07 用户拍板）：内核白名单 _PARALLEL_SAFE_TOOLS 仅纯只读（read_file/search_files/web_search/web_extract/skill_view/skills_list/session_search/vision_analyze）可并发；terminal/patch/write_file/memory/delegate_task 均为顺序屏障，逐条串行执行（共享持久 shell 会话是安全设计）。思考、报告、总结中严禁写「并行执行命令/已并行」等表述——批量发多个 terminal 调用时是「逐条串行」；表述失实=假执行，同等严重。UI 消歧：「已保存到记忆 N entries」徽章=前台 memory 工具调用（zh.ts L3807），非后台 fork（已禁用，写入走 💾 行）。config.yaml 改动无需重启（spawn 时实时重读）。
