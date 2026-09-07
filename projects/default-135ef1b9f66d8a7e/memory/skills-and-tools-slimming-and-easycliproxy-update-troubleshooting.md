@@ -1,11 +1,11 @@
 ---
 name: skills-and-tools-slimming-and-easycliproxy-update-troubleshooting
-description: EasyCLIProxyAPI 更新内核与 GUI 报错根因诊断与双端 (Hermes & ZCode) 技能库深度精简归档规范
+description: EasyCLIProxyAPI 更新内核与 GUI 报错根因诊断与双端 (Hermes & ZCode) 技能库深度精简与物理清理规范
 metadata:
   type: project
 ---
 
-# EasyCLIProxyAPI 更新报错诊断与双端技能库精简归档
+# EasyCLIProxyAPI 更新报错诊断与双端技能库精简清理
 
 ## 一、EasyCLIProxyAPI 更新启动报错排查复盘（2026-09-07）
 
@@ -34,15 +34,13 @@ metadata:
 ### 1. 精简动机与效率瓶颈
 121 个 Skills 的名称、分类和描述在每次 Agent 会话启动时全量注入系统 Prompt，不仅白白消耗数千 tokens 的固定开销，还在意图分发时引入歧义与迟滞。
 
-### 2. 归档而非物理删除原则
-为保证安全可回溯，所有被剔除的技能不使用 `rm` 彻底销毁，而是移动到各自的备用归档目录：
-- **Hermes 归档目录**：`C:\Users\VOS-User\AppData\Local\hermes\skills-archived\`
-- **ZCode 归档目录**：`C:\Users\VOS-User\.zcode\skills-archived\`
-未来若有特定极端开发场景需要恢复，只需将文件夹从 `skills-archived/` 移回 `skills/` 即可秒级复活。
+### 2. 归档与彻底物理删除演进
+* **初始归档**：初次精简时，所有被剔除的技能先统一移入各端的备用归档目录（`AppData\Local\hermes\skills-archived\` 与 `.zcode\skills-archived\`）。
+* **物理删除拍板（2026-09-07 用户拍板）**：用户确认无需保留本地归档残余，已彻底将 Hermes 与 ZCode 两端的 `skills-archived` 物理删除，做到本地磁盘与环境零冗余沉淀。未来若有极端罕见开发场景需用，直接自官方仓库或 SkillHub 按需重装即可。
 
-### 3. 精简归档技能分类清单
+### 3. 精简清理技能分类清单
 
-| 类别 | 归档技能 | 归档原因与更优替代 |
+| 类别 | 清理技能 | 清理原因与更优替代 |
 | :--- | :--- | :--- |
 | **网络抓取类** | `smart-web-crawler`<br>`scrapling` | 依赖本地 requests/Playwright，在复杂代理环境下极易被 Cloudflare / 验证码风控阻断；**更优替代**：配置已全量接管为 Exa 独享（`web_search` / `web_extract`），云端清洗免密，速度与成功率高数倍。 |
 | **本地重型/大显存 MLOps 类** | `llama-cpp`<br>`comfyui`<br>`audiocraft-audio-generation`<br>`nemo-curator`<br>`huggingface-tokenizers`<br>`huggingface-hub`<br>`segment-anything-model`<br>`dspy`<br>`qdrant` | 用户配置明确 `local_runtime.enabled: false`，本机 8GB 显存无法支撑重型本地大模型运行，长期 0 触发；向量检索由 OpenViking 智能感知与 2 分钟闲置休眠全权接管。 |
@@ -55,4 +53,4 @@ metadata:
 - **核心保留**：Superpowers 研发纪律套件（14个）、`shared-agent-memory`、`hermes-agent`、`telegram-channel-ops`、`ast-grep`、`frontend-design`、`chinese-copywriting` 等核心能力 100% 完整保留。
 
 **Why:** 降低系统 Prompt 的 Token 损耗与意图匹配噪音，杜绝无凭据/低效爬虫工具对模型的误导。
-**How to apply:** 日常对话与研发中，网页抓取一律使用原生 Exa 驱动的 `web_extract` / `web_search`；多任务优先 `delegate_task` 并发；若遇小众需求需临时找回旧技能，直接在 `skills-archived` 查验复制。
+**How to apply:** 日常对话与研发中，网页抓取一律使用原生 Exa 驱动的 `web_extract` / `web_search`；多任务优先 `delegate_task` 并发；被裁撤技能已依用户指令彻底物理清理（`skills-archived` 已整体移除），杜绝无用残余。
