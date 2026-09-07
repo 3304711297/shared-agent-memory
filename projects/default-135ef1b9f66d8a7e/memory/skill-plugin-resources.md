@@ -25,4 +25,7 @@ metadata:
 **前沿 Agent 架构类（2026-09-07 书签最新实查扩充）**
 10. **TokenRhythm/opensquilla** — https://github.com/TokenRhythm/opensquilla ：OpenSquilla，高 Token 效率与高智能密度 Agent 框架，具有前沿 Session 隔离与任务裁决机制。
 
-**How to apply:** 用户要找某类能力（如 PPT/SEO/安全审计技能）或 ZCode/Hermes 缺功能时，先查 1/2 的中文目录定位技能名，再回 GitHub 拿源码审读后安装；Claude 系官方技能/插件直接用 7/8/9（源头真源，优先于第三方转译）；Gemini/ZCode 官方需求直接用 5/6；Token 优化与架构借鉴看 10。第三方 skill 安装前必须人工审内容（提示词注入面），不盲装。
+**高价值方法论与技能蒸馏元生态类（2026-09-07 评审评估收录）**
+11. **kangarooking/cangjie-skill** — https://github.com/kangarooking/cangjie-skill ：仓颉技能蒸馏母机（9.2k Stars，RIA-TV++ 体系），将书籍、长视频字幕、播客转写提炼为原子化、可执行的 Agent 技能包；已提炼母机为本地按需技能 `cangjie-distill`（排除上百个衍生包，杜绝技能通胀）。
+
+**How to apply:** 用户要找某类能力（如 PPT/SEO/安全审计技能）或 ZCode/Hermes 缺功能时，先查 1/2 的中文目录定位技能名，再回 GitHub 拿源码审读后安装；Claude 系官方技能/插件直接用 7/8/9（源头真源，优先于第三方转译）；Gemini/ZCode 官方需求直接用 5/6；Token 优化与架构借鉴看 10；长文/长视频方法论提炼看 11。第三方 skill 安装前必须人工审内容（提示词注入面），不盲装。
