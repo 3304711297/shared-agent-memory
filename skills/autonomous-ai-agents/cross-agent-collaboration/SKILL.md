@@ -152,3 +152,17 @@ When the user issues a directive to delete or archive the active session, or whe
    - Stage and commit all persistent knowledge updates, pushing to their authoritative remote branches (`main` for shared repositories, `hermes` for profile-local state).
    - Actively monitor and poll remote GitHub Actions workflows (`gh run watch` / `gh run list`) until 100% green (Success ✓) before completing the turn. Never conclude an archive request without remote CI verification.
 
+## 13. Dual-Agent Workspace Alignment & Cross-Repo Lock Invariants
+
+### Desktop Workspace Alignment (`D:\ai coding`)
+When aligning workspace boundaries between Hermes Desktop and ZCode:
+- **Root Anchor**: ZCode's default workspace directory is anchored to `D:\ai coding` (with `dataBaseDir` and internal spaces residing within).
+- **Hermes Desktop Project Tool**: Anchor the active Hermes session to the same root via `desktop_project(action='create', name='ai coding', path='D:/ai coding')` (or `switch`). This aligns the desktop sidebar file-tree without manual path hopping.
+- **Persistent Shortcut WorkingDir**: On Windows, update the desktop shortcut `C:\Users\VOS-User\Desktop\Hermes Agent.lnk` with `WorkingDirectory = 'D:\ai coding'` via `WScript.Shell`. This ensures fresh GUI launches default directly to the shared coding root.
+
+### Cross-Repo Knowledge Lock Invariant (`tweakbyjie` <-> `youshouldknow`)
+When maintaining interdependent repositories where one locks the documentation commit of the other (e.g. `tweakbyjie/tools/knowledge.lock.json` tracking `youshouldknow`):
+- **Exact 40-Hex Commit SHA**: Always retrieve the commit SHA programmatically using `git -C <path> rev-parse HEAD` or `gh api repos/<owner>/<repo>/commits/main --jq .sha`.
+- **Zero-Splicing / Zero-Truncation**: Never hand-type or splice truncated SHAs into lock files. Audit scripts (e.g. `Test-CrossRepoCoverage.ps1`) construct direct Raw GitHub URLs (`raw.githubusercontent.com/.../<ref>/...`); a malformed or non-existent commit SHA immediately fails with HTTP 404, blocking Coverage and CI pipelines.
+- **Push Order Constraint**: Always commit and push the knowledge documentation repository first, verify the commit exists on remote `main`, update the downstream lock file, run local cross-repo coverage and test suites (`Invoke-Pester`), and only then push the downstream repository.
+

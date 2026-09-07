@@ -3,9 +3,9 @@
   "account": "2964251404@qq.com",
   "activeAccount": "2964251404@qq.com",
   "plan": "Google AI Pro",
-  "quota5h": 50.1,
+  "quota5h": 21.3,
   "reset5h": "2026-09-07T12:32:19Z",
-  "quotaWeekly": 65.3,
+  "quotaWeekly": 60.5,
   "resetWeekly": "2026-09-13T12:55:45Z",
   "claudeQuota5h": 100,
   "claudeQuotaWeekly": 100,
@@ -15,9 +15,9 @@
       "email": "2964251404@qq.com",
       "plan": "Google AI Pro",
       "priority": 10,
-      "quota5h": 50.1,
+      "quota5h": 21.3,
       "reset5h": "2026-09-07T12:32:19Z",
-      "quotaWeekly": 65.3,
+      "quotaWeekly": 60.5,
       "resetWeekly": "2026-09-13T12:55:45Z",
       "claudeQuota5h": 100,
       "claudeQuotaWeekly": 100,
@@ -39,8 +39,8 @@
   ],
   "accountsCount": 2,
   "source": "Google 官方直连 (Hermes 内置)",
-  "updatedAt": "2026-09-07T09:30:45Z",
-  "updatedAtLocal": "17:30:45",
+  "updatedAt": "2026-09-07T10:41:42Z",
+  "updatedAtLocal": "18:41:42",
   "workbuddy": {
     "id": "workbuddy",
     "name": "WorkBuddy (codebuddy2openai)",
@@ -61,12 +61,12 @@
       "windows": [
         {
           "label": "Gemini 5h 滚动额度",
-          "remaining": 50.1,
+          "remaining": 21.3,
           "reset": "2026-09-07T12:32:19Z"
         },
         {
           "label": "Gemini 每周总配额",
-          "remaining": 65.3,
+          "remaining": 60.5,
           "reset": "2026-09-13T12:55:45Z"
         },
         {

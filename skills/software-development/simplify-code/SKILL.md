@@ -1,6 +1,6 @@
 ---
 name: simplify-code
-description: "Parallel 4-agent cleanup of recent code changes."
+description: Use when user asks to simplify, cleanup, or refactor recent code changes, or says "简化代码", "代码重构", "清理代码", "代码瘦身". Parallel 4-agent review.
 version: 1.1.0
 author: Hermes Agent (inspired by Claude Code /simplify)
 license: MIT
