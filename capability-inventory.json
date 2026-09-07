@@ -7,12 +7,25 @@
       "id": "chrome-devtools-mcp",
       "display": "Chrome DevTools MCP",
       "checks": [
-        { "type": "npm", "package": "chrome-devtools-mcp" }
+        {
+          "type": "npm",
+          "package": "chrome-devtools-mcp"
+        }
       ],
       "installed": [
-        { "where": "ZCode cli/config.json mcp.servers（钉版，含防扩展清空保护参数）", "version": "1.8.0" },
-        { "where": "ZCode 插件 claude-plugins-official（已补保护参数）", "version": "1.8.0", "sha": "45f187b1e3202c9f32ddba913be5d68751c3caa3" },
-        { "where": "Hermes config.yaml mcp_servers（钉版，含保护参数）", "version": "1.8.0" }
+        {
+          "where": "ZCode cli/config.json mcp.servers（钉版，含防扩展清空保护参数）",
+          "version": "1.8.0"
+        },
+        {
+          "where": "ZCode 插件 claude-plugins-official（已补保护参数）",
+          "version": "1.8.0",
+          "sha": "45f187b1e3202c9f32ddba913be5d68751c3caa3"
+        },
+        {
+          "where": "Hermes config.yaml mcp_servers（钉版，含保护参数）",
+          "version": "1.8.0"
+        }
       ],
       "claudeMarketplaceSha": {
         "plugin": "chrome-devtools-mcp",
@@ -23,22 +36,42 @@
       "id": "desktop-commander",
       "display": "Desktop Commander",
       "checks": [
-        { "type": "npm", "package": "@wonderwhy-er/desktop-commander" }
+        {
+          "type": "npm",
+          "package": "@wonderwhy-er/desktop-commander"
+        }
       ],
       "installed": [
-        { "where": "Hermes 插件 upstream.json 记录", "version": "0.2.48" },
-        { "where": "ZCode 插件 claude-plugins-official（插件壳版本 0.2.0，核心随 git-subdir main）", "version": "0.2.48" }
+        {
+          "where": "Hermes 插件 upstream.json 记录",
+          "version": "0.2.48"
+        },
+        {
+          "where": "ZCode 插件 claude-plugins-official（插件壳版本 0.2.0，核心随 git-subdir main）",
+          "version": "0.2.48"
+        }
       ]
     },
     {
       "id": "superpowers",
       "display": "Superpowers 开发纪律套件",
       "checks": [
-        { "type": "gh-release", "repo": "obra/superpowers" }
+        {
+          "type": "gh-release",
+          "repo": "obra/superpowers"
+        }
       ],
       "installed": [
-        { "where": "ZCode 插件 claude-plugins-official", "version": "6.3.0", "sha": "b36e0829c6d0140e93cfef2ca599b1b07d4a7797" },
-        { "where": "Hermes 插件 upstream.json 记录", "version": "6.3.0", "sha": "b36e0829c6d0140e93cfef2ca599b1b07d4a7797" }
+        {
+          "where": "ZCode 插件 claude-plugins-official",
+          "version": "6.3.0",
+          "sha": "b36e0829c6d0140e93cfef2ca599b1b07d4a7797"
+        },
+        {
+          "where": "Hermes 插件 upstream.json 记录",
+          "version": "6.3.0",
+          "sha": "b36e0829c6d0140e93cfef2ca599b1b07d4a7797"
+        }
       ],
       "claudeMarketplaceSha": {
         "plugin": "superpowers",
@@ -49,31 +82,52 @@
       "id": "serena",
       "display": "Serena 语义代码分析",
       "checks": [
-        { "type": "gh-release", "repo": "oraios/serena" }
+        {
+          "type": "gh-release",
+          "repo": "oraios/serena"
+        }
       ],
       "installed": [
-        { "where": "Hermes 插件 upstream.json 记录", "version": "1.7.0" },
-        { "where": "ZCode 插件 claude-plugins-official（版本号 0.0.0 无意义，随 hermes 评估）", "version": "1.7.0" }
+        {
+          "where": "Hermes 插件 upstream.json 记录",
+          "version": "1.7.0"
+        },
+        {
+          "where": "ZCode 插件 claude-plugins-official（版本号 0.0.0 无意义，随 hermes 评估）",
+          "version": "1.7.0"
+        }
       ]
     },
     {
       "id": "cliproxyapi",
       "display": "EasyCLIProxyAPI 网关核心",
       "checks": [
-        { "type": "gh-release", "repo": "router-for-me/CLIProxyAPI" }
+        {
+          "type": "gh-release",
+          "repo": "router-for-me/CLIProxyAPI"
+        }
       ],
       "installed": [
-        { "where": "D:\\EasyCLIProxyAPI-v0.2.71-Windows-amd64\\cpa-core", "version": "7.2.152" }
+        {
+          "where": "D:\\EasyCLIProxyAPI-v0.2.71-Windows-amd64\\cpa-core",
+          "version": "7.2.152"
+        }
       ]
     },
     {
       "id": "zcode-github",
       "display": "ZCode 插件：github",
       "checks": [
-        { "type": "zcode-marketplace", "plugin": "github" }
+        {
+          "type": "zcode-marketplace",
+          "plugin": "github"
+        }
       ],
       "installed": [
-        { "where": "ZCode 插件（已启用）", "version": "0.1.2" }
+        {
+          "where": "ZCode 插件（已启用）",
+          "version": "0.1.2"
+        }
       ]
     },
     {
@@ -87,55 +141,116 @@
         }
       ],
       "installed": [
-        { "name": "browser-use", "where": "ZCode 内置插件（已启用）", "version": "0.4.2" },
-        { "name": "computer-use", "where": "ZCode 内置插件（已启用）", "version": "0.5.14" },
-        { "name": "document-skills", "where": "ZCode 内置插件（已启用）", "version": "0.1.4" },
-        { "name": "skill-creator", "where": "ZCode 内置插件（已启用）", "version": "0.1.0" },
-        { "name": "zcode-guide", "where": "ZCode 内置插件（已启用）", "version": "0.1.0" },
-        { "name": "restore-legacy-sessions", "where": "ZCode 内置插件（已启用）", "version": "0.1.0" },
-        { "name": "zcode-cua", "where": "ZCode 内置组件（缓存随计算机控制联动）", "version": "0.5.12" },
-        { "name": "android-emulator", "where": "ZCode 内置插件（已停用）", "version": "0.1.0" },
-        { "name": "ios-simulator", "where": "ZCode 内置插件（已停用）", "version": "0.1.0" }
+        {
+          "name": "browser-use",
+          "where": "ZCode 内置插件（已启用）",
+          "version": "0.4.2"
+        },
+        {
+          "name": "computer-use",
+          "where": "ZCode 内置插件（已启用）",
+          "version": "0.5.14"
+        },
+        {
+          "name": "document-skills",
+          "where": "ZCode 内置插件（已启用）",
+          "version": "0.1.4"
+        },
+        {
+          "name": "skill-creator",
+          "where": "ZCode 内置插件（已启用）",
+          "version": "0.1.0"
+        },
+        {
+          "name": "zcode-guide",
+          "where": "ZCode 内置插件（已启用）",
+          "version": "0.1.0"
+        },
+        {
+          "name": "restore-legacy-sessions",
+          "where": "ZCode 内置插件（已启用）",
+          "version": "0.1.0"
+        },
+        {
+          "name": "zcode-cua",
+          "where": "ZCode 内置组件（缓存随计算机控制联动）",
+          "version": "0.5.12"
+        },
+        {
+          "name": "android-emulator",
+          "where": "ZCode 内置插件（已停用）",
+          "version": "0.1.0"
+        },
+        {
+          "name": "ios-simulator",
+          "where": "ZCode 内置插件（已停用）",
+          "version": "0.1.0"
+        }
       ]
     },
     {
       "id": "cli-gh",
       "display": "系统 CLI：GitHub CLI",
       "checks": [
-        { "type": "gh-release", "repo": "cli/cli" }
+        {
+          "type": "gh-release",
+          "repo": "cli/cli"
+        }
       ],
       "installed": [
-        { "where": "MSI 机器级安装（gh auth 走 keyring）", "version": "2.100.0" }
+        {
+          "where": "MSI 机器级安装（gh auth 走 keyring）",
+          "version": "2.100.0"
+        }
       ]
     },
     {
       "id": "cli-git",
       "display": "系统 CLI：Git for Windows",
       "checks": [
-        { "type": "gh-release", "repo": "git-for-windows/git" }
+        {
+          "type": "gh-release",
+          "repo": "git-for-windows/git"
+        }
       ],
       "installed": [
-        { "where": "D:\\Git（自定义路径，升级须走官方安装器锁路径流程，禁用 winget）", "version": "2.55.0.windows.5" }
+        {
+          "where": "D:\\Git（自定义路径，升级须走官方安装器锁路径流程，禁用 winget）",
+          "version": "2.55.0.windows.5"
+        }
       ]
     },
     {
       "id": "cli-powershell",
       "display": "系统 CLI：PowerShell 7",
       "checks": [
-        { "type": "gh-release", "repo": "PowerShell/PowerShell" }
+        {
+          "type": "gh-release",
+          "repo": "PowerShell/PowerShell"
+        }
       ],
       "installed": [
-        { "where": "winget 用户级（5.1 系统内置不列入）", "version": "7.6.5" }
+        {
+          "where": "winget 用户级（5.1 系统内置不列入）",
+          "version": "7.6.5"
+        }
       ]
     },
     {
       "id": "cli-lychee",
       "display": "系统 CLI：lychee 链接检查",
       "checks": [
-        { "type": "gh-release", "repo": "lycheeverse/lychee", "tag_strip": "^lychee-v" }
+        {
+          "type": "gh-release",
+          "repo": "lycheeverse/lychee",
+          "tag_strip": "^lychee-v"
+        }
       ],
       "installed": [
-        { "where": "%LOCALAPPDATA%\\Programs\\lychee", "version": "0.24.2" }
+        {
+          "where": "%LOCALAPPDATA%\\Programs\\lychee",
+          "version": "0.24.2"
+        }
       ]
     },
     {
@@ -150,7 +265,11 @@
         }
       ],
       "installed": [
-        { "where": "Hermes skills/（80 项）+ ZCode ~/.zcode/skills（44 项精简副本）", "version": "HEAD@ee5b5ec2", "sha": "ee5b5ec21e576ccf9b941f9ff71330418415a5cb" }
+        {
+          "where": "Hermes skills/（80 项）+ ZCode ~/.zcode/skills（44 项精简副本）",
+          "version": "HEAD@ee5b5ec2",
+          "sha": "ee5b5ec21e576ccf9b941f9ff71330418415a5cb"
+        }
       ]
     },
     {
@@ -165,7 +284,11 @@
         }
       ],
       "installed": [
-        { "where": "官方技能雷达（书签真源）", "version": "HEAD@41bbe19d", "sha": "41bbe19d1a1a7eaab5e7bb9050a417e5c6cffc8f" }
+        {
+          "where": "官方技能雷达（书签真源）",
+          "version": "HEAD@41bbe19d",
+          "sha": "41bbe19d1a1a7eaab5e7bb9050a417e5c6cffc8f"
+        }
       ]
     },
     {
@@ -180,7 +303,11 @@
         }
       ],
       "installed": [
-        { "where": "官方技能雷达（书签真源）", "version": "HEAD@0fa937a5", "sha": "0fa937a5b79e902b86be5792e8bc7188747286ae" }
+        {
+          "where": "官方技能雷达（书签真源）",
+          "version": "HEAD@0fa937a5",
+          "sha": "0fa937a5b79e902b86be5792e8bc7188747286ae"
+        }
       ]
     },
     {
@@ -195,7 +322,11 @@
         }
       ],
       "installed": [
-        { "where": "开源技能雷达（书签真源）", "version": "HEAD@ca185ef5", "sha": "ca185ef5f7667078a1e70a763bd3a9c71c48acf0" }
+        {
+          "where": "开源技能雷达（书签真源）",
+          "version": "HEAD@ca185ef5",
+          "sha": "ca185ef5f7667078a1e70a763bd3a9c71c48acf0"
+        }
       ]
     },
     {
@@ -209,7 +340,12 @@
         }
       ],
       "installed": [
-        { "where": "官网 Skills Hub 聚合索引（书签真源）", "version": "90698", "totalSkills": 90698, "extractedAt": "2026-09-06" }
+        {
+          "where": "官网 Skills Hub 聚合索引（书签真源）",
+          "version": "90698",
+          "totalSkills": 90698,
+          "extractedAt": "2026-09-06"
+        }
       ]
     },
     {
@@ -223,7 +359,12 @@
         }
       ],
       "installed": [
-        { "where": "国内社区雷达（书签真源）", "version": "1405", "totalSkills": 1405, "extractedAt": "2026-09-07" }
+        {
+          "where": "国内社区雷达（书签真源）",
+          "version": "1405",
+          "totalSkills": 1405,
+          "extractedAt": "2026-09-07"
+        }
       ]
     },
     {
@@ -237,17 +378,29 @@
         }
       ],
       "installed": [
-        { "where": "精品策展雷达（书签真源）", "version": "16", "totalSkills": 16 }
+        {
+          "where": "精品策展雷达（书签真源）",
+          "version": "16",
+          "totalSkills": 16
+        }
       ]
     },
     {
       "id": "ponytail-skills",
       "display": "Ponytail 代码极简与反过度工程技能套件",
       "checks": [
-        { "type": "gh-release", "repo": "DietrichGebert/ponytail", "tag_strip": "^v" }
+        {
+          "type": "gh-release",
+          "repo": "DietrichGebert/ponytail",
+          "tag_strip": "^v"
+        }
       ],
       "installed": [
-        { "where": "Hermes skills/（6 项）+ ZCode ~/.zcode/skills（6 项副本）", "version": "4.9.0", "sha": "974d940a1c5344210874150b98ff0d2c861fab6a" }
+        {
+          "where": "Hermes skills/（6 项）+ ZCode ~/.zcode/skills（6 项副本）",
+          "version": "4.9.0",
+          "sha": "974d940a1c5344210874150b98ff0d2c861fab6a"
+        }
       ]
     }
   ],
@@ -263,6 +416,7 @@
     "未安装的市场插件不监控：cloudbase-skills(0.1.0)、example-plugin(0.2.0)、代码安全防护（后者在 CDN manifest 与本地合并清单均未出现，来源待查，疑似按版本/渠道下发）",
     "zcode-custom 六个自有 skill（用户原创，无上游）",
     "deepwiki 等 http 远端 MCP（服务端永远最新）",
-    "hermes token-stats 插件（hermes 专有后端，随 hermes 本体分发，无公开上游）"
+    "hermes token-stats 插件（hermes 专有后端，随 hermes 本体分发，无公开上游）",
+    "【本地已改技能 2026-09-07】github 与 tauri-desktop-development 为本地自有/深度定制技能（无上游），不纳入看门；本次仅补操作纪律（gh pr checks --watch 替代自造轮询、本地先跑 CI 等价验证链），非版本变动"
   ]
 }
