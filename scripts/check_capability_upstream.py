@@ -117,6 +117,9 @@ def upstream_version(check):
             if p.get("name") == check["plugin"]:
                 return p.get("version")
         return None
+    if t == "hermes-skills-hub":
+        data = http_json(check["url"], accept="application/json")
+        return str(data.get("totalSkills", ""))
     raise ValueError(f"unknown check type: {t}")
 
 
@@ -251,6 +254,39 @@ def main():
             detail.append(f"- 基线：`{(rec or '未记录')[:8]}` → " + (f"**{count} 笔新提交涉及技能库**" if behind else "✅ 一致"))
             if behind:
                 detail.append("- 跟进：Hermes GUI 技能页更新/重跑迁移同步到 ZCode 后，把清单 `installed.sha` 回写为最新 HEAD 并推 main。")
+            details.append("\n".join(detail))
+            continue
+
+        # Hermes 官网 Skills Hub 聚合全网技能库检查（9万+ 索引）
+        if check["type"] == "hermes-skills-hub":
+            try:
+                data = http_json(check["url"], accept="application/json")
+            except Exception as e:
+                rows.append(f"| {comp['display']} | `{cid}` | N/A | ⚠️ 查询失败 |")
+                details.append("\n".join([
+                    f"### {comp['display']}（{cid}）", "",
+                    f"- ⚠️ 上游查询失败：{type(e).__name__}: {e}",
+                ]))
+                continue
+            total = data.get("totalSkills", 0)
+            extracted_at = data.get("extractedAt", "")[:10]
+            rec_loc = comp.get("installed", [{}])[0]
+            rec_total = rec_loc.get("totalSkills", 0)
+            rec_date = rec_loc.get("extractedAt", "")
+            behind = bool(total != rec_total or (extracted_at and rec_date and extracted_at > rec_date))
+            diff_str = f"+{total - rec_total}" if total > rec_total else (f"{total - rec_total}" if total < rec_total else "0")
+            state = "🔴 有更新" if behind else "✅ 最新"
+            rows.append(f"| {comp['display']} | `{cid}` | {total:,} ({extracted_at}) | {state} |")
+            if behind:
+                outdated += 1
+            detail = [f"### {comp['display']}（{cid}）", ""]
+            detail.append(f"- 上游最新：**{total:,}** 技能（索引时间：`{extracted_at}`，自营: {data.get('localSkills', 0)}, 外部: {data.get('externalSkills', 0)}）")
+            detail.append(f"- 基线记录：**{rec_total:,}** 技能（记录时间：`{rec_date}`）→ " + (f"**全网索引有变动（{diff_str} 技能）**" if behind else "✅ 一致"))
+            top_sources = sorted(data.get("bySource", {}).items(), key=lambda x: x[1], reverse=True)[:5]
+            src_summary = ", ".join(f"{k}: {v:,}" for k, v in top_sources)
+            detail.append(f"- 主要源分布：{src_summary} 等")
+            if behind:
+                detail.append("- 跟进：访问 https://hermes-agent.nousresearch.com/docs/skills/ 浏览新技能；评估后更新 `capability-inventory.json` 中 `totalSkills` 与 `extractedAt` 并推 main。")
             details.append("\n".join(detail))
             continue
 
