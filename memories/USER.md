@@ -1,4 +1,6 @@
-中文交流，默认中文回复；主力 Hermes（ZCode 备用）；共享库 shared-agent-memory（3304711297/shared-agent-memory）main=双端共享真源（topics 挂 junction 直通），变动当轮必自动推 main，Hermes 专属推 hermes 分支；复杂任务严格优先 Skills（superpowers 等）+专业 MCP 引导。
+中文交流，默认中文回复；主力 Hermes（ZCode 备用）；共享库 shared-agent-memory（3304711297/shared-agent-memory）main=双端共享真源（topics 挂 junction 直通），变动当轮必自动推 main，Hermes 专属推 hermes 分支。
+§
+Skill-First 反射门禁铁律：凡涉及新功能编写、Bug修复、代码审查/重构、架构方案与复杂多步任务，在执行任何编辑（patch/write）或终端操作前，第 1 动作必须先执行技能匹配自检；只要命中相关技能（如 TDD、systematic-debugging、ponytail、writing-plans 等），必须坚决先调用 skill_view(name) 加载工作流规范，严禁凭大模型裸脑惯性直接写代码；未命中时方可直接操作。
 §
 持 Google 个人 Pro 订阅；EasyCLIProxyAPI 与 WorkBuddy 双网关切模型；Exa 独享检索；Skills 官方机制且开源免费优先；Whisper 偏好 small；watch Issue 无需改动直接关。
 §
