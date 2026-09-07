@@ -21,7 +21,9 @@ have caught in seconds is the failure mode to avoid.
 
 Also run `npm run tauri build` when the desktop client artifact must be current
 — CI never produces it, and a green CI does NOT mean the local exe/installer is
-up to date. Before that, `taskkill /IM <app>.exe /F` (see Pitfall 3 on os error 32).
+up to date. When the user asks "把本地构建到最新版了吗", answer directly with the
+real artifact status: distinguish frontend `dist/` from full release installer/exe.
+Before building, `taskkill /IM <app>.exe /F` (see Pitfall 3 on os error 32).
 
 Only after local is green: commit → push → `gh pr checks --watch`.
 
