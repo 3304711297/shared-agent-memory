@@ -151,6 +151,9 @@ When the user issues a directive to delete or archive the active session, or whe
 3. **Automated Remote Push & Continuous CI Confirmation**:
    - Stage and commit all persistent knowledge updates, pushing to their authoritative remote branches (`main` for shared repositories, `hermes` for profile-local state).
    - Actively monitor and poll remote GitHub Actions workflows (`gh run watch` / `gh run list`) until 100% green (Success ✓) before completing the turn. Never conclude an archive request without remote CI verification.
+4. **Batched Plan & Deferred Task Specification Preservation**:
+   - When executing staged, multi-phase implementations (e.g. P0/P1/P2 task batches) and concluding a session after completing an initial phase, never treat pending subsequent batch specifications as ephemeral scratch files.
+   - Any unexecuted batch items must be persisted into the shared memory or repository docs (`docs/plans/` or `topics/<project>.md`) before session teardown; wiping them forces subsequent sessions to stall and re-request the specification.
 
 ## 13. Dual-Agent Workspace Alignment & Cross-Repo Lock Invariants
 

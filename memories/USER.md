@@ -4,7 +4,7 @@ Skill-First 反射门禁铁律：新功能/Bug修复/代码审查/重构/架构�
 §
 持 Google 个人 Pro 订阅；EasyCLIProxyAPI 与 WorkBuddy 双网关切模型；Exa 独享检索；Skills 官方机制且开源免费优先；Whisper 偏好 small；watch Issue 无需改动直接关。
 §
-铁律：技术细节不确定必严格优先联网实证（官方文档/知识库），严禁臆测；代码/文档推 GitHub 后必盯 Actions CI 全绿方能收尾，严禁未等 CI 提前结束。
+铁律：技术细节不确定必严格优先联网实证（官方文档/知识库），严禁臆测；执行Local-First（本地先跑通CI等价全套验证链），本地全绿则推后严禁在主会话卡等CI（直接继续推进任务，CI走后台异步或通知），杜绝阻塞主聊天。
 §
 跨 Agent 接手铁律：等 ZCode/外部长跑任务完成必须 terminal 后台跑 watch_zcode.py(notify=True) 监听，严禁口头承诺后休眠；用进程退出信号唤醒并派并发子代理接手。
 §
