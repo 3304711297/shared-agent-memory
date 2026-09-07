@@ -290,6 +290,108 @@ def main():
             details.append("\n".join(detail))
             continue
 
+        # SkillHub 腾讯云社区技能库检查（防爬虫失效 & 优雅降级）
+        if check["type"] == "skillhub-market":
+            total = None
+            err_msg = None
+            try:
+                req = urllib.request.Request(
+                    check["url"],
+                    headers={
+                        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+                        "Accept": "application/json",
+                    },
+                )
+                with _open(req, timeout=15) as r:
+                    res = json.loads(r.read().decode("utf-8"))
+                    if isinstance(res, dict) and res.get("code") == 0 and isinstance(res.get("data"), dict):
+                        raw_total = res["data"].get("total")
+                        if isinstance(raw_total, int) and raw_total > 0:
+                            total = raw_total
+                    if total is None:
+                        err_msg = "响应结构未包含有效 data.total"
+            except Exception as e:
+                err_msg = f"{type(e).__name__}: {e}"
+
+            rec_loc = comp.get("installed", [{}])[0]
+            rec_total = rec_loc.get("totalSkills", 0)
+
+            # 铁律：非 GitHub 站点抓取异常时 behind 严格为 False，绝不误计入 outdated，绝不误开 Issue
+            if total is None:
+                rows.append(f"| {comp['display']} | `{cid}` | N/A | ⚠️ 抓取暂不可达 |")
+                details.append("\n".join([
+                    f"### {comp['display']}（{cid}）", "",
+                    f"- ⚠️ 上游查询异常（已自动跳过，不阻塞其他检查）：{err_msg}",
+                    f"- 基线记录：**{rec_total:,}** 技能",
+                    "- 说明：非 GitHub 外部站点受网络波动或反爬策略影响可能临时不可达，保持当前基线，不触发误报。",
+                ]))
+                continue
+
+            behind = bool(total != rec_total)
+            diff_str = f"+{total - rec_total}" if total > rec_total else (f"{total - rec_total}" if total < rec_total else "0")
+            state = "🔴 有更新" if behind else "✅ 最新"
+            rows.append(f"| {comp['display']} | `{cid}` | {total:,} | {state} |")
+            if behind:
+                outdated += 1
+            detail = [f"### {comp['display']}（{cid}）", ""]
+            detail.append(f"- 上游最新：**{total:,}** 社区技能")
+            detail.append(f"- 基线记录：**{rec_total:,}** 技能 → " + (f"**社区有新技能上架（{diff_str} 项）**" if behind else "✅ 一致"))
+            if behind:
+                detail.append("- 跟进：访问 https://www.skillhub.cn/ 浏览新技能；评估后更新 `capability-inventory.json` 中 `totalSkills` 并推 main。")
+            details.append("\n".join(detail))
+            continue
+
+        # Cola Skill 优质技能策展市场检查（防爬虫失效 & 优雅降级）
+        if check["type"] == "colaskill-market":
+            total = None
+            sample_skills = []
+            err_msg = None
+            try:
+                req = urllib.request.Request(
+                    check["url"],
+                    headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"},
+                )
+                with _open(req, timeout=15) as r:
+                    html = r.read().decode("utf-8", errors="ignore")
+                    m = re.search(r'<script type="application/ld\+json">(.*?)</script>', html, re.DOTALL)
+                    if m:
+                        ld_data = json.loads(m.group(1))
+                        items = ld_data.get("mainEntity", {}).get("itemListElement", [])
+                        total = ld_data.get("mainEntity", {}).get("numberOfItems") or len(items)
+                        sample_skills = [it.get("name") for it in items if it.get("name")][:3]
+                    else:
+                        err_msg = "页面未提取到 application/ld+json 结构化数据"
+            except Exception as e:
+                err_msg = f"{type(e).__name__}: {e}"
+
+            rec_loc = comp.get("installed", [{}])[0]
+            rec_total = rec_loc.get("totalSkills", 0)
+
+            # 铁律：非 GitHub 站点抓取异常时 behind 严格为 False，绝不误计入 outdated，绝不误开 Issue
+            if total is None:
+                rows.append(f"| {comp['display']} | `{cid}` | N/A | ⚠️ 抓取暂不可达 |")
+                details.append("\n".join([
+                    f"### {comp['display']}（{cid}）", "",
+                    f"- ⚠️ 上游查询异常（已自动跳过，不阻塞其他检查）：{err_msg}",
+                    f"- 基线记录：**{rec_total}** 精品技能",
+                    "- 说明：非 GitHub 外部站点受网络波动或模板变动影响可能临时不可达，保持当前基线，不触发误报。",
+                ]))
+                continue
+
+            behind = bool(total != rec_total)
+            diff_str = f"+{total - rec_total}" if total > rec_total else (f"{total - rec_total}" if total < rec_total else "0")
+            state = "🔴 有更新" if behind else "✅ 最新"
+            rows.append(f"| {comp['display']} | `{cid}` | {total} | {state} |")
+            if behind:
+                outdated += 1
+            detail = [f"### {comp['display']}（{cid}）", ""]
+            detail.append(f"- 上游最新：**{total}** 个精选技能（包含：{', '.join(sample_skills)} 等）")
+            detail.append(f"- 基线记录：**{rec_total}** 个技能 → " + (f"**发现新增策展技能（{diff_str} 项）**" if behind else "✅ 一致"))
+            if behind:
+                detail.append("- 跟进：访问 https://colaskill.com/zh/ 挑选优质新技能；评估后更新 `capability-inventory.json` 中 `totalSkills` 并推 main。")
+            details.append("\n".join(detail))
+            continue
+
         upstream = None
         src_err = None
         try:
