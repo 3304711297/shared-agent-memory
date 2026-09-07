@@ -39,13 +39,14 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           COUNT="${{ steps.check.outputs.update_count }}"
+          TITLE="🔔 [Capability Watch] 本地能力组件有上游更新（${COUNT} 项待跟进）"
           EXISTING=$(gh issue list --state open --label "capability-watch" --json number --jq '.[0].number')
           if [ -n "$EXISTING" ]; then
             echo "更新已存在的 Issue #$EXISTING"
             gh issue edit "$EXISTING" --title "$TITLE" --body-file capability-report.md
           else
             gh issue create \
-              --title "🔔 [Capability Watch] 本地能力组件有上游更新（${COUNT} 项待跟进）" \
+              --title "$TITLE" \
               --body-file capability-report.md \
               --label "capability-watch"
           fi
