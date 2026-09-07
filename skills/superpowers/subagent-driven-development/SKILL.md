@@ -1,6 +1,6 @@
 ---
 name: subagent-driven-development
-description: Use when executing implementation plans with independent tasks in the current session
+description: "独立任务并行分派/子代理驱动开发时必用。多工并发推进，主会话聚合收敛。Use when executing tasks with independent parallel subagents."
 ---
 
 # Subagent-Driven Development

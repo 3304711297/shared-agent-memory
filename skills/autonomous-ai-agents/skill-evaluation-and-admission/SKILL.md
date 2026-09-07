@@ -45,12 +45,16 @@ When evaluating candidate skills or toolkits, execute this audit sequentially:
 - Compare the candidate against existing local tools and skills.
 - If an existing native tool or mature skill already covers the need with better aesthetics or integration, reject the redundant tool. Only admit items that provide distinct, verifiable leverage.
 
-### Step 5: Admission & Closed-Loop Registration
-Once approved:
-1. **Dual-Agent Alignment**: Deploy skill copies to all active agent runtimes (e.g. Hermes and ZCode).
-2. **Trigger Optimization**: Rewrite the frontmatter description to follow the 57-Character Rule + Chinese colloquial aliases (see Section 2).
-3. **Watchdog Registration**: Register the upstream release/commit in `capability-inventory.json` under `checks`.
-4. **CI Verification**: Run local check scripts (`check_capability_upstream.py`), push memory/inventory updates, and confirm remote GitHub Actions pass completely green.
+### Step 5: Lifecycle & Watchdog Synchronization (Strict Atomicity)
+Any change to skills (admission, version upgrade, pruning, or evaluation rejection) must be treated as an atomic transaction with the capability watchdog:
+1. **Dual-Agent Alignment**: Deploy or prune skill copies across all active agent runtimes (e.g., Hermes and ZCode).
+2. **Trigger Optimization**: For newly admitted skills, enforce the 57-Character Rule + Chinese colloquial aliases in frontmatter description.
+3. **Inventory & Baseline Sync**: Immediately update `capability-inventory.json` in the same turn:
+   - Admitted: register upstream repo/release under `checks` and record installed version/SHA.
+   - Upgraded: advance `installed.version` and `sha` to the target release.
+   - Pruned: adjust installed copy counts (e.g., `hermes-hub-skills`) and clean out orphaned checks.
+   - Rejected: record explicit technical disqualification reason under `notWatched` to prevent repeat re-evaluations.
+4. **CI Verification**: Execute `check_capability_upstream.py` locally, commit and push to remote `main`, and verify remote GitHub Actions pass 100% green before concluding.
 
 ---
 
@@ -78,5 +82,6 @@ Enforce an explicit gate in the agent's core instructions:
 
 ## Verification & Pitfalls
 
-- **Pitfall**: Never accept an external tool's self-reported benchmark without auditing the baseline. Many tools test against a strawman (e.g. comparing against an unprompted verbose conversational model rather than an agentic baseline).
-- **Pitfall**: Do not leave orphaned entries in `capability-inventory.json` when retiring a skill. Pruning must be accompanied by clean removal from tracking manifests to prevent spurious CI alerts.
+- **Pitfall: Decoupled Skill Modifications and Watchdog Tracking**: Never modify, install, prune, or reject a skill in the filesystem without atomically updating `capability-inventory.json` and verifying CI in the very same turn. Modifying skills while forgetting the watchdog causes baseline drift, breaks daily automated upstream checks, and requires manual user intervention to fix.
+- **Pitfall: Deceptive Single-Shot Benchmarks**: Never accept an external tool's self-reported benchmark without auditing its baseline. Many tools test against a verbose unprompted conversational model rather than an agentic baseline, artificially inflating reported savings.
+- **Pitfall: Dynamic Modifiers Breaking Prompt Cache**: Reject proxies or interceptors that heuristically truncate logs, code, or context turns on the fly. Dynamic prompt mutation continuously breaks provider prefix cache hashes, causing downstream API costs to spike despite theoretical token reductions.

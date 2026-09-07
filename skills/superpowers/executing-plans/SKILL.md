@@ -1,6 +1,6 @@
 ---
 name: executing-plans
-description: Use when you have a written implementation plan to execute in a separate session with review checkpoints
+description: "执行任务书/实现计划/分批推进时必用。严格按步骤执行，逐项校验收口。Use when executing a written implementation plan with review checkpoints."
 ---
 
 # Executing Plans

@@ -1,6 +1,6 @@
 ---
 name: writing-plans
-description: Use when planning multi-step tasks, specs, or when user asks to "出方案", "实现计划", "做设计", "规划", before touching code. Produces bite-sized TDD tasks.
+description: "复杂多步任务/写方案/立项规划时必用。系统拆解步骤与依赖，不盲目动手。Use when planning multi-step tasks or specs before writing code."
 ---
 
 # Writing Plans

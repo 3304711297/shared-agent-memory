@@ -1,6 +1,6 @@
 ---
 name: test-driven-development
-description: Use when implementing any feature or bugfix, or when user asks to "写功能", "写代码", "开发特性", "做个需求", "TDD". Enforces writing test before implementation code.
+description: "写代码/做需求/修Bug时必用。TDD红绿循环：先写失败测试再写实现代码。Use when implementing any feature or bugfix; enforces writing tests before implementation code."
 ---
 
 # Test-Driven Development (TDD)

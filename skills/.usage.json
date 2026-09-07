@@ -230,14 +230,14 @@
     "created_by": null,
     "last_patched_at": null,
     "last_reused_patch_generation": 0,
-    "last_used_at": "2026-09-06T09:56:18.313258+00:00",
-    "last_viewed_at": "2026-09-06T09:56:18.310739+00:00",
+    "last_used_at": "2026-09-07T11:09:52.093676+00:00",
+    "last_viewed_at": "2026-09-07T11:09:52.091676+00:00",
     "patch_count": 0,
     "patch_generation": 0,
     "pinned": false,
     "state": "active",
-    "use_count": 1,
-    "view_count": 1
+    "use_count": 2,
+    "view_count": 2
   },
   "comfyui": {
     "archived_at": null,
@@ -304,15 +304,15 @@
     "created_at": "2026-09-05T14:40:18.961927+00:00",
     "created_by": "agent",
     "last_patched_at": "2026-09-07T10:01:11.226185+00:00",
-    "last_reused_patch_generation": 19,
-    "last_used_at": "2026-09-07T10:01:03.032370+00:00",
-    "last_viewed_at": "2026-09-07T10:01:03.029370+00:00",
+    "last_reused_patch_generation": 20,
+    "last_used_at": "2026-09-07T12:07:45.784620+00:00",
+    "last_viewed_at": "2026-09-07T12:07:45.781620+00:00",
     "patch_count": 20,
     "patch_generation": 20,
     "pinned": false,
     "state": "active",
-    "use_count": 24,
-    "view_count": 24
+    "use_count": 25,
+    "view_count": 25
   },
   "dispatching-parallel-agents": {
     "archived_at": null,
@@ -449,6 +449,21 @@
     "use_count": 0,
     "view_count": 0
   },
+  "executing-plans": {
+    "archived_at": null,
+    "created_at": "2026-09-07T12:48:35.944743+00:00",
+    "created_by": null,
+    "last_patched_at": null,
+    "last_reused_patch_generation": 0,
+    "last_used_at": "2026-09-07T12:48:35.946751+00:00",
+    "last_viewed_at": "2026-09-07T12:48:35.944743+00:00",
+    "patch_count": 0,
+    "patch_generation": 0,
+    "pinned": false,
+    "state": "active",
+    "use_count": 1,
+    "view_count": 1
+  },
   "fastmcp": {
     "archived_at": null,
     "created_at": "2026-09-03T13:34:11.951677+00:00",
@@ -483,16 +498,16 @@
     "archived_at": null,
     "created_at": "2026-09-03T07:05:52.523493+00:00",
     "created_by": null,
-    "last_patched_at": null,
+    "last_patched_at": "2026-09-07T12:13:46.082722+00:00",
     "last_reused_patch_generation": 0,
-    "last_used_at": "2026-09-07T08:00:58.098679+00:00",
-    "last_viewed_at": "2026-09-07T08:00:58.096177+00:00",
-    "patch_count": 0,
-    "patch_generation": 0,
+    "last_used_at": "2026-09-07T12:11:40.210799+00:00",
+    "last_viewed_at": "2026-09-07T12:11:40.208798+00:00",
+    "patch_count": 1,
+    "patch_generation": 1,
     "pinned": false,
     "state": "active",
-    "use_count": 18,
-    "view_count": 17
+    "use_count": 20,
+    "view_count": 19
   },
   "gitnexus-explorer": {
     "archived_at": null,
@@ -944,6 +959,21 @@
     "use_count": 1,
     "view_count": 1
   },
+  "ponytail-audit": {
+    "archived_at": null,
+    "created_at": "2026-09-07T11:09:49.481539+00:00",
+    "created_by": null,
+    "last_patched_at": null,
+    "last_reused_patch_generation": 0,
+    "last_used_at": "2026-09-07T11:09:49.484539+00:00",
+    "last_viewed_at": "2026-09-07T11:09:49.481539+00:00",
+    "patch_count": 0,
+    "patch_generation": 0,
+    "pinned": false,
+    "state": "active",
+    "use_count": 1,
+    "view_count": 1
+  },
   "ponytail-review": {
     "archived_at": null,
     "created_at": "2026-09-07T10:16:45.055457+00:00",
@@ -1188,16 +1218,16 @@
     "archived_at": null,
     "created_at": "2026-09-07T10:46:23.160016+00:00",
     "created_by": "agent",
-    "last_patched_at": "2026-09-07T10:50:02.485055+00:00",
-    "last_reused_patch_generation": 0,
-    "last_used_at": "2026-09-07T10:49:58.908817+00:00",
-    "last_viewed_at": "2026-09-07T10:49:58.907316+00:00",
-    "patch_count": 1,
-    "patch_generation": 1,
+    "last_patched_at": "2026-09-07T10:57:16.375957+00:00",
+    "last_reused_patch_generation": 2,
+    "last_used_at": "2026-09-07T10:57:12.209484+00:00",
+    "last_viewed_at": "2026-09-07T10:57:12.206980+00:00",
+    "patch_count": 3,
+    "patch_generation": 3,
     "pinned": false,
     "state": "active",
-    "use_count": 2,
-    "view_count": 2
+    "use_count": 4,
+    "view_count": 4
   },
   "smart-web-crawler": {
     "archived_at": null,
@@ -1233,16 +1263,16 @@
     "archived_at": null,
     "created_at": "2026-09-04T13:00:31.205336+00:00",
     "created_by": "agent",
-    "last_patched_at": "2026-09-06T09:45:11.265923+00:00",
-    "last_reused_patch_generation": 15,
-    "last_used_at": "2026-09-06T09:45:07.624776+00:00",
-    "last_viewed_at": "2026-09-06T09:45:07.621776+00:00",
-    "patch_count": 16,
-    "patch_generation": 16,
+    "last_patched_at": "2026-09-07T12:31:42.249459+00:00",
+    "last_reused_patch_generation": 18,
+    "last_used_at": "2026-09-07T12:28:43.481060+00:00",
+    "last_viewed_at": "2026-09-07T12:28:43.478559+00:00",
+    "patch_count": 19,
+    "patch_generation": 19,
     "pinned": false,
     "state": "active",
-    "use_count": 21,
-    "view_count": 21
+    "use_count": 24,
+    "view_count": 24
   },
   "telegram-channel-ops": {
     "archived_at": null,
@@ -1258,6 +1288,21 @@
     "state": "active",
     "use_count": 9,
     "view_count": 9
+  },
+  "test-driven-development": {
+    "archived_at": null,
+    "created_at": "2026-09-07T11:19:14.604357+00:00",
+    "created_by": null,
+    "last_patched_at": null,
+    "last_reused_patch_generation": 0,
+    "last_used_at": "2026-09-07T11:19:14.607357+00:00",
+    "last_viewed_at": "2026-09-07T11:19:14.604357+00:00",
+    "patch_count": 0,
+    "patch_generation": 0,
+    "pinned": false,
+    "state": "active",
+    "use_count": 1,
+    "view_count": 1
   },
   "tldraw-offline": {
     "archived_at": null,
@@ -1310,14 +1355,14 @@
     "created_by": null,
     "last_patched_at": null,
     "last_reused_patch_generation": 0,
-    "last_used_at": "2026-09-06T10:03:40.529091+00:00",
-    "last_viewed_at": "2026-09-06T10:03:40.527091+00:00",
+    "last_used_at": "2026-09-07T12:41:56.970145+00:00",
+    "last_viewed_at": "2026-09-07T12:41:56.967144+00:00",
     "patch_count": 0,
     "patch_generation": 0,
     "pinned": false,
     "state": "active",
-    "use_count": 6,
-    "view_count": 6
+    "use_count": 8,
+    "view_count": 8
   },
   "watchers": {
     "archived_at": null,

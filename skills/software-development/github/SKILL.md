@@ -38,6 +38,12 @@ Supporting assets: `scripts/gh-env.sh` + `scripts/git-credential-token.py`
 
 ## Core discipline (applies to every workflow)
 
+- Load THIS skill before any push/PR/CI work — do not hand-roll `gh` loops from
+  memory. Monitoring CI with a bash `for` + `sleep` poll is the classic mistake:
+  it either blocks the main session or gets backgrounded and floods the chat.
+  Use `gh pr checks <n> --watch --interval 15` (or `--fail-fast`) instead; it
+  blocks once and prints the final state. Only fall back to polling when
+  `--watch` is unavailable.
 - Preflight once per session: `gh auth status` — if it fails, go to
   `references/auth.md` before anything else.
 - Prefer `gh` over raw REST; drop to `gh api` only for endpoints the

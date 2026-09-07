@@ -5,8 +5,25 @@ description: Use when developing, building, or debugging Tauri apps.
 
 # Tauri Desktop Development
 
-## Overview
-Guidelines and best practices for developing, debugging, and migrating Tauri v2 desktop applications on Windows, covering WebView sandboxing, native OS process launching, build artifact paths, and desktop workspace layout.
+## Verification Before Push (Local-First)
+
+Every CI step in this project's GitHub Actions has a local equivalent. Run them
+locally BEFORE committing — waiting ~4.5 min for CI to catch what local would
+have caught in seconds is the failure mode to avoid.
+
+| CI step | Local equivalent |
+|---|---|
+| `npm ci` + `npm run build` | `npm run build` |
+| `pytest -q` | `python -m pytest tests/` (venv: `C:\Users\<user>\.workbuddy\binaries\python\envs\default`) |
+| `npm test` | `npm test` (node:test runner) |
+| `cargo check --locked` | `cargo check --manifest-path src-tauri/Cargo.toml --locked` |
+| `cargo test --locked` | `cargo test --manifest-path src-tauri/Cargo.toml --locked` |
+
+Also run `npm run tauri build` when the desktop client artifact must be current
+— CI never produces it, and a green CI does NOT mean the local exe/installer is
+up to date. Before that, `taskkill /IM <app>.exe /F` (see Pitfall 3 on os error 32).
+
+Only after local is green: commit → push → `gh pr checks --watch`.
 
 ## Core Patterns & Pitfalls
 
@@ -173,6 +190,32 @@ When a local desktop proxy/daemon exposes an HTTP API (e.g. converting upstream 
 - **Enforce Mandatory Authentication on Non-Loopback Binding**: When the server binds to `0.0.0.0` or a public/LAN interface, refuse to start without an API key unless an explicit flag like `--unsafe-expose` is provided.
 - **Unified Credential Source of Truth**: When both a desktop UI multi-account store (`accounts.json`) and an auth file (`.info`) exist, prioritize the active account in the UI store to prevent credential drift between chat forwarding and billing/quota summary endpoints.
 - **Log Sanitation & Log Levels**: Avoid dumping raw prompt/completion payloads by default. Use a 3-tier log level (`info` for latency/summary, `debug` for error bodies, `trace` for raw streams) and apply regex masks on tokens, authorization headers, and cookies to prevent credential leakage to disk.
+
+### 9. Environment Proxy Bypass for Loopback & Direct Upstreams (`no_proxy`)
+`reqwest` / HTTP clients automatically inherit system/environment proxies (`ALL_PROXY`, `HTTP_PROXY`). If a local proxy client (e.g. Karing on `127.0.0.1:3067`) is listening but disconnected from an outbound node, requests to `127.0.0.1` health endpoints or domestic direct upstreams hang or timeout, causing false-positive "proxy kernel failed to start".
+- **Rule**: Build loopback and direct-connect HTTP clients with `.no_proxy()` explicitly:
+  ```rust
+  reqwest::Client::builder().no_proxy().timeout(Duration::from_secs(10)).build()
+  ```
+
+### 10. Atomic Multi-Process State Persistence (`.tmp` + Rename)
+Direct file overwriting via `std::fs::write(&path, ...)` or Python `open(path, 'w')` risks file truncation and JSON parse corruption if the app crashes, reboots, or is read concurrently by backend daemons.
+- **Rule**: Always write to a `.tmp` file in the same directory first, then execute an atomic rename (`std::fs::rename` in Rust / `os.replace` in Python).
+
+### 11. Subprocess Termination: Direct PID Tree Kill vs WMI / PowerShell Scan
+Never use `powershell Get-CimInstance Win32_Process ... Where-Object CommandLine -like '*name*'` to kill background daemons on Windows. WMI scanning takes 1-2s and risks killing other projects running same-named scripts.
+- **Rule**: Track the child PID from `child.id()` and terminate the exact process tree instantly via native `taskkill`:
+  ```rust
+  Command::new("taskkill").args(["/F", "/T", "/PID", &child.id().to_string()]).output();
+  ```
+
+### 12. Dual-Channel SSE Streaming: Reasoning, Content & Tool Calls Coexistence
+In streaming / SSE adapters, never use exclusive branching like `if tool_calls: ... elif content:`.
+- **Rule**: When models generate text content, reasoning tokens (`reasoning_content`), and tool calls in the same turn, stream `reasoning_content` and `content` chunks before or alongside `tool_calls` chunks; otherwise agent explanations are silently swallowed.
+
+### 13. DOM ID Scoping Across Static & Dynamic Tabs
+In vanilla JS desktop webviews, giving the same `id` (e.g. `btn-refresh-usage`) to both a static tab button and a dynamically rendered card element in another tab causes `document.getElementById` to target the first element in DOM, attaching duplicate or conflicting listeners.
+- **Rule**: Scope element IDs per domain (`btn-refresh-account-quota` vs `btn-refresh-usage`) or use `data-action` with container-level event delegation.
 
 ## References & Deep-Dives
 - `references/proxy-console-architecture-and-pitfalls.md` — Detailed recipes and code patterns for subprocess window suppression (`CREATE_NO_WINDOW`), full-stack UTF-8 stream decoding, 3-tier daemon tray management with bi-directional event broadcast, Tauri v2 snake_case IPC deserialization, upstream model matrix reverse-engineering, and local network security boundary enforcement.
