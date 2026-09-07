@@ -417,6 +417,6 @@
     "zcode-custom 六个自有 skill（用户原创，无上游）",
     "deepwiki 等 http 远端 MCP（服务端永远最新）",
     "hermes token-stats 插件（hermes 专有后端，随 hermes 本体分发，无公开上游）",
-    "【本地已改技能 2026-09-07】github 与 tauri-desktop-development 为本地自有/深度定制技能（无上游），不纳入看门；本次仅补操作纪律（gh pr checks --watch 替代自造轮询、本地先跑 CI 等价验证链），非版本变动"
+    "【本地已改技能 2026-09-07】github、tauri-desktop-development 与 superpowers（14项技能frontmatter中文高频动作词前置紧凑化，突破前57字符截断瓶颈）为本地自有/深度定制技能；本次仅补操作纪律与截断优化，非上游版本变动"
   ]
 }
