@@ -212,6 +212,20 @@
       "installed": [
         { "where": "开源技能雷达（书签真源）", "version": "HEAD@ca185ef5", "sha": "ca185ef5f7667078a1e70a763bd3a9c71c48acf0" }
       ]
+    },
+    {
+      "id": "hermes-skills-hub",
+      "display": "Hermes 官网 Skills Hub 全网技能索引",
+      "checks": [
+        {
+          "type": "hermes-skills-hub",
+          "url": "https://hermes-agent.nousresearch.com/docs/api/skills-meta.json",
+          "note": "Hermes 官网聚合的 9万+ 全网技能统一索引（ClawHub/skills.sh/LobeHub等）；监控全网索引总数与生成时间。"
+        }
+      ],
+      "installed": [
+        { "where": "官网 Skills Hub 聚合索引（书签真源）", "version": "90698", "totalSkills": 90698, "extractedAt": "2026-09-06" }
+      ]
     }
   ],
   "notWatched": [
