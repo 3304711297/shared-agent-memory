@@ -144,5 +144,19 @@ metadata:
   - 增加 capacity=1 极致丢包场景下的压力测试，验证丢弃大量通知后最终落盘尺寸仍严格精准；
 - **全量验证通过**：全量 62 项 pytest、2 项前端测试、Vite build、13 项 cargo test 100% 通过；本地产出基于最新 main 的 Release NSIS 安装包 `codebuddy2openai_0.2.0_x64-setup.exe` 与 exe；PR #4 已合入 main（Commit `f2cc94c`）。
 
+**2026-09-07 P2 配置保真与可观测性修复批次（任务书 v1.0 闭环，PR #5 合入 main，提交 174d21d）**：
+- **P2-1 Hermes config.yaml 纯文本精准 Patch 保真 (agents.rs)**：
+  - 彻底淘汰 `serde_yaml` 全量反序列化与重写，杜绝注释丢失、空行被抹除和键排序打乱；
+  - 改为纯文本行级精准 Patch：行级定位 `custom_providers` 与 `model_aliases`，精准修改/追加目标条目；
+  - 100% 保持用户原始注释、空行、原有键顺序与缩进；
+  - 严格保证幂等性：目标已存在且一致时（Case E）零字节变更；端口变更时原位仅更新目标值（Case F）；
+  - 新增 7 项 Rust 配置保真单测（Case A~F 及精准移除测试）全部通过；
+- **P2-2 动态模型拉取异常细粒度可观测性与日志脱敏 (converter.py)**：
+  - 彻底消除 `_fetch_remote_models` 中 `except Exception: pass` 盲点，补全网络异常、请求超时、4xx/5xx 错误、JSON 解析失败、数据结构缺失等细粒度诊断；
+  - 统一使用 `debug` 日志级别，确保网络波动绝不影响服务正常运行，100% 维持原有降级行为与模型缓存机制；
+  - 强化日志脱敏保护，严密拦截 Token、密钥、Bearer 头等敏感凭据；
+  - 新增 `tests/test_p2_fixes.py`（5 例回归单测）覆盖网络异常、HTTP 错误、非法 JSON、结构残缺与敏感凭据脱敏；
+- **全量验证通过**：全量 67 项 pytest、2 项前端测试、Vite build、20 项 cargo test 100% 通过；本地产出基于最新 main 的 Release NSIS 安装包 `codebuddy2openai_0.2.0_x64-setup.exe` 与 exe；PR #5 已合入 main（Commit `174d21d`）。
+
 **Why:** 用户要求模型列表全量覆盖官方模型库，并补全 WorkBuddy 核心的倍率显示、上下文限制与思考强度调节能力。
 **How to apply:** 维护 `C:\Users\VOS-User\Desktop\codebuddy2openai`，后续所有跨端 Agent 配置及客户端演进均以此架构为基准。
