@@ -194,6 +194,21 @@
     "use_count": 3,
     "view_count": 3
   },
+  "cangjie-distill": {
+    "archived_at": null,
+    "created_at": "2026-09-07T13:03:46.497857+00:00",
+    "created_by": null,
+    "last_patched_at": null,
+    "last_reused_patch_generation": 0,
+    "last_used_at": "2026-09-07T13:03:46.500358+00:00",
+    "last_viewed_at": "2026-09-07T13:03:46.497857+00:00",
+    "patch_count": 0,
+    "patch_generation": 0,
+    "pinned": false,
+    "state": "active",
+    "use_count": 1,
+    "view_count": 1
+  },
   "cloudflare-temporary-deploy": {
     "archived_at": null,
     "created_at": "2026-09-03T13:49:43.149439+00:00",
@@ -499,15 +514,15 @@
     "created_at": "2026-09-03T07:05:52.523493+00:00",
     "created_by": null,
     "last_patched_at": "2026-09-07T12:13:46.082722+00:00",
-    "last_reused_patch_generation": 0,
-    "last_used_at": "2026-09-07T12:11:40.210799+00:00",
-    "last_viewed_at": "2026-09-07T12:11:40.208798+00:00",
+    "last_reused_patch_generation": 1,
+    "last_used_at": "2026-09-07T12:58:41.943522+00:00",
+    "last_viewed_at": "2026-09-07T12:58:41.941521+00:00",
     "patch_count": 1,
     "patch_generation": 1,
     "pinned": false,
     "state": "active",
-    "use_count": 20,
-    "view_count": 19
+    "use_count": 21,
+    "view_count": 20
   },
   "gitnexus-explorer": {
     "archived_at": null,
@@ -1263,16 +1278,16 @@
     "archived_at": null,
     "created_at": "2026-09-04T13:00:31.205336+00:00",
     "created_by": "agent",
-    "last_patched_at": "2026-09-07T12:31:42.249459+00:00",
-    "last_reused_patch_generation": 18,
-    "last_used_at": "2026-09-07T12:28:43.481060+00:00",
-    "last_viewed_at": "2026-09-07T12:28:43.478559+00:00",
-    "patch_count": 19,
-    "patch_generation": 19,
+    "last_patched_at": "2026-09-07T12:58:51.086543+00:00",
+    "last_reused_patch_generation": 19,
+    "last_used_at": "2026-09-07T12:58:46.491643+00:00",
+    "last_viewed_at": "2026-09-07T12:58:46.488142+00:00",
+    "patch_count": 20,
+    "patch_generation": 20,
     "pinned": false,
     "state": "active",
-    "use_count": 24,
-    "view_count": 24
+    "use_count": 25,
+    "view_count": 25
   },
   "telegram-channel-ops": {
     "archived_at": null,
@@ -1295,14 +1310,14 @@
     "created_by": null,
     "last_patched_at": null,
     "last_reused_patch_generation": 0,
-    "last_used_at": "2026-09-07T11:19:14.607357+00:00",
-    "last_viewed_at": "2026-09-07T11:19:14.604357+00:00",
+    "last_used_at": "2026-09-07T13:03:23.741450+00:00",
+    "last_viewed_at": "2026-09-07T13:03:23.738450+00:00",
     "patch_count": 0,
     "patch_generation": 0,
     "pinned": false,
     "state": "active",
-    "use_count": 1,
-    "view_count": 1
+    "use_count": 2,
+    "view_count": 2
   },
   "tldraw-offline": {
     "archived_at": null,
@@ -1355,14 +1370,14 @@
     "created_by": null,
     "last_patched_at": null,
     "last_reused_patch_generation": 0,
-    "last_used_at": "2026-09-07T12:41:56.970145+00:00",
-    "last_viewed_at": "2026-09-07T12:41:56.967144+00:00",
+    "last_used_at": "2026-09-07T13:03:32.373064+00:00",
+    "last_viewed_at": "2026-09-07T13:03:32.370064+00:00",
     "patch_count": 0,
     "patch_generation": 0,
     "pinned": false,
     "state": "active",
-    "use_count": 8,
-    "view_count": 8
+    "use_count": 9,
+    "view_count": 9
   },
   "watchers": {
     "archived_at": null,
