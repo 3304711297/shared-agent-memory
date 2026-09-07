@@ -223,7 +223,7 @@
         }
       ],
       "installed": [
-        { "where": "国内社区雷达（书签真源）", "version": "1396", "totalSkills": 1396, "extractedAt": "2026-09-07" }
+        { "where": "国内社区雷达（书签真源）", "version": "1405", "totalSkills": 1405, "extractedAt": "2026-09-07" }
       ]
     },
     {
@@ -238,6 +238,16 @@
       ],
       "installed": [
         { "where": "精品策展雷达（书签真源）", "version": "16", "totalSkills": 16 }
+      ]
+    },
+    {
+      "id": "ponytail-skills",
+      "display": "Ponytail 代码极简与反过度工程技能套件",
+      "checks": [
+        { "type": "gh-release", "repo": "DietrichGebert/ponytail", "tag_strip": "^v" }
+      ],
+      "installed": [
+        { "where": "Hermes skills/（6 项）+ ZCode ~/.zcode/skills（6 项副本）", "version": "4.9.0", "sha": "974d940a1c5344210874150b98ff0d2c861fab6a" }
       ]
     }
   ],
