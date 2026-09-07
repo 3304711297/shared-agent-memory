@@ -47,7 +47,16 @@ metadata:
 | **无本地凭据 SaaS 工具类** | `airtable`<br>`box`<br>`notion`<br>`google-workspace`<br>`teams-meeting-pipeline`<br>`himalaya`<br>`1password` | 本机未配置对应 CLI / OAuth 授权，保留会导致模型误以为具有调用能力而产生试探报错。 |
 | **冗余外部 Agent CLI 类** | `claude-code`<br>`codex`<br>`opencode` | 本机无对应后台 CLI 服务；多任务严格优先原生 `delegate_task` 并发子代理与双端跨 Agent 握手。 |
 
-### 4. 优化成果
+### 4. 优化成果与第二轮瘦身（2026-09-07 治理 AI 不调技能痛点）
+
+#### 治理背景与根因
+针对“安装了上百个技能，AI 依然不优先调用、全凭模型裸脑惯性生成”的经典痛点，实施三项工程化根治措施：
+1. **Skill-First 反射门禁铁律**：在 `USER.md` 中固化硬约束，凡涉及代码开发、修Bug、审查重构等，第一动作必须先自检技能池并调用 `skill_view`，打破直接裸写惯性；
+2. **强触发词改造（57 字符与口语别名）**：核心技能（TDD、systematic-debugging、writing-plans、simplify-code、ponytail 系列）的 description 前 57 字符增加中文高频口语化别名（如“写代码”、“修bug”、“帮我看下代码”、“代码瘦身”等）；
+3. **第二轮技能池二八分层物理裁撤（用户拍板：重叠类仅保留更优者）**：
+   - 裁撤 44 项：包括低频玩具娱乐（ascii/comic/draw-your-font/p5js/pixel-art 等 18 项）、重型训练微调框架（unsloth/vllm/evaluating-llms 等 4 项）、社工情报（osint/sherlock 等 6 项）、低频个人工具（maps/memento/product-price/weekly 等 10 项）、平台不适用或重叠劣质项（sdlc-review/setup-wizard/watchers/qmd/powerpoint/docx 等 6 项）；
+   - 优选保留同类真强项：保留暗黑极客 SVG 真神 `architecture-diagram`（裁撤 excalidraw/sketch）、保留 Tailwind/React 前端真神 `frontend-design`、保留数据处理核心 `pdf` 与 `xlsx`、保留 `OpenViking` 本地知识检索与自建 CI 看门；
+   - 技能总数从 123 降至 79 项，Prompt 信噪比提升 2 倍以上，双端已完成物理删除与对齐。
 - **Hermes 端**：由 **121 个** 技能精简至 **102 个**（剔除 19 项 / 21 个子目录）。
 - **ZCode 端**：由 **92 个** 技能精简至 **75 个**（剔除 17 个子目录）。
 - **核心保留**：Superpowers 研发纪律套件（14个）、`shared-agent-memory`、`hermes-agent`、`telegram-channel-ops`、`ast-grep`、`frontend-design`、`chinese-copywriting` 等核心能力 100% 完整保留。
