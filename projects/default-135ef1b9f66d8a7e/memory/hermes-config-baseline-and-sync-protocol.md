@@ -14,9 +14,9 @@ metadata:
 | 组件 / 维度 | 当前版本与标识 | 来源 / 验证方式 |
 | :--- | :--- | :--- |
 | **Hermes Agent 版本** | `v0.21.0 (2026.8.31)` | `hermes --version` |
-| **上游 Git Commit SHA** | `00140a85574d4fc9e42f977a167aeda899b50ca9` (Sun Sep 6 20:50:02 2026) | `git -C hermes-agent log -1` |
+| **上游 Git Commit SHA** | `22c5684b983eac6a81ee015ae80296c4b3dbf5bb` (Mon Sep 7 02:37:13 2026) | `git -C hermes-agent log -1` |
 | **Desktop 桌面客户端** | `v0.17.0` | `apps/desktop/package.json` |
-| **配置规范版本** | `_config_version: 40` | `config.yaml` 根字段 |
+| **配置规范版本** | `_config_version: 41` | `config.yaml` 根字段 |
 | **Python 运行时** | `Python 3.11.16` / `OpenAI SDK 2.24.0` | 内部运行时依赖 |
 | **安装目录与方式** | `C:\Users\VOS-User\AppData\Local\hermes\hermes-agent` (Git source checkout) | 源码检出并可热更新 |
 
@@ -50,6 +50,12 @@ metadata:
 4. **Mixture of Agents (MoA)**：
    - 全局与预设 `enabled: false` 显式关闭。
    - 避免在 Agent 编程和工具调用（Tool Calling / Function Calling）场景下引入多模型扇出造成的格式破坏、多倍延迟和积分浪费；清理了原残留的 `OpenCode Free` 和 `OpenRouter` 无效通道。
+
+---
+
+5. **后台技能维护器 (Curator)**：
+   - 全局显式配置 `curator.enabled: false`（同时置为 paused）。
+   - **核心考量**：Hermes 技能库实行 GitHub 单一真源（`shared-agent-memory`）、ZCode 双端对齐及 `capability-upstream-watch` 自动化看门狗机制；Curator 原生基于白名单的判定无法识别私有工作流与自研技能，默认会在 30~90 天闲置后擅自归档低频技能并破坏基线版本一致性，故彻底禁用由人工/CI 闭环接管。
 
 ---
 
@@ -240,7 +246,7 @@ computer_use:
   backend: cua
 local_runtime:
   enabled: false
-_config_version: 40
+_config_version: 41
 mcp_servers:
   chrome-devtools:
     command: cmd
@@ -307,17 +313,17 @@ custom_providers:
   base_url: http://127.0.0.1:18080/v1
   model: gemini-3.8-flash
   models:
+    claude-sonnet-4-6: {}
+    gemini-3.8-flash: {}
     gemini-3.1-flash-image: {}
     gemini-pro-agent: {}
-    gpt-oss-120b-medium: {}
     gemini-web-search: {}
-    claude-opus-4-6-thinking: {}
-    claude-sonnet-4-6: {}
-    gemini-3-flash: {}
-    gemini-3.1-pro-low: {}
     gemini-3.6-flash: {}
     gemini-3.7-flash: {}
-    gemini-3.8-flash: {}
+    gemini-3-flash: {}
+    gemini-3.1-pro-low: {}
+    gpt-oss-120b-medium: {}
+    claude-opus-4-6-thinking: {}
   models_discovered: true
   name: cpa-gui
 - name: WorkBuddy (127.0.0.1:8787)
@@ -463,6 +469,8 @@ model_aliases:
 # fallback_model:
 #   provider: openrouter
 #   model: anthropic/claude-sonnet-4
+curator:
+  enabled: false
 ```
 
 ---
