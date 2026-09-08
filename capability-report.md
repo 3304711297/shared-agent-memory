@@ -1,6 +1,6 @@
 # 🔔 本地能力组件上游更新报告
 
-> 生成时间：2026-09-08 12:17（北京时间） · 清单：`capability-inventory.json`
+> 生成时间：2026-09-08 12:46（北京时间） · 清单：`capability-inventory.json`
 >
 > **跟进方式**：升级对应组件后，把清单里的 `installed.version` 更新为新版本并随共享库推 `main`，本看门会在下次运行时自动收口本 Issue。
 
@@ -22,7 +22,7 @@
 | Google Gemini 官方技能库（skills/ 目录提交） | `gemini-skills` | 0fa937a5 | ✅ 最新 |
 | ECC Agent 优化技能库（skills/ 目录提交） | `ecc-skills` | c11753d0 | ✅ 最新 |
 | Hermes 官网 Skills Hub 全网技能索引 | `hermes-skills-hub` | 90,698 (2026-09-08) | ✅ 最新 |
-| SkillHub 社区精选技能库 | `skillhub-market` | 1,433 | ✅ 最新 |
+| SkillHub 社区精选技能库 | `skillhub-market` | 1,434 | ✅ 最新 |
 | Cola Skill 精品技能策展市场 | `colaskill-market` | 16 | ✅ 最新 |
 | Ponytail 代码极简与反过度工程技能套件 | `ponytail-skills` | 4.9.0 | ✅ 最新 |
 | Hermes 本地配置守卫（更新后漂移检查） | `hermes-config-guard` | 本地源 | ✅ 最新 |
@@ -116,8 +116,8 @@
 
 ### SkillHub 社区精选技能库（skillhub-market）
 
-- 上游最新：**1,433** 社区技能
-- 基线记录：**1,433** 技能 → ✅ 一致
+- 上游最新：**1,434** 社区技能
+- 基线记录：**1,434** 技能 → ✅ 一致
 
 ### Cola Skill 精品技能策展市场（colaskill-market）
 
@@ -150,7 +150,7 @@
 
 **③ 核心自研技能 `created_by` 标记巡查**
 
-- ✅ 7 项核心自研技能均为非 agent 标记，curator 不会触碰
+- ✅ 8 项核心自研技能均为非 agent 标记，curator 不会触碰
 
 ### Cangjie 仓颉内容方法论蒸馏技能（cangjie-distill）
 
