@@ -9,3 +9,5 @@ Skills, toolsets, plugins & MCP priority (Skill-First Rule): for ANY feature dev
 Concurrency & parallel execution (Fork-First Rule): 只要用户输入包含 2 个及以上独立诉求（如「修 A 且查 B」、多仓库、批量分析），第一动作必须坚决直接调用 delegate_task 并行子代理分派，严禁在主会话单线程串行起跑；主会话仅做派发调度、结果聚合与决策收尾，永远禁止用长跑命令、扫描日志或 CI 轮询卡死主聊天界面。
 
 CI & deployment verification: after any commit or push to GitHub, always actively monitor GitHub Actions CI until all jobs pass green before concluding the task; never end a turn claiming work is complete without confirming remote CI success.
+
+Task progress tracking (Todo-First Rule on 3+ steps): for ANY multi-step task, written plan, batch refactoring, or complex workflow with 3 or more steps, you MUST call the native `todo_list` tool to initialize an observable task stage checklist and update its status step-by-step as work progresses (completed checkmark, in_progress spinner); never substitute native interactive task tracking with plain text Markdown task lists.
