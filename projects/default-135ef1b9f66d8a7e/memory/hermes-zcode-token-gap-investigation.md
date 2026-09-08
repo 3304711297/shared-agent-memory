@@ -38,7 +38,7 @@ metadata:
 ## 关键文件路径（复查入口）
 
 - 网关账本：`D:/EasyCLIProxyAPI-v0.2.71-Windows-amd64/usage-records/usage.db`
-- Hermes 会话库：`C:/Users/VOS-User/AppData/Local/hermes/state.db`（session_model_usage 表 task='background_review' 单独记账）
-- ZCode 会话库：`C:/Users/VOS-User/.zcode/cli/db/db.sqlite`（model_usage 表，只读用 uri=file:...?mode=ro）
+- Hermes 会话库：`%LOCALAPPDATA%/hermes/state.db`（session_model_usage 表 task='background_review' 单独记账）
+- ZCode 会话库：`%USERPROFILE%/.zcode/cli/db/db.sqlite`（model_usage 表，只读用 uri=file:...?mode=ro）
 - 请求转储：`AppData/Local/hermes/sessions/request_dump_*.json`（reason= max_retries_exhausted 34 个/non_retryable 11 个）
 - bg-review 日志行：`Background review complete: thread=bg-review calls=N in=N out=N cache_read=N result=none`

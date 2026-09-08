@@ -18,7 +18,7 @@ metadata:
 | **Desktop 桌面客户端** | `v0.17.0` | `apps/desktop/package.json` |
 | **配置规范版本** | `_config_version: 41` | `config.yaml` 根字段 |
 | **Python 运行时** | `Python 3.11.16` / `OpenAI SDK 2.24.0` | 内部运行时依赖 |
-| **安装目录与方式** | `C:\Users\VOS-User\AppData\Local\hermes\hermes-agent` (Git source checkout) | 源码检出并可热更新 |
+| **安装目录与方式** | `%LOCALAPPDATA%\hermes\hermes-agent` (Git source checkout) | 源码检出并可热更新 |
 
 > **版本演进铁律**：后续 Hermes 升级（如执行 `hermes update` 或上游拉取新 commit）时，若检测到 `_config_version` 升级或新增/废弃了配置字段，同步记忆库时必须一并刷新上方表格中的版本号与 Git SHA，并简要记录该版本下的配置变迁（Changelog diff）。
 > 
@@ -29,7 +29,7 @@ metadata:
 ## 二、 双 Agent 协同铁律：改动设置自识别与同步机制
 
 1. **核心工作流触发**：
-   - 当用户在日常对话中告知修改了 Hermes 的界面设置（或发截图、发通知）时，当前接待的 Agent（Hermes 或 ZCode）**严禁仅作口头附和**，必须**主动读取并自行识别最新配置**（源文件：`C:\Users\VOS-User\AppData\Local\hermes\config.yaml`）。
+   - 当用户在日常对话中告知修改了 Hermes 的界面设置（或发截图、发通知）时，当前接待的 Agent（Hermes 或 ZCode）**严禁仅作口头附和**，必须**主动读取并自行识别最新配置**（源文件：`%LOCALAPPDATA%\hermes\config.yaml`）。
    - 提取最新变动要点与全量配置快照，更新本专题文档以及同目录下的独立配置文件 `hermes-config.yaml`，并同步提交推送到双端共享记忆库 GitHub `main` 分支（`https://github.com/3304711297/shared-agent-memory`）。
 2. **脱敏保护铁律**：
    - 由于共享记忆库为公开仓库，写入与同步 YAML 快照时，必须严格将私有 API Key 或敏感 Token 过滤脱敏为 `<REDACTED_*>`，严禁明文凭据入库。
@@ -71,7 +71,7 @@ metadata:
 ## 四、 独立配置文件与全量配置快照
 
 * **同目录下独立配置文件**：[`hermes-config.yaml`](./hermes-config.yaml)（可直接供脚本解析或一键恢复）
-* **本地源文件路径**：`C:\Users\VOS-User\AppData\Local\hermes\config.yaml` (450行全量)
+* **本地源文件路径**：`%LOCALAPPDATA%\hermes\config.yaml` (450行全量)
 
 ```yaml
 model:
@@ -525,4 +525,4 @@ model_aliases:
 ## 六、 关键实施与检索指南
 
 - **Why**: Hermes 拥有复杂的桌面与多模型配置，且随版本持续迭代。将软件构建指纹与全量配置快照绑定，不仅杜绝跨端协作时的信息差，还能在未来版本升级出现配置兼容性问题时秒级追溯回滚。
-- **How to apply**: 当用户提及「我改了设置 / 看一下我改的 / 同步一下设置」时，立即执行 `read_file(C:/Users/VOS-User/AppData/Local/hermes/config.yaml)`，同步核对 `hermes --version`，对比变动点后覆写更新本文件与 `hermes-config.yaml` 并提交推送 `main`。
+- **How to apply**: 当用户提及「我改了设置 / 看一下我改的 / 同步一下设置」时，立即执行 `read_file(%LOCALAPPDATA%/hermes/config.yaml)`，同步核对 `hermes --version`，对比变动点后覆写更新本文件与 `hermes-config.yaml` 并提交推送 `main`。

@@ -100,7 +100,7 @@
       "checks": [
         {
           "type": "local-merged-marketplace",
-          "file": "C:/Users/VOS-User/.zcode/cli/plugins/marketplaces/zcode-plugins-official/marketplace.json",
+          "file": "%USERPROFILE%/.zcode/cli/plugins/marketplaces/zcode-plugins-official/marketplace.json",
           "note": "UI 市场真源 = 客户端本地合并清单（bundled 种子 + CDN 在线）；此检查仅本地运行有效，Actions 跳过。客户端更新种子后跑 watch-capability.cmd 检测并回写清单。"
         }
       ],
@@ -373,8 +373,8 @@
       "checks": [
         {
           "type": "local-config-guard",
-          "file": "C:/Users/VOS-User/AppData/Local/hermes/config.yaml",
-          "usageFile": "C:/Users/VOS-User/AppData/Local/hermes/skills/.usage.json",
+          "file": "%LOCALAPPDATA%/hermes/config.yaml",
+          "usageFile": "%LOCALAPPDATA%/hermes/skills/.usage.json",
           "expect": [
             {
               "path": "curator.enabled",
@@ -398,8 +398,8 @@
             }
           ],
           "stashRepos": [
-            "C:/Users/VOS-User/AppData/Local/hermes/hermes-agent",
-            "C:/Users/VOS-User/AppData/Local/hermes"
+            "%LOCALAPPDATA%/hermes/hermes-agent",
+            "%LOCALAPPDATA%/hermes"
           ],
           "protectedSkills": [
             "shared-agent-memory",
@@ -450,7 +450,7 @@
       ],
       "installed": [
         {
-          "where": "本地专属环境 C:/Users/VOS-User/.openviking/venv",
+          "where": "本地专属环境 %USERPROFILE%/.openviking/venv",
           "version": "0.4.18"
         }
       ]

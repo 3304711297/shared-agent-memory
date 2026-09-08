@@ -5,7 +5,7 @@
 | 项 | 值 |
 |---|---|
 | Edge Dev 可执行文件 | `C:\Program Files (x86)\Microsoft\Edge Dev\Application\msedge.exe` |
-| 默认 profile | `C:\Users\VOS-User\AppData\Local\Microsoft\Edge Dev\User Data` |
+| 默认 profile | `%LOCALAPPDATA%\Microsoft\Edge Dev\User Data` |
 | 扩展目录 | `Default\Extensions`（本机基线 **10** 个） |
 | chrome-devtools MCP | 默认连 **Chrome** 的 `DevToolsActivePort`；本机 Chrome 未运行 → `Could not connect to Chrome`。主力是 Edge Dev |
 | 组策略 | `RemoteDebuggingAllowed` / `DevToolsRemoteDebuggingAllowed` 均为 `1`（允许）→ **排除策略封锁** |

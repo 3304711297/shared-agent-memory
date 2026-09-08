@@ -12,8 +12,8 @@ metadata:
 ## 启动
 - 无窗口启动（推荐）：双击桌面快捷方式 `start_silent.vbs`（日志追加到项目目录 `proxy_stdout.log`）
 - 窗口模式：`start_workbuddy_proxy.bat`
-- 两者均已改用受管 venv 解释器：`C:\Users\VOS-User\.workbuddy\binaries\python\envs\default\Scripts\python.exe converter.py --port 8787 --desensitize`
-- 项目目录：`C:\Users\VOS-User\AppData\Local\hermes\codebuddy2openai`
+- 两者均已改用受管 venv 解释器：`%USERPROFILE%\.workbuddy\binaries\python\envs\default\Scripts\python.exe converter.py --port 8787 --desensitize`
+- 项目目录：`%LOCALAPPDATA%\hermes\codebuddy2openai`
 
 > **⚠️ vbs 重定向坑（2026-09-04 已修）**：`WshShell.Run` 不经 cmd.exe，直接写 `python.exe ... >> log 2>&1` 会导致 `>>` 被当作字面参数、CreateProcess 静默失败——双击快捷方式毫无反应（.bat 正常，因为 cmd 原生支持重定向）。vbs 内必须包一层 `cmd /c`：`WshShell.Run "cmd /c """"...python.exe"" converter.py --port 8787 --desensitize >> proxy_stdout.log 2>&1""", 0, False`。
 

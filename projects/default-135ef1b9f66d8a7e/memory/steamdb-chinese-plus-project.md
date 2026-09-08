@@ -9,7 +9,7 @@ metadata:
   originSessionId: sess_19bf06e3-9812-4e80-89fc-84a6aa45b9e5
 ---
 
-桌面 `C:\Users\VOS-User\Desktop\steamdb-chinese\` 是 SteamDB 中文化油猴脚本项目（2026-08-30 创建），发布仓库 **3304711297/steamdb-chinese-plus**（gh 账号 3304711297），初始提交 `3381af3`，产物 `steamdb-chinese-plus.user.js` v1.0.1（1423 词条）。用户此前用的 GreasyFork 脚本 437076 SteamDB_CN（作者 Chr_）已停更，本项目接续。
+桌面 `%USERPROFILE%\Desktop\steamdb-chinese\` 是 SteamDB 中文化油猴脚本项目（2026-08-30 创建），发布仓库 **3304711297/steamdb-chinese-plus**（gh 账号 3304711297），初始提交 `3381af3`，产物 `steamdb-chinese-plus.user.js` v1.0.1（1423 词条）。用户此前用的 GreasyFork 脚本 437076 SteamDB_CN（作者 Chr_）已停更，本项目接续。
 
 - **上游真相（踩坑）**：词库真实仓库是 **Chr233/GM_Scripts**（分支 master，路径 SteamDB/SteamDB_CN.json）——`Chr_/GM_Scripts` 是 404；`raw.chrxw.com/GM_Scripts/...` 是作者自有 CDN（与 GitHub 逐字节一致）；词库版本号在 `DOC["更新时间"]` 字段。上游许可证 AGPL-3.0，本项目整体跟随
 - 词库结构（与 HF 项目不同）：`DOC/STATIC/INPUT/LABEL/DYNAMIC`，STATIC 与 DYNAMIC 是 **CSS 选择器作用域词典**（选择器→词典），选择器精确匹配本身就是安全机制，引擎无需 unsafe 区；上游引擎只加载时翻译一次，我们补了 MutationObserver + requestIdleCallback 动态翻译并实装了上游标注"暂未实装"的 DYNAMIC 段

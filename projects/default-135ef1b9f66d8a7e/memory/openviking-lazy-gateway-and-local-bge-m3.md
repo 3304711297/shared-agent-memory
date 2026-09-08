@@ -40,8 +40,8 @@ metadata:
 
 ### 1. 存储空间治理：NTFS Junction 彻底释放 C 盘
 Hermes 客户端默认将模型与运行时下载至 `AppData\Local\hermes\`。通过 Windows NTFS 目录联接（Junction）实现透明物理重定向：
-- `C:\Users\VOS-User\AppData\Local\hermes\models` ➔ `D:\HermesModels`
-- `C:\Users\VOS-User\AppData\Local\hermes\runtimes` ➔ `D:\HermesRuntimes`
+- `%LOCALAPPDATA%\hermes\models` ➔ `D:\HermesModels`
+- `%LOCALAPPDATA%\hermes\runtimes` ➔ `D:\HermesRuntimes`
 写入与下载对 C 盘空间损耗为 0 字节，全部落入 D 盘（可用空间 145+ GB）。
 
 ### 2. 本地推理引擎与模型矩阵
@@ -57,16 +57,16 @@ OpenViking 摄入长 Markdown 文档时输入常超过 2000 tokens。llama-serve
 `-c 8192 -b 8192 --ubatch-size 8192 -ngl 99`
 
 ### 4. Serverless 懒人网关与 Agent 退出自动清理（Agent Guard 闭环）
-脚本位于 `C:\Users\VOS-User\AppData\Local\hermes\scripts\openviking_lazy_gateway.py`。
+脚本位于 `%LOCALAPPDATA%\hermes\scripts\openviking_lazy_gateway.py`。
 依用户指令（2026-09-06）：
 1. **解除开机自启**：已从 `Startup` 移除 `OpenVikingGateway.vbs`；
 2. **全自动退出清理（方案 A）**：部署 `scripts/agent_guard.py`（开机启动项 `Startup/AgentGuard.vbs`，经 `.openviking\venv\Scripts\pythonw.exe` 驱动，占用 ~18MB 内存，CPU 0%）。静默监控 `Hermes.exe` 与 `ZCode.exe`：
    - 当检测到所有 Agent GUI 均已关闭后，防抖 2.5 秒，自动连根清除 MCP 孙子孤儿进程（`chrome-devtools-mcp`、`desktop-commander`、`context7-mcp`、`serena`）、残留后台 Python 进程，并自动执行 `openviking_service.py stop` 完全释放 GPU 显存与内存；
 3. **按需自启闭环（100% 自动化，桌面零快捷方式负担）**：
-   - 部署 PATH shim（`C:\Users\VOS-User\.openviking\shim-bin\openviking-server.bat`）；当 Hermes 需检索记忆时自动静默唤醒懒网关栈（1933 + 1934 + 18082 BGE-M3）；
+   - 部署 PATH shim（`%USERPROFILE%\.openviking\shim-bin\openviking-server.bat`）；当 Hermes 需检索记忆时自动静默唤醒懒网关栈（1933 + 1934 + 18082 BGE-M3）；
    - 闲置 2 分钟网关自动休眠退显存；关闭 Agent 后 `agent_guard` 自动清理全栈与孤儿进程；
    - 早期过渡用的桌面快捷方式（启动/停止/清理）已全部移除，达成桌面零残留。
-4. **运行环境严格隔离**：必须使用 OpenViking 独立虚拟环境 `C:\Users\VOS-User\.openviking\venv\Scripts\pythonw.exe` 驱动，严禁借用 `hermes-agent\venv`，规避 Windows 文件锁拦截 Hermes 桌面更新。
+4. **运行环境严格隔离**：必须使用 OpenViking 独立虚拟环境 `%USERPROFILE%\.openviking\venv\Scripts\pythonw.exe` 驱动，严禁借用 `hermes-agent\venv`，规避 Windows 文件锁拦截 Hermes 桌面更新。
 - 平时状态：0% GPU、0 MB 显存、0% CPU；
 - 收到提问时：自动在后台 5~6 秒内静默拉起 18082 与 1934，无任何黑框终端弹出；
 - 连续 2 分钟无请求：自动 taskkill 终止推理进程，100% 归还 800MB 显存。
@@ -87,13 +87,13 @@ Hermes 桌面端「提供方 → 本地模型」下的「已安装 llama.cpp 运
 
 
 ## 三、双驱动防漂移机制
-- **即时驱动**：在 `C:\Users\VOS-User\.zcode\cli\memories\.git\hooks\post-commit` 与 `post-merge` 挂载自动同步脚本 `scripts/sync_shared_memory_openviking.py`；
-- **探活对比**：记录 `C:\Users\VOS-User\.openviking\last_synced_commit.txt`，对比 HEAD SHA，重复提交秒级跳过，新提交触发增量重扫。
+- **即时驱动**：在 `%USERPROFILE%\.zcode\cli\memories\.git\hooks\post-commit` 与 `post-merge` 挂载自动同步脚本 `scripts/sync_shared_memory_openviking.py`；
+- **探活对比**：记录 `%USERPROFILE%\.openviking\last_synced_commit.txt`，对比 HEAD SHA，重复提交秒级跳过，新提交触发增量重扫。
 
 ## 四、常用维护命令
-- 查看守护状态：`python C:/Users/VOS-User/AppData/Local/hermes/scripts/openviking_service.py status`
-- 强制启停后端：`python C:/Users/VOS-User/AppData/Local/hermes/scripts/openviking_service.py [start|stop|restart]`
-- 强制全量同步：`python C:/Users/VOS-User/AppData/Local/hermes/scripts/sync_shared_memory_openviking.py --force`
-- 语义检索验证：`C:/Users/VOS-User/.openviking/venv/Scripts/ov.exe find "<query>"`
+- 查看守护状态：`python %LOCALAPPDATA%/hermes/scripts/openviking_service.py status`
+- 强制启停后端：`python %LOCALAPPDATA%/hermes/scripts/openviking_service.py [start|stop|restart]`
+- 强制全量同步：`python %LOCALAPPDATA%/hermes/scripts/sync_shared_memory_openviking.py --force`
+- 语义检索验证：`%USERPROFILE%/.openviking/venv/Scripts/ov.exe find "<query>"`
 
 [[shared-agent-memory]] [[hermes-shared-memory]] [[user-windows-environment]] [[hermes-agent-install]]

@@ -28,7 +28,7 @@ metadata:
 
 ## 2026-09-01 执行状态（Plan 3 完成）
 
-仓库 `C:\Users\VOS-User\Desktop\make-bilibili-great-together`（GitHub 3304711297/...，main）。
+仓库 `%USERPROFILE%\Desktop\make-bilibili-great-together`（GitHub 3304711297/...，main）。
 
 - **Plan 1+2 userscript、Plan 3 MV3 扩展均已完成**；SDD 账本重建于 `.superpowers/sdd/2026-09-01-plan3-extension/progress.md`（原 ledger 文件丢失，gitignored）
 - 扩展 id `naephbpbijnomloddmldmgmfcjhikbac`（unpacked，dist=`packages/extension/dist`），Edge Dev 154 + BewlyCat 1.7.8 真机冒烟 6 项全过：注入✓ DNR 拦 data/cm✓ pending-family→generic 结算✓ compat status 落盘✓ 桥接端到端✓ userscript 停用✓

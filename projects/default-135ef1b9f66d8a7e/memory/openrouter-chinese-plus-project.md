@@ -8,7 +8,7 @@ metadata:
   originSessionId: sess_619b1ebc-599b-48a5-ac7f-6eb15deb6d77
 ---
 
-桌面 `C:\Users\VOS-User\Desktop\openrouter-chinese\` 是三源合并的油猴脚本项目（2026-08-21 创建），发布目标为 GitHub 仓库 **3304711297/openrouter-chinese-plus**（gh CLI 登录账号 `3304711297`，昵称"智商已更新"）。
+桌面 `%USERPROFILE%\Desktop\openrouter-chinese\` 是三源合并的油猴脚本项目（2026-08-21 创建），发布目标为 GitHub 仓库 **3304711297/openrouter-chinese-plus**（gh CLI 登录账号 `3304711297`，昵称"智商已更新"）。
 
 - 组装：`node build.mjs` 把 `sources/datou-locals.js` + `sources/datou-main.user.js` + `cny-price.module.js` 拼成单文件产物 `openrouter-chinese-plus.user.js`（构建生成勿手改）
 - 取舍：datou1996 引擎+词库整体采用（MIT）；LynnGuo666 人民币价格功能仅借鉴思路、代码全部重写（其 PolyForm Noncommercial 禁止商用，不能复制）；isdoge 未并入（覆盖子集且停更）

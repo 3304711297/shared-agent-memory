@@ -13,12 +13,12 @@ metadata:
 - **桌面端登录凭据位置**：`%LOCALAPPDATA%\CodeBuddyExtension\Data\Public\auth\workbuddy-desktop.info`
 
 ## 桥接方案 1：Hermes 专用直连适配器（codebuddy2openai，8787 端口）
-- **代码目录**：`C:\Users\VOS-User\AppData\Local\hermes\codebuddy2openai`
+- **代码目录**：`%LOCALAPPDATA%\hermes\codebuddy2openai`
 - **监听端点**：`http://127.0.0.1:8787/v1`（OpenAI 兼容协议，原生支持 Tool Calling / 流式 SSE）
 - **核心原理**：直接读取本地登录态凭据透传至腾讯后端 `copilot.tencent.com/v2/chat/completions`，无需付费版 Web API Key。
 - **启动脚本**：
-  - 后台静默启动：`C:\Users\VOS-User\AppData\Local\hermes\codebuddy2openai\start_silent.vbs`
-  - 终端运行脚本：`C:\Users\VOS-User\AppData\Local\hermes\codebuddy2openai\start_workbuddy_proxy.bat`
+  - 后台静默启动：`%LOCALAPPDATA%\hermes\codebuddy2openai\start_silent.vbs`
+  - 终端运行脚本：`%LOCALAPPDATA%\hermes\codebuddy2openai\start_workbuddy_proxy.bat`
 - **Hermes 接入状态**：
   - `custom_providers` 已注册 `WorkBuddy (127.0.0.1:8787)`
   - 模型别名：`/model workbuddy`（自动）、`/model hy4-preview` / `/model hy4`（混元4代）、`/model hy3`、`/model workbuddy-glm53`、`/model workbuddy-kimi3` 等。

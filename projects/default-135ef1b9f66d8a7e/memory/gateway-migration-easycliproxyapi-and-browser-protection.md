@@ -57,7 +57,7 @@ metadata:
 - **现象**：在 EasyCLIProxyAPI 桌面控制台「智能体配置」中选中 ZCode 时，提示黄色警告「只检测到配置文件，未检测到客户端」，右下角按钮显示「无法启动」。
 - **根因**：EasyCLIProxyAPI 在 Windows 上按固定规范路径探查客户端安装位置（`%LOCALAPPDATA%\Programs\ZCode\ZCode.exe` 与 `%ProgramFiles%\ZCode\ZCode.exe`），而用户的 ZCode 实际安装在 `D:\zcode\ZCode.exe`。
 - **解决**：建立目录联接（Junction）：
-  - `mklink /J "C:\Users\VOS-User\AppData\Local\Programs\ZCode" "D:\zcode"`
+  - `mklink /J "%LOCALAPPDATA%\Programs\ZCode" "D:\zcode"`
   - `mklink /J "C:\Program Files\ZCode" "D:\zcode"`
   使 EasyCLIProxyAPI 原生探查器能够直接定位并拉起 ZCode。
 
@@ -69,7 +69,7 @@ metadata:
   - **已被否决的方案（勿再尝试）**：① ZCode CLI `config.json` 给 gemini 模型加 `reasoning` 节点 → 无效（该字段对 anthropic kind 的 -high 模型无附加作用，且用户要求回滚）；② cpa-core `config.yaml` 加 `payload.default` 强制注入 `reasoning_effort: "high"` → 无效且导致模型调用失败（已回滚并重启核心）。真正链路：客户端任意 effort → `-high` 上游模型 → 强制高思考。
   - **重启方法论**：修改 `cpa-core/config.yaml` 后必须重启核心。守护进程 EasyCLIProxyAPI.exe（GUI 壳）不会自动重启被杀的 cli-proxy-api.exe 核心；需连 GUI 壳一起 `Stop-Process` 后重新 `Popen` 启动 `EasyCLIProxyAPI.exe`（它负责拉起核心子进程）。
 - **配置持久化**：
-  - 更新全局配置 `C:\Users\VOS-User\.zcode\v2\config.json` 与工作区配置 `D:\ai coding\.zcode\v2\config.json`。
+  - 更新全局配置 `%USERPROFILE%\.zcode\v2\config.json` 与工作区配置 `D:\ai coding\.zcode\v2\config.json`。
   - 在 `zcode-antigravity-local`（Google 提供商）中注入：
     - `gemini-3.8-flash`（优先级 200，支持思维链）
     - `gemini-3.7-flash`（优先级 201）

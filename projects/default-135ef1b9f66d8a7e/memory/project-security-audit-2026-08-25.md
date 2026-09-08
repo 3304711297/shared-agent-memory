@@ -7,7 +7,7 @@ metadata:
   originSessionId: sess_073ef12c-e861-4f05-92d2-11f62185bf91
 ---
 
-2026-08-25 对 `C:/Users/VOS-User/Desktop/tweak` 与 `C:/Users/VOS-User/Desktop/youshouldknow` 做只读审计。未发现主运行脚本中的 `Invoke-Expression`、`DownloadString` 或下载远程脚本后直接执行；但 tweakbyjie 仍应按“高权限、需人工审慎运行”的系统修改工具对待，Coverage 通过不等于安全或可完全回滚。
+2026-08-25 对 `%USERPROFILE%/Desktop/tweak` 与 `%USERPROFILE%/Desktop/youshouldknow` 做只读审计。未发现主运行脚本中的 `Invoke-Expression`、`DownloadString` 或下载远程脚本后直接执行；但 tweakbyjie 仍应按“高权限、需人工审慎运行”的系统修改工具对待，Coverage 通过不等于安全或可完全回滚。
 
 **最高优先级风险：**
 - `defender-removal.ps1` 将 SYSTEM 重试命令写入用户可写 `%TEMP%` 的 `.cmd` 后由 SYSTEM 计划任务执行，存在临时文件竞态/劫持风险；另会递归接管并删除 Defender 系统组件，缺少完整恢复机制，并可能在部分失败后强制重启。

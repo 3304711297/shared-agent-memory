@@ -10,8 +10,8 @@ metadata:
 # Hermes×ZCode 双端互等握手机制（2026-09-06 全链路实测闭环）
 
 ## 一、Hermes 等 ZCode（✅ 已验证，标准主链路）
-- 监听层：只读打开 ZCode SQLite（`sqlite3.connect(r'file:C:\Users\VOS-User\.zcode\cli\db\db.sqlite?mode=ro', uri=True)`），严禁写入（database is locked 死锁）；session 表按 `task_type != 'subagent_child'` 过滤主会话，`time_updated` 距今秒数判活跃。
-- 守护层：`python C:/Users/VOS-User/AppData/Local/hermes/scripts/watch_zcode.py --timeout <秒>`（118 行，3s 轮询，15 秒滑动窗口判 settled，忽略历史遗留 step-start 子代理防假阳性）；输出 `ZCode session <id> has settled!` 且 exit 0=完工。
+- 监听层：只读打开 ZCode SQLite（`sqlite3.connect(os.path.expandvars(r'file:%USERPROFILE%\.zcode\cli\db\db.sqlite?mode=ro'), uri=True)`），严禁写入（database is locked 死锁）；session 表按 `task_type != 'subagent_child'` 过滤主会话，`time_updated` 距今秒数判活跃。
+- 守护层：`python %LOCALAPPDATA%/hermes/scripts/watch_zcode.py --timeout <秒>`（118 行，3s 轮询，15 秒滑动窗口判 settled，忽略历史遗留 step-start 子代理防假阳性）；输出 `ZCode session <id> has settled!` 且 exit 0=完工。
 - 唤醒层：`terminal(background=True, notify=true)` 启动守护 → 进程退出触发 Hermes 内部 Process Exit Event（应用内事件总线，不受 Windows 系统通知开关影响）自动唤醒主对话，随即自主接手。
 - 实测时间线：T+0 派 ZCode 任务 → T+2s 挂守护 → 聊天框休眠 → ZCode exit 0 → watcher settled 退出 → Hermes 自动唤醒执行接手验证，全程零用户输入。
 

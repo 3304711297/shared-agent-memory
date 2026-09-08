@@ -8,7 +8,7 @@ metadata:
 ---
 
 桌面三个文件夹中 KYE 排除，有效项目仅 tweak（tweakbyjie）和 youshouldknow，已完成体检、工程化补齐、联动完善、内容加厚、gh-pages 发布与跨仓库 Coverage 审计修复，提交信息使用中文；当前与远端完全同步（0 0，working tree clean）。
-- 本地路径：`C:/Users/VOS-User/Desktop/tweak` 和 `C:/Users/VOS-User/Desktop/youshouldknow`
+- 本地路径：`%USERPROFILE%/Desktop/tweak` 和 `%USERPROFILE%/Desktop/youshouldknow`
 - 远端：`https://github.com/3304711297/tweakbyjie.git` 和 `https://github.com/3304711297/youshouldknow.git`，分支 main 跟踪 origin/main
 - 入口：`.\tweakbyjie.cmd`（双运行时启动器，pwsh 优先回退 5.1）或 `powershell -ExecutionPolicy Bypass -File .\tweakbyjie.ps1`（需整仓下载，模块内用 $script:RepoRoot 锚点）
 - youshouldknow 为 13 个中文分类的知识库（内容在 `docs/` 下，知识层与执行层联动），tweak 为 PowerShell 工具集（Loader + Modules/）+ ultimate-performance.pow

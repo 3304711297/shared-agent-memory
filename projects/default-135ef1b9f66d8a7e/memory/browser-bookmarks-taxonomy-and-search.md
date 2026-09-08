@@ -46,10 +46,10 @@ metadata:
 ### 1. 关键词与目录精确检索（首选，秒级执行）
 ```bash
 # 模糊匹配标题、URL 或目录路径
-python C:/Users/VOS-User/AppData/Local/hermes/scripts/search_bookmarks.py "<检索词>" -n 20
+python %LOCALAPPDATA%/hermes/scripts/search_bookmarks.py "<检索词>" -n 20
 
 # 限定在特定分类目录搜索
-python C:/Users/VOS-User/AppData/Local/hermes/scripts/search_bookmarks.py "<检索词>" -f "AI" -n 10
+python %LOCALAPPDATA%/hermes/scripts/search_bookmarks.py "<检索词>" -f "AI" -n 10
 ```
 
 ### 2. 自然语言概念检索（OpenViking 意图召回）

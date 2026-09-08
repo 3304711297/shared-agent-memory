@@ -8,7 +8,7 @@ metadata:
   originSessionId: sess_7ad7ae87-25fb-45bb-916e-807424ab1e84
 ---
 
-The user maintains a public GitHub knowledge repo **youshouldknow** at https://github.com/3304711297/youshouldknow containing verified tech articles. Local path: `C:/Users/VOS-User/Desktop/youshouldknow`.
+The user maintains a public GitHub knowledge repo **youshouldknow** at https://github.com/3304711297/youshouldknow containing verified tech articles. Local path: `%USERPROFILE%/Desktop/youshouldknow`.
 
 Categories (folders at repo root): 验机相关, 内存超频 (has an images/ subfolder — the only folder with embedded images), 系统知识, 网络通信, 显卡优化. As of 2026-08-16 there are 31 articles across 5 categories.
 

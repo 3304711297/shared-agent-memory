@@ -11,7 +11,7 @@ metadata:
 
 ## 架构对齐与实现成果 (2026-09-04)
 1. **项目路径规范**：
-   - 遵照用户使用习惯，项目源码已完整从临时路径迁移至桌面：`C:\Users\VOS-User\Desktop\codebuddy2openai\`。
+   - 遵照用户使用习惯，项目源码已完整从临时路径迁移至桌面：`%USERPROFILE%\Desktop\codebuddy2openai\`。
    - 桌面已创建独立 Release 版快捷方式 `CodeBuddy2OpenAI.lnk`（指向 `src-tauri\target\release\codebuddy2openai.exe`）。
    - 原先的批处理窗口与 `start_silent.vbs` 等脚本已彻底删除并下线，完全由桌面 GUI 控制台接管生命周期。
 2. **多账号管理体系**：
@@ -52,7 +52,7 @@ metadata:
 
 **2026-09-05 安全与健壮性批次（全账号审计产出，均已推送）**：
 - `2020b4b` 日志查看器 UTF-8 边界 panic 修复（中文日志 80KB 截断对齐 char boundary）；
-- `c9da638` 开发机硬编码路径全量环境变量化：集中工具区 env_nonempty/local_appdata/user_home + `C2O_PYTHON`/`C2O_CONVERTER`/`HERMES_HOME`，原 VOS-User 路径仅剩最终兜底（本机行为不变）；**Agent 路径检测已核实通用**：Hermes 候选=官方 Windows 默认 %LOCALAPPDATA%\hermes + HERMES_HOME + ~/.hermes（官方文档三 者 皆 认），ZCode=~/.zcode/cli（官方约定），他人机器可正常检测；
+- `c9da638` 开发机硬编码路径全量环境变量化：集中工具区 env_nonempty/local_appdata/user_home + `C2O_PYTHON`/`C2O_CONVERTER`/`HERMES_HOME`，原用户名路径仅剩最终兜底（本机行为不变）；**Agent 路径检测已核实通用**：Hermes 候选=官方 Windows 默认 %LOCALAPPDATA%\hermes + HERMES_HOME + ~/.hermes（官方文档三 者 皆 认），ZCode=~/.zcode/cli（官方约定），他人机器可正常检测；
 - `b23c2d5` /health 收窄为 {status, authenticated} 并新增 LocalHostOnlyMiddleware（Host 头校验防 DNS rebinding，[::1]:port 方括号解析已处理）；前端昵称改走 accounts_list 并移除硬编码"晚街"；
 - `d79fd4f` 补基础 CI（windows-latest：npm ci+vite build+cargo check --locked+rust-cache，timeout 30min，首跑 4m26s 绿）+ dependabot.yml（npm+cargo）；
 - 已知存量风险与技术债：
@@ -172,4 +172,4 @@ metadata:
 - **全量验证全绿**：全量 67 项 pytest、2 项前端测试、Vite build、29 项 cargo test 100% 通过。
 
 **Why:** 用户要求模型列表全量覆盖官方模型库，并补全 WorkBuddy 核心的倍率显示、上下文限制与思考强度调节能力。
-**How to apply:** 维护 `C:\Users\VOS-User\Desktop\codebuddy2openai`，后续所有跨端 Agent 配置及客户端演进均以此架构为基准。
+**How to apply:** 维护 `%USERPROFILE%\Desktop\codebuddy2openai`，后续所有跨端 Agent 配置及客户端演进均以此架构为基准。

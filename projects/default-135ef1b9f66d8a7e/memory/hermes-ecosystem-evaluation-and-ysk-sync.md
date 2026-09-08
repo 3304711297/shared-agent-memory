@@ -53,7 +53,7 @@ metadata:
 ## 二、3 & 5 内容入库 youshouldknow 项目
 
 已将第 3 项（HermesWatcher 最新命令速查指南）与第 5 项（witcheer 官方生态与上手路线）整合提炼为高质量科普长文，落入知识库项目：
-- **项目路径**：`C:/Users/VOS-User/Desktop/youshouldknow/`
+- **项目路径**：`%USERPROFILE%/Desktop/youshouldknow/`
 - **文档路径**：`docs/AI工具/Hermes-Agent高阶指令全景与生态路线指南.md`
 - **核心涵盖**：
   1. 八大核心场景指令全景表（/goal, /loop, /heartbeat, /bg, /btw, /busy, /plan, /review, /refine, /moa 等）；

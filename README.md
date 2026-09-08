@@ -10,7 +10,7 @@ Hermes Agent 与 ZCode 共用的跨端长期记忆库。**共享内容只有一�
 
 | 分支 | 内容 | 物理位置 |
 |------|------|----------|
-| `main`（默认） | **双端共享记忆库**（唯一真源）：`projects/default-*/memory/*.md` 专题记忆 + `MEMORY.md` 索引 | `C:\Users\VOS-User\.zcode\cli\memories\` |
+| `main`（默认） | **双端共享记忆库**（唯一真源）：`projects/default-*/memory/*.md` 专题记忆 + `MEMORY.md` 索引 | `%USERPROFILE%\.zcode\cli\memories\` |
 | `zcode` | 仅 ZCode 专属、不与 Hermes 共享的内容（占位，暂空） | 按需检出 |
 | `hermes` | 仅 Hermes 专属：home 白名单备份（SOUL.md、原生 USER.md/MEMORY.md、技能/插件配置）；**不含共享 topics** | `%LOCALAPPDATA%\hermes\` |
 
@@ -27,7 +27,7 @@ Hermes Agent 与 ZCode 共用的跨端长期记忆库。**共享内容只有一�
 # 2. 克隆共享记忆库到 ZCode 记忆目录（检出 main）：
 git clone -b main https://github.com/3304711297/shared-agent-memory.git "$HOME\.zcode\cli\memories"
 # 3. 重建 Hermes 侧 junction（hermes home 就位后执行）：
-cmd /c mklink /J "%LOCALAPPDATA%\hermes\memories\topics" "C:\Users\VOS-User\.zcode\cli\memories\projects\default-135ef1b9f66d8a7e\memory"
+cmd /c mklink /J "%LOCALAPPDATA%\hermes\memories\topics" "%USERPROFILE%\.zcode\cli\memories\projects\default-135ef1b9f66d8a7e\memory"
 ```
 
 恢复后重启 ZCode / Hermes 即自动读取全部记忆。
@@ -39,7 +39,7 @@ cmd /c mklink /J "%LOCALAPPDATA%\hermes\memories\topics" "C:\Users\VOS-User\.zco
 共享库变动（任一 Agent）：
 
 ```bash
-git -C "C:/Users/VOS-User/.zcode/cli/memories" add -A && git -C "C:/Users/VOS-User/.zcode/cli/memories" commit -m "memory: <简述>" && git -C "C:/Users/VOS-User/.zcode/cli/memories" push origin main
+git -C "$HOME/.zcode/cli/memories" add -A && git -C "$HOME/.zcode/cli/memories" commit -m "memory: <简述>" && git -C "$HOME/.zcode/cli/memories" push origin main
 ```
 
 或直接运行本目录的 `backup-memories.cmd`。Hermes 专属变动则在其 home 仓库推 `hermes` 分支。

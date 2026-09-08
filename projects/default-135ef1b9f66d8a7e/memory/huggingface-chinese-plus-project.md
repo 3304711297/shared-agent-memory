@@ -8,7 +8,7 @@ metadata:
   originSessionId: sess_19bf06e3-9812-4e80-89fc-84a6aa45b9e5
 ---
 
-桌面 `C:\Users\VOS-User\Desktop\huggingface-chinese\` 是 Hugging Face 中文化油猴脚本项目（2026-08-29 创建），发布仓库 **3304711297/huggingface-chinese-plus**（gh 账号 3304711297），初始提交 `faf7249`，产物 `huggingface-chinese-plus.user.js` v1.0.1。
+桌面 `%USERPROFILE%\Desktop\huggingface-chinese\` 是 Hugging Face 中文化油猴脚本项目（2026-08-29 创建），发布仓库 **3304711297/huggingface-chinese-plus**（gh 账号 3304711297），初始提交 `faf7249`，产物 `huggingface-chinese-plus.user.js` v1.0.1。
 
 - **许可证路线（用户未及时拍板、按推荐执行）**：词库采用 izhadu/GreasyFork 的 HuggingFace-Chinese/dict.json（GPL-3.0，1836 静态词条 + 131 正则），本项目整体 GPL-3.0；引擎**原创**（借鉴 izhadu 与 1cyberlangke1/huggingface-zh 的思路，未复制代码），与 [[openrouter-chinese-plus-project]] 的 cny-price 同样的"只借思路"纪律
 - 结构：`i18n-core.mjs`（纯函数翻译核心，build 内联去 export，与单测同源）+ `engine.js`（TreeWalker + MutationObserver + requestIdleCallback 空闲批处理，代码块/编辑器/.markdown-body 安全区豁免）+ `sources/hf-dict.json`（vendored 快照）→ `build.mjs` 组装单文件；版本 `<ourBase>.<buildNumber>`（当前 1.2.x；ourBase=功能/引擎修复人工递增，buildNumber=词库自动同步，语义已写进 README）

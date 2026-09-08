@@ -8,7 +8,7 @@ metadata:
   originSessionId: sess_5aaf10dd-f320-4323-9c4e-f0fba4ee03cf
 ---
 
-用户 2026-08-30 启动新项目 `make-bilibili-great-together`，位于 `C:\Users\VOS-User\Desktop\make-bilibili-great-together`（仅本地仓库，尚未推 GitHub）。
+用户 2026-08-30 启动新项目 `make-bilibili-great-together`，位于 `%USERPROFILE%\Desktop\make-bilibili-great-together`（仅本地仓库，尚未推 GitHub）。
 
 关键拍板（spec 在 `docs/superpowers/specs/2026-08-30-make-bilibili-great-together-design.md`）：
 - 接手 SukkaW/Make-Bilibili-Great-Than-Ever-Before（MIT，新仓库移植其架构，非 fork）

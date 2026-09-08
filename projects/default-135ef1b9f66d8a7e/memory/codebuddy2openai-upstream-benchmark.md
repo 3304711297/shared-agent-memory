@@ -10,7 +10,7 @@ metadata:
 
 2026-09-05 对标 EasyCLIProxyAPI v0.2.72 并**四批全部落地推送**（11 提交，多次 CI 全绿，版本 0.2.0）：
 
-**批次1（a75b68e 前端 + 040c441 Rust）**：①动态插值全量 esc()+事件委托修 XSS（inline onclick 改 data-act 委托，因 JS 上下文 HTML 转义防不住单引号逃逸）；②全局错误兜底 error/unhandledrejection+面板；③Promise 版 showConfirm 替代原生 confirm；④renderFallbackModels 仍被降级路径引用故改写成 4 列而非删除；⑤AppConfig 增 port/desensitize 持久化+托盘每次现读 settings.json；⑥tauri-plugin-single-instance 2.4.4（二次启动聚焦已有窗口）；⑦版本对齐 0.2.0（Cargo.lock 须随 CI --locked 提交）；⑧清理 C:\Users\VOS-User 残留（dirs::data_local_dir 兜底）。
+**批次1（a75b68e 前端 + 040c441 Rust）**：①动态插值全量 esc()+事件委托修 XSS（inline onclick 改 data-act 委托，因 JS 上下文 HTML 转义防不住单引号逃逸）；②全局错误兜底 error/unhandledrejection+面板；③Promise 版 showConfirm 替代原生 confirm；④renderFallbackModels 仍被降级路径引用故改写成 4 列而非删除；⑤AppConfig 增 port/desensitize 持久化+托盘每次现读 settings.json；⑥tauri-plugin-single-instance 2.4.4（二次启动聚焦已有窗口）；⑦版本对齐 0.2.0（Cargo.lock 须随 CI --locked 提交）；⑧清理开发机用户目录残留（dirs::data_local_dir 兜底）。
 
 **批次2（2e8e97e + 8926b3c）**：明暗双主题（[data-theme=light] 仅覆盖变量+原生 setBackgroundColor 同步+日志控制台刻意保持黑底）；响应式断点 1080/820/700/560（≤700 侧栏 56px 仅图标）；proxy_test_chat 改流式 SSE 探 TTFT（reqwest stream feature+futures-util，行缓冲解析防 UTF-8 截断，max_tokens=100）；日志超 1MB 在 proxy_start 前与 proxy_stop 后轮转 .1（避免进程运行中 rename 失败）；open_logs_dir；窗口尺寸记忆独立 window.json（500ms 去抖+代数计数，不并入 AppConfig 免契约纠缠）。
 
