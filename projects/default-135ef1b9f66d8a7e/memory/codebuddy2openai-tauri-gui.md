@@ -171,5 +171,13 @@ metadata:
 - **补齐 9 项边界回归测试全绿**：覆盖 3 字段全部正确零修改、model/provider/base_url 错误各单修、缺少字段补齐、内含空行+注释、三轮反复幂等、configure-remove-configure 循环及 block 含空行注释无残余替换与移除；
 - **全量验证全绿**：全量 67 项 pytest、2 项前端测试、Vite build、29 项 cargo test 100% 通过。
 
+**2026-09-09 Release 构建生产资产内嵌与 custom-protocol 根因修复（提交 1801b90）**：
+- **故障现象**：升级 v0.2.1 后打开桌面客户端，WebView2 抛出 `ERR_CONNECTION_REFUSED`（`localhost 拒绝连接`）。
+- **根因分析**：直接使用 `cargo build --release` 编译 Rust 产物时，因 `src-tauri/Cargo.toml` 缺少 `[features] custom-protocol = ["tauri/custom-protocol"]` 声明，Tauri 宏内核将 `dev` 判定为 `true`（`dev: cfg!(not(feature = "custom-protocol"))`），导致编译出来的 release 二进制仍指向 `devUrl`（`http://localhost:5173`）。在未启动 Vite 开发服务的情况下启动软件，WebView2 访问回环开发端口失败。
+- **修复方案**：
+  1. `src-tauri/Cargo.toml` 显式声明 `[features] custom-protocol = ["tauri/custom-protocol"]`，符合 Tauri 官方标准规范；
+  2. 规范发布构建流水线：必须保证 `npm run build` 生成前端静态产物后，由 `npm run tauri build -- --no-bundle`（或带 `--features custom-protocol`）完成内嵌打包；
+- **全量验证**：pytest 103 项 + cargo test 29 项 + 前端 2 项共 134 项测试 100% 通过；Windows 原生 API 捕获窗口画面实证 v0.2.1 暗黑控制台正常渲染，桌面快捷方式直接恢复。
+
 **Why:** 用户要求模型列表全量覆盖官方模型库，并补全 WorkBuddy 核心的倍率显示、上下文限制与思考强度调节能力。
 **How to apply:** 维护 `%USERPROFILE%\Desktop\codebuddy2openai`，后续所有跨端 Agent 配置及客户端演进均以此架构为基准。
