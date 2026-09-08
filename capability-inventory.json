@@ -325,9 +325,9 @@
       "installed": [
         {
           "where": "国内社区雷达（书签真源）",
-          "version": "1420",
-          "totalSkills": 1420,
-          "extractedAt": "2026-09-07"
+          "version": "1432",
+          "totalSkills": 1432,
+          "extractedAt": "2026-09-08"
         }
       ]
     },
@@ -376,11 +376,26 @@
           "file": "C:/Users/VOS-User/AppData/Local/hermes/config.yaml",
           "usageFile": "C:/Users/VOS-User/AppData/Local/hermes/skills/.usage.json",
           "expect": [
-            { "path": "curator.enabled", "value": false },
-            { "path": "memory.nudge_interval", "value": 0 },
-            { "path": "skills.creation_nudge_interval", "value": 0 },
-            { "path": "auxiliary.background_review.enabled", "value": false },
-            { "path": "updates.non_interactive_local_changes", "value": "stash" }
+            {
+              "path": "curator.enabled",
+              "value": false
+            },
+            {
+              "path": "memory.nudge_interval",
+              "value": 0
+            },
+            {
+              "path": "skills.creation_nudge_interval",
+              "value": 0
+            },
+            {
+              "path": "auxiliary.background_review.enabled",
+              "value": false
+            },
+            {
+              "path": "updates.non_interactive_local_changes",
+              "value": "stash"
+            }
           ],
           "stashRepos": [
             "C:/Users/VOS-User/AppData/Local/hermes/hermes-agent",
