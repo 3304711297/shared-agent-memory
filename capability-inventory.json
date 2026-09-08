@@ -457,6 +457,7 @@
     }
   ],
   "notWatched": [
+    "【评估否决 2026-09-08】D4Vinci/Scrapling：Python自适应与反爬虫框架。经评估其MCP与本地无头浏览器与现有Exa独享检索及极简MCP终态倒挂，且重型浏览器依赖侵占C盘空间；日常油猴与系统调优工作流无常驻爬虫刚需，仅定性为按需Python脚本库，不予作为常驻MCP/技能引入看门",
     "【自研技能 2026-09-08】agentic-video-distill：基于 Gemini Agentic Video Understanding 架构的解耦蒸馏技能（双端实装，自包含执行器），属于用户自研工具体系，无公开上游，不纳入单独看门，已列入 protectedSkills 白名单",
     "【评估否决 2026-09-08】etherscan/skills：Etherscan 官方 Web3/EVM 链上分析套件（4项技能），强依赖未配置的 ETHERSCAN_API_KEY 凭据，且与当前系统调优/代理/桌面工程完全脱节，避免污染技能池注意力，不予引入",
     "【评估否决 2026-09-08】mindfold-ai/trellis：单仓任务状态机与 PRD 生成与外部 AI 任务书分级（P0/P1/P2）严重权责倒挂；其 .trellis/workspace 弱记忆与跨端物理真源 shared-agent-memory 冲突；环境依赖过重，不予引入",
