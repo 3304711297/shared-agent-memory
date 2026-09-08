@@ -28,7 +28,7 @@
 - [HuggingFace Chinese Plus Project](huggingface-chinese-plus-project.md) — 桌面 huggingface-chinese 汉化脚本项目；引擎原创 GPL-3.0 + izhadu 词库自动同步；**产物 1.3.3（buildNumber 3），build 防倒退已加（172 测试）**
 - [SteamDB Chinese Plus Project](steamdb-chinese-plus-project.md) — 桌面 steamdb-chinese 汉化脚本项目；接续停更 SteamDB_CN；词库真源 Chr233/GM_Scripts(AGPL-3.0)；**v1.4.4，build 防倒退已加（39 测试）**
 - [Bilibili Enhancement Tools](bilibili-enhancement-tools.md) — B站增强三件套调研：SukkaW 反跟踪油猴脚本（安全可装）+ BewlyCat(功能向) vs AveMujica(外观向) 二选一，B站2026-01推荐API需BewlyCat≥1.5.6；源码级重叠四块+脚本独有清单+共存关模块建议
-- [Hermes Agent Install](hermes-agent-install.md) — hermes-agent（HERMES_HOME=LocalAppData，GUI 桌面端为主用法）：git/uv 必须走 127.0.0.1:3067 代理；429 限流→GitHub URL 带身份 insteadOf 已修；token-stats 配额微服务 18088 与更新弹窗文件锁排查
+- [Hermes Agent Install](hermes-agent-install.md) — hermes-agent（HERMES_HOME=LocalAppData，GUI 桌面端为主用法）：git/uv 走 3067 代理；429 限流 insteadOf 规则；token-stats 配额微服务 18088；更新弹窗文件锁排查；09-08 桌面更新 exit 8 校验 cwd 误报根因（windows.ps1 第 1609 行 Path.cwd 修复为 InstallRoot）
 - [Hermes Shared Memory](hermes-shared-memory.md) — 共享库单一真源=ZCode 记忆目录（main 分支）；hermes 经 NTFS junction 直读 topics 并自行提交推送 main（旧「ZCode 代推」规则作废）
 - [Bilibili Video Transcription Pipeline](bilibili-video-transcription-pipeline.md) — B站视频→逐字稿管线（直连API防412+ffmpeg whisper small+误听对照表），脚本在 bios_knowledge/
 - [Youshouldknow BIOS Knowledge Series](youshouldknow-bios-knowledge-series.md) — ysk BIOS 选项科普系列（2026-09-02 批次+09-03 EP15 NVMe，逐篇附出处）；同步点 d0fc852；B站看门 bilibili-watch 每 6h 自动开 Issue；ysk 新增页面必须重跑 gen-matrix.py
