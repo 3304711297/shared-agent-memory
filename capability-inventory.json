@@ -288,8 +288,8 @@
       "installed": [
         {
           "where": "开源技能雷达（书签真源）",
-          "version": "HEAD@ca185ef5",
-          "sha": "ca185ef5f7667078a1e70a763bd3a9c71c48acf0"
+          "version": "HEAD@c11753d0",
+          "sha": "c11753d0b94d3a8cc379564609a740c5e68599e3"
         }
       ]
     },
@@ -325,8 +325,8 @@
       "installed": [
         {
           "where": "国内社区雷达（书签真源）",
-          "version": "1432",
-          "totalSkills": 1432,
+          "version": "1433",
+          "totalSkills": 1433,
           "extractedAt": "2026-09-08"
         }
       ]
