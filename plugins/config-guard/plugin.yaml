@@ -1,0 +1,4 @@
+name: config-guard
+version: 1.0.0
+description: 本地配置守卫后端 — 为桌面状态栏 config-guard-chip 插件提供 /api/plugins/config-guard/result 数据服务（读取 gateway:startup hook 的检查结果）
+author: VOS-User
