@@ -33,10 +33,50 @@ def ensure_proxy():
         os.environ["HTTPS_PROXY"] = proxy_url
         os.environ["ALL_PROXY"] = proxy_url
 
+def detect_current_gemini_model() -> str:
+    """
+    智能动态探测当前环境首选的 Gemini 模型：
+    1. 优先读取 Hermes state.db 当前活跃会话的模型；
+    2. 若不是 Gemini（如切到了 Claude/GLM），读取 config.yaml 或环境变量；
+    3. 若均为非 Gemini 模型，智能回退至最新兼容基线 gemini-3.8-flash。
+    """
+    # 1. 尝试从 Hermes 最新活跃会话探测
+    state_db = Path.home() / "AppData/Local/hermes/state.db"
+    if state_db.exists():
+        try:
+            import sqlite3
+            conn = sqlite3.connect(str(state_db))
+            cur = conn.cursor()
+            cur.execute("SELECT model FROM sessions ORDER BY last_activity_at DESC LIMIT 1")
+            row = cur.fetchone()
+            if row and row[0] and "gemini" in row[0].lower():
+                # 规范化：剥离 high/thinking 等后缀，保留核心型号如 gemini-3.9-flash / gemini-3.8-flash
+                m = row[0].strip()
+                return m
+        except Exception:
+            pass
+
+    # 2. 尝试从 config.yaml 读取默认模型
+    cfg_path = Path.home() / "AppData/Local/hermes/config.yaml"
+    if cfg_path.exists():
+        try:
+            import yaml
+            with open(cfg_path, "r", encoding="utf-8") as f:
+                cfg = yaml.safe_load(f)
+            m = cfg.get("model", {}).get("default", "")
+            if "gemini" in m.lower():
+                return m
+        except Exception:
+            pass
+
+    # 3. 环境变量或默认安全基线
+    return os.environ.get("GEMINI_VIDEO_MODEL", "gemini-3.8-flash")
+
 def main():
+    detected_model = detect_current_gemini_model()
     parser = argparse.ArgumentParser(description="Gemini Agentic Video 知识蒸馏工具")
     parser.add_argument("source", help="本地视频文件路径（MP4/MKV等）或公开 YouTube URL（https://youtu.be/...）")
-    parser.add_argument("-m", "--model", default="gemini-3.8-flash", help="指定模型，默认 gemini-3.8-flash（可选 gemini-3.7-flash 等）")
+    parser.add_argument("-m", "--model", default=detected_model, help=f"指定模型，默认自适应探测: {detected_model}（支持传参覆盖）")
     parser.add_argument("-p", "--prompt", default=DEFAULT_PROMPT, help="自定义提炼提示词")
     parser.add_argument("-o", "--output", help="输出 Markdown 文件路径，默认输出到同名 .md 或 stdout")
     parser.add_argument("--key", help="Google AI Studio API Key（默认从 GEMINI_API_KEY 环境变量读取）")
