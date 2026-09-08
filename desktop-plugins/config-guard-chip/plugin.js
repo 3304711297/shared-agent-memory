@@ -132,7 +132,7 @@ export default {
       id: 'chip',
       area: 'statusBar.right',
       order: 9, // token-stats chip (order 10) 左侧
-      render: () => jsx(GuardChip, null),
+      render: () => jsx(GuardChip, { ctx }),
     })
   },
 }
