@@ -145,6 +145,143 @@ def local_merged_versions(path):
     return {p.get("name"): p.get("version") for p in d.get("plugins", [])}
 
 
+# ── 本地配置守卫（Hermes 更新后漂移检查）────────────────────────────────
+# 纯标准库实现：不依赖 PyYAML。config.yaml 主体是简单嵌套映射，按缩进维护
+# 路径栈即可取到叶子值；列表项（`- ` 开头）与注释行一律跳过，不干扰栈。
+
+def _parse_scalar(raw):
+    s = raw.strip()
+    if s == "" or s.startswith("#"):
+        return None
+    low = s.lower()
+    if low in ("true", "yes"):
+        return True
+    if low in ("false", "no"):
+        return False
+    if low in ("null", "~"):
+        return None
+    try:
+        return int(s)
+    except ValueError:
+        pass
+    try:
+        return float(s)
+    except ValueError:
+        pass
+    return s.strip("'\"")
+
+
+def read_config_leaves(path):
+    """把 config.yaml 解析成 {点分路径: 叶子值}。仅覆盖映射结构，列表分支跳过。"""
+    leaves, stack = {}, []  # stack: [(indent, key)]
+    with open(path, encoding="utf-8") as f:
+        for raw in f:
+            line = raw.rstrip("\n")
+            if not line.strip() or line.lstrip().startswith("#"):
+                continue
+            stripped = line.lstrip()
+            if stripped.startswith("-") or stripped.startswith("|-") or stripped.startswith(">-"):
+                continue  # 列表项 / 块标量：不参与路径栈
+            indent = len(line) - len(line.lstrip())
+            if ":" not in stripped:
+                continue
+            key, _, val = stripped.partition(":")
+            key = key.strip()
+            while stack and stack[-1][0] >= indent:
+                stack.pop()
+            stack.append((indent, key))
+            parsed = _parse_scalar(val)
+            if parsed is not None:
+                leaves[".".join(k for _, k in stack)] = parsed
+    return leaves
+
+
+def check_config_guard(check):
+    """返回 (problems, detail_lines)。problems 非空即视为待跟进。"""
+    problems, detail = [], []
+    cfg_path = check["file"]
+
+    try:
+        leaves = read_config_leaves(cfg_path)
+    except Exception as e:
+        return [f"配置读取失败：{type(e).__name__}: {e}"], [
+            f"- ⚠️ 无法读取 `{cfg_path}`：{type(e).__name__}: {e}"
+        ]
+
+    detail.append(f"- 配置文件：`{cfg_path}`")
+    detail.append("")
+    detail.append("**① 拍板配置键（上游深合并新增默认值不会冲掉叶子，但需确认仍在）**")
+    detail.append("")
+    for item in check.get("expect", []):
+        path, want = item["path"], item["value"]
+        got = leaves.get(path, "<缺失>")
+        ok = (got == want)
+        icon = "✅" if ok else "🔴"
+        detail.append(f"- {icon} `{path}` = `{got}`（拍板值 `{want}`）" + ("" if ok else " — **已漂移/缺失**"))
+        if not ok:
+            problems.append(f"{path} 期望 {want!r}，实际 {got!r}")
+
+    # ② 本地源码 stash 残留（桌面端更新会 stash 且不自动 pop）
+    detail.append("")
+    detail.append("**② 本地源码 stash 残留（桌面端更新不自动还原）**")
+    detail.append("")
+    for repo in check.get("stashRepos", []):
+        try:
+            import subprocess
+            out = subprocess.run(
+                ["git", "-C", repo, "stash", "list", "--format=%gd|%s"],
+                capture_output=True, text=True, timeout=20,
+            )
+            stashes = [l for l in (out.stdout or "").splitlines() if l.strip()]
+            if stashes:
+                detail.append(f"- 🔴 `{repo}` 有 {len(stashes)} 条未还原 stash：")
+                for s in stashes[:5]:
+                    ref, _, subject = s.partition("|")
+                    kind = "（hermes 更新自动暂存）" if "hermes-update-autostash" in subject else "（手动暂存 ⚠️ 可能含本地定制）"
+                    detail.append(f"  - `{ref}` {subject}{kind}")
+                auto_n = sum(1 for s in stashes if "hermes-update-autostash" in s)
+                manual_n = len(stashes) - auto_n
+                msg = f"{repo} 存在 {len(stashes)} 条未还原 stash"
+                if manual_n:
+                    msg += f"（其中 {manual_n} 条为手动暂存，务必确认）"
+                msg += "；确认无本地定制后可用 `git stash drop` 清理"
+                problems.append(msg)
+            else:
+                detail.append(f"- ✅ `{repo}` 无 stash 残留")
+        except Exception as e:
+            detail.append(f"- ⚠️ `{repo}` stash 检查失败：{type(e).__name__}: {e}")
+
+    # ③ 核心自研技能是否被误打 created_by: agent（新版 curator 管辖标记）
+    detail.append("")
+    detail.append("**③ 核心自研技能 `created_by` 标记巡查**")
+    detail.append("")
+    usage_path = check.get("usageFile")
+    protected = check.get("protectedSkills", [])
+    if usage_path and protected:
+        try:
+            with open(usage_path, encoding="utf-8") as f:
+                usage = json.load(f)
+            flagged = []
+            for name in protected:
+                rec = usage.get(name)
+                if isinstance(rec, dict) and (
+                    rec.get("created_by") == "agent" or rec.get("agent_created") is True
+                ):
+                    flagged.append(name)
+            if flagged:
+                detail.append(f"- 🔴 以下核心技能已被标记为 `created_by: agent`，会进入 curator 归档倒计时：{', '.join(flagged)}")
+                detail.append("- 处理：`hermes curator unpin` 无效，需人工编辑 `.usage.json` 改回或确认是否接受归档。")
+                problems.append(f"核心技能被标为 agent-created：{', '.join(flagged)}")
+            else:
+                detail.append(f"- ✅ {len(protected)} 项核心自研技能均为非 agent 标记，curator 不会触碰")
+        except Exception as e:
+            detail.append(f"- ⚠️ `.usage.json` 读取失败：{type(e).__name__}: {e}")
+    else:
+        detail.append("- ⏭️ 未配置 usageFile / protectedSkills，跳过")
+
+    return problems, detail
+
+
 def github_commits_for_path(repo, path):
     """取仓库某路径最近 100 笔提交（新→旧）。"""
     q = urllib.parse.quote(path, safe="/")
@@ -218,6 +355,36 @@ def main():
             if behind:
                 outdated += 1
             details.append("\n".join(detail))
+            continue
+
+        # 本地配置守卫：Hermes 更新后检查拍板配置漂移 / stash 残留 / 核心技能标记
+        if check["type"] == "local-config-guard":
+            if on_actions:
+                skipped += 1
+                rows.append(f"| {comp['display']} | `{cid}` | 本地源 | ⏭️ Actions 跳过 |")
+                details.append("\n".join([
+                    f"### {comp['display']}（{cid}）", "",
+                    "- ⏭️ 本地配置检查在 Actions 上跳过（runner 无本地环境）。Hermes 更新后请在本地运行 `watch-capability.cmd`。",
+                ]))
+                continue
+            problems, detail = check_config_guard(check)
+            state = "🔴 有更新" if problems else "✅ 最新"
+            rows.append(f"| {comp['display']} | `{cid}` | 本地源 | {state} |")
+            if problems:
+                outdated += 1
+            head = [f"### {comp['display']}（{cid}）", ""]
+            if problems:
+                head.append(f"- 🔴 发现 **{len(problems)}** 项需人工确认：")
+                for p in problems:
+                    head.append(f"  - {p}")
+                head.append("")
+                head.append("- 跟进：处理完毕后（恢复配置 / `git stash apply` 或丢弃 / 修正 `.usage.json`），"
+                            "本项会在下次运行时自动恢复 ✅。")
+                head.append("")
+            else:
+                head.append("- ✅ 拍板配置齐全、无 stash 残留、核心技能未被 curator 标记。")
+                head.append("")
+            details.append("\n".join(head + detail))
             continue
 
         # 技能库路径提交检查：对比基线 sha，报告新增提交数
