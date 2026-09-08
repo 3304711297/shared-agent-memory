@@ -1,17 +1,13 @@
 #!/usr/bin/env python3
 """
-distill_gemini_video.py — 基于 Gemini Agentic Video Understanding 的长视频/屏幕录制高密度知识蒸馏工具
-
-特性：
-1. 启用 Google 原生 processing="agentic" 模式：先字幕定位、按需局部抽帧与自适应帧率，Token 节省 88%；
-2. 支持本地 MP4/MKV 录屏视频或公开 YouTube URL 直接直连分析；
-3. 输出带时间戳、画面要素、文字转录与核心结论的 Markdown 结构化文档；
-4. 产出物原生适配 cangjie-distill 方法论蒸馏与 youshouldknow 知识库格式。
+distill.py — 基于 Gemini Agentic Video Understanding 的长视频/屏幕录制高密度知识蒸馏执行器
+（集成当前会话模型动态感知、SSE流式保活防断连、主备API Key自动故障转移）
 """
 
 import os
 import sys
 import time
+import json
 import argparse
 from pathlib import Path
 
@@ -25,6 +21,8 @@ DEFAULT_PROMPT = """请对该视频进行高精度的结构化技术蒸馏：
 5. 【结构化配置/操作清单】：给出可直接抄作业的最终推荐配置、命令或排错检查清单。
 输出需保持专业、客观、严密，拒绝无意义的客套与套话。"""
 
+AUTH_FILE = Path.home() / "AppData/Local/hermes/auth/gemini_video_keys.json"
+
 def ensure_proxy():
     """自动对齐本地代理，确保连接 Google 服务"""
     if not os.environ.get("HTTPS_PROXY") and not os.environ.get("ALL_PROXY"):
@@ -33,14 +31,36 @@ def ensure_proxy():
         os.environ["HTTPS_PROXY"] = proxy_url
         os.environ["ALL_PROXY"] = proxy_url
 
+def load_keys(cli_key: str = None) -> list[str]:
+    """获取可用 API Key 列表（优先级：CLI传参 > 环境变量 > 本地凭据文件）"""
+    keys = []
+    if cli_key:
+        keys.append(cli_key)
+    env_key = os.environ.get("GEMINI_API_KEY")
+    if env_key and env_key not in keys:
+        keys.append(env_key)
+    env_backup = os.environ.get("GEMINI_API_KEY_BACKUP")
+    if env_backup and env_backup not in keys:
+        keys.append(env_backup)
+
+    if AUTH_FILE.exists():
+        try:
+            with open(AUTH_FILE, "r", encoding="utf-8") as f:
+                d = json.load(f)
+                if isinstance(d, dict):
+                    primary = d.get("primary")
+                    backup = d.get("backup")
+                    if primary and primary not in keys:
+                        keys.append(primary)
+                    if backup and backup not in keys:
+                        keys.append(backup)
+        except Exception:
+            pass
+
+    return keys
+
 def detect_current_gemini_model() -> str:
-    """
-    智能动态探测当前环境首选的 Gemini 模型：
-    1. 优先读取 Hermes state.db 当前活跃会话的模型；
-    2. 若不是 Gemini（如切到了 Claude/GLM），读取 config.yaml 或环境变量；
-    3. 若均为非 Gemini 模型，智能回退至最新兼容基线 gemini-3.8-flash。
-    """
-    # 1. 尝试从 Hermes 最新活跃会话探测
+    """智能动态探测当前环境首选的 Gemini 模型"""
     state_db = Path.home() / "AppData/Local/hermes/state.db"
     if state_db.exists():
         try:
@@ -50,13 +70,10 @@ def detect_current_gemini_model() -> str:
             cur.execute("SELECT model FROM sessions ORDER BY last_activity_at DESC LIMIT 1")
             row = cur.fetchone()
             if row and row[0] and "gemini" in row[0].lower():
-                # 规范化：剥离 high/thinking 等后缀，保留核心型号如 gemini-3.9-flash / gemini-3.8-flash
-                m = row[0].strip()
-                return m
+                return row[0].strip()
         except Exception:
             pass
 
-    # 2. 尝试从 config.yaml 读取默认模型
     cfg_path = Path.home() / "AppData/Local/hermes/config.yaml"
     if cfg_path.exists():
         try:
@@ -69,33 +86,27 @@ def detect_current_gemini_model() -> str:
         except Exception:
             pass
 
-    # 3. 环境变量或默认安全基线
     return os.environ.get("GEMINI_VIDEO_MODEL", "gemini-3.8-flash")
 
 def main():
     detected_model = detect_current_gemini_model()
     parser = argparse.ArgumentParser(description="Gemini Agentic Video 知识蒸馏工具")
     parser.add_argument("source", help="本地视频文件路径（MP4/MKV等）或公开 YouTube URL（https://youtu.be/...）")
-    parser.add_argument("-m", "--model", default=detected_model, help=f"指定模型，默认自适应探测: {detected_model}（支持传参覆盖）")
+    parser.add_argument("-m", "--model", default=detected_model, help=f"指定模型，默认自适应探测当前活跃模型: {detected_model}（支持显式覆盖）")
     parser.add_argument("-p", "--prompt", default=DEFAULT_PROMPT, help="自定义提炼提示词")
     parser.add_argument("-o", "--output", help="输出 Markdown 文件路径，默认输出到同名 .md 或 stdout")
-    parser.add_argument("--key", help="Google AI Studio API Key（默认从 GEMINI_API_KEY 环境变量读取）")
+    parser.add_argument("--key", help="Google AI Studio API Key（默认从环境变量或本地凭据池读取）")
     parser.add_argument("--dry-run", action="store_true", help="测试参数与环境连通性，不实际提交分析请求")
     args = parser.parse_args()
 
     ensure_proxy()
-
-    api_key = args.key or os.environ.get("GEMINI_API_KEY")
-    if not api_key and not args.dry_run:
-        print("[错误] 未检测到 Google API Key。请设置 GEMINI_API_KEY 环境变量或通过 --key 参数传入。", file=sys.stderr)
-        print("提示：可在 https://aistudio.google.com/app/apikey 获取个人免费/开发凭据。", file=sys.stderr)
-        sys.exit(1)
+    keys = load_keys(args.key)
 
     try:
         from google import genai
+        import httpx
     except ImportError:
-        print("[错误] 未安装 google-genai SDK。请运行以下命令安装：", file=sys.stderr)
-        print("  pip install google-genai", file=sys.stderr)
+        print("[错误] 依赖缺失。请运行：pip install google-genai httpx", file=sys.stderr)
         sys.exit(1)
 
     is_youtube = args.source.startswith("http://") or args.source.startswith("https://")
@@ -105,78 +116,136 @@ def main():
         print(f"[Dry-Run] 目标: {args.source}")
         print(f"[Dry-Run] 模型: {args.model}")
         print(f"[Dry-Run] 代理: {os.environ.get('HTTPS_PROXY')}")
-        print(f"[Dry-Run] API Key: {'已配置' if api_key else '未配置（运行时需传入）'}")
+        print(f"[Dry-Run] 发现可用 API Key 数量: {len(keys)}")
         print(f"[Dry-Run] 代理式视频理解 processing='agentic' 参数就绪。")
         return
 
-    print(f"[1/4] 初始化 Google GenAI 客户端 (Model: {args.model})...")
-    client = genai.Client(api_key=api_key)
+    if not keys:
+        print("[错误] 未检测到 Google API Key。请设置 GEMINI_API_KEY 环境变量或通过 --key 参数传入。", file=sys.stderr)
+        print("提示：可在 https://aistudio.google.com/app/apikey 获取个人免费/开发凭据。", file=sys.stderr)
+        sys.exit(1)
 
-    if is_youtube:
-        print(f"[2/4] 识别为 YouTube 远程视频，启用云端直接流式解析: {args.source}")
-        video_input = {
-            "type": "video",
-            "uri": args.source,
-            "processing": "agentic"
-        }
-    else:
-        video_path = Path(args.source).resolve()
-        if not video_path.exists():
-            print(f"[错误] 本地视频文件不存在: {video_path}", file=sys.stderr)
-            sys.exit(1)
+    # 尝试轮询 Key（主用优先，429/配额不足时自动顺延备用）
+    last_err = None
+    for idx, current_key in enumerate(keys):
+        masked_key = current_key[:6] + "..." + current_key[-4:]
+        print(f"[1/4] 初始化 Google GenAI 客户端 (Key #{idx+1}: {masked_key}, Model: {args.model})...")
+        client = genai.Client(api_key=current_key)
 
-        file_size_mb = video_path.stat().st_size / (1024 * 1024)
-        print(f"[2/4] 上传本地视频至 Google File API ({file_size_mb:.1f} MB): {video_path.name}...")
-        
-        video_file = client.files.upload(file=str(video_path))
-        print(f"      文件 ID: {video_file.name}, 等待服务端切片就绪...")
-        
-        while video_file.state.name == "PROCESSING":
-            time.sleep(2)
-            video_file = client.files.get(name=video_file.name)
-            
-        if video_file.state.name != "ACTIVE":
-            print(f"[错误] 视频服务端处理失败，状态为: {video_file.state.name}", file=sys.stderr)
-            sys.exit(1)
-            
-        print("      服务端索引准备完毕。")
-        video_input = {
-            "type": "video",
-            "uri": video_file.uri,
-            "mime_type": video_file.mime_type or "video/mp4",
-            "processing": "agentic"
-        }
+        try:
+            if is_youtube:
+                print(f"[2/4] 识别为 YouTube 远程视频，启用云端直接流式解析: {args.source}")
+                video_input = {
+                    "type": "video",
+                    "uri": args.source,
+                    "processing": "agentic"
+                }
+            else:
+                video_path = Path(args.source).resolve()
+                if not video_path.exists():
+                    print(f"[错误] 本地视频文件不存在: {video_path}", file=sys.stderr)
+                    sys.exit(1)
 
-    print("[3/4] 提交 Interactions API，模型启动 Think-Act-Observe 自主多模态探查循环...")
-    start_time = time.time()
-    
-    interaction = client.interactions.create(
-        model=args.model,
-        input=[
-            video_input,
-            {"type": "text", "text": args.prompt}
-        ]
-    )
-    
-    elapsed = time.time() - start_time
-    print(f"      分析完成！耗时: {elapsed:.1f} 秒。")
+                file_size_mb = video_path.stat().st_size / (1024 * 1024)
+                print(f"[2/4] 上传本地视频至 Google File API ({file_size_mb:.1f} MB): {video_path.name}...")
+                
+                video_file = client.files.upload(file=str(video_path))
+                print(f"      文件 ID: {video_file.name}, 等待服务端切片就绪...")
+                
+                while video_file.state.name == "PROCESSING":
+                    time.sleep(2)
+                    video_file = client.files.get(name=video_file.name)
+                    
+                if video_file.state.name != "ACTIVE":
+                    raise RuntimeError(f"视频服务端切片失败，状态为: {video_file.state.name}")
+                    
+                print("      服务端索引准备完毕。")
+                video_input = {
+                    "type": "video",
+                    "uri": video_file.uri,
+                    "mime_type": video_file.mime_type or "video/mp4",
+                    "processing": "agentic"
+                }
 
-    output_content = interaction.output_text
-    
-    # 统计信息
-    usage = getattr(interaction, "usage", None)
-    if usage:
-        print(f"      Token 消耗: 思考/推理={getattr(usage, 'total_thought_tokens', 0)}, 工具调取={getattr(usage, 'total_tool_use_tokens', 0)}, 总计={getattr(usage, 'total_tokens', 0)}")
+            # 自动探测或传参的模型，支持高负载时的动态平替 fallback
+            models_to_try = [args.model]
+            if "3.8" in args.model:
+                models_to_try.append("gemini-3.7-flash")
+            elif "3.7" in args.model:
+                models_to_try.append("gemini-3.8-flash")
 
-    if args.output:
-        out_path = Path(args.output).resolve()
-        out_path.parent.mkdir(parents=True, exist_ok=True)
-        out_path.write_text(output_content, encoding="utf-8")
-        print(f"[4/4] 结构化 Markdown 已写入: {out_path}")
-    else:
-        print("\n" + "="*50 + " 提炼结果 " + "="*50)
-        print(output_content)
-        print("="*108)
+            success = False
+            for target_model in models_to_try:
+                print(f"[3/4] 提交 Interactions API (Model: {target_model}, SSE 流式长连接)...")
+                print("      模型启动 Think-Act-Observe 自主多模态探查循环...\n" + "-"*60)
+                start_time = time.time()
+                
+                try:
+                    stream = client.interactions.create(
+                        model=target_model,
+                        input=[
+                            video_input,
+                            {"type": "text", "text": args.prompt}
+                        ],
+                        stream=True,
+                        timeout=httpx.Timeout(600.0, connect=60.0)
+                    )
+                    
+                    collected_text = []
+                    usage_info = None
+
+                    for event in stream:
+                        # 捕获实时生成的文字增量 (TextDelta)
+                        delta = getattr(event, "delta", None)
+                        if delta:
+                            chunk = getattr(delta, "text", None)
+                            if chunk:
+                                print(chunk, end="", flush=True)
+                                collected_text.append(chunk)
+                        
+                        # 捕获异常事件
+                        if type(event).__name__ == "ErrorEvent":
+                            err_obj = getattr(event, "error", None)
+                            raise RuntimeError(f"Google 服务端事件报错: {err_obj}")
+
+                        # 捕获最终完成事件与使用量
+                        interaction = getattr(event, "interaction", None)
+                        if interaction:
+                            usage = getattr(interaction, "usage", None)
+                            if usage:
+                                usage_info = usage
+
+                    elapsed = time.time() - start_time
+                    print("\n" + "-"*60)
+                    print(f"      分析完成！耗时: {elapsed:.1f} 秒。")
+
+                    full_output = "".join(collected_text).strip()
+                    if full_output:
+                        success = True
+                        break
+                except Exception as model_err:
+                    print(f"\n[提示] 模型 {target_model} 遇到服务端波动: {model_err}，尝试候选模型...", file=sys.stderr)
+
+            if not success:
+                raise RuntimeError("所有候选模型均未能返回有效分析内容")
+
+            if args.output:
+                out_path = Path(args.output).resolve()
+                out_path.parent.mkdir(parents=True, exist_ok=True)
+                out_path.write_text(full_output, encoding="utf-8")
+                print(f"[4/4] 结构化 Markdown 已写入: {out_path}")
+
+            return  # 成功，结束退出
+
+        except Exception as e:
+            print(f"\n[警告] Key #{idx+1} 调用异常: {e}", file=sys.stderr)
+            last_err = e
+            if idx + 1 < len(keys):
+                print("[重试] 自动切换至备用 API Key 重新执行...\n", file=sys.stderr)
+                time.sleep(1)
+
+    print(f"\n[失败] 所有可用 API Key 均执行失败。最终错误: {last_err}", file=sys.stderr)
+    sys.exit(1)
 
 if __name__ == "__main__":
     main()
