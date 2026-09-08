@@ -69,5 +69,6 @@
 - [Hermes and ZCode Session Storage Paths](hermes-and-zcode-session-storage-paths.md) — Hermes 与 ZCode 会话存储物理路径、桌面工作区锚定与快捷方式启动规范（state.db、projects.db 与 D:/ai coding 对齐全貌）
 - [Ponytail Anti Bloat Skills](ponytail-anti-bloat-skills.md) — 引入 Ponytail 极简编程与反过度工程技能套件（v4.9.0，按需 Skill 架构而非常驻 Plugin，双端 6 项落地），纳入看门狗 capability-inventory.json 追踪
 - [Hermes Desktop Rewind Deadlock](hermes-desktop-rewind-deadlock.md) — Desktop 会话假死（切模型+中断→refusing truncation 拒绝循环，上游 #94486）根因链、重启不自愈机理与手工修复 SOP（备份→删毒尾行→校准计数→Esc 清挂起态）
+- [Hermes Desktop Update Exit 8 False Negative](hermes-desktop-update-exit8-false-negative.md) — Windows 下更新后误报 exit 8 校验失败与启动弹窗的根因（Path.cwd 脱节）、阅后即焚消费机制与免修结论（Issue #105145 / PR #105168）
 
 
