@@ -454,6 +454,44 @@
           "version": "0.4.18"
         }
       ]
+    },
+    {
+      "id": "wb2api-upstream-xiaofan",
+      "display": "workbuddy2api 原版（xiaofan6ya，借鉴雷达）",
+      "checks": [
+        {
+          "type": "github-commits-path",
+          "repo": "xiaofan6ya/workbuddy2api",
+          "path": ".",
+          "note": "codebuddy2openai 的借鉴源仓库（workbuddy2api 网关+多账号共享平台）；监控整仓新提交，出现可采纳改进（协议适配器/投影压缩/脱敏词表）时评估摘樱桃。"
+        }
+      ],
+      "installed": [
+        {
+          "where": "借鉴雷达（codebuddy2openai 已吸收其 X-Device-Token 注入方案）",
+          "version": "HEAD@74d4473",
+          "sha": "74d4473814801968dc478f76d20bbfc43e86bd1c"
+        }
+      ]
+    },
+    {
+      "id": "wb2api-upstream-distpub",
+      "display": "workbuddy2api 增强 fork（DistPub，借鉴雷达）",
+      "checks": [
+        {
+          "type": "github-commits-path",
+          "repo": "DistPub/workbuddy2api",
+          "path": ".",
+          "note": "xiaofan6ya 的活跃 fork（内置 Turing SDK/macOS 适配/content_localizer 敏感词定位）；已吸收 reasoning 合并器与品牌词脱敏；监控整仓新提交。"
+        }
+      ],
+      "installed": [
+        {
+          "where": "借鉴雷达（codebuddy2openai 已吸收其 reasoning 合并器/空段清洗/品牌词脱敏）",
+          "version": "HEAD@3e6b223",
+          "sha": "3e6b223a4c27ff98c9a14e25039e32fec3e33487"
+        }
+      ]
     }
   ],
   "notWatched": [
