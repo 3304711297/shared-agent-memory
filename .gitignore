@@ -30,6 +30,7 @@ node_modules/
 # 严禁跟踪敏感文件与运行时数据
 .env*
 auth.json
+auth/*.json
 *.lock
 *.db*
 *.log
