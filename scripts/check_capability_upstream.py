@@ -15,8 +15,9 @@ import urllib.parse
 import urllib.request
 from datetime import datetime, timezone, timedelta
 
-INV_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "capability-inventory.json")
-REPORT_PATH = "capability-report.md"
+REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+INV_PATH = os.path.join(REPO_ROOT, "capability-inventory.json")
+REPORT_PATH = os.path.join(REPO_ROOT, "capability-report.md")
 GH_TOKEN = os.environ.get("GH_TOKEN", "")
 CLAUDE_MKT_REPO = "anthropics/claude-plugins-official"
 ZCODE_MKT_URL = "https://raw.githubusercontent.com/zai-org/zcode-plugins/main/marketplace.json"
@@ -305,13 +306,25 @@ def main():
     ]
     outdated = 0
     skipped = 0
+    failed_queries = 0
     rows = []
     details = []
     on_actions = os.environ.get("GITHUB_ACTIONS") == "true"
+    local_only = "--local-only" in sys.argv
 
     for comp in inv["components"]:
         cid = comp["id"]
         check = comp["checks"][0]
+
+        # 本地模式跳过远程检查：CI 负责 18 项外部上游，本地只跑本地专属 2 项，杜绝重复查询与配额耗尽
+        if local_only and check["type"] not in ("local-merged-marketplace", "local-config-guard"):
+            skipped += 1
+            rows.append(f"| {comp['display']} | `{cid}` | 云端托管 | ⏭️ 本地模式跳过 |")
+            details.append("\n".join([
+                f"### {comp['display']}（{cid}）", "",
+                "- ⏭️ 本组件由 GitHub Actions CI 每日定时比对托管，本地 `--local-only` 模式已跳过网络查询。",
+            ]))
+            continue
 
         # 本地源组件：读客户端本地合并清单，仅在本地运行时可比对
         if check["type"] == "local-merged-marketplace":
@@ -392,6 +405,7 @@ def main():
             try:
                 commits = github_commits_for_path(check["repo"], check["path"])
             except Exception as e:
+                failed_queries += 1
                 rows.append(f"| {comp['display']} | `{cid}` | N/A | ⚠️ 查询失败 |")
                 details.append("\n".join([
                     f"### {comp['display']}（{cid}）", "",
@@ -429,6 +443,7 @@ def main():
             try:
                 data = http_json(check["url"], accept="application/json")
             except Exception as e:
+                failed_queries += 1
                 rows.append(f"| {comp['display']} | `{cid}` | N/A | ⚠️ 查询失败 |")
                 details.append("\n".join([
                     f"### {comp['display']}（{cid}）", "",
@@ -604,6 +619,7 @@ def main():
             state = "🔴 有更新"
         elif src_err:
             state = "⚠️ 查询失败"
+            failed_queries += 1
         elif upstream is None:
             state = "🟡 上游清单中无此组件"
         else:
@@ -638,6 +654,18 @@ def main():
     lines.append(f"**待跟进组件数：{outdated}** · 未纳入看门的组件见清单 `notWatched` 字段。")
 
     report = "\n".join(lines)
+
+    # 本地非 local-only 模式且遭遇大面积失败（API 限额或网络中断）时，拒绝写盘覆盖已有报告
+    if not on_actions and not local_only and failed_queries >= 3:
+        sys.stderr.write(
+            f"\n[WARN] 本地检测到 {failed_queries} 项上游查询失败（如未带 GH_TOKEN 触发 GitHub API 403 限额或网络波动）。\n"
+            f"为防止以残缺数据覆盖云端 Issue/报告，已中止写入 {REPORT_PATH}。\n"
+            f"💡 本地若仅需检查客户端内置插件与配置守卫，请使用: python scripts/check_capability_upstream.py --local-only\n"
+        )
+        if not gh_out:
+            print(report)
+        return 1
+
     with open(REPORT_PATH, "w", encoding="utf-8") as f:
         f.write(report)
 
