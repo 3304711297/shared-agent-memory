@@ -1,6 +1,6 @@
 # 🔔 本地能力组件上游更新报告
 
-> 生成时间：2026-09-08 10:45（北京时间） · 清单：`capability-inventory.json`
+> 生成时间：2026-09-08 11:36（北京时间） · 清单：`capability-inventory.json`
 >
 > **跟进方式**：升级对应组件后，把清单里的 `installed.version` 更新为新版本并随共享库推 `main`，本看门会在下次运行时自动收口本 Issue。
 
@@ -22,7 +22,7 @@
 | Google Gemini 官方技能库（skills/ 目录提交） | `gemini-skills` | N/A | ⚠️ 查询失败 |
 | ECC Agent 优化技能库（skills/ 目录提交） | `ecc-skills` | N/A | ⚠️ 查询失败 |
 | Hermes 官网 Skills Hub 全网技能索引 | `hermes-skills-hub` | 90,698 (2026-09-07) | ✅ 最新 |
-| SkillHub 社区精选技能库 | `skillhub-market` | 1,431 | 🔴 有更新 |
+| SkillHub 社区精选技能库 | `skillhub-market` | 1,433 | ✅ 最新 |
 | Cola Skill 精品技能策展市场 | `colaskill-market` | 16 | ✅ 最新 |
 | Ponytail 代码极简与反过度工程技能套件 | `ponytail-skills` | N/A | ⚠️ 查询失败 |
 | Hermes 本地配置守卫（更新后漂移检查） | `hermes-config-guard` | 本地源 | ✅ 最新 |
@@ -113,9 +113,8 @@
 
 ### SkillHub 社区精选技能库（skillhub-market）
 
-- 上游最新：**1,431** 社区技能
-- 基线记录：**1,432** 技能 → **社区有新技能上架（-1 项）**
-- 跟进：访问 https://www.skillhub.cn/ 浏览新技能；评估后更新 `capability-inventory.json` 中 `totalSkills` 并推 main。
+- 上游最新：**1,433** 社区技能
+- 基线记录：**1,433** 技能 → ✅ 一致
 
 ### Cola Skill 精品技能策展市场（colaskill-market）
 
@@ -157,4 +156,4 @@
 
 ---
 
-**待跟进组件数：1** · 未纳入看门的组件见清单 `notWatched` 字段。
+**待跟进组件数：0** · 未纳入看门的组件见清单 `notWatched` 字段。
