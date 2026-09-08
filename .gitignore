@@ -10,3 +10,4 @@ $RECYCLE.BIN/
 *.bak
 *.swp
 __pycache__/
+/topics
