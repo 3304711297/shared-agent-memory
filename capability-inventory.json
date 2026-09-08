@@ -439,6 +439,7 @@
     }
   ],
   "notWatched": [
+    "【评估否决 2026-09-08】etherscan/skills：Etherscan 官方 Web3/EVM 链上分析套件（4项技能），强依赖未配置的 ETHERSCAN_API_KEY 凭据，且与当前系统调优/代理/桌面工程完全脱节，避免污染技能池注意力，不予引入",
     "【评估否决 2026-09-08】mindfold-ai/trellis：单仓任务状态机与 PRD 生成与外部 AI 任务书分级（P0/P1/P2）严重权责倒挂；其 .trellis/workspace 弱记忆与跨端物理真源 shared-agent-memory 冲突；环境依赖过重，不予引入",
     "【定向吸收/余项排除 2026-09-08】mattpocock/skills：精选采纳核心工程技能 domain-modeling（领域建模与术语防漂移）与 codebase-design（深模块设计哲学）双端实装；其余 PM 切票类（to-spec/to-tickets/triage/wayfinder，与任务书冲突）及架构大改类（improve-codebase-architecture，违背严禁顺手重构铁律）予以否决排除，不纳入整仓看门",
     "【评估否决 2026-09-07】JuliusBrussee/caveman：经技术评估确认存在破坏 Prefix Prompt Cache 缓存与每轮 1k+ 输入 Token 倒挂缺陷，未实装，不纳入看门",
