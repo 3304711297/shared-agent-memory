@@ -49,6 +49,12 @@ NousResearch hermes-agent v0.21.0 于 2026-09-02 23 时重装完成并验证（d
     2. 探针验证：`python -m hermes_cli._scan_venv_blockers` 返回 `{"ok": true, "blocked": false, "processes": []}`，阻断彻底归零；
     3. 【架构铁律】：Windows 下任何开机自启、常驻后台守护或辅助微服务，严禁借用 `hermes-agent\venv` 解释器，必须严格使用独立 Venv，确保 Hermes 自身 Venv 零占用。
 
+- **Hermes 桌面更新误报「The updated Desktop executable is missing」(exit 8) 根因与排查（2026-09-08）**：
+  - 现象：Hermes Desktop 后台自动更新完成后（更新日志显示 code updated to `520e63661c` v0.21.1、deps checked、cua-driver 0.24.0、gateway cold-start 重启成功、`hermes update exit code: 0`），随后抛出 `verify! RuntimeError: The updated Desktop executable is missing`，退出码 8 并弹出「Failed to update」窗口；后台 PowerShell 进程（PID 7048 等）仍挂起运行。
+  - 根因：commit `520e63661c` 新增了 `desktop_update_verify.py` 完整性校验，但在 `scripts/desktop-update/windows.ps1` 第 1609 行硬编码调用了 `verify_windows_desktop_update(Path.cwd())`。因 Desktop 启动 `windows.ps1` 时的 working directory 是 `%LOCALAPPDATA%\hermes`（`HERMES_HOME`）而非仓库根目录 `hermes-agent`，校验逻辑在当前目录下找 `apps/desktop` 找不到导致误报；实测手动传入真实项目路径 `C:\Users\VOS-User\AppData\Local\hermes\hermes-agent` 校验 100% 静默通过，`Hermes.exe`（214MB）与 unpacked 资源完好无损。
+  - 进程挂起机制：校验报错后脚本进入 `Show-ErrorFinale` 的 WinForms 循环，有 5 分钟超时限制（`$deadline = (Get-Date).AddMinutes(5)`），用户点击 Close 或超时后脚本会自动调用 `Start-DesktopRelaunch` 拉起 Desktop。
+  - 修复方案：修改 `windows.ps1` 第 1609 行将 `Path.cwd()` 改为 `Path(r'''$InstallRoot''')`，避免下次后台更新再次因工作目录不一致误报。
+
 - **Hermes 端无 ZCode 式「配置静默丢弃」风险（2026-09-05 排查）**：ZCode 曾因 cli/config.json 的 provider.npm 字段触发 schema 拒绝、整份配置被静默丢弃（见 [[capability-upstream-watch]]）；对照排查 Hermes 端——config.yaml 无任何 npm 类字段，`hermes doctor` 全项通过（仅浏览器工具 2 个既有 npm 依赖漏洞与若干可选系统依赖警告，与配置校验无关）。结论：该雷区为 ZCode CLI 专属，Hermes 端无需处理。
 
 **Why:** 安装两次失败均因 git/uv 不走系统代理，且坏了的旧 checkout 会被安装器整目录移走导致运行时丢失；记住这些可避免重复踩坑。

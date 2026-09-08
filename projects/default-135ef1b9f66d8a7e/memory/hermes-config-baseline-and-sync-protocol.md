@@ -14,13 +14,15 @@ metadata:
 | 组件 / 维度 | 当前版本与标识 | 来源 / 验证方式 |
 | :--- | :--- | :--- |
 | **Hermes Agent 版本** | `v0.21.0 (2026.8.31)` | `hermes --version` |
-| **上游 Git Commit SHA** | `22c5684b983eac6a81ee015ae80296c4b3dbf5bb` (Mon Sep 7 02:37:13 2026) | `git -C hermes-agent log -1` |
+| **上游 Git Commit SHA** | `520e63661c8eaa2135ebd60a07192f0d8aa45e6e` (Mon Sep 7 21:08:26 2026) | `git -C hermes-agent log -1` |
 | **Desktop 桌面客户端** | `v0.17.0` | `apps/desktop/package.json` |
 | **配置规范版本** | `_config_version: 41` | `config.yaml` 根字段 |
 | **Python 运行时** | `Python 3.11.16` / `OpenAI SDK 2.24.0` | 内部运行时依赖 |
 | **安装目录与方式** | `C:\Users\VOS-User\AppData\Local\hermes\hermes-agent` (Git source checkout) | 源码检出并可热更新 |
 
 > **版本演进铁律**：后续 Hermes 升级（如执行 `hermes update` 或上游拉取新 commit）时，若检测到 `_config_version` 升级或新增/废弃了配置字段，同步记忆库时必须一并刷新上方表格中的版本号与 Git SHA，并简要记录该版本下的配置变迁（Changelog diff）。
+> 
+> * **2026-09-08 更新**：Hermes 上游合入 commit `520e63661c`（fix: keep command-auth model discovery lazy across config and setup）；本地配置守卫自动化触发全绿通过，启用本地插件 `config-guard`，基线配置快照同步更新。
 
 ---
 
