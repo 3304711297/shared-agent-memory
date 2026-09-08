@@ -368,6 +368,44 @@
       ]
     },
     {
+      "id": "hermes-config-guard",
+      "display": "Hermes 本地配置守卫（更新后漂移检查）",
+      "checks": [
+        {
+          "type": "local-config-guard",
+          "file": "C:/Users/VOS-User/AppData/Local/hermes/config.yaml",
+          "usageFile": "C:/Users/VOS-User/AppData/Local/hermes/skills/.usage.json",
+          "expect": [
+            { "path": "curator.enabled", "value": false },
+            { "path": "memory.nudge_interval", "value": 0 },
+            { "path": "skills.creation_nudge_interval", "value": 0 },
+            { "path": "auxiliary.background_review.enabled", "value": false },
+            { "path": "updates.non_interactive_local_changes", "value": "stash" }
+          ],
+          "stashRepos": [
+            "C:/Users/VOS-User/AppData/Local/hermes/hermes-agent",
+            "C:/Users/VOS-User/AppData/Local/hermes"
+          ],
+          "protectedSkills": [
+            "shared-agent-memory",
+            "cangjie-distill",
+            "hermes-quota-embedded",
+            "browser-bookmarks",
+            "github",
+            "ponytail-review",
+            "hermes-config-baseline-and-sync-protocol"
+          ],
+          "note": "Hermes 更新后必跑：① 用户拍板过的配置键是否仍为拍板值（上游深合并加新默认值不会冲掉叶子，但要确认没被重置）；② 桌面端更新会 stash 本地源码改动且不自动 pop；③ 核心自研技能若被误打 created_by:agent 会进入 curator 归档倒计时。Actions 上跳过，仅本地运行。"
+        }
+      ],
+      "installed": [
+        {
+          "where": "本地拍板基线（09-07 定案）",
+          "version": "v41-guard"
+        }
+      ]
+    },
+    {
       "id": "cangjie-distill",
       "display": "Cangjie 仓颉内容方法论蒸馏技能",
       "checks": [
