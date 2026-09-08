@@ -23,3 +23,5 @@ Git push 卡住排查：github.com 直连被墙需走 Karing；ALL_PROXY=127.0.0
 Hermes Desktop「会话运行不了」假死=切模型注入 user 角色系统消息+客户端带截断参数重试被网关拒绝（上游 #94486，已评论补充证据）；重启不自愈，修复 SOP 见共享库 topics/hermes-desktop-rewind-deadlock.md。
 §
 【铁律】terminal 严禁宣称/暗示并行（09-07 用户拍板）：内核白名单 _PARALLEL_SAFE_TOOLS 仅纯只读（read_file/search_files/web_search/web_extract/skill_view/skills_list/session_search/vision_analyze）可并发；terminal/patch/write_file/memory/delegate_task 均为顺序屏障，逐条串行执行（共享持久 shell 会话是安全设计）。思考、报告、总结中严禁写「并行执行命令/已并行」等表述——批量发多个 terminal 调用时是「逐条串行」；表述失实=假执行，同等严重。UI 消歧：「已保存到记忆 N entries」徽章=前台 memory 工具调用（zh.ts L3807），非后台 fork（已禁用，写入走 💾 行）。config.yaml 改动无需重启（spawn 时实时重读）。
+§
+避坑（09-07 实证）：Hermes 仓库内 website/i18n/zh-Hans 下的本地中文翻译文档会滞后于源码（如 curator.md 仍描述旧二元白名单判定，实际源码 tools/skill_usage.py 已改为 created_by=agent 标记制+adopt/ledger）。判定机制/默认值类问题必须直接读源码，不以本地文档为准；官方文档站亦可能与本地构建版本漂移，需标注哪边新再下结论。
