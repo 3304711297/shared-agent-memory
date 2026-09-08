@@ -139,9 +139,22 @@ def claude_marketplace_sha(plugin):
     return None
 
 
+def normalize_local_path(p: str) -> str:
+    """展开环境变量（%VAR%、$VAR）、~ 用户目录并归一化为跨平台标准路径。"""
+    if not p:
+        return ""
+    expanded = os.path.expandvars(p)
+    if "%" in expanded:
+        def _repl(m):
+            var = m.group(1)
+            return os.environ.get(var, m.group(0))
+        expanded = re.sub(r"%([^%]+)%", _repl, expanded)
+    return os.path.normpath(os.path.expanduser(expanded))
+
+
 def local_merged_versions(path):
     """读取客户端本地合并市场清单（UI 真源），返回 {插件名: 版本}。"""
-    with open(path, encoding="utf-8") as f:
+    with open(normalize_local_path(path), encoding="utf-8") as f:
         d = json.load(f)
     return {p.get("name"): p.get("version") for p in d.get("plugins", [])}
 
@@ -200,16 +213,17 @@ def read_config_leaves(path):
 def check_config_guard(check):
     """返回 (problems, detail_lines)。problems 非空即视为待跟进。"""
     problems, detail = [], []
-    cfg_path = check["file"]
+    raw_cfg_path = check["file"]
+    cfg_path = normalize_local_path(raw_cfg_path)
 
     try:
         leaves = read_config_leaves(cfg_path)
     except Exception as e:
         return [f"配置读取失败：{type(e).__name__}: {e}"], [
-            f"- ⚠️ 无法读取 `{cfg_path}`：{type(e).__name__}: {e}"
+            f"- ⚠️ 无法读取 `{raw_cfg_path}`：{type(e).__name__}: {e}"
         ]
 
-    detail.append(f"- 配置文件：`{cfg_path}`")
+    detail.append(f"- 配置文件：`{raw_cfg_path}`")
     detail.append("")
     detail.append("**① 拍板配置键（上游深合并新增默认值不会冲掉叶子，但需确认仍在）**")
     detail.append("")
@@ -227,10 +241,11 @@ def check_config_guard(check):
     detail.append("**② 本地源码 stash 残留（桌面端更新不自动还原）**")
     detail.append("")
     for repo in check.get("stashRepos", []):
+        norm_repo = normalize_local_path(repo)
         try:
             import subprocess
             out = subprocess.run(
-                ["git", "-C", repo, "stash", "list", "--format=%gd|%s"],
+                ["git", "-C", norm_repo, "stash", "list", "--format=%gd|%s"],
                 capture_output=True, text=True, timeout=20,
             )
             stashes = [l for l in (out.stdout or "").splitlines() if l.strip()]
@@ -256,7 +271,8 @@ def check_config_guard(check):
     detail.append("")
     detail.append("**③ 核心自研技能 `created_by` 标记巡查**")
     detail.append("")
-    usage_path = check.get("usageFile")
+    raw_usage_path = check.get("usageFile")
+    usage_path = normalize_local_path(raw_usage_path) if raw_usage_path else None
     protected = check.get("protectedSkills", [])
     if usage_path and protected:
         try:
