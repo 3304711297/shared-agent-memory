@@ -11,6 +11,7 @@ metadata:
 
 - 交流语言：中文为主，默认中文回复。
 - **Local-First 验证与 CI 非阻塞铁律（2026-09-07 用户纠偏）**：本地构建与测试工作流（如 pytest / npm test / vite build / cargo check / cargo test / release build）与远端 GitHub Actions CI 完全等价。代码或文档提交推送前**必须严格执行 Local-First 本地跑通全套等价验证链**；既然本地已全绿通过，推送到 GitHub 后**严禁在主会话单线程卡死干等 CI 完成才继续会话**（避免每个工作流耗时数分钟严重拖慢交互节奏），应立即直接继续推进后续任务；CI 仅走后台异步跟踪或通知，杜绝阻塞主聊天界面。
+- **CI 修复与任务收尾通知标记 Done 铁律（2026-09-08 用户拍板）**：排错、CI 修复或多步任务全绿收尾后，**必须顺手调用 GitHub API（`DELETE /notifications/threads/{id}`）将对应的失败或待办通知标记为 Done（已完成）**，从用户 GitHub Notifications 收件箱清除，杜绝用户在通知中心误判任务未完成或仍在报错。
 - **联网核实铁律**：面对不确定的技术细节、版本状态、命令参数或未完全验证的信息，必须严格优先联网检索（web_search/web_extract/API/官方文档）核实确凿事实，严禁主观臆测或输出未经实证的内容。
 - **技能优先**：复杂或特定领域任务严格优先通过相关 Skills（如 [[superpowers-usage]] 流程规范、领域专业技能）引导思考和执行全过程；处理复杂任务优先调用技能与专业 MCP 工具。
 - Skills 筛选偏好：偏好 100% 免费开源、无付费 API/订阅且无功能冲突的上位技能；语音转录（Whisper）明确偏好 small 模型（见 [[bilibili-video-transcription-pipeline]]）；技能安装走各 Agent 官方技能机制，严禁擅自用 pip/npm 替代原生安装。
