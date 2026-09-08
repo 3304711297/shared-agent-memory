@@ -1,4 +1,4 @@
-中文交流，默认中文回复；主力 Hermes（ZCode 备用）；共享库 shared-agent-memory（3304711297/shared-agent-memory）main=双端共享真源（topics 挂 junction 直通），变动当轮必自动推 main，Hermes 专属推 hermes 分支。
+中文交流，默认中文回复；主力 Hermes（ZCode 备用）；共享库 shared-agent-memory（3304711297/shared-agent-memory）main=双端共享真源（topics 挂 junction 直通），写入前必先脱敏（严禁机器用户名与物理路径，必转标准环境变量，凭据全脱敏），变动当轮必自动推 main，Hermes 专属推 hermes 分支。
 §
 Skill-First 反射门禁铁律：新功能/Bug修复/代码审查/重构/架构与复杂多步任务，编辑或终端操作前第 1 动作必须技能匹配自检；命中即须 skill_view 加载并严格按其规范执行，严禁用模型惯性手搓替代（典型反例：CI 监控自造 sleep 轮询而非 gh pr checks --watch）；未命中方可直接操作。
 §
