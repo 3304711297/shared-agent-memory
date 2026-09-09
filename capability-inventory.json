@@ -14,11 +14,11 @@
       ],
       "installed": [
         {
-          "where": "ZCode cli/config.json mcp.servers（钉版，含防扩展清空保护参数）",
+          "where": "ZCode cli/config.json mcp.servers（钉版，含防扩展清空保护参数）【组件已随 ZCode 拆除移除，2026-09-09】",
           "version": "1.9.0"
         },
         {
-          "where": "ZCode 插件 claude-plugins-official（已补保护参数）",
+          "where": "ZCode 插件 claude-plugins-official（已补保护参数）【组件已随 ZCode 拆除移除，2026-09-09】",
           "version": "1.9.0",
           "sha": "45f187b1e3202c9f32ddba913be5d68751c3caa3"
         },
@@ -47,7 +47,7 @@
           "version": "0.2.48"
         },
         {
-          "where": "ZCode 插件 claude-plugins-official（插件壳版本 0.2.0，核心随 git-subdir main）",
+          "where": "ZCode 插件 claude-plugins-official（插件壳版本 0.2.0，核心随 git-subdir main）【组件已随 ZCode 拆除移除，2026-09-09】",
           "version": "0.2.48"
         }
       ]
@@ -63,7 +63,7 @@
       ],
       "installed": [
         {
-          "where": "ZCode 插件 claude-plugins-official",
+          "where": "ZCode 插件 claude-plugins-official【组件已随 ZCode 拆除移除，2026-09-09】",
           "version": "6.3.0",
           "sha": "b36e0829c6d0140e93cfef2ca599b1b07d4a7797"
         },
@@ -77,80 +77,6 @@
         "plugin": "superpowers",
         "installedSha": "b36e0829c6d0140e93cfef2ca599b1b07d4a7797"
       }
-    },
-    {
-      "id": "zcode-github",
-      "display": "ZCode 插件：github",
-      "checks": [
-        {
-          "type": "zcode-marketplace",
-          "plugin": "github"
-        }
-      ],
-      "installed": [
-        {
-          "where": "ZCode 插件（已启用）",
-          "version": "0.1.2"
-        }
-      ]
-    },
-    {
-      "id": "zcode-bundled-plugins",
-      "display": "ZCode 内置插件组（随客户端构建种子分发）",
-      "checks": [
-        {
-          "type": "local-merged-marketplace",
-          "file": "%USERPROFILE%/.zcode/cli/plugins/marketplaces/zcode-plugins-official/marketplace.json",
-          "note": "UI 市场真源 = 客户端本地合并清单（bundled 种子 + CDN 在线）；此检查仅本地运行有效，Actions 跳过。客户端更新种子后跑 watch-capability.cmd 检测并回写清单。"
-        }
-      ],
-      "installed": [
-        {
-          "name": "browser-use",
-          "where": "ZCode 内置插件（已启用）",
-          "version": "0.4.2"
-        },
-        {
-          "name": "computer-use",
-          "where": "ZCode 内置插件（已启用）",
-          "version": "0.5.14"
-        },
-        {
-          "name": "document-skills",
-          "where": "ZCode 内置插件（已启用）",
-          "version": "0.1.4"
-        },
-        {
-          "name": "skill-creator",
-          "where": "ZCode 内置插件（已启用）",
-          "version": "0.1.0"
-        },
-        {
-          "name": "zcode-guide",
-          "where": "ZCode 内置插件（已启用）",
-          "version": "0.1.0"
-        },
-        {
-          "name": "restore-legacy-sessions",
-          "where": "ZCode 内置插件（已启用）",
-          "version": "0.1.0"
-        },
-        {
-          "name": "zcode-cua",
-          "where": "ZCode 内置组件（缓存随计算机控制联动）",
-          "version": "0.5.12"
-        },
-        {
-          "name": "android-emulator",
-          "where": "ZCode 内置插件（已停用）",
-          "version": "0.1.0"
-        },
-        {
-          "name": "ios-simulator",
-          "where": "ZCode 内置插件（已停用）",
-          "version": "0.1.0"
-        }
-      ]
     },
     {
       "id": "cli-gh",
@@ -230,7 +156,7 @@
       ],
       "installed": [
         {
-          "where": "Hermes skills/（80 项）+ ZCode ~/.zcode/skills（44 项精简副本）",
+          "where": "Hermes skills/（80 项）+ ZCode ~/.zcode/skills（44 项精简副本）【组件已随 ZCode 拆除移除，2026-09-09】",
           "version": "HEAD@abd83ab5",
           "sha": "abd83ab560327c58f17f8e2ecd9be0307d5c9cf9"
         }
@@ -361,7 +287,7 @@
       ],
       "installed": [
         {
-          "where": "Hermes skills/（6 项）+ ZCode ~/.zcode/skills（6 项副本）",
+          "where": "Hermes skills/（6 项）+ ZCode ~/.zcode/skills（6 项副本）【组件已随 ZCode 拆除移除，2026-09-09】",
           "version": "4.9.0",
           "sha": "974d940a1c5344210874150b98ff0d2c861fab6a"
         }
@@ -433,7 +359,7 @@
       ],
       "installed": [
         {
-          "where": "Hermes skills/productivity/cangjie-distill + ZCode ~/.zcode/skills/cangjie-distill",
+          "where": "Hermes skills/productivity/cangjie-distill + ZCode ~/.zcode/skills/cangjie-distill【组件已随 ZCode 拆除移除，2026-09-09】",
           "version": "2.5.0"
         }
       ]
@@ -516,5 +442,8 @@
     "【本地已改技能 2026-09-07】github、tauri-desktop-development 与 superpowers（14项技能frontmatter中文高频动作词前置紧凑化，突破前57字符截断瓶颈）为本地自有/深度定制技能；本次仅补操作纪律与截断优化，非上游版本变动",
     "【用户拍板 2026-09-07】serena：插件已物理删除（双端均无），uv tool 中 serena-agent 与 ~/.serena 残留另行处置，不再纳入看门",
     "【用户拍板 2026-09-07】cliproxyapi（EasyCLIProxyAPI 网关核心）：退出看门，用户自行在软件内手动检查并更新"
-  ]
+  ],
+  "meta": {
+    "zcodeDecommissioned": "2026-09-09: ZCode 客户端已拆除，zcode-github / zcode-bundled-plugins 组件条目移除（组件物理消失，看门无法再检查）；skills 条目中 'ZCode ~/.zcode/skills 副本' 表述已过时，Hermes 侧为唯一副本"
+  }
 }
