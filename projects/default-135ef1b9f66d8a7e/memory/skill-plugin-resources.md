@@ -1,6 +1,6 @@
 ---
 name: skill-plugin-resources
-description: 技能/插件索引库：18 个 Skills/插件/Agent 资源站与仓库（需新技能时在此按需检索，已装技能的漂移检查走 check_skill_drift.py）
+description: 技能/插件索引库：19 个 Skills/插件/Agent 资源站与仓库（需新技能时在此按需检索，已装技能的漂移检查走 check_skill_drift.py）
 metadata:
   type: reference
 ---
@@ -39,6 +39,9 @@ metadata:
 17. **BadTechBandit/skills** — https://github.com/BadTechBandit/skills ：本地 `c​laude-design` 与 `architecture-diagram` 的可能来源（4 Stars，2026-04 后停更，**已停维护**，仅作溯源用）。
 18. **JulienTant/blogwatcher-cli** — https://github.com/JulienTant/blogwatcher-cli ：本地 `research/blogwatcher` 的上游（31 Stars，2026-05 后停更，仅作溯源用）。
 
-**索引库规模（2026-09-09 实查）**：15 个 GitHub 源合计约 **1,467 个可拉取 SKILL.md**（ECC 898 / hermes-agent 199 / knowledge-work-plugins 212 / science-skills 40 / mattpocock 37 / claude-plugins-official 31 / anthropics 20 / ponytail 13 / gemini-skills 3 等），全部可访问、无归档或禁用；本地实装 84 项，采撷率约 5.7%，符合二八瘦身铁律（技能池控制在 30-50 项为宜，按需从本索引单拉）。
+**Hermes 专用生态地图类（2026-09-09 评审收录，按需检索不实装）**
+19. **ksimback/hermes-ecosystem（Hermes Atlas）** — https://github.com/ksimback/hermes-ecosystem （站点 https://hermesatlas.com ）：社区维护的 Hermes 生态项目地图（1229 Stars，bot 自动重建，全量 249 个项目、质量过滤收录 80+，分 12 类：Core/GUI 工作台/技能库/插件/记忆/多智能体/部署/集成/开发工具/领域应用/指南）。亮点：对 25★+ 仓库做过安全审查（`repos/security-review.md`，5 个 WARN：hermes-CCC 与 vessel-browser 有 curl-pipe-bash 安装器、gladiator 有硬编码凭据，使用前先审脚本）；找"某类 Hermes 工具是否存在/哪个成熟"先查它。注意：ECOSYSTEM.md 是 2026-04 快照（星数滞后），实时数据看网站 API；`data/repos.json` 为活数据。基线 sha `bebd922`（2026-09-09）。
 
-**How to apply:** 用户要找某类能力（如 PPT/SEO/安全审计技能）或 ZCode/Hermes 缺功能时，先查 1/2 的中文目录定位技能名，再回 GitHub 拿源码审读后安装；Claude 系官方技能/插件直接用 7/8/9（源头真源，优先于第三方转译）；Gemini/ZCode 官方需求直接用 5/6；Token 优化与架构借鉴看 10；长文/长视频方法论提炼看 11；领域建模与深模块架构看 12；科研数据库（蛋白/基因/化合物/文献/临床）查文献需求看 13（按需单拉，不整装）；**已装技能的溯源与重装查 14-18**。第三方 skill 安装前必须人工审内容（提示词注入面），不盲装。
+**索引库规模（2026-09-09 实查）**：15 个 GitHub 技能源合计约 **1,467 个可拉取 SKILL.md**（ECC 898 / hermes-agent 199 / knowledge-work-plugins 212 / science-skills 40 / mattpocock 37 / claude-plugins-official 31 / anthropics 20 / ponytail 13 / gemini-skills 3 等），全部可访问、无归档或禁用；本地实装 84 项，采撷率约 5.7%，符合二八瘦身铁律（技能池控制在 30-50 项为宜，按需从本索引单拉）。第 19 号源 Atlas 为项目地图（不含 SKILL.md），不计入技能源计数。
+
+**How to apply:** 用户要找某类能力（如 PPT/SEO/安全审计技能）或 ZCode/Hermes 缺功能时，先查 1/2 的中文目录定位技能名，再回 GitHub 拿源码审读后安装；Claude 系官方技能/插件直接用 7/8/9（源头真源，优先于第三方转译）；Gemini/ZCode 官方需求直接用 5/6；Token 优化与架构借鉴看 10；长文/长视频方法论提炼看 11；领域建模与深模块架构看 12；科研数据库（蛋白/基因/化合物/文献/临床）查文献需求看 13（按需单拉，不整装）；**已装技能的溯源与重装查 14-18**；找 Hermes 生态里的成熟工具/插件/集成项目（含安全审查结论）看 19。第三方 skill 安装前必须人工审内容（提示词注入面），不盲装。
