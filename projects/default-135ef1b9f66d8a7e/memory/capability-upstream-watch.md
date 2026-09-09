@@ -37,6 +37,16 @@ metadata:
     - **坑位二：OpenViking 服务状态检测失真**——`openviking_service.py status` 显示全 OFFLINE，实际却有 4 个进程在跑（`openviking-server` + python + 2×pythonw），导致 pip 卸载报 WinError 32 文件占用。**规则：升级前一律先跑 `stop` 再复核进程列表，不能信 status 单方面输出。** 另注：`agent_guard.py` 借用同一 venv 常驻运行（pythonw），**严禁随 openviking 进程一并杀掉**，升级后须确认其 PID 仍存活。
     - **坑位三：uv 创建的 venv 不含 pip**（`No module named pip`），需先 `python -m ensurepip --default-pip` 补装再升级；卸载中断会留下 `~penviking*` 等 `~` 前缀残留目录，需手动清理，否则 pip 持续告警「Ignoring invalid distribution」。
     - **本轮处置**：openviking 0.4.18→0.4.19（服务三端 ONLINE + 实发语义检索验证）、PowerShell 7.6.5→7.6.6（winget）、chrome-devtools-mcp 1.8.0→1.9.0（Hermes config.yaml + ZCode cli/config.json 双端钉版，`npx @1.9.0 --version` 实测通过）。**1.9.0 行为变更留观**：CLI 默认开启 `--allow-unrestricted-paths`、默认过滤 Chrome webui targets，若影响 Edge Dev 抓取流程需回滚钉版。
+  - **【重大语义变更 2026-09-09 用户拍板】技能看门从「发现新技能」改为「已装技能漂移检查」**：
+    - **旧语义（已废弃）**：`github-commits-path` 类型按「仓库有新提交」判定 `behind`，报「有更新」并计入 outdated。问题：上游 100 笔提交里可能只有 1 笔改动了你装的技能，却全算成待跟进，且**不区分**「上游新增你没装的技能」与「你装的技能内容变了」——本质是误导性噪音。
+    - **新语义**：①**发现新技能**完全移交 `skill-plugin-resources.md` 索引库按需检索，看门不再承担；②**已装技能是否落后**由新脚本 `scripts/check_skill_drift.py` 做**技能级内容比对**（本地 SKILL.md vs 上游同名文件）；③`check_capability_upstream.py` 的 `github-commits-path` 分支改为仅展示 HEAD/基线信息，状态标记 `ℹ️ 漂移检查`，**永不计入 outdated**（源码已加注释固化此语义）。
+    - **check_skill_drift.py 三层判定（实测有效）**：
+      1. **行尾归一哈希**：CRLF/LF + 行尾空白 + BOM 归一后比对，消除跨平台噪声（否则 `adversarial-ux-test` 这类会永久误报）；
+      2. **差异方向**：本地多 = `local_extra`（本地增强，忽略）；上游多/大幅改写 = `upstream_extra`/`upstream_rewrote`（需评估）；双向 = `both_changed`（人工判定）；
+      3. **仅 description 差异特判**（关键）：若正文完全一致、仅 frontmatter 的 `description` 不同 → 判定为 `local_extra` 并明确标注「本地中文强触发词定制，禁止被上游覆盖」。此规则保护了 2026-09-07 那次 57 字符截断优化成果（superpowers 13 项）。
+    - **首次实测结论（18 项可映射技能）**：需人工评估 **0 项**，本地增强 15 项，上游无同名 8 项。典型三类：①`hermes-agent` 本地多 4 行（用户加的 UI 消歧/禁止假称并行铁律）；②superpowers 13 项仅 description 不同（中文强触发词）；③`python-debugpy` 上游把 `platforms` 改成 `[linux, macos]` **去掉 windows**——属上游缩小支持范围，本地保留 windows 正确，**不应跟进**。
+    - **运行方式**：本地 `watch-skill-drift.cmd`（依赖本地技能目录，CI runner 无此环境，故不进 Actions）；支持 `--json` 与 `--repo <子串>` 过滤。
+    - **配套产物**：`skills-provenance.json`（84 项技能 × 22 来源的出处盘点，含可监控性标注），为后续补监控提供数据基础。
 - **schedule 时线（2026-09-05 会话归档时状态）**：workflow 文件当日 03:26 UTC 才建到 main，此前仅手动 dispatch（当日 6 次：1 失败=Issue 创建前标签不存在，已由 `fix(watch): Issue 创建前先确保 capability-watch 标签存在` 自愈，其后全绿）；**首次 schedule 触发预计 2026-09-06 UTC 01:00（北京 09:00），归档时待验证**。
 - **【重大事故复盘 2026-09-05】cli/config.json 的 provider.npm 字段导致整份用户配置被 CLI 静默丢弃**：桌面端/第三方工具写入的 provider 条目含 `npm` 键，而捆绑 CLI（zcode.cjs 0.16.5）的 zod schema 定义 `npm: g.never()`——出现即 parse 失败→配置回退空对象（无任何诊断输出）。症状：marketplace 来源插件（github/claude 市场系）全部显示 disabled、GUI 开关点击弹回、更新徽章异常；bundled 内置插件因走 officialPluginsEnabledByDefault 默认启用列表而看似正常，极具迷惑性。修复=删掉 provider 各条目的 `npm` 键（其他字段 passthrough 全兼容）。排查路径：CLI `plugins list --json` 状态矛盾 → 沙盒复刻（USERPROFILE 重定向+junction plugins 目录+二分 config 段落→字段）。**教训：cli/config.json 是 schema 强校验文件，手工/第三方工具写入前必须过 CLI `plugins list` 冒烟验证**。
 - **无 CLI 的 ZCode 插件手工更新法（复刻安装器行为，已两次实操验证）**：下载 zip/tarball → 校验 sha256/来源 → 解压到 cache 新版本目录（zip 需剥离顶层前缀）→ installed_plugins.json 定向更新 version/installPath/updatedAt/source.sha（勿动 cacheTransactionId 等其余字段）→ 删旧版本目录（.git 只读 pack 需先 chmod -R u+w）→ 本地跑脚本验证全绿。注意 python 脚本内不可用 /tmp 路径（MSYS 虚拟路径，Windows python 看不到）。
