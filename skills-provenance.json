@@ -1,0 +1,267 @@
+{
+  "generatedAt": "2026-09-09 19:09",
+  "scope": "Hermes skills/ 目录",
+  "totalSkills": 84,
+  "sources": [
+    {
+      "source": "NousResearch/hermes-agent",
+      "count": 27,
+      "checkType": "github-commits-path",
+      "watchStatus": "已在看门(hermes-hub-skills)",
+      "skills": [
+        "autonomous-ai-agents/agent-merge-conflict-arbiter",
+        "autonomous-ai-agents/computer-use",
+        "autonomous-ai-agents/cross-agent-collaboration",
+        "autonomous-ai-agents/hermes-agent",
+        "autonomous-ai-agents/skill-evaluation-and-admission",
+        "dogfood/adversarial-ux-test",
+        "hermes/hermes-desktop-theme-authoring",
+        "hermes/hermes-memory-tiering",
+        "hermes/hermes-quota-embedded",
+        "hermes/hermes-reasoning-display-internals",
+        "hermes/hermes-remote-access",
+        "hermes/hermes-token-debugging",
+        "mcp/fastmcp",
+        "media/agentic-video-distill",
+        "productivity/pdf",
+        "productivity/xlsx",
+        "research/arxiv",
+        "research/llm-wiki",
+        "software-development/codebase-inspection",
+        "software-development/hermes-agent-skill-authoring",
+        "software-development/inspecting-hermes-desktop-dom",
+        "software-development/node-inspect-debugger",
+        "software-development/python-debugpy",
+        "web-development/cloudflare-temporary-deploy",
+        "web-development/har-derived-api-client",
+        "web-development/publish-site",
+        "web/blocked-page-recovery"
+      ]
+    },
+    {
+      "source": "obra/superpowers",
+      "count": 14,
+      "checkType": "gh-release",
+      "watchStatus": "已在看门(superpowers)",
+      "skills": [
+        "superpowers/brainstorming",
+        "superpowers/dispatching-parallel-agents",
+        "superpowers/executing-plans",
+        "superpowers/finishing-a-development-branch",
+        "superpowers/receiving-code-review",
+        "superpowers/requesting-code-review",
+        "superpowers/subagent-driven-development",
+        "superpowers/systematic-debugging",
+        "superpowers/test-driven-development",
+        "superpowers/using-git-worktrees",
+        "superpowers/using-superpowers",
+        "superpowers/verification-before-completion",
+        "superpowers/writing-plans",
+        "superpowers/writing-skills"
+      ]
+    },
+    {
+      "source": "Teknium(anthropics系/未知仓库)",
+      "count": 8,
+      "checkType": null,
+      "watchStatus": "⚠️ 来源不明-待人工确认",
+      "skills": [
+        "media/youtube-content",
+        "note-taking/obsidian",
+        "research/gitnexus-explorer",
+        "research/grounded-citations",
+        "research/rss-feeds",
+        "social-media/reddit-reading",
+        "software-development/code-wiki",
+        "software-development/dogfood"
+      ]
+    },
+    {
+      "source": "zcode-custom(自研/无上游)",
+      "count": 7,
+      "checkType": null,
+      "watchStatus": "自研/无上游-免监控",
+      "skills": [
+        "zcode-custom/browser-bookmarks",
+        "zcode-custom/chinese-copywriting",
+        "zcode-custom/frontend-design",
+        "zcode-custom/gemini-image-gen",
+        "zcode-custom/readme-master",
+        "zcode-custom/semantic-release-pro",
+        "zcode-custom/shared-agent-memory"
+      ]
+    },
+    {
+      "source": "DietrichGebert/ponytail",
+      "count": 6,
+      "checkType": "gh-release",
+      "watchStatus": "已在看门(ponytail-skills)",
+      "skills": [
+        "software-development/ponytail",
+        "software-development/ponytail-audit",
+        "software-development/ponytail-debt",
+        "software-development/ponytail-gain",
+        "software-development/ponytail-help",
+        "software-development/ponytail-review"
+      ]
+    },
+    {
+      "source": "自研(无 author)",
+      "count": 5,
+      "checkType": null,
+      "watchStatus": "自研/无上游-免监控",
+      "skills": [
+        "devops/local-proxy-client-diagnostics",
+        "devops/windows-crash-diagnostics",
+        "media/bilibili-content",
+        "productivity/telegram-channel-ops",
+        "web/edge-dev-cdp-scraping"
+      ]
+    },
+    {
+      "source": "mattpocock/skills",
+      "count": 2,
+      "checkType": "github-commits-path",
+      "watchStatus": "❌ 未纳入（仅定向吸收2项）",
+      "skills": [
+        "software-development/codebase-design",
+        "software-development/domain-modeling"
+      ]
+    },
+    {
+      "source": "BadTechBandit/skills 或 Cocoon AI 原创",
+      "count": 1,
+      "checkType": null,
+      "watchStatus": "⚠️ 来源不明-待人工确认",
+      "skills": [
+        "creative/architecture-diagram"
+      ]
+    },
+    {
+      "source": "BadTechBandit/skills",
+      "count": 1,
+      "checkType": "github-commits-path",
+      "watchStatus": "❌ 未纳入",
+      "skills": [
+        "creative/claude-design"
+      ]
+    },
+    {
+      "source": "未知(sprmn24)",
+      "count": 1,
+      "checkType": null,
+      "watchStatus": "⚠️ 来源不明-待人工确认",
+      "skills": [
+        "devops/docker-management"
+      ]
+    },
+    {
+      "source": "benbarclay 个人贡献",
+      "count": 1,
+      "checkType": null,
+      "watchStatus": "⚠️ 来源不明-待人工确认",
+      "skills": [
+        "email/email-inbox-triage"
+      ]
+    },
+    {
+      "source": "community",
+      "count": 1,
+      "checkType": null,
+      "watchStatus": "⚠️ 来源不明-待人工确认",
+      "skills": [
+        "mcp/mcporter"
+      ]
+    },
+    {
+      "source": "Orchestra Research",
+      "count": 1,
+      "checkType": null,
+      "watchStatus": "⚠️ 来源不明-待人工确认",
+      "skills": [
+        "mlops/whisper"
+      ]
+    },
+    {
+      "source": "kangarooking/cangjie-skill",
+      "count": 1,
+      "checkType": "gh-release",
+      "watchStatus": "已在看门(cangjie-distill)",
+      "skills": [
+        "productivity/cangjie-distill"
+      ]
+    },
+    {
+      "source": "JulienTant/blogwatcher-cli",
+      "count": 1,
+      "checkType": "gh-release",
+      "watchStatus": "❌ 未纳入",
+      "skills": [
+        "research/blogwatcher"
+      ]
+    },
+    {
+      "source": "code-yeongyu 系 OhMyOpenAgent",
+      "count": 1,
+      "checkType": null,
+      "watchStatus": "⚠️ 来源不明-待人工确认",
+      "skills": [
+        "software-development/ast-grep"
+      ]
+    },
+    {
+      "source": "benbarclay",
+      "count": 1,
+      "checkType": null,
+      "watchStatus": "⚠️ 来源不明-待人工确认",
+      "skills": [
+        "software-development/github"
+      ]
+    },
+    {
+      "source": "rafaumeu",
+      "count": 1,
+      "checkType": null,
+      "watchStatus": "⚠️ 来源不明-待人工确认",
+      "skills": [
+        "software-development/grill-me"
+      ]
+    },
+    {
+      "source": "eren-karakus0",
+      "count": 1,
+      "checkType": null,
+      "watchStatus": "⚠️ 来源不明-待人工确认",
+      "skills": [
+        "software-development/rest-graphql-debug"
+      ]
+    },
+    {
+      "source": "Claude Code /simplify 启发",
+      "count": 1,
+      "checkType": null,
+      "watchStatus": "⚠️ 来源不明-待人工确认",
+      "skills": [
+        "software-development/simplify-code"
+      ]
+    },
+    {
+      "source": "gsd-build/get-shit-done",
+      "count": 1,
+      "checkType": null,
+      "watchStatus": "⚠️ 来源不明-待人工确认",
+      "skills": [
+        "software-development/spike"
+      ]
+    },
+    {
+      "source": "自研(本地已改)",
+      "count": 1,
+      "checkType": null,
+      "watchStatus": "自研/无上游-免监控",
+      "skills": [
+        "software-development/tauri-desktop-development"
+      ]
+    }
+  ]
+}
