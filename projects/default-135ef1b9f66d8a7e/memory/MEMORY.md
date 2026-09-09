@@ -74,5 +74,6 @@
 - [Cross-Repo Governance and Anti-Pattern Lessons](cross-repo-governance-and-anti-pattern-lessons.md) — 多仓治理、并发调度反模式与油猴双发布通道实战踩坑教训：Fork-First 强并发约束破除单线程惰性、版本基线实查防倒退、油猴双通道真实解耦（--channel=stable+release.yml）与全仓 CI 卫生自动化门禁
 - [CPA Core Update 1175 and Issue 241](cpa-core-update-1175-and-issue-241.md) — CPA 内核更新 os error 1175（ReplaceFile 瞬态锁）根因（裸调 ReplaceFileW 无重试）、手动装核五步 SOP、Restart Manager 探针工具箱与上游 issue #241 跟踪；同日 science-skills 评估为第 13 号雷达源不整装（predictingthepast 禁用）
 - [Prompt Language Token Cost](prompt-language-token-cost.md) — 09-09 双分词器实测：**G​emini 真值 1.10x**（countTokens 零配额实测，中文 0.59 tok/字）、o200k 1.34x，厂商不可外推；陷阱=内置库按字符限额而成本按 token 计，译英需先压掉约 60% 内容；三文件落地后每轮注入 3430→2004 token
+- [Session Archive Dual Push](session-archive-dual-push.md) — 会话收尾必须双推送：hermes-sessions 归档转录（私有/未脱敏）+ shared-agent-memory 推记忆（公开/脱敏）；09-09 曾只推记忆库漏归档，两者是不同仓库不同隐私级别
 
 
