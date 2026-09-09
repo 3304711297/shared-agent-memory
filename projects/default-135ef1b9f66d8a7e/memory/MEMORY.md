@@ -75,5 +75,6 @@
 - [CPA Core Update 1175 and Issue 241](cpa-core-update-1175-and-issue-241.md) — CPA 内核更新 os error 1175（ReplaceFile 瞬态锁）根因（裸调 ReplaceFileW 无重试）、手动装核五步 SOP、Restart Manager 探针工具箱与上游 issue #241 跟踪；同日 science-skills 评估为第 13 号雷达源不整装（predictingthepast 禁用）
 - [Prompt Language Token Cost](prompt-language-token-cost.md) — 09-09 双分词器实测：**G​emini 真值 1.10x**（countTokens 零配额实测，中文 0.59 tok/字）、o200k 1.34x，厂商不可外推；陷阱=内置库按字符限额而成本按 token 计，译英需先压掉约 60% 内容；三文件落地后每轮注入 3430→2004 token
 - [Session Archive Dual Push](session-archive-dual-push.md) — 会话收尾必须双推送：hermes-sessions 归档转录（私有/未脱敏）+ shared-agent-memory 推记忆（公开/脱敏）；09-09 曾只推记忆库漏归档，两者是不同仓库不同隐私级别
+- [Local LLM Bench and Model Lineup](local-llm-bench-and-model-lineup.md) — 09-09 本地三模型横评(MiniCPM5-2B 与 Qwen3.5-9B 双满分,R1-7B 已删)+ bench.py 可复用基建(/health 只收 GET 坑)+ 嵌入备选备忘(jina-v5-nano 三理由搁置,重建索引再议)
 
 
