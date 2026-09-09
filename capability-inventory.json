@@ -231,8 +231,8 @@
       "installed": [
         {
           "where": "Hermes skills/（80 项）+ ZCode ~/.zcode/skills（44 项精简副本）",
-          "version": "HEAD@ee5b5ec2",
-          "sha": "ee5b5ec21e576ccf9b941f9ff71330418415a5cb"
+          "version": "HEAD@abd83ab5",
+          "sha": "abd83ab560327c58f17f8e2ecd9be0307d5c9cf9"
         }
       ]
     },
@@ -306,9 +306,9 @@
       "installed": [
         {
           "where": "官网 Skills Hub 聚合索引（书签真源）",
-          "version": "90698",
-          "totalSkills": 90698,
-          "extractedAt": "2026-09-06"
+          "version": "90699",
+          "totalSkills": 90699,
+          "extractedAt": "2026-09-09"
         }
       ]
     },
@@ -325,9 +325,9 @@
       "installed": [
         {
           "where": "国内社区雷达（书签真源）",
-          "version": "1444",
-          "totalSkills": 1444,
-          "extractedAt": "2026-09-08"
+          "version": "1479",
+          "totalSkills": 1479,
+          "extractedAt": "2026-09-09"
         }
       ]
     },
