@@ -8,7 +8,7 @@ Hardware: RTX 4070 Laptop 8GB + 24GB; models/runtime junctioned to D:. OpenVikin
 §
 Retrieval = Exa only (EXA_API_KEY in .env). EasyCLIProxyAPI `gemini-web-search` is an alias with no live search — unusable.
 §
-Memory (09-07): provider=openviking is ADDITIVE, not a replacement — built-in MEMORY.md/USER.md (3000/2000 CHARS) still inject in full every turn. Low-frequency facts -> viking_remember; built-in keeps high-frequency only. Near limit: SUBTRACT, never raise the cap. 09-09: rewritten to English (1525->~820 tok) since CJK costs ~1.34x tokens per meaning while the cap counts chars.
+Memory (09-07): provider=openviking is ADDITIVE, not a replacement — built-in MEMORY.md/USER.md (3000/2000 CHARS) still inject in full every turn. Low-frequency facts -> viking_remember; built-in keeps high-frequency only. Near limit: SUBTRACT, never raise the cap. 09-09: rewritten to English (1525->740 tok); CJK costs 1.10x on Gemini's own tokenizer (measured via zero-quota countTokens) vs 1.34x on o200k, while the char cap counts chars.
 §
 Tools: only pure-read tools (read_file/search_files/web_search/web_extract/skill_view/skills_list/session_search/vision_analyze) may go concurrently; terminal/patch/write_file/memory/delegate_task are sequential barriers, one at a time (shared persistent shell by design). Never call batched terminal calls "parallel" in thinking/reports/summaries — false claim, as serious as fake execution. config.yaml needs no restart (re-read at spawn).
 §
