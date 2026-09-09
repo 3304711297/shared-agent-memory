@@ -29,4 +29,7 @@ metadata:
 11. **kangarooking/cangjie-skill** — https://github.com/kangarooking/cangjie-skill ：仓颉技能蒸馏母机（9.2k Stars，RIA-TV++ 体系），将书籍、长视频字幕、播客转写提炼为原子化、可执行的 Agent技能包；已提炼母机为本地按需技能 `cangjie-distill`（排除上百个衍生包，杜绝技能通胀）。
 12. **mattpocock/skills** — https://github.com/mattpocock/skills ：Matt Pocock 工程师实战技能集（247k Stars，Skills for Real Engineers）；精选采纳 `domain-modeling`（防术语漂移）与 `codebase-design`（深模块设计哲学），排除与外部任务书重叠的 PM 切票类工具。
 
-**How to apply:** 用户要找某类能力（如 PPT/SEO/安全审计技能）或 ZCode/Hermes 缺功能时，先查 1/2 的中文目录定位技能名，再回 GitHub 拿源码审读后安装；Claude 系官方技能/插件直接用 7/8/9（源头真源，优先于第三方转译）；Gemini/ZCode 官方需求直接用 5/6；Token 优化与架构借鉴看 10；长文/长视频方法论提炼看 11；领域建模与深模块架构看 12。第三方 skill 安装前必须人工审内容（提示词注入面），不盲装。
+**权威科研数据域雷达（2026-09-09 评审收录，按需单拉不整装）**
+13. **google-deepmind/science-skills** — https://github.com/google-deepmind/science-skills ：GDM 官方科研技能库（2659 Stars，Apache 2.0），40 个 skill 覆盖基因组学/结构生物学/化学信息学/文献检索/本体通路/临床数据，脚本经 PEP 723 + `uv run` 直连 40+ 权威数据源（UniProt/Ensembl/PDB/PubChem/ChEMBL/ClinVar/gnomAD/PubMed/OpenAlex/arXiv 等）。**不整装**（会冲破二八瘦身铁律），需要时**只拉单个 skill 目录**审读后放入 skills/。免 key 可直接用的优先项：`pubmed_database`、`uniprot_database`、`pubchem_database`、`pdb_database`、`clinical_trials_database`、`literature_search_arxiv`（与本地 research/arxiv 重叠，二选一）、`gnomad_database`、`string_database`。需 key 才完整：alphagenome(2 项) 与 openalex 必需，clinvar/dbsnp/ncbi/pubmed/openfda 加 NCBI_API_KEY 提频。**⛔ 禁用 `predictingthepast`**：其 run_inference.py 用 `pickle.load` 反序列化 GCS 下载的 .pkl 检查点，属远程代码执行面，且强依赖 jax。基线 sha `28b8482`（2026-09-08）。
+
+**How to apply:** 用户要找某类能力（如 PPT/SEO/安全审计技能）或 ZCode/Hermes 缺功能时，先查 1/2 的中文目录定位技能名，再回 GitHub 拿源码审读后安装；Claude 系官方技能/插件直接用 7/8/9（源头真源，优先于第三方转译）；Gemini/ZCode 官方需求直接用 5/6；Token 优化与架构借鉴看 10；长文/长视频方法论提炼看 11；领域建模与深模块架构看 12；科研数据库（蛋白/基因/化合物/文献/临床）查文献需求看 13（按需单拉，不整装）。第三方 skill 安装前必须人工审内容（提示词注入面），不盲装。
