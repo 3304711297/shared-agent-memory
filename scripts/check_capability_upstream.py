@@ -416,7 +416,11 @@ def main():
             details.append("\n".join(head + detail))
             continue
 
-        # 技能库路径提交检查：对比基线 sha，报告新增提交数
+        # 技能库路径提交检查：【语义变更 2026-09-09 用户拍板】
+        # 旧语义：仓库有新提交即报「有更新」→ 会误导用户去同步（实为误导性噪音）。
+        # 新语义：新增技能由 skill-plugin-resources.md 索引库按需检索，本看门不负责「发现新技能」；
+        #        此处仅保留基线 sha 作为信息展示，且**永不计入 outdated**，
+        #        真正的「已装技能是否落后」由 scripts/check_skill_drift.py 做技能级内容比对。
         if check["type"] == "github-commits-path":
             try:
                 commits = github_commits_for_path(check["repo"], check["path"])
@@ -430,27 +434,17 @@ def main():
                 continue
             head = commits[0]["sha"] if commits else None
             rec = next((loc.get("sha") for loc in comp.get("installed", []) if loc.get("sha")), None)
-            behind = bool(head and rec and head != rec)
-            count = None
-            if behind and commits:
-                for i, c in enumerate(commits):
-                    if c["sha"] == rec:
-                        count = i
-                        break
-                if count is None:
-                    count = f"{len(commits)}+"
+            # 不再判定 behind / 不再计入 outdated
             head_msg = (commits[0]["commit"]["message"].split("\n")[0][:60]) if commits else ""
             head_date = commits[0]["commit"]["committer"]["date"][:10] if commits else ""
-            state = "🔴 有更新" if behind else ("✅ 最新" if head else "⚠️ 查询失败")
-            rows.append(f"| {comp['display']} | `{cid}` | {head[:8] if head else 'N/A'} | {state} |")
-            if behind:
-                outdated += 1
+            rows.append(f"| {comp['display']} | `{cid}` | {head[:8] if head else 'N/A'} | ℹ️ 漂移检查 |")
             detail = [f"### {comp['display']}（{cid}）", ""]
             if head:
-                detail.append(f"- 上游最新：**{head[:8]}**（{head_date}）{head_msg}")
-            detail.append(f"- 基线：`{(rec or '未记录')[:8]}` → " + (f"**{count} 笔新提交涉及技能库**" if behind else "✅ 一致"))
-            if behind:
-                detail.append("- 跟进：Hermes GUI 技能页更新/重跑迁移同步到 ZCode 后，把清单 `installed.sha` 回写为最新 HEAD 并推 main。")
+                detail.append(f"- 上游最新 HEAD：**{head[:8]}**（{head_date}）{head_msg}")
+            detail.append(f"- 基线：`{(rec or '未记录')[:8]}`")
+            detail.append("- ℹ️ **本项不再由提交数判定更新**（2026-09-09 语义变更）：新技能发现走 "
+                          "`skill-plugin-resources.md` 索引库按需检索；已装技能是否落后由 "
+                          "`scripts/check_skill_drift.py` 做技能级内容比对。")
             details.append("\n".join(detail))
             continue
 
