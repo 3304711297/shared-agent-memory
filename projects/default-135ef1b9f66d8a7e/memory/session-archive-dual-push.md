@@ -8,8 +8,13 @@
    ```bash
    cd "$HOME/GitRepos/hermes-sessions"   # 或实际克隆位置
    python tools/upload_session.py --latest            # 仅归档
-   python tools/upload_session.py --latest --delete   # 归档并清本地
    ```
+   **⚠️ 铁律（2026-09-09 两次事故定案）：严禁 `--delete`，会话由用户自行删除。**
+   Agent 跑 `--delete` 删掉活跃会话的 state.db 行 → 桌面端写入失败 →
+   "session storage could not be written" 回合中止 + 历史丢失（需从归档回灌）。
+   脚本已加 30 分钟活跃保护，但 Agent 侧根本不该带 `--delete`。
+   误删后的修复工具：`tools/restore_session.py`（整会话回灌）、
+   `tools/merge_session_back.py`（并回已重建会话）。
    校验远端落盘：`git rev-parse HEAD` 必须等于 `git ls-remote origin main`。
 
 2. **记忆库推送**（公开库，写入前必须脱敏）
