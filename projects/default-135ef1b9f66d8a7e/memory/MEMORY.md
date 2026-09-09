@@ -69,7 +69,7 @@
 - [Hermes and ZCode Session Storage Paths](hermes-and-zcode-session-storage-paths.md) — Hermes 与 ZCode 会话存储物理路径、桌面工作区锚定与快捷方式启动规范（state.db、projects.db 与 D:/ai coding 对齐全貌）
 - [Ponytail Anti Bloat Skills](ponytail-anti-bloat-skills.md) — 引入 Ponytail 极简编程与反过度工程技能套件（v4.9.0，按需 Skill 架构而非常驻 Plugin，双端 6 项落地），纳入看门狗 capability-inventory.json 追踪
 - [Hermes Desktop Rewind Deadlock](hermes-desktop-rewind-deadlock.md) — Desktop 会话假死（切模型+中断→refusing truncation 拒绝循环，上游 #94486）根因链、重启不自愈机理与手工修复 SOP（备份→删毒尾行→校准计数→Esc 清挂起态）
-- [Hermes Desktop Update Exit 8 False Negative](hermes-desktop-update-exit8-false-negative.md) — Windows 下更新后误报 exit 8 校验失败与启动弹窗的根因（Path.cwd 脱节）、阅后即焚消费机制与免修结论（Issue #105145 / PR #105168）
+- [Hermes Desktop Update Exit 8 False Negative](hermes-desktop-update-exit8-false-negative.md) — Windows 下更新后误报 exit 8 校验失败与启动弹窗的根因（Path.cwd 脱节）、阅后即焚消费机制；**09-09 已治愈**（Issue #105145 已关闭，修复随 990473a79c 落地；09-09 那次复发是旧脚本自更新鸡生蛋问题属预期最后一次）
 - [Gemini Agentic Video Distill Architecture](gemini-agentic-video-distill-architecture.md) — Gemini 代理式视频理解（Agentic Video Understanding）解耦架构、Token暴降实测取证（386 vs 53k tokens）与跨端自包含技能落地全貌（双端 agentic-video-distill，动态感知 3.9/平替 3.7，主备 Key 轮询）
 - [Cross-Repo Governance and Anti-Pattern Lessons](cross-repo-governance-and-anti-pattern-lessons.md) — 多仓治理、并发调度反模式与油猴双发布通道实战踩坑教训：Fork-First 强并发约束破除单线程惰性、版本基线实查防倒退、油猴双通道真实解耦（--channel=stable+release.yml）与全仓 CI 卫生自动化门禁
 - [CPA Core Update 1175 and Issue 241](cpa-core-update-1175-and-issue-241.md) — CPA 内核更新 os error 1175（ReplaceFile 瞬态锁）根因（裸调 ReplaceFileW 无重试）、手动装核五步 SOP、Restart Manager 探针工具箱与上游 issue #241 跟踪；同日 science-skills 评估为第 13 号雷达源不整装（predictingthepast 禁用）

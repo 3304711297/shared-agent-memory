@@ -37,6 +37,11 @@ metadata:
 - **排错关键**：此弹窗为纯粹的“一次性历史通知”，点“确定”后桌面端正常进入 runtime 加载并启动后端服务（端口 3352）；再次启动绝不会重复弹出，无需重装或修复。
 
 ### 4. 社区状态与对齐
-- **Issue**: [NousResearch/hermes-agent#105145](https://github.com/NousResearch/hermes-agent/issues/105145) (P1 bug，多位 Windows 用户证实)
+- **Issue**: [NousResearch/hermes-agent#105145](https://github.com/NousResearch/hermes-agent/issues/105145) (P1 bug，多位 Windows 用户证实；**2026-09-09 已关闭**)
 - **PR**: [NousResearch/hermes-agent#105168](https://github.com/NousResearch/hermes-agent/pull/105168) (已提交，通过 `[Environment]::CurrentDirectory = $InstallRoot` 修复)
-- 本地无需手动魔改仓库文件（保持 clean 以免阻碍后续 `git pull`），等待官方合流 PR 即可自动治愈。
+- 本地无需手动魔改仓库文件（保持 clean 以免阻碍后续 `git pull`）。
+
+### 5. 【已治愈 2026-09-09】复发一次后随官方修复合流收口
+- 09-09 更新（250 commits → `990473a79c` / v0.21.1）**再次复发同一误报**，属预期内的最后一次：hand-off 运行的是**更新前的旧脚本**（备份 ref `orphan-main-20260909-045354` 的 windows.ps1 中 `Set-InstallRootCurrentDirectory` 出现 0 次），修复代码是本次更新自己带进来的——鸡生蛋问题，无法更早生效。
+- 修复已落地并实证：更新后 `windows.ps1` L1459 在起任何子进程前先 `Set-InstallRootCurrentDirectory $InstallRoot` 钉 CWD（L1647 仍调 `Path.cwd()`，但此时 cwd 已正确指向源码根），并附 `-SelfTestWorkingDirectory` 自检模式。真身 exe（`hermes-agent\apps\desktop\release\win-unpacked\Hermes.exe`，214MB）完好，`.hermes-update-result.json` 已阅后即焚无残留。
+- **结论：此后 Windows 桌面端更新不应再出现 exit 8 误报；若再遇更新失败弹窗，先查 `desktop-update-handoff.log` 确认是否同堆栈，勿盲目重装修复。**「更新时窗口卡住」体感=桌面端先退出→更新子进程静默跑数分钟（日志批量刷新）→旧脚本误报后不自动重启 GUI，属更新管线正常形态+已知 bug 叠加，非死机。
