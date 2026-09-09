@@ -1,27 +1,19 @@
-Hermes 主力模型 gemini-3.8-flash，经 EasyCLIProxyAPI（网关 18080，provider=cpa-gui）桥接 Antigravity（双账号平级优先级 10 轮询+会话粘性 1h 保缓存）；auxiliary.* 辅助模型严格默认 auto 自动跟随主模型（严禁擅自改动）。
+Model: gemini-3.8-flash via EasyCLIProxyAPI (18080, provider=cpa-gui) -> Antigravity (2 accts, priority 10 round-robin + 1h sticky). auxiliary.* stays `auto` — never change.
 §
-WorkBuddy=本地 codebuddy2openai 反代 http://127.0.0.1:8787/v1（Tauri v2 客户端：多账号/积分看板/托盘/Hermes 一键写入）；venv=C:\Users\VOS-User\.workbuddy\binaries\python\envs\default；运维细节检索 OpenViking。
+Windows: Karing proxy 127.0.0.1:3067 (Karing itself 1666). 3067 listens only with an outbound node up; no listener = no route, check node first when push hangs. Bare push: `env -u ALL_PROXY -u HTTP_PROXY -u HTTPS_PROXY`. PyPI CDN = files.pythonhosted.org. gh acct 3304711297. Browser Edge Dev + chrome-devtools MCP. NO_PROXY list & Edge Dev CDP quirk -> OpenViking.
 §
-Windows 运行环境：本地代理 Karing 混合口 127.0.0.1:3067；NO_PROXY=127.0.0.1,localhost,::1,copilot.tencent.com,.tencent.com,pypi.org,files.pythonhosted.org（github.com 有意不加：常态被墙，加了会在可直连时强制绕代理反失败；不挂节点 git push 用 env -u 清代理变量）；PyPI 下载 CDN=files.pythonhosted.org（.org，非 .com）；GitHub CLI 账号 3304711297；浏览器接管 Edge Dev + chrome-devtools MCP；superpowers 插件有 Windows 定制。
+WorkBuddy = codebuddy2openai reverse proxy 127.0.0.1:8787/v1 (Tauri v2: multi-acct, credits, tray, Hermes write). Ops detail -> OpenViking.
 §
-子代理路由：delegate_task 默认继承聊天模型；未告知=同聊天模型；严禁固定 delegation.provider/model（已撤回）；单任务定制走 kanban per-task override；改 config.yaml 用 python yaml。
+Hardware: RTX 4070 Laptop 8GB + 24GB; models/runtime junctioned to D:. OpenViking venv on-demand, sleeps 2min idle. MCP: chrome-devtools (--autoConnect, connect-only) + deepwiki.
 §
-Hermes 检索与抽取=Exa 独享（EXA_API_KEY 在 .env，web/search/extract backend 全=exa）；EasyCLIProxyAPI(18080) 的 gemini-web-search 仅是别名无实时搜索，不可作搜索源。
+Retrieval = Exa only (EXA_API_KEY in .env). EasyCLIProxyAPI `gemini-web-search` is an alias with no live search — unusable.
 §
-本机硬件：RTX 4070 Laptop (8GB)+24GB 内存；C 盘紧张，模型/运行时 NTFS Junction 至 D 盘（models→D:\HermesModels，runtimes→D:\HermesRuntimes）；OpenViking venv=.openviking\venv 按需自启、2 分钟闲置休眠；MCP 终态：Hermes 端仅 chrome-devtools（--autoConnect 纯连接防清扩展）与 deepwiki，lazy+60s 回收；agent_guard 治理 MCP 孤儿进程并联动停 OpenViking 释放显存。
+Memory (09-07): provider=openviking is ADDITIVE, not a replacement — built-in MEMORY.md/USER.md (3000/2000 CHARS) still inject in full every turn. Low-frequency facts -> viking_remember; built-in keeps high-frequency only. Near limit: SUBTRACT, never raise the cap. 09-09: rewritten to English (1525->~820 tok) since CJK costs ~1.34x tokens per meaning while the cap counts chars.
 §
-记忆架构（09-07 拍板）：memory.provider=openviking 仅为叠加检索层，内置 MEMORY.md/USER.md（3000/2000 字符限额，随系统提示词全量注入）仍并行存在；低频细节用 viking_remember 存 OpenViking 检索召回，内置只留高频必带事实，双库 99% 顶格时优先做减法不是调限额。
+Tools: only pure-read tools (read_file/search_files/web_search/web_extract/skill_view/skills_list/session_search/vision_analyze) may go concurrently; terminal/patch/write_file/memory/delegate_task are sequential barriers, one at a time (shared persistent shell by design). Never call batched terminal calls "parallel" in thinking/reports/summaries — false claim, as serious as fake execution. config.yaml needs no restart (re-read at spawn).
 §
-配置改动流程：先列候选+官方默认+代价清单，等用户拍板再动手，严禁擅自改。
+Style: external-AI cross-review -> P0/P1/P2 spec; fixed scope, no opportunistic refactors. Local-First: full CI-equivalent + Release build locally, then push; never block the main session on CI. Config change: list candidates + defaults + cost, wait for the call.
 §
-Git push 卡住排查：github.com 直连被墙需走 Karing；ALL_PROXY=127.0.0.1:3067 仅在 Karing 已开出站节点时才监听（Karing 进程自身另监听 127.0.0.1:1666），3067 未监听即无路由，先确认节点开启再 push。
+Background loops off (09-07): nudge_interval=0 + creation_nudge_interval=0 + background_review.enabled=false (triple, anti-fail-open). Foreground memory/OpenViking//refine unaffected. serena & cliproxyapi off the capability-inventory watchlist; serena purged.
 §
-用户工作方式：外部AI交叉审查产出任务书并严格分级（P0/P1/P2），限定修改范围严禁顺手重构；执行Local-First铁律（本地先跑完整CI等价验证链与Release构建，本地全绿推后严禁在主会话卡等CI拖慢节奏，直接继续后续会话）；补回归测试闭环。
-§
-后台学习循环禁用（09-07 已落盘）：memory.nudge_interval=0 + skills.creation_nudge_interval=0 + auxiliary.background_review.enabled=false 三重禁用（防 fail-open 复活）；前台 memory 工具/OpenViking//refine 不受影响。serena、cliproxyapi 已退出 capability-inventory.json 看门（用户拍板：cliproxyapi 软件内手动更新）；serena 残留已清理（uv tool 卸载 + ~/.serena 587MB 删除）。
-§
-Hermes Desktop「会话运行不了」假死=切模型注入 user 角色系统消息+客户端带截断参数重试被网关拒绝（上游 #94486，已评论补充证据）；重启不自愈，修复 SOP 见共享库 topics/hermes-desktop-rewind-deadlock.md。
-§
-【铁律】terminal 严禁宣称/暗示并行（09-07 用户拍板）：内核白名单 _PARALLEL_SAFE_TOOLS 仅纯只读（read_file/search_files/web_search/web_extract/skill_view/skills_list/session_search/vision_analyze）可并发；terminal/patch/write_file/memory/delegate_task 均为顺序屏障，逐条串行执行（共享持久 shell 会话是安全设计）。思考、报告、总结中严禁写「并行执行命令/已并行」等表述——批量发多个 terminal 调用时是「逐条串行」；表述失实=假执行，同等严重。UI 消歧：「已保存到记忆 N entries」徽章=前台 memory 工具调用（zh.ts L3807），非后台 fork（已禁用，写入走 💾 行）。config.yaml 改动无需重启（spawn 时实时重读）。
-§
-避坑（09-07 实证）：Hermes 仓库内 website/i18n/zh-Hans 下的本地中文翻译文档会滞后于源码（如 curator.md 仍描述旧二元白名单判定，实际源码 tools/skill_usage.py 已改为 created_by=agent 标记制+adopt/ledger）。判定机制/默认值类问题必须直接读源码，不以本地文档为准；官方文档站亦可能与本地构建版本漂移，需标注哪边新再下结论。
+Pitfalls: Desktop "session won't run" freeze = model switch injecting a user-role system msg + truncated retry rejected by gateway (upstream #94486); restart won't self-heal — SOP in shared lib topics/hermes-desktop-rewind-deadlock.md. Repo-local website/i18n/zh-Hans translations lag source (curator.md vs tools/skill_usage.py created_by=agent + adopt/ledger) — read source for behavior/defaults, never the translation.
