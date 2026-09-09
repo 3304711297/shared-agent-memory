@@ -72,5 +72,6 @@
 - [Hermes Desktop Update Exit 8 False Negative](hermes-desktop-update-exit8-false-negative.md) — Windows 下更新后误报 exit 8 校验失败与启动弹窗的根因（Path.cwd 脱节）、阅后即焚消费机制与免修结论（Issue #105145 / PR #105168）
 - [Gemini Agentic Video Distill Architecture](gemini-agentic-video-distill-architecture.md) — Gemini 代理式视频理解（Agentic Video Understanding）解耦架构、Token暴降实测取证（386 vs 53k tokens）与跨端自包含技能落地全貌（双端 agentic-video-distill，动态感知 3.9/平替 3.7，主备 Key 轮询）
 - [Cross-Repo Governance and Anti-Pattern Lessons](cross-repo-governance-and-anti-pattern-lessons.md) — 多仓治理、并发调度反模式与油猴双发布通道实战踩坑教训：Fork-First 强并发约束破除单线程惰性、版本基线实查防倒退、油猴双通道真实解耦（--channel=stable+release.yml）与全仓 CI 卫生自动化门禁
+- [CPA Core Update 1175 and Issue 241](cpa-core-update-1175-and-issue-241.md) — CPA 内核更新 os error 1175（ReplaceFile 瞬态锁）根因（裸调 ReplaceFileW 无重试）、手动装核五步 SOP、Restart Manager 探针工具箱与上游 issue #241 跟踪；同日 science-skills 评估为第 13 号雷达源不整装（predictingthepast 禁用）
 
 
