@@ -1,6 +1,6 @@
 ---
 name: skill-plugin-resources
-description: 用户书签 skill hub 文件夹的 10 个 Skills/插件/Agent 资源站与仓库（需要技能/插件时调取下载，并作为看门狗技能雷达真源）
+description: 技能/插件索引库：18 个 Skills/插件/Agent 资源站与仓库（需新技能时在此按需检索，已装技能的漂移检查走 check_skill_drift.py）
 metadata:
   type: reference
 ---
@@ -32,4 +32,13 @@ metadata:
 **权威科研数据域雷达（2026-09-09 评审收录，按需单拉不整装）**
 13. **google-deepmind/science-skills** — https://github.com/google-deepmind/science-skills ：GDM 官方科研技能库（2659 Stars，Apache 2.0），40 个 skill 覆盖基因组学/结构生物学/化学信息学/文献检索/本体通路/临床数据，脚本经 PEP 723 + `uv run` 直连 40+ 权威数据源（UniProt/Ensembl/PDB/PubChem/ChEMBL/ClinVar/gnomAD/PubMed/OpenAlex/arXiv 等）。**不整装**（会冲破二八瘦身铁律），需要时**只拉单个 skill 目录**审读后放入 skills/。免 key 可直接用的优先项：`pubmed_database`、`uniprot_database`、`pubchem_database`、`pdb_database`、`clinical_trials_database`、`literature_search_arxiv`（与本地 research/arxiv 重叠，二选一）、`gnomad_database`、`string_database`。需 key 才完整：alphagenome(2 项) 与 openalex 必需，clinvar/dbsnp/ncbi/pubmed/openfda 加 NCBI_API_KEY 提频。**⛔ 禁用 `predictingthepast`**：其 run_inference.py 用 `pickle.load` 反序列化 GCS 下载的 .pkl 检查点，属远程代码执行面，且强依赖 jax。基线 sha `28b8482`（2026-09-08）。
 
-**How to apply:** 用户要找某类能力（如 PPT/SEO/安全审计技能）或 ZCode/Hermes 缺功能时，先查 1/2 的中文目录定位技能名，再回 GitHub 拿源码审读后安装；Claude 系官方技能/插件直接用 7/8/9（源头真源，优先于第三方转译）；Gemini/ZCode 官方需求直接用 5/6；Token 优化与架构借鉴看 10；长文/长视频方法论提炼看 11；领域建模与深模块架构看 12；科研数据库（蛋白/基因/化合物/文献/临床）查文献需求看 13（按需单拉，不整装）。第三方 skill 安装前必须人工审内容（提示词注入面），不盲装。
+**已在本地实装的上游源（2026-09-09 出处盘点回补，供漂移检查与重装定位）**
+14. **obra/superpowers** — https://github.com/obra/superpowers ：开发纪律套件（283k Stars），本地 14 项全量实装，正文与上游一致、仅 description 做了中文强触发词改造（**禁止被上游覆盖**）。
+15. **DietrichGebert/ponytail** — https://github.com/DietrichGebert/ponytail ：代码极简与反过度工程套件（132k Stars），本地 6 项实装。注意其仓库同时存在 `.openclaw/skills/` 与 `skills/` 两份副本，以 `skills/` 为准。
+16. **NousResearch/hermes-agent** — https://github.com/NousResearch/hermes-agent ：Hermes 本体仓库的 `skills/` + `optional-skills/`（合计 199 个 SKILL.md），本地 27 项实装。注意 `optional-skills/` 与 `skills/` 存在重名（如 rss-feeds/reddit-reading 已迁至 optional），映射时优先取较短路径。
+17. **BadTechBandit/skills** — https://github.com/BadTechBandit/skills ：本地 `c​laude-design` 与 `architecture-diagram` 的可能来源（4 Stars，2026-04 后停更，**已停维护**，仅作溯源用）。
+18. **JulienTant/blogwatcher-cli** — https://github.com/JulienTant/blogwatcher-cli ：本地 `research/blogwatcher` 的上游（31 Stars，2026-05 后停更，仅作溯源用）。
+
+**索引库规模（2026-09-09 实查）**：15 个 GitHub 源合计约 **1,467 个可拉取 SKILL.md**（ECC 898 / hermes-agent 199 / knowledge-work-plugins 212 / science-skills 40 / mattpocock 37 / claude-plugins-official 31 / anthropics 20 / ponytail 13 / gemini-skills 3 等），全部可访问、无归档或禁用；本地实装 84 项，采撷率约 5.7%，符合二八瘦身铁律（技能池控制在 30-50 项为宜，按需从本索引单拉）。
+
+**How to apply:** 用户要找某类能力（如 PPT/SEO/安全审计技能）或 ZCode/Hermes 缺功能时，先查 1/2 的中文目录定位技能名，再回 GitHub 拿源码审读后安装；Claude 系官方技能/插件直接用 7/8/9（源头真源，优先于第三方转译）；Gemini/ZCode 官方需求直接用 5/6；Token 优化与架构借鉴看 10；长文/长视频方法论提炼看 11；领域建模与深模块架构看 12；科研数据库（蛋白/基因/化合物/文献/临床）查文献需求看 13（按需单拉，不整装）；**已装技能的溯源与重装查 14-18**。第三方 skill 安装前必须人工审内容（提示词注入面），不盲装。
