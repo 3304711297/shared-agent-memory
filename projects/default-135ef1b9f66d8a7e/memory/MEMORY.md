@@ -30,11 +30,11 @@
 - [SteamDB Chinese Plus Project](steamdb-chinese-plus-project.md) — 桌面 steamdb-chinese 汉化脚本项目；接续停更 SteamDB_CN；词库真源 Chr233/GM_Scripts(AGPL-3.0)；**v1.4.4，build 防倒退已加（39 测试）**
 - [Bilibili Enhancement Tools](bilibili-enhancement-tools.md) — B站增强三件套调研：SukkaW 反跟踪油猴脚本（安全可装）+ BewlyCat(功能向) vs AveMujica(外观向) 二选一，B站2026-01推荐API需BewlyCat≥1.5.6；源码级重叠四块+脚本独有清单+共存关模块建议
 - [Hermes Agent Install](hermes-agent-install.md) — hermes-agent（HERMES_HOME=LocalAppData，GUI 桌面端为主用法）：git/uv 走 3067 代理；429 限流 insteadOf 规则；token-stats 配额微服务 18088；更新弹窗文件锁排查；09-08 桌面更新 exit 8 校验 cwd 误报根因（windows.ps1 第 1609 行 Path.cwd 修复为 InstallRoot）
-- [Hermes Shared Memory](hermes-shared-memory.md) — 共享库单一真源=ZCode 记忆目录（main 分支）；hermes 经 NTFS junction 直读 topics 并自行提交推送 main（旧「ZCode 代推」规则作废）
+- [Hermes Shared Memory](hermes-shared-memory.md) — 共享库单一真源=ZCode 记忆目录（main 分支）；hermes 经 NTFS junction 直读 topics 并自行提交推送 main（旧「ZCode 代推」规则作废）【⚠️ 2026-09-09 真源已迁 D:/ai coding/GitRepos/shared-agent-memory，ZCode 已拆除，见 zcode-decommissioned 卡】
 - [Bilibili Video Transcription Pipeline](bilibili-video-transcription-pipeline.md) — B站视频→逐字稿管线（直连API防412+ffmpeg whisper small+误听对照表），脚本在 bios_knowledge/
 - [Youshouldknow BIOS Knowledge Series](youshouldknow-bios-knowledge-series.md) — ysk BIOS 选项科普系列（2026-09-02 批次+09-03 EP15 NVMe，逐篇附出处）；同步点 d0fc852；B站看门 bilibili-watch 每 6h 自动开 Issue；ysk 新增页面必须重跑 gen-matrix.py
 - [Serena MCP Silent Config](serena-mcp-silent-config.md) — Serena 插件静默配置（禁用 Web Dashboard 与 GUI 日志弹窗，离线快速启动）
-- [Multi Branch Memory Backup](multi-branch-memory-backup.md) — 共享库三分支架构（2026-09-05 重构）：main=双端共享唯一真源（hermes junction 直读）、zcode/hermes=各自专属；谁改谁当轮推 main；**仓库已公开**（脱敏后转公开，用户拍板不做历史重写）
+- [Multi Branch Memory Backup](multi-branch-memory-backup.md) — 共享库三分支架构（2026-09-05 重构）：main=双端共享唯一真源（hermes junction 直读）、zcode/hermes=各自专属；谁改谁当轮推 main；**仓库已公开**（脱敏后转公开，用户拍板不做历史重写）【⚠️ 2026-09-09：ZCode 拆除，库为 Hermes 单端所有；会话归档分支 zcode 在姊妹私有仓 shared-agent-sessions】
 - [User Global Preferences](user-global-preferences.md) — 用户全局铁律与偏好：CI 全绿才收尾、不确定信息联网核实、**多任务优先并行子代理（Gemini 实测单批支持 10 并发，建议 3~6 批次）**、**跨 Agent 协同自驱接手（后台守护+notify唤醒，严禁口头空等）**、Whisper small、UI 键值分层等宽加粗/加载动效、桌面工具内嵌无黑框、托盘 GUI.for.Cores 风格
 - [Hermes to ZCode Capability Sync](hermes-to-zcode-capability-sync.md) — 2026-09-05 Hermes→ZCode 能力同步：87 skills 迁入 ~/.zcode/skills、deepwiki MCP 新增、重复（superpowers/docx 等）与 Hermes 专有（quota/dogfood 等）跳过清单、记忆库 7 补 5 合
 - [Capability Upstream Watch](capability-upstream-watch.md) — 每日能力组件上游看门（shared-agent-memory Actions，capability-watch 标签 Issue）+ watch-capability.cmd 本地一键；ZCode 市场两层架构（bundled 种子+CDN）；升级组件后必须回写 capability-inventory.json 推 main 自动收口；2026-09-07 扩充至 18 个组件（去重同源告警与爬虫优雅降级）；09-07 第三轮：skills-hub 日期刷新误报根治；09-08 第四轮：本地看门解耦与防漂移（相对路径修复为 REPO_ROOT 绝对锚定、--local-only 模式默认跳过外部查询防 403 限额与云端不对齐、大面积失败熔断保护、报告退出 git 跟踪以 Issue 为唯一真源）
@@ -67,7 +67,7 @@
 - [Hardware Laptop Undervolt ThrottleStop](hardware-laptop-undervolt-throttlestop.md) — 机械革命极光 X (i7-12800HX) ThrottleStop 调优配置（Core/Cache 均锁定 -180mV、C-State BIOS 关、单轨 Cache 决定论）与 0x0000000A (IRQL=255 HIGH_LEVEL) 黑屏死机根因排障闭环
 - [Browser Automation and Ego Lite Evaluation](browser-automation-and-ego-lite-evaluation.md) — 真实浏览器接管与自动化方案对比及 ego-lite 深度评估：ego-lite 仅限 Mac 暂不适用；提炼「Heredoc 批量执行+压缩语义快照」降 Token 思维；现有成熟开箱即用 Skill 选型（dev-browser、attach-to-browser-skill、faster-chrome-devtools）与 Edge Dev 安全边界
 - [NCSI Active Probing and DNS Hijack Defense](ncsi-active-probing-and-dns-hijack-defense.md) — 2026-07-21 中国移动 DNS 劫持复盘与 Windows NCSI 主动探测防御体系：Captive Portal 热点认证机制武器化剖析、EnableActiveProbing=0 系统级阻断、DoH 与 TUN Fake-IP 治本方案及 tweak/ysk 双仓工程化闭环
-- [Hermes and ZCode Session Storage Paths](hermes-and-zcode-session-storage-paths.md) — Hermes 与 ZCode 会话存储物理路径、桌面工作区锚定与快捷方式启动规范（state.db、projects.db 与 D:/ai coding 对齐全貌）
+- [Hermes and ZCode Session Storage Paths](hermes-and-zcode-session-storage-paths.md) — Hermes 与 ZCode 会话存储物理路径、桌面工作区锚定与快捷方式启动规范（state.db、projects.db 与 D:/ai coding 对齐全貌）【⚠️ 2026-09-09 ZCode 拆除：ZCode 侧路径仅存历史，会话转录在 shared-agent-sessions zcode 分支】
 - [Ponytail Anti Bloat Skills](ponytail-anti-bloat-skills.md) — 引入 Ponytail 极简编程与反过度工程技能套件（v4.9.0，按需 Skill 架构而非常驻 Plugin，双端 6 项落地），纳入看门狗 capability-inventory.json 追踪
 - [Hermes Desktop Rewind Deadlock](hermes-desktop-rewind-deadlock.md) — Desktop 会话假死（切模型+中断→refusing truncation 拒绝循环，上游 #94486）根因链、重启不自愈机理与手工修复 SOP（备份→删毒尾行→校准计数→Esc 清挂起态）
 - [Hermes Desktop Update Exit 8 False Negative](hermes-desktop-update-exit8-false-negative.md) — Windows 下更新后误报 exit 8 校验失败与启动弹窗的根因（Path.cwd 脱节）、阅后即焚消费机制；**09-09 已治愈**（Issue #105145 已关闭，修复随 990473a79c 落地；09-09 那次复发是旧脚本自更新鸡生蛋问题属预期最后一次）
@@ -77,5 +77,6 @@
 - [Prompt Language Token Cost](prompt-language-token-cost.md) — 09-09 双分词器实测：**G​emini 真值 1.10x**（countTokens 零配额实测，中文 0.59 tok/字）、o200k 1.34x，厂商不可外推；陷阱=内置库按字符限额而成本按 token 计，译英需先压掉约 60% 内容；三文件落地后每轮注入 3430→2004 token
 - [Session Archive Dual Push](session-archive-dual-push.md) — 会话收尾必须双推送：hermes-sessions 归档转录（私有/未脱敏）+ shared-agent-memory 推记忆（公开/脱敏）；09-09 曾只推记忆库漏归档，两者是不同仓库不同隐私级别
 - [Local LLM Bench and Model Lineup](local-llm-bench-and-model-lineup.md) — 09-09 本地三模型横评(MiniCPM5-2B 与 Qwen3.5-9B 双满分,R1-7B 已删)+ bench.py 可复用基建(/health 只收 GET 坑)+ 嵌入备选备忘(jina-v5-nano 三理由搁置,重建索引再议)
+- [ZCode Decommissioned](zcode-decommissioned.md) — **2026-09-09 ZCode 客户端全量拆除**：~/.zcode 与 D:\ai coding\.zcode 已删、Roaming 残留与注册表已清；会话转录归档 shared-agent-sessions zcode 分支（GUI db.sqlite.gz 75MB + 24 CLI 会话）；共享记忆库真源迁 D:/ai coding/GitRepos/shared-agent-memory（junction 重指）；唯一遗留关联=智谱活动赠额经 zcode-api 反代进 Hermes（SOP 见 OpenViking zcode_api 卡）
 
 
