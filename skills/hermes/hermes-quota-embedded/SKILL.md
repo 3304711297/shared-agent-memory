@@ -18,6 +18,13 @@ description: Hermes 配额监控内置化架构与排障路径（token-stats 后
 - 前端 plugin.js 接受 ok|degraded 两态，Chip 呼吸灯/看板徽章转琥珀色并出横幅。
 - 改 plugin_api.py / plugin.js 后必须重启桌面端进程才生效（模块级加载，无热重载）。
 
+## WorkBuddy 上游频率限制监控（2026-09-08 新增）
+- 腾讯 CodeBuddy 上游免费模型限流报文：HTTP 429 + `{"code":6004,"msg":"您的使用量已超出频率限制，将在 <YYYY-MM-DD HH:MM:SS> UTC+8 重置…"}`；报文自带精确重置时刻，冷却窗口不定长（实测触发点浮动：hy4-preview 5h 滚动 46~212 次请求 / 9.3M~20.3M tokens 均出现过，与未触发区间重叠，**腾讯未公开固定阈值**，严禁前端推算剩余百分比）。
+- 数据链路两级：① 新版 converter.py（commit 03d600b）在流式/非流式两条上游错误路径记录 6004，自曝 `GET /api/rate_limit`（含 resetAt/resetLocal/remainingSec + usage.jsonl 滚动用量 + 账号昵称，只读零配额消耗）；② 旧版反代无该端点时，插件后端回退扫 Hermes 自身 `logs/errors.log(.1)` 尾部 4MB 的 6004 报文（纯被动）。`_workbuddy_rate_limit()` 优先①回退②，20s 内存缓存，挂在 `/quota` 的 workbuddy.rateLimit 与独立 `/api/plugins/token-stats/rate_limit`。
+- 前端：Chip Popover WorkBuddy 卡内 `RateLimitRow` 紧凑行（limited=红点呼吸+冷却倒计时 `⏳3h12m @22:11:33`，正常=绿点+5h请求数）；/quota 看板独立卡片（原始报文、5h 请求/tokens/429 次数/最近一次 429 四宫格、数据源标注）。倒计时按绝对值 resetAt 每渲染重算，不依赖后端快照 remainingSec。
+- 当前聊天模型与被限模型可能不同（用户切模型避限）：当前模型无 6004 记录时报「最近被限的模型」，字段 `model` 如实标注。
+- 观测数据源：`%LOCALAPPDATA%\codebuddy2openai\usage\usage.jsonl`（ts/model/ok/input_tokens/output_tokens/error），SQLite 不涉及。
+
 ## 关键机制（排障必读）
 - 用户插件后端代码被挂载的**硬性安全门**：插件名必须在 `config.yaml` 的 `plugins.enabled` 列表（GHSA-mcfc-hp25-cjv7）。漏掉 → 404。
 - 插件发现：扫 `<plugins root>/*/dashboard/manifest.json`，`api` 字段必须是 dashboard 目录内相对路径；`tab.hidden: true` 可只挂 API 不出标签页。

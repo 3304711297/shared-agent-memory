@@ -108,6 +108,99 @@ function getTextColor(pct) {
   return 'text-rose-400'
 }
 
+// ==================== 频率限制（code 6004）呈现 ====================
+
+// 剩余秒数 -> 「3h12m / 25m / 42s」
+function fmtCooldown(sec) {
+  if (sec == null) return '--'
+  if (sec <= 0) return '已恢复'
+  const h = Math.floor(sec / 3600)
+  const m = Math.floor((sec % 3600) / 60)
+  const s = sec % 60
+  if (h > 0) return `${h}h${String(m).padStart(2, '0')}m`
+  if (m > 0) return `${m}m${String(s).padStart(2, '0')}s`
+  return `${s}s`
+}
+
+// WorkBuddy 频率限制行：只呈现真实观测值，不虚构阈值/百分比
+function RateLimitRow({ rl, compact }) {
+  if (!rl) return null
+  const st = rl.state || 'unknown'
+  const obs = rl.observed || {}
+  const limited = st === 'limited'
+  const dot =
+    st === 'limited'
+      ? 'bg-rose-400 shadow-rose-400/50'
+      : st === 'ok'
+        ? 'bg-emerald-400 shadow-emerald-400/50'
+        : 'bg-zinc-500'
+  const textCls = limited ? 'text-rose-300' : st === 'ok' ? 'text-emerald-300/90' : 'text-(--ui-text-tertiary)'
+
+  // 实时倒计时：每 30s 自减一次，基于绝对值 resetAt 计算（不依赖后端快照的 remainingSec）
+  const [, setTick] = useState(0)
+  useEffect(() => {
+    if (!limited) return
+    const t = setInterval(() => setTick((v) => v + 1), 30000)
+    return () => clearInterval(t)
+  }, [limited])
+
+  let left = null
+  if (limited) {
+    const abs = rl.resetAt ? new Date(rl.resetAt).getTime() : null
+    if (abs) {
+      left = Math.max(0, Math.round((abs - Date.now()) / 1000))
+    } else if (rl.remainingSec != null) {
+      left = Math.max(0, rl.remainingSec)
+    }
+  }
+
+  return jsxs('div', {
+    className: cn(
+      'flex items-center justify-between gap-2',
+      compact ? 'text-[10px]' : 'text-[0.6875rem]'
+    ),
+    title: rl.message || rl.source || '上游频率限制（腾讯 code 6004）',
+    children: [
+      jsxs('div', {
+        className: 'flex items-center gap-1.5 min-w-0',
+        children: [
+          jsx('span', {
+            className: cn('w-1.5 h-1.5 rounded-full shrink-0', limited && 'animate-pulse', dot),
+          }),
+          jsx('span', {
+            className: 'text-(--ui-text-tertiary) shrink-0',
+            children: '频率限制',
+          }),
+          jsx('span', {
+            className: cn('font-mono truncate', textCls),
+            children: limited ? '已触发 · 冷却中' : st === 'ok' ? '正常' : st === 'offline' ? '网关离线' : '未知',
+          }),
+        ],
+      }),
+      jsxs('div', {
+        className: 'flex items-center gap-1.5 font-mono shrink-0',
+        children: [
+          limited && left != null
+            ? jsxs('span', {
+                className: 'text-rose-300 font-semibold',
+                children: ['⏳ ', fmtCooldown(left)],
+              })
+            : null,
+          limited && rl.resetLocal
+            ? jsx('span', { className: 'text-(--ui-text-tertiary)', children: `@${rl.resetLocal}` })
+            : null,
+          !limited && obs.reqs5h != null
+            ? jsxs('span', {
+                className: 'text-(--ui-text-tertiary)',
+                children: ['5h ', obs.reqs5h, '次'],
+              })
+            : null,
+        ],
+      }),
+    ],
+  })
+}
+
 // ==================== 状态栏 Chip 组件 ====================
 
 function AntigravityQuotaChip({ ctx }) {
@@ -152,7 +245,7 @@ function AntigravityQuotaChip({ ctx }) {
     account: '...',
     claude5h: 100,
     claudeWeekly: 100,
-    workbuddy: { status: 'offline', statusLabel: '未启动' },
+    workbuddy: { status: 'offline', statusLabel: '未启动', rateLimit: null },
   })
 
   const toggleFormat = (e) => {
@@ -185,7 +278,7 @@ function AntigravityQuotaChip({ ctx }) {
           activeAccount: data.activeAccount || data.account,
           claude5h: data.claudeQuota5h != null ? Math.round(data.claudeQuota5h) : 100,
           claudeWeekly: data.claudeQuotaWeekly != null ? Math.round(data.claudeQuotaWeekly) : 100,
-          workbuddy: data.workbuddy || { status: 'offline', statusLabel: '未启动' },
+          workbuddy: data.workbuddy || { status: 'offline', statusLabel: '未启动', rateLimit: null },
           degraded: !!data.degraded,
           degradedReason: data.degradedReason || '',
         })
@@ -759,6 +852,10 @@ function AntigravityQuotaChip({ ctx }) {
                       className: 'text-[0.625rem] text-amber-400/80 pt-0.5',
                       children: `⚠️ ${quotaData.workbuddy.usageError}`,
                     }),
+
+                  // 上游频率限制（code 6004）状态行
+                  quotaData.workbuddy.rateLimit &&
+                    jsx('div', { className: 'pt-0.5', children: jsx(RateLimitRow, { rl: quotaData.workbuddy.rateLimit, compact: true }) }),
                 ],
               }),
             ],
@@ -857,7 +954,7 @@ function QuotaPage({ ctx }) {
     account: '...',
     claude5h: 100,
     claudeWeekly: 100,
-    workbuddy: { status: 'offline', statusLabel: '未启动', note: '本地反代服务待机中 (端口 8787)' },
+    workbuddy: { status: 'offline', statusLabel: '未启动', note: '本地反代服务待机中 (端口 8787)', rateLimit: null },
   })
 
   const toggleFormat = () => {
@@ -889,7 +986,7 @@ function QuotaPage({ ctx }) {
           activeAccount: res.activeAccount || res.account,
           claude5h: res.claudeQuota5h != null ? Math.round(res.claudeQuota5h) : 100,
           claudeWeekly: res.claudeQuotaWeekly != null ? Math.round(res.claudeQuotaWeekly) : 100,
-          workbuddy: res.workbuddy || { status: 'offline', statusLabel: '未启动', note: '本地反代服务待机中' },
+          workbuddy: res.workbuddy || { status: 'offline', statusLabel: '未启动', note: '本地反代服务待机中', rateLimit: null },
           degraded: !!res.degraded,
           degradedReason: res.degradedReason || '',
         })
@@ -1442,6 +1539,66 @@ function QuotaPage({ ctx }) {
                         }, i)
                       ),
                     ],
+                  }),
+              ],
+            }),
+
+          // 上游频率限制（腾讯 code 6004）卡片
+          data.workbuddy.rateLimit &&
+            jsxs('div', {
+              className: cn(
+                'p-4 rounded-xl border flex flex-col gap-2',
+                data.workbuddy.rateLimit.state === 'limited'
+                  ? 'bg-rose-500/5 border-rose-500/25'
+                  : 'bg-black/20 border-white/5'
+              ),
+              children: [
+                jsxs('div', {
+                  className: 'flex items-center justify-between',
+                  children: [
+                    jsx('span', {
+                      className: 'text-xs font-semibold text-(--ui-text-secondary)',
+                      children: '上游频率限制（腾讯 code 6004）',
+                    }),
+                    jsx(RateLimitRow, { rl: data.workbuddy.rateLimit }),
+                  ],
+                }),
+                data.workbuddy.rateLimit.state === 'limited' &&
+                  data.workbuddy.rateLimit.message &&
+                  jsx('div', {
+                    className: 'text-[11px] leading-relaxed text-rose-300/90 font-mono break-all',
+                    children: data.workbuddy.rateLimit.message,
+                  }),
+                (() => {
+                  const obs = data.workbuddy.rateLimit.observed || {}
+                  if (!Object.keys(obs).length) return null
+                  return jsxs('div', {
+                    className: 'grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 border-t border-white/5',
+                    children: [
+                      ['近 5h 请求', obs.reqs5h != null ? obs.reqs5h : '—'],
+                      ['近 5h tokens', obs.tokens5h != null ? `${(obs.tokens5h / 1e6).toFixed(2)}M` : '—'],
+                      ['近 5h 429 次数', obs.err429_5h != null ? obs.err429_5h : '—'],
+                      ['最近一次 429', obs.last429Local || '—'],
+                    ].map(([label, val]) =>
+                      jsxs('div', {
+                        className: 'flex flex-col gap-0.5',
+                        children: [
+                          jsx('span', { className: 'text-[10px] text-(--ui-text-tertiary)', children: label }),
+                          jsx('span', { className: 'font-mono text-xs text-(--foreground)', children: String(val) }),
+                        ],
+                      })
+                    ),
+                  })
+                })(),
+                jsx('div', {
+                  className: 'text-[10px] text-(--ui-text-tertiary) pt-0.5',
+                  children:
+                    '腾讯未公开固定阈值：实测触发点随模型与窗口浮动（5h 请求 46~212 次、5h tokens 9.3M~20.3M 均出现过），故此处只报实测值，不推算剩余百分比。',
+                }),
+                data.workbuddy.rateLimit.source &&
+                  jsx('div', {
+                    className: 'text-[10px] text-(--ui-text-quaternary) font-mono',
+                    children: `数据源：${data.workbuddy.rateLimit.source}${data.workbuddy.rateLimit.observedAt ? ` · ${data.workbuddy.rateLimit.observedAt}` : ''}`,
                   }),
               ],
             }),

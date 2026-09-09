@@ -3,9 +3,9 @@
   "account": "2964251404@qq.com",
   "activeAccount": "2964251404@qq.com",
   "plan": "Google AI Pro",
-  "quota5h": 0,
-  "reset5h": "2026-09-07T17:32:19Z",
-  "quotaWeekly": 40.3,
+  "quota5h": 100,
+  "reset5h": "2026-09-09T16:25:27Z",
+  "quotaWeekly": 1.4,
   "resetWeekly": "2026-09-13T12:55:45Z",
   "claudeQuota5h": 100,
   "claudeQuotaWeekly": 100,
@@ -15,32 +15,19 @@
       "email": "2964251404@qq.com",
       "plan": "Google AI Pro",
       "priority": 10,
-      "quota5h": 0,
-      "reset5h": "2026-09-07T17:32:19Z",
-      "quotaWeekly": 40.3,
+      "quota5h": 100,
+      "reset5h": "2026-09-09T16:25:27Z",
+      "quotaWeekly": 1.4,
       "resetWeekly": "2026-09-13T12:55:45Z",
       "claudeQuota5h": 100,
       "claudeQuotaWeekly": 100,
       "isActive": true
-    },
-    {
-      "account": "jimygod114514@gmail.com",
-      "email": "jimygod114514@gmail.com",
-      "plan": "Google AI",
-      "priority": 10,
-      "quota5h": 100,
-      "reset5h": "2026-09-07T17:33:13Z",
-      "quotaWeekly": 0,
-      "resetWeekly": "2026-09-11T01:03:50Z",
-      "claudeQuota5h": 100,
-      "claudeQuotaWeekly": 100,
-      "isActive": false
     }
   ],
-  "accountsCount": 2,
+  "accountsCount": 1,
   "source": "Google 官方直连 (Hermes 内置)",
-  "updatedAt": "2026-09-07T15:58:15Z",
-  "updatedAtLocal": "23:58:15",
+  "updatedAt": "2026-09-09T11:26:54Z",
+  "updatedAtLocal": "19:26:54",
   "workbuddy": {
     "id": "workbuddy",
     "name": "WorkBuddy (codebuddy2openai)",
@@ -48,20 +35,20 @@
     "statusLabel": "运行中",
     "endpoint": "http://127.0.0.1:8787/v1",
     "modelsCount": 28,
-    "note": "账号「晚街」· 积分 2119/3909 (54.2%)",
+    "note": "账号「晚街」· 积分 1309/4109 (31.9%)",
     "usage": {
       "nickname": "晚街",
-      "total": 3909.0,
-      "remain": 2118.66000095,
-      "used": 1790.33999905,
-      "remainPercent": 54.2,
+      "total": 4109.0,
+      "remain": 1309.4400016499999,
+      "used": 2799.55999835,
+      "remainPercent": 31.9,
       "isPaidUser": false,
       "packages": [
         {
           "code": "TCACA_code_007_nzdH5h4Nl0",
-          "total": 2409.0,
-          "remain": 1118.66000095,
-          "used": 1290.33999905,
+          "total": 2609.0,
+          "remain": 309.44000165,
+          "used": 2299.55999835,
           "unit": "credits"
         },
         {
@@ -79,6 +66,24 @@
           "unit": "credits"
         }
       ]
+    },
+    "rateLimit": {
+      "model": "hy4-preview",
+      "state": "ok",
+      "resetAt": null,
+      "resetLocal": null,
+      "remainingSec": null,
+      "message": null,
+      "observed": {
+        "reqs5h": 179,
+        "reqs24h": 393,
+        "tokens5h": 3604729,
+        "tokens24h": 19818783,
+        "err429_5h": 41,
+        "last429Local": "09-09 16:17:34"
+      },
+      "source": "Hermes errors.log (无 6004)",
+      "observedAt": "19:26:54"
     }
   },
   "providers": [
@@ -92,38 +97,13 @@
       "windows": [
         {
           "label": "Gemini 5h 滚动额度",
-          "remaining": 0,
-          "reset": "2026-09-07T17:32:19Z"
+          "remaining": 100,
+          "reset": "2026-09-09T16:25:27Z"
         },
         {
           "label": "Gemini 每周总配额",
-          "remaining": 40.3,
+          "remaining": 1.4,
           "reset": "2026-09-13T12:55:45Z"
-        },
-        {
-          "label": "3P 协同池 (Claude/GPT)",
-          "remaining": 100,
-          "reset": null
-        }
-      ]
-    },
-    {
-      "id": "antigravity_jimygod114514@gmail.com",
-      "name": "Google AI",
-      "plan": "Google AI",
-      "account": "jimygod114514@gmail.com",
-      "status": "standby",
-      "priority": 10,
-      "windows": [
-        {
-          "label": "Gemini 5h 滚动额度",
-          "remaining": 100,
-          "reset": "2026-09-07T17:33:13Z"
-        },
-        {
-          "label": "Gemini 每周总配额",
-          "remaining": 0,
-          "reset": "2026-09-11T01:03:50Z"
         },
         {
           "label": "3P 协同池 (Claude/GPT)",
@@ -139,20 +119,20 @@
       "statusLabel": "运行中",
       "endpoint": "http://127.0.0.1:8787/v1",
       "modelsCount": 28,
-      "note": "账号「晚街」· 积分 2119/3909 (54.2%)",
+      "note": "账号「晚街」· 积分 1309/4109 (31.9%)",
       "usage": {
         "nickname": "晚街",
-        "total": 3909.0,
-        "remain": 2118.66000095,
-        "used": 1790.33999905,
-        "remainPercent": 54.2,
+        "total": 4109.0,
+        "remain": 1309.4400016499999,
+        "used": 2799.55999835,
+        "remainPercent": 31.9,
         "isPaidUser": false,
         "packages": [
           {
             "code": "TCACA_code_007_nzdH5h4Nl0",
-            "total": 2409.0,
-            "remain": 1118.66000095,
-            "used": 1290.33999905,
+            "total": 2609.0,
+            "remain": 309.44000165,
+            "used": 2299.55999835,
             "unit": "credits"
           },
           {
@@ -170,6 +150,24 @@
             "unit": "credits"
           }
         ]
+      },
+      "rateLimit": {
+        "model": "hy4-preview",
+        "state": "ok",
+        "resetAt": null,
+        "resetLocal": null,
+        "remainingSec": null,
+        "message": null,
+        "observed": {
+          "reqs5h": 179,
+          "reqs24h": 393,
+          "tokens5h": 3604729,
+          "tokens24h": 19818783,
+          "err429_5h": 41,
+          "last429Local": "09-09 16:17:34"
+        },
+        "source": "Hermes errors.log (无 6004)",
+        "observedAt": "19:26:54"
       }
     }
   ]

@@ -44,3 +44,6 @@ profiles/
 
 # 共享 topics 已是 NTFS junction（真源在 shared-agent-memory 仓库 main 分支），严禁跟踪
 memories/topics/
+
+# 09-09 memory rewrite backups (local only)
+memories/*.bak-20260909

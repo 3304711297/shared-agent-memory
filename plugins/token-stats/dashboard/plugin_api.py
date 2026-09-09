@@ -17,6 +17,7 @@ import logging
 import os
 import threading
 import time
+import datetime
 from pathlib import Path
 from typing import Any, Optional
 from concurrent.futures import ThreadPoolExecutor
@@ -144,6 +145,174 @@ def _stale_disk_cache() -> Optional[dict]:
         return None
 
 
+_rl_cache: Optional[dict] = None
+_rl_cache_time = 0.0
+RL_CACHE_TTL = 20  # seconds — log scanning is cheap but not free; panel polls every 15s
+
+
+def _workbuddy_rate_limit() -> dict[str, Any]:
+    """WorkBuddy(8787) 上游频率限制状态与滚动用量观测（只读，不发起任何探测请求）。
+
+    数据来源与优先级：
+      ① 反代自曝端点 http://127.0.0.1:8787/api/rate_limit（新版 converter.py 提供，
+         由真实上游 6004 报文落盘，最准）；
+      ② 回退：扫描 Hermes 自身 logs/errors.log(+.1) 中的 6004 报文
+         （老版构建没有 ① 时仍可用，纯被动解析，不消耗任何配额）。
+    滚动用量一律来自反代 usage.jsonl 的本地统计（近 5h / 24h）。
+
+    注意：腾讯侧并未公开固定阈值，实测「触发时的 5h 请求数」在 46~212 之间、
+    「5h token 量」在 9.3M~20.3M 之间均出现过，且与未触发区间存在重叠，
+    因此这里**只报实测值，不伪造百分比/阈值**。
+    """
+    global _rl_cache, _rl_cache_time
+    if _rl_cache is not None and (time.time() - _rl_cache_time) < RL_CACHE_TTL:
+        return dict(_rl_cache)
+
+    import re as _rl_re
+    import urllib.request as _u
+
+    chat = _read_current_chat_route()
+    model = chat.get("model") or ""
+    out: dict[str, Any] = {
+        "model": model,
+        "state": "unknown",
+        "resetAt": None,
+        "resetLocal": None,
+        "remainingSec": None,
+        "message": None,
+        "observed": {},
+        "source": None,
+    }
+
+    # ---------- ① 优先：反代自曝端点 ----------
+    try:
+        opener = _u.build_opener(_u.ProxyHandler({}))
+        with opener.open("http://127.0.0.1:8787/api/rate_limit", timeout=1.5) as r:
+            rl = json.loads(r.read().decode("utf-8"))
+        models = (rl or {}).get("models") or {}
+        entry = models.get(model) if model else None
+        if not entry and models:
+            entry = next(iter(models.values()))
+        if entry:
+            out.update(
+                state=entry.get("state") or "unknown",
+                resetAt=entry.get("resetAt"),
+                resetLocal=entry.get("resetLocal"),
+                remainingSec=entry.get("remainingSec"),
+                message=entry.get("message"),
+                source="codebuddy2openai /api/rate_limit",
+            )
+    except Exception:
+        pass
+
+    # ---------- ② 回退：解析 Hermes errors.log 的 6004 报文 ----------
+    if not out.get("resetAt"):
+        found: dict[str, Any] = {}
+        for name in ("errors.log.1", "errors.log"):
+            p = _hermes_home() / "logs" / name
+            if not p.exists():
+                continue
+            try:
+                size = p.stat().st_size
+                with open(p, "rb") as f:
+                    f.seek(max(0, size - 4 * 1024 * 1024))
+                    tail = f.read().decode("utf-8", errors="ignore")
+            except Exception:
+                continue
+            for m in _rl_re.finditer(
+                r"model=([\w.\-]+).*?\"code\":6004,\"msg\":\"([^\"]*?将在\s*"
+                r"(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})\s*UTC\+8\s*重置[^\"]*?)\"",
+                tail,
+            ):
+                try:
+                    ts = datetime.datetime.strptime(m.group(3), "%Y-%m-%d %H:%M:%S").replace(
+                        tzinfo=datetime.timezone(datetime.timedelta(hours=8))
+                    )
+                except Exception:
+                    continue
+                sec = ts.timestamp() - time.time()
+                if sec <= 0:
+                    continue  # 已过期，冷却结束
+                cand = {
+                    "model": m.group(1),
+                    "state": "limited",
+                    "resetAt": ts.isoformat(),
+                    "resetLocal": m.group(3)[11:],
+                    "remainingSec": int(sec),
+                    "message": m.group(2),
+                }
+                # 命中当前聊天模型的优先；否则取最近一次
+                if model and cand["model"] == model:
+                    found = cand
+                    break
+                if not found:
+                    found = cand
+        if found:
+            out.update(found)
+            out["source"] = "Hermes errors.log (6004 报文)"
+        elif out.get("source") is None:
+            out["state"] = "ok"
+            out["source"] = "Hermes errors.log (无 6004)"
+
+    # ---------- 滚动用量观测（usage.jsonl） ----------
+    try:
+        now_ms = time.time() * 1000
+        reqs5 = reqs24 = err5 = 0
+        tok5 = tok24 = 0
+        last429: Optional[float] = None
+        p = Path(os.environ.get("LOCALAPPDATA", "")) / "codebuddy2openai" / "usage" / "usage.jsonl"
+        if p.exists():
+            with open(p, "r", encoding="utf-8") as f:
+                for line in f:
+                    line = line.strip()
+                    if not line:
+                        continue
+                    try:
+                        rec = json.loads(line)
+                    except Exception:
+                        continue
+                    ts = rec.get("ts")
+                    if not ts or (now_ms - ts) > 24 * 3600 * 1000:
+                        continue
+                    if model and rec.get("model") != model:
+                        continue
+                    age5 = (now_ms - ts) <= 5 * 3600 * 1000
+                    if rec.get("ok"):
+                        reqs24 += 1
+                        tok24 += (rec.get("input_tokens") or 0) + (rec.get("output_tokens") or 0)
+                        if age5:
+                            reqs5 += 1
+                            tok5 += (rec.get("input_tokens") or 0) + (rec.get("output_tokens") or 0)
+                    elif rec.get("error") == "HTTP 429":
+                        if age5:
+                            err5 += 1
+                        if last429 is None or ts > last429:
+                            last429 = ts
+        out["observed"] = {
+            "reqs5h": reqs5,
+            "reqs24h": reqs24,
+            "tokens5h": tok5,
+            "tokens24h": tok24,
+            "err429_5h": err5,
+            "last429Local": (
+                time.strftime("%m-%d %H:%M:%S", time.localtime(last429 / 1000)) if last429 else None
+            ),
+        }
+    except Exception:
+        pass
+
+    if out.get("state") == "unknown" and out.get("observed"):
+        out["state"] = "limited" if out["observed"].get("err429_5h") else "ok"
+    try:
+        out["observedAt"] = time.strftime("%H:%M:%S")
+    except Exception:
+        pass
+    with _cache_lock:
+        _rl_cache = out
+        _rl_cache_time = time.time()
+    return out
+
+
 def check_workbuddy_status() -> dict[str, Any]:
     """Non-blocking check for local WorkBuddy / codebuddy2openai gateway (port 8787).
 
@@ -194,6 +363,11 @@ def check_workbuddy_status() -> dict[str, Any]:
                         base["usageError"] = usage.get("error", "unknown")
                 except Exception as exc:
                     base["usageError"] = f"积分获取失败: {exc}"
+                # 上游频率限制状态（只读，不消耗配额）
+                try:
+                    base["rateLimit"] = _workbuddy_rate_limit()
+                except Exception as exc:
+                    base["rateLimit"] = {"state": "unknown", "error": str(exc)}
                 return base
     except Exception:
         pass
@@ -206,6 +380,7 @@ def check_workbuddy_status() -> dict[str, Any]:
         "endpoint": endpoint,
         "modelsCount": 0,
         "note": "本地反代服务待机中 (端口 8787)",
+        "rateLimit": {"state": "offline"},
     }
 
 
@@ -464,6 +639,33 @@ def format_quota_markdown(data: dict) -> str:
     lines.append(f"- **网关状态**：`{wb_status}` · `{wb_note}`")
     lines.append("- **本地端点**：`http://127.0.0.1:8787/v1`")
 
+    rl = wb.get("rateLimit") or {}
+    if rl:
+        st = rl.get("state", "unknown")
+        icon = {"limited": "🔴", "ok": "🟢", "offline": "⚪"}.get(st, "⚪")
+        obs = rl.get("observed") or {}
+        if st == "limited":
+            bits = [f"{icon} **频率限制**：已触发（上游 code 6004）"]
+            if rl.get("resetLocal"):
+                bits.append(f"重置于 `{rl['resetLocal']}`")
+            if rl.get("remainingSec") is not None:
+                h, m2 = divmod(int(rl["remainingSec"]) // 60, 60)
+                bits.append(f"剩余 `{h}h{m2}m`")
+            lines.append("- " + " · ".join(bits))
+        else:
+            lines.append(f"- {icon} **频率限制**：{'正常' if st == 'ok' else '未知'}")
+        if rl.get("model"):
+            lines.append(f"- **监控模型**：`{rl['model']}`")
+        if obs:
+            lines.append(
+                f"- **近 5h 用量**：`{obs.get('reqs5h', 0)}` 次 / `{(obs.get('tokens5h') or 0)/1e6:.2f}M` tokens"
+                + (f" · 429 次数 `{obs.get('err429_5h', 0)}`" if obs.get("err429_5h") else "")
+            )
+            if obs.get("last429Local"):
+                lines.append(f"- **最近一次 429**：`{obs['last429Local']}`")
+        if rl.get("source"):
+            lines.append(f"- *限制状态数据源：{rl['source']}*")
+
     usage = wb.get("usage")
     if wb.get("status") == "online" and usage:
         pct = usage.get("remainPercent", 0)
@@ -482,6 +684,12 @@ def format_quota_markdown(data: dict) -> str:
 
     lines.append("\n*(输入 `/quota refresh` 可强制穿透刷新)*")
     return "\n".join(lines)
+
+
+@router.get("/rate_limit")
+async def rate_limit():
+    """WorkBuddy(8787) 上游频率限制状态与滚动用量观测（只读，不消耗配额）。"""
+    return _workbuddy_rate_limit()
 
 
 @router.get("/quota")
