@@ -17,3 +17,5 @@ Style: external-AI cross-review -> P0/P1/P2 spec; fixed scope, no opportunistic 
 serena purged.
 §
 Pitfalls: Desktop "session won't run" freeze = model switch injecting a user-role system msg + truncated retry rejected by gateway (upstream #94486); restart won't self-heal — SOP in shared lib topics/hermes-desktop-rewind-deadlock.md. Repo-local website/i18n/zh-Hans translations lag source (curator.md vs tools/skill_usage.py created_by=agent + adopt/ledger) — read source for behavior/defaults, never the translation.
+§
+Sessions: 归档只跑 upload_session.py --latest(严禁 --delete,用户自行删会话);Agent 删活跃会话 state.db 会崩,已两次事故(09-09)。
