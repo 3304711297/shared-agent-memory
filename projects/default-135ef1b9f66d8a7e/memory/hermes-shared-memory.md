@@ -18,3 +18,8 @@ hermes-agent（[[hermes-agent-install]]）与 ZCode **共享同一份记忆库**
 
 **Why:** 单一物理副本 + 单一共享分支彻底消除双端镜像漂移，切换 Agent 零同步成本。
 **How to apply:** 涉及持久事实写入本库时严格执行前置脱敏，写入后立即 git 推 main 闭环；勿再往 hermes home 的 topics 里复制共享内容（那已是 junction）。
+
+## 【09-09 实证】第二克隆漂移事故与处置
+- 发现 `D:\ai coding\GitRepos\shared-agent-memory` **第二克隆**（TUI 会话 20260909_115310_a7e8a4 经它提交推送 94991c1/76856db，导致真源端 push 被拒 non-fast-forward；会话经网关 tui_gateway 接入、state.db 无档案，仅 request_dump 可取证）。日常一律用 `%USERPROFILE%/.zcode/cli/memories` 真源，**严禁再用 GitRepos 副本提交**。
+- **recover SOP**：push 被拒时先 `git pull --rebase origin main` 再推（复现于 09-09，成功 e153b6b）；跨端取证顺序：GitHub events（推送账号）→ 提交是否签名（unsigned=git 客户端，web-flow=网页）→ 网关 request_dump 的 messages 反查命令路径 → reflog 判定本地从未有该提交。
+- 收口动作（09-09）：GitRepos 副本 fetch 后已与远端对齐，仅作快照不作为写入端；后续若再发现 GitRepos 副本产生新提交，按 recover SOP 回收并对齐真源。
