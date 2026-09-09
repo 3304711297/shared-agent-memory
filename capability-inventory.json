@@ -15,16 +15,16 @@
       "installed": [
         {
           "where": "ZCode cli/config.json mcp.servers（钉版，含防扩展清空保护参数）",
-          "version": "1.8.0"
+          "version": "1.9.0"
         },
         {
           "where": "ZCode 插件 claude-plugins-official（已补保护参数）",
-          "version": "1.8.0",
+          "version": "1.9.0",
           "sha": "45f187b1e3202c9f32ddba913be5d68751c3caa3"
         },
         {
           "where": "Hermes config.yaml mcp_servers（钉版，含保护参数）",
-          "version": "1.8.0"
+          "version": "1.9.0"
         }
       ],
       "claudeMarketplaceSha": {
@@ -196,7 +196,7 @@
       "installed": [
         {
           "where": "winget 用户级（5.1 系统内置不列入）",
-          "version": "7.6.5"
+          "version": "7.6.6"
         }
       ]
     },
@@ -451,7 +451,7 @@
       "installed": [
         {
           "where": "本地专属环境 %USERPROFILE%/.openviking/venv",
-          "version": "0.4.18"
+          "version": "0.4.19"
         }
       ]
     },
