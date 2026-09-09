@@ -1,7 +1,7 @@
 {
   "version": 2,
   "description": "本地能力组件清单（skill/mcp/plugin/工具核心的已装版本与上游源）。由 capability-upstream-watch 工作流每日比对远端源；本地源组件用 watch-capability.cmd 或任意 Agent 会话跑脚本比对。【维护铁律】升级或新装任何组件后，必须同步更新本清单并随共享库推 main，看门自动收口对应 Issue。",
-  "updatedAt": "2026-09-08",
+  "updatedAt": "2026-09-09",
   "components": [
     {
       "id": "chrome-devtools-mcp",
@@ -495,6 +495,7 @@
     }
   ],
   "notWatched": [
+    "【定向吸收/雷达源·不整装 2026-09-09】google-deepmind/science-skills：GDM 官方科研技能库（2659 Stars，Apache 2.0，基线 sha 28b8482/2026-09-08）。经五步评估：质量与权威性达标（40 skill、63 个 PEP 723 脚本、纯静态提示词不破坏 Prefix Cache、无 Token 倒挂，本机 uv 0.12.9 实测 arxiv 脚本跑通）；但整装会把技能池推至 125 项，违反二八瘦身铁律（~30-50 为宜），且科研生物域与当前主线（系统调优/代理/桌面工程/视频蒸馏）脱节，用户拍板不实装。已作为第 13 号雷达源写入 skill-plugin-resources.md，需要时只按需单拉单个 skill 目录。⛔ 永久禁用其中 predictingthepast（pickle.load 反序列化 GCS 下载的 .pkl 检查点=远程代码执行面 + 强依赖 jax）；凭据门槛：alphagenome/openalex 必需 key，clinvar/dbsnp/ncbi/pubmed/openfda 需 NCBI_API_KEY 提频",
     "【评估否决 2026-09-08】D4Vinci/Scrapling：Python自适应与反爬虫框架。经评估其MCP与本地无头浏览器与现有Exa独享检索及极简MCP终态倒挂，且重型浏览器依赖侵占C盘空间；日常油猴与系统调优工作流无常驻爬虫刚需，仅定性为按需Python脚本库，不予作为常驻MCP/技能引入看门",
     "【自研技能 2026-09-08】agentic-video-distill：基于 Gemini Agentic Video Understanding 架构的解耦蒸馏技能（双端实装，自包含执行器），属于用户自研工具体系，无公开上游，不纳入单独看门，已列入 protectedSkills 白名单",
     "【评估否决 2026-09-08】etherscan/skills：Etherscan 官方 Web3/EVM 链上分析套件（4项技能），强依赖未配置的 ETHERSCAN_API_KEY 凭据，且与当前系统调优/代理/桌面工程完全脱节，避免污染技能池注意力，不予引入",
