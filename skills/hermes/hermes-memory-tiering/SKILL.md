@@ -11,6 +11,16 @@ description: "Use when 内置记忆库顶格告警或需分层整理。低频迁
 - 内置限额在 config.yaml：`memory.memory_char_limit` / `memory.user_char_limit`（当前 3000/2000，以实机 config.yaml 为准）。系统提示里「99% — x/y chars」就是这两库的占用，**与 OpenViking 无关**——「记忆库满」永远是内置库顶格，不要往 provider 方向排查。
 - OpenViking（viking_remember / viking_search）无字符限额，按语义检索召回，是低频事实的正确去处。
 
+## 语言成本（09-09 实测，动手前必读）
+
+注入块的语言直接决定每轮开销：同义中文比英文贵约 **1.34x token**（o200k_base；同句 104 vs 80）。MEMORY.md 曾 49% 是汉字。
+
+**致命陷阱**：限额是 `memory_char_limit`（**字符**），成本是 token。同样 3000 字符，全中文 ≈2490 token，全英文 ≈615 token；但英文表达同样信息要约 2.5x 字符——**直接翻译必然撑爆限额**。正确顺序：先做减法（低频迁 OpenViking）压掉约 60%，再译英。改完必须实测字符数确认未超限。
+
+**不要为了省几十 token 反复改 SOUL.md**：它位于 cache 前缀最头部，每次改动失效其后整段前缀一次。
+
+详见共享库专题 `topics/prompt-language-token-cost.md`。
+
 ## 分层铁律（用户拍板）
 
 - 内置双库只留**高频必带**事实：身份、环境路径、安全铁律、活跃项目锚点。低频细节（单次排障记录、组件演进史、事件收尾）用 `viking_remember` 入 OpenViking。

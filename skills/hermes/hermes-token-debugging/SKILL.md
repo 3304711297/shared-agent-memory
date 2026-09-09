@@ -37,4 +37,16 @@ compression:
 - 用户习惯会话 ≥1M 即删 → `idle_compact_after_seconds` 无意义，prune 是核心杠杆；订阅缓存读倍率决定 prune 净收益（倍率≈免费时 prune 费用面倒挂，余量/质量收益仍在）。
 
 ## 验证方法
-改后重算同口径四指标：单次中位/均值/P90（基线 328,714/422,973/817,333）、缓存命中率（基线 95.9%）；prune 提交应呈"罕见大批次"节奏，间隔 <10min 说明触发线偏小。
+改后重算同口径四指标：单次中位/均值/P90、缓存命中率；prune 提交应呈"罕见大批次"节奏，间隔 <10min 说明触发线偏小。
+
+## 口径铁律（2026-09-08 实测纠正，勿再犯）
+1. **Gateway usage.db 的 `input_tokens` 已含 `cache_read_tokens`**（全量口径）。命中率 = `SUM(cache_read)/SUM(input)`，**不是** `cr/(input+cr)`——后者会算出 48.5% 的假值，真值 94.1%。
+2. **`total_tokens` ≈ `input+output`**，不含 cache 加算。
+3. **usage.db 只保留 4 天**（id 从 1 连续，滚动清库）。任何跨周对比都会失真；改前/改后基线必须同库同窗口内取。
+4. 2026-09-08 实测（Hermes UA，n=7848，09-04~08）：med 164,138 / mean 194,205 / P90 404,215 / cache 94.1%。**旧记录的 328,714/422,973/817,333 基线出自更早的已清库数据，不可复现，勿再引用。**
+5. 归因 bg-review 效果用 `state.db` 的 `session_model_usage.task` 字段（按 task 记账），比在 usage.db 里按 UA/时间切片可靠。
+
+## 已兑现效果（2026-09-08 实测）
+- **background_review 关闭确实生效**：最后一条记录停在 09-07 23:53（禁用后），09-08 全天为 0，无 fail-open 复活。
+- 其历史占比：calls 17.8%、input 28.8%、cache_read **37.5%**；每调用均值 133,781 cache_read vs 主流量 49,999（2.7x）。剔除后每调用均值 71,201→54,957（**-22.8%**）。
+- **proactive_prune 至今仍是 `proactive_prune_tokens: 0`（从未开启）** —— 最大的那个杠杆一分钱没兑现。

@@ -156,6 +156,36 @@ COPY failed: file not found in build context
 
 ---
 
+## Node.js 20 Deprecation Warnings (Annotations)
+
+**Signature (warning annotation on every run, often under a job like `hygiene`):**
+```
+Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24
+```
+
+**Root cause:** the action's own `action.yml` declares `runs.using: node20`; GitHub force-runs it on node24 and emits the annotation. The workflow's `node-version` is irrelevant.
+
+**Diagnose which actions are stale (SHA→tag→runtime):**
+```bash
+# 1. Map pinned SHA to tag
+git ls-remote --tags https://github.com/<owner>/<action> | grep <sha-prefix>
+# (use the ^{} peeled SHA line when the tag is annotated)
+
+# 2. Check the action's runtime at that tag / at latest
+gh api repos/<owner>/<action>/contents/action.yml?ref=<tag> --jq '.content' | base64 -d | grep using:
+```
+`composite` actions have no node runtime — never a source of this warning.
+
+**Fix:** bump to the node24 release, keeping 40-char SHA pinning. Verified targets (2026-09):
+- `softprops/action-gh-release` v2.0.8(node20) → v3.0.3 = `efb35369e0ad2afab669f228072c1b0d510eae64`
+- `pnpm/action-setup` v4.0.0(node20) → v6.1.0 = `ea17c68df8912ef543352723c149a84f56e3d413` (packageManager auto-detect contract unchanged)
+- `actions/checkout` v4.2.2(node20) → v7.0.1 = `3d3c42e5aac5ba805825da76410c181273ba90b1`
+- `actions/setup-python` v5.4.0(node20) → v7.0.0 = `5fda3b95a4ea91299a34e894583c3862153e4b97` (v7 removed the `pip-install` input)
+
+**Gotchas:** checkout v7 blocks fork checkout in `pull_request_target`/`workflow_run` (breaking vs v4). A green run can still carry warning annotations — verify elimination via the commit's `check-runs` → `output.annotations_url`, not just `conclusion`.
+
+---
+
 ## Auto-Fix Decision Tree
 
 ```
