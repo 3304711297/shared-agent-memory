@@ -10,18 +10,18 @@ metadata:
 ## 一、 EasyCLIProxyAPI 多账号调度与会话粘性机制
 
 ### 1. 优先级桶与轮询规则（实测排查结论）
-- **现象复盘**：在 EasyCLIProxyAPI 控制台开启「轮询 (Round Robin)」后，系统仍持续将所有请求分发给 `jimygod114514@gmail.com`，而 Pro 账号 `2964251404@qq.com` 额度完全未动。
+- **现象复盘**：在 EasyCLIProxyAPI 控制台开启「轮询 (Round Robin)」后，系统仍持续将所有请求分发给 `<account-A>@gmail.com`，而 Pro 账号 `<account-B>@qq.com` 额度完全未动。
 - **内核机制剖析**：
   - EasyCLIProxyAPI 内核（`selector.go`）在执行 `RoundRobinSelector` 时，**优先级（Priority）是第一维度的硬分组（Priority Bucket）**。
-  - 调度器仅在**当前最高优先级的凭据池**内执行轮询。之前 `jimygod` 优先级为 `10`，`2964251404` 优先级为 `9`。由于 `10 > 9`，最高优先级池中仅有单个凭据，导致轮询退化为单号单打。
-  - **解决方案**：在 `D:\EasyCLIProxyAPI\auth\antigravity-2964251404@qq.com.json` 中将 `priority` 同步调高至 `10`，使两账号平级并存入同一轮询池。
+  - 调度器仅在**当前最高优先级的凭据池**内执行轮询。之前 `<account-A>` 优先级为 `10`，`<account-B>` 优先级为 `9`。由于 `10 > 9`，最高优先级池中仅有单个凭据，导致轮询退化为单号单打。
+  - **解决方案**：在 `D:\EasyCLIProxyAPI\auth\antigravity-<account-B>@qq.com.json` 中将 `priority` 同步调高至 `10`，使两账号平级并存入同一轮询池。
 
 ### 2. 轮询分流与会话粘性（Session-Affinity）联动
 - **配置基准**：
   - `routing.strategy: round-robin`（轮询）
   - `routing.session-affinity: true`（开启会话粘性，TTL: 1h）
 - **端到端实测验证**：
-  - **新会话轮询**：发起独立新会话时，网关触发 `session-affinity: LCP cache miss, new binding`，分别交替绑定 `jimygod114514@gmail.com` 与 `2964251404@qq.com`。
+  - **新会话轮询**：发起独立新会话时，网关触发 `session-affinity: LCP cache miss, new binding`，分别交替绑定 `<account-A>@gmail.com` 与 `<account-B>@qq.com`。
   - **会话粘性命中**：同一会话后续多轮对话触发 `session-affinity: LCP cache hit`，请求牢牢锁定在初始选定的凭据上，最大化命中 Google Prompt/KV Cache，保障首字延迟与生成吞吐。
 
 ---
@@ -29,7 +29,7 @@ metadata:
 ## 二、 token-stats 配额监控插件全面升级
 
 ### 1. 历史缺陷
-- 原 `fetch_quota.py` 及 `plugin_api.py` 采用 `os.listdir` 按文件名升序盲取首个 `antigravity-*.json`，导致状态栏 Popover 弹窗永远只显示排在首位的 `2964251404@qq.com`（99.8% 假象），无法反映底层网关实际调用 `jimygod`（周额度已消耗至 2.4%）的真实状况。
+- 原 `fetch_quota.py` 及 `plugin_api.py` 采用 `os.listdir` 按文件名升序盲取首个 `antigravity-*.json`，导致状态栏 Popover 弹窗永远只显示排在首位的 `<account-B>@qq.com`（99.8% 假象），无法反映底层网关实际调用 `<account-A>`（周额度已消耗至 2.4%）的真实状况。
 
 ### 2. 后端核心重构 (`plugins/token-stats/dashboard/plugin_api.py`)
 - **动态活跃路由感知**：
