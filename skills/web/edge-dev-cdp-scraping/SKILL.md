@@ -7,7 +7,7 @@ description: Use when scraping login-walled pages via signed-in Edge.
 
 ## 环境事实（本机，2026-09-08 实证）
 - Edge Dev 路径：`C:\Program Files (x86)\Microsoft\Edge Dev\Application\msedge.exe`
-- 默认 profile：`C:\Users\VOS-User\AppData\Local\Microsoft\Edge Dev\User Data`（扩展在 `Default\Extensions`，基线 10 个）
+- 默认 profile：`%LOCALAPPDATA%\Microsoft\Edge Dev\User Data`（扩展在 `Default\Extensions`，基线 10 个）
 - chrome-devtools MCP 默认连 **Chrome** 的 `DevToolsActivePort`；本机 Chrome 未运行 → "Could not connect to Chrome"。本机主力是 Edge Dev。
 - 组策略 `RemoteDebuggingAllowed` / `DevToolsRemoteDebuggingAllowed` 均为 1（允许），**排除策略封锁**。
 

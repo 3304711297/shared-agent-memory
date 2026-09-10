@@ -12,8 +12,8 @@ Protocol for coordinating Hermes with external coding agents running on the same
 ## 1. Observing External Agent Progress [ARCHIVED — ZCode decommissioned 2026-09-09]
 
 When checking the live progress, active subagents, or tool traces of ZCode:
-- Target database: `C:/Users/VOS-User/.zcode/cli/db/db.sqlite`
-- **Lock-Free Read Protocol**: Always connect with SQLite URI read-only mode (`sqlite3.connect("file:C:/Users/VOS-User/.zcode/cli/db/db.sqlite?mode=ro", uri=True)`). Opening in standard read-write mode risks colliding with the external agent's active write transactions, causing `sqlite3.OperationalError: database is locked`.
+- Target database: `%USERPROFILE%/.zcode/cli/db/db.sqlite`
+- **Lock-Free Read Protocol**: Always connect with SQLite URI read-only mode (`sqlite3.connect("file:%USERPROFILE%/.zcode/cli/db/db.sqlite?mode=ro", uri=True)`). Opening in standard read-write mode risks colliding with the external agent's active write transactions, causing `sqlite3.OperationalError: database is locked`.
 - Hierarchy:
   - `session`: identify active task (`time_updated DESC`), parent-child delegation trees (`task_type='subagent_child'`, `parent_id`).
   - `message` & `part`: inspect `type='tool'` (tool status: running/completed/error) and `type='reasoning'` (Chain of Thought).
@@ -31,7 +31,7 @@ Launch a lightweight polling daemon in the background with process exit notifica
 
 ```python
 terminal(
-    command="python C:/Users/VOS-User/AppData/Local/hermes/scripts/watch_zcode.py --session <SESSION_ID>",
+    command="python %LOCALAPPDATA%/hermes/scripts/watch_zcode.py --session <SESSION_ID>",  # script retired with ZCode; pattern remains canonical for any external long-runner
     background=True,
     notify=True  # Critical: triggers autonomous turn wake-up when process exits
 )
@@ -99,7 +99,7 @@ When orchestrating internal specialized bots (profiles under `~/.hermes/profiles
 - **CLI Creation Pattern**: Always use `hermes profile create --clone-from default <name> --description "<role description>"` to inherit current gateway endpoints, `.env` API keys, and essential baseline configurations.
 - **Shared Memory Junction (CRITICAL)**: Newly created profiles instantiate an isolated `memories/` directory. To prevent memory fragmentation and state divergence, immediately establish an NTFS Directory Junction pointing `memories/topics` directly to the shared memory single physical source of truth:
   ```cmd
-  cmd.exe /c "mklink /J C:\Users\VOS-User\AppData\Local\hermes\profiles\<name>\memories\topics C:\Users\VOS-User\.zcode\cli\memories\projects\default-135ef1b9f66d8a7e\memory"
+  cmd.exe /c "mklink /J \"%LOCALAPPDATA%\hermes\profiles\<name>\memories\topics\" \"D:\ai coding\GitRepos\shared-agent-memory\projects\default-135ef1b9f66d8a7e\memory\""
   ```
 - **Specialized SOUL.md Contracts**: Replace the default prompt in `profiles/<name>/SOUL.md` with explicit role boundaries: Identity, Mandates & Rules, Cross-Bot Handoffs (@mentions / Agent Inbox protocols), and Shared Memory Protocols.
 - **In-Session Handoffs**: Use `@<bot-name>` in conversation turns for synchronous task handoffs, or rely on Agent Inbox for asynchronous batch deliveries.
@@ -118,10 +118,10 @@ Because Windows does not cascade process termination to grandchildren upon GUI w
    When cleaning up or automating post-exit shutdown, never blindly `taskkill /IM node.exe` (which kills user web servers, Vite, Next.js). Target exclusively verified MCP signatures:
    - Node MCPs: `commandline` matching `chrome-devtools-mcp`, `desktop-commander`, `context7-mcp`.
    - Python MCPs: `serena.exe` and `cmdline` containing `serena`.
-   - Implementation: canonical safe reaper at `C:/Users/VOS-User/AppData/Local/hermes/scripts/cleanup_agent_orphans.py`, orchestrated by background daemon `C:/Users/VOS-User/AppData/Local/hermes/scripts/agent_guard.py` (2.5s debounce after all Agent GUIs close).
+   - Implementation: canonical safe reaper at `%LOCALAPPDATA%/hermes/scripts/cleanup_agent_orphans.py`, orchestrated by background daemon `%LOCALAPPDATA%/hermes/scripts/agent_guard.py` (2.5s debounce after all Agent GUIs close).
 - **OpenViking Automated Demand-Wake & Zero-Focus-Steal Invariant**:
   - OpenViking is the shared dual-agent memory service, completely decoupled from OS auto-start (`Startup/OpenVikingGateway.vbs` removed) and free of desktop shortcut clutter.
-  - **Native GUI PATH Shim**: Hermes' OpenViking plugin runs `shutil.which("openviking-server")` on 1933 connection drops. A compiled Go binary with `-H=windowsgui` PE subsystem header at `C:/Users/VOS-User/.openviking/shim-bin/openviking-server.exe` (placed first on User PATH) intercepts the call and transparently boots the full lazy-gateway stack without spawning `cmd.exe` or flashing console windows.
+  - **Native GUI PATH Shim**: Hermes' OpenViking plugin runs `shutil.which("openviking-server")` on 1933 connection drops. A compiled Go binary with `-H=windowsgui` PE subsystem header at `%USERPROFILE%/.openviking/shim-bin/openviking-server.exe` (placed first on User PATH) intercepts the call and transparently boots the full lazy-gateway stack without spawning `cmd.exe` or flashing console windows.
   - **Zero Console-Allocation / Zero Focus-Steal (CRITICAL)**: In background supervisor or auto-sleep routines running under `pythonw.exe` (such as `openviking_lazy_gateway.py` or `agent_guard.py`), NEVER invoke console executables (`netstat.exe`, `taskkill.exe`) without `CREATE_NO_WINDOW = 0x08000000`. On Windows, running console apps from a windowless process forces the OS to allocate a transient `conhost.exe` host window; even a 10ms transient console creation steals foreground input focus, disrupting active typing and destroying uncommitted IME candidate buffers. Always terminate processes via native `psutil` (`proc.kill()` / Win32 `TerminateProcess`) and query ports via `psutil.net_connections()`.
   - **Tri-phase Lifecycle**: Demand-wake on first memory access -> 2-minute idle auto-sleep (100% VRAM release) -> automatic termination upon Agent GUI close via `agent_guard`.
 
@@ -163,7 +163,7 @@ When the user issues a directive to delete or archive the active session, or whe
 When aligning workspace boundaries between Hermes Desktop and ZCode:
 - **Root Anchor**: ZCode's default workspace directory is anchored to `D:\ai coding` (with `dataBaseDir` and internal spaces residing within).
 - **Hermes Desktop Project Tool**: Anchor the active Hermes session to the same root via `desktop_project(action='create', name='ai coding', path='D:/ai coding')` (or `switch`). This aligns the desktop sidebar file-tree without manual path hopping.
-- **Persistent Shortcut WorkingDir**: On Windows, update the desktop shortcut `C:\Users\VOS-User\Desktop\Hermes Agent.lnk` with `WorkingDirectory = 'D:\ai coding'` via `WScript.Shell`. This ensures fresh GUI launches default directly to the shared coding root.
+- **Persistent Shortcut WorkingDir**: On Windows, update the desktop shortcut `%USERPROFILE%\Desktop\Hermes Agent.lnk` with `WorkingDirectory = 'D:\ai coding'` via `WScript.Shell`. This ensures fresh GUI launches default directly to the shared coding root.
 
 ### Cross-Repo Knowledge Lock Invariant (`tweakbyjie` <-> `youshouldknow`)
 When maintaining interdependent repositories where one locks the documentation commit of the other (e.g. `tweakbyjie/tools/knowledge.lock.json` tracking `youshouldknow`):

@@ -16,13 +16,13 @@ description: Use when searching user browser bookmarks or saved tools.
 
 ```bash
 # 关键词检索（支持在标题、URL、所属文件夹中匹配）
-python C:/Users/VOS-User/AppData/Local/hermes/scripts/search_bookmarks.py "<关键词>" -n 20
+python %LOCALAPPDATA%/hermes/scripts/search_bookmarks.py "<关键词>" -n 20
 
 # 按文件夹过滤搜索
-python C:/Users/VOS-User/AppData/Local/hermes/scripts/search_bookmarks.py "<关键词>" -f "AI" -n 10
+python %LOCALAPPDATA%/hermes/scripts/search_bookmarks.py "<关键词>" -f "AI" -n 10
 
 # 查看主要分类文件夹分布
-python C:/Users/VOS-User/AppData/Local/hermes/scripts/search_bookmarks.py --folders
+python %LOCALAPPDATA%/hermes/scripts/search_bookmarks.py --folders
 ```
 
 ### 2. 意图/自然语言语义检索 (OpenViking)

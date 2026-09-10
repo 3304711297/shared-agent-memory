@@ -88,7 +88,7 @@
 ## 📂 资产目录全景
 
 ```text
-C:\Users\VOS-User\AppData\Local\hermes/  (Repo Root: branch hermes)
+%LOCALAPPDATA%\hermes/  (Repo Root: branch hermes)
 ├── README.md               # 本自述文件、资产分层说明与灾备恢复指南
 ├── .gitignore              # 严格白名单过滤，仅跟踪记忆、技能与插件
 ├── SOUL.md                 # Hermes 核心人设与交互底座规范
