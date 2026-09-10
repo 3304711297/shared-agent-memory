@@ -17,8 +17,8 @@ metadata:
    - 报错信息：`dial tcp 127.0.0.1:3067: connectex: No connection could be made because the target machine actively refused it.`
    - 根因在于客户端重启瞬间本地代理（3067）短时不可达或网络中断，导致启动探活直接抛错。
 2. **上游服务断连（EOF 与单账号冷却）**：
-   - 主账号 `antigravity-jimygod114514@gmail.com.json` 此前已因配额耗尽进入 104 小时冷却；
-   - 更新前后备用号 `antigravity-2964251404@qq.com.json` 短暂遭遇 Google 上游接口断连（`err=Post "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse": EOF`），从而抛出 500/503 错误。
+   - 主账号 `antigravity-<account-A>@gmail.com.json` 此前已因配额耗尽进入 104 小时冷却；
+   - 更新前后备用号 `antigravity-<account-B>@qq.com.json` 短暂遭遇 Google 上游接口断连（`err=Post "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse": EOF`），从而抛出 500/503 错误。
 3. **便携版更新机制与单实例锁**：
    - 便携版通过临时目录 `EasyCLIProxyAPI-updater.exe` 就地替换 `EasyCLIProxyAPI.exe`、`core-version.txt` 和 `portable-app.json`；外层安装目录名保持旧名 `D:\EasyCLIProxyAPI-v0.2.71-Windows-amd64` 属于正常现象；
    - 若旧主进程未完全退出即拉起新 exe，会碰撞命名互斥锁 `Local\EasyCLIProxyAPI-instance-{hash}` 或 18080 端口占用提示。
