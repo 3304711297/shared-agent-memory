@@ -51,7 +51,8 @@
 - [Codebuddy2openai Upstream Benchmark](codebuddy2openai-upstream-benchmark.md) — 09-05 对标 EasyCLIProxyAPI **四批全部落地推送（11 提交 CI 全绿，遗留清零）**：XSS/单实例锁/双主题/TTFT/用量统计/更新检查/auto_start_proxy/双端拆分/CSP+pytest 24 用例+CI 加测试；批次4 经 [[Hermes Side Verification Handoff]] 验收合流
 - [Cross-Agent Handshake Mechanism](cross-agent-handshake-mechanism.md) — Hermes×ZCode 双端互等握手机制全量实测（watch_zcode.py 自动唤醒 / 握手文件反向等待 / 时序铁律 / CLI 与 GUI 会话体系辨析）
 - [Hermes Side Verification Handoff](hermes-side-verification-handoff.md) — 用户可令 Hermes 旁路接手全量构建/代码审查/验收：ZCode 只做秒级底线检查+本地提交保护现场+冻结树待验收，验收反馈回来后再推送；被取消的子代理可能已写完文件，先审计残骸
-- [Hermes Ecosystem Evaluation and YSK Sync](hermes-ecosystem-evaluation-and-ysk-sync.md) — 社区 Hermes 资源评估（1/2/4/6 安装价值辨析）与 3/5（高阶指令速查+官方生态进阶）整理落入 youshouldknow 项目全流程闭环（commit abcc8f8，CI 全绿部署）
+- [Hermes Atlas Absorption](hermes-atlas-absorption.md) — ksimback/hermes-ecosystem 吸收总账（09-09/10）：第 19 号索引源（项目地图+research/ 约 70 篇按需取读，不实装）；三篇蒸馏入 ysk（记忆三层架构/技能机制渐进披露/多 Profile 编队，CI 四绿）；安全红旗六类清单+PASS/WARN/REJECT 分级并入评估技能；RAG 管线/bot 重建/星数快照明确排除
+- [Hermes Ecosystem Evaluation And Ysk Sync](hermes-ecosystem-evaluation-and-ysk-sync.md) — 社区 Hermes 资源评估（1/2/4/6 安装价值辨析）与 3/5（高阶指令速查+官方生态进阶）整理落入 youshouldknow 项目全流程闭环
 - [Telegram Channel Emoegg Ops](telegram-channel-emoegg-ops.md) — 用户个人 Telegram 频道 @emoegg（蛋总的圈）专属 Bot (@HermesAgentByjieBot) 管理体系、主号风控背景与 14 款纯暗黑精选主题落地
 - [Hermes Studio Evaluation and Desktop Theming](hermes-studio-evaluation-and-desktop-theming.md) — 第三方客户端 hermes-studio 深度评估（插件SDK缺失/数据库裂脑/双重代理）与官方桌面端 ZCode Dark 沉浸式 IDE 主题 1:1 复刻落地
 - [Hermes Search Provider Exa and Cleanup](hermes-search-provider-exa-and-cleanup.md) — Hermes 检索与抽取全量锁定为 Exa 独享（EXA_API_KEY 固化于 .env）、解构 EasyCLIProxyAPI 网关 gemini-web-search 伪联网本质、清理 duckduckgo 与 searxng 冗余技能
