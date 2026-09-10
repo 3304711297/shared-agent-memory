@@ -10,7 +10,7 @@ Memory (09-07): provider=openviking is ADDITIVE, not a replacement — built-in 
 §
 Tools: only pure-read tools may batch concurrently; terminal/patch/write_file/memory/delegate_task are sequential barriers. Never claim batched terminal calls ran in parallel. config.yaml needs no restart (re-read at spawn). PS5.1: .ps1/.cmd with CJK need UTF-8 BOM else mojibake; bash swallows $_/$var in inline powershell -Command, use .ps1 files. vision_analyze first call may fail, retry once.
 §
-Style: external-AI cross-review -> P0/P1/P2 spec; fixed scope, no opportunistic refactors. Local-First: full CI-equivalent + Release build locally, then push; never block the main session on CI. Config change: list candidates + defaults + cost, wait for the call.
+Style: external-AI cross-review -> P0/P1/P2 spec; fixed scope, no opportunistic refactors. Local-First: full CI-equivalent + Release build locally, then push; never block the main session on CI. Config change: list candidates + defaults + cost, wait for the call. User keeps reasoning_effort=ultra (global default) — not a candidate for optimization.
 §
 serena removed; "(std v1beta 404s)" -> OpenViking.
 §
