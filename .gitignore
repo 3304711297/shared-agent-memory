@@ -46,6 +46,9 @@ profiles/
 desktop-plugins/token-stats/direct-quota.json
 desktop-plugins/token-stats/ovlm-state.json
 
+# skills 运行时台账（含本机绝对路径，2026-09-10 起移出跟踪，仅存本地）
+skills/.curator_ledger.jsonl
+
 # 共享 topics 已是 NTFS junction（真源在 shared-agent-memory 仓库 main 分支），严禁跟踪
 memories/topics/
 
