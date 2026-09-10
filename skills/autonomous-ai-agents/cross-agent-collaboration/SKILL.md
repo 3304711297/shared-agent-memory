@@ -1,13 +1,15 @@
 ---
 name: cross-agent-collaboration
-description: Use when coordinating Hermes with ZCode or other agents.
+description: Use when coordinating Hermes with external agents or tools, or handling parallel multi-repo fan-out. (ZCode client was decommissioned 2026-09-09; sections 1-2 remain as archived protocol reference.)
 ---
 
 # Cross-Agent Collaboration & Autonomous Handoff
 
-Protocol for coordinating Hermes with ZCode or external coding agents running on the same host, observing task progress, and executing automated handoffs without user babysitting.
+> **⚠️ Status (2026-09-09): ZCode client has been fully decommissioned and uninstalled.** Sections 1–2 (SQLite observation, watch_zcode.py daemon) are **archived protocol reference** — the target database `~/.zcode/cli/db/db.sqlite` no longer exists. Section 3's parallel-execution invariants remain fully ACTIVE for delegate_task fan-out and multi-repo work.
 
-## 1. Observing External Agent Progress
+Protocol for coordinating Hermes with external coding agents running on the same host, observing task progress, and executing automated handoffs without user babysitting.
+
+## 1. Observing External Agent Progress [ARCHIVED — ZCode decommissioned 2026-09-09]
 
 When checking the live progress, active subagents, or tool traces of ZCode:
 - Target database: `C:/Users/VOS-User/.zcode/cli/db/db.sqlite`
@@ -16,7 +18,7 @@ When checking the live progress, active subagents, or tool traces of ZCode:
   - `session`: identify active task (`time_updated DESC`), parent-child delegation trees (`task_type='subagent_child'`, `parent_id`).
   - `message` & `part`: inspect `type='tool'` (tool status: running/completed/error) and `type='reasoning'` (Chain of Thought).
 
-## 2. Autonomous Handoff & Session Watching
+## 2. Autonomous Handoff & Session Watching [ARCHIVED — watcher script retired with ZCode]
 
 When instructed to "wait for the other agent to finish and then take over / review":
 
@@ -41,7 +43,7 @@ terminal(
 4. The runtime notification (`[PROCESS EXITED]`) automatically re-enters the conversation and awakens Hermes.
 5. **OS Notification Independence**: The `notify=True` parameter in Hermes relies strictly on the internal application event bus (Process Exit Event detected by the Hermes runtime gateway). It is 100% self-contained within Hermes and is completely independent of Windows 11 OS Toast Notifications (which can remain globally disabled in Windows Settings without affecting agent wake-up).
 
-## 3. Takeover & Parallel Execution (Multi-Repo & Multi-Task Fan-out)
+## 3. Takeover & Parallel Execution (Multi-Repo & Multi-Task Fan-out) [ACTIVE]
 
 Upon being awakened by a handoff signal, or when presented with multi-repository / multi-domain audit findings and fix items:
 - **Fork-First 强约束门禁（Anti-Serialization Rule）**：只要用户输入包含 **2 个及以上独立诉求/目标**（如“一边修 A 一边查 B”、跨仓库、多文件批量检查、或修复+深度分析），**第一动作必须坚决直接调用 `delegate_task` 并行分派，严禁在主会话单线程串行起跑**；主会话仅做调度派发、最终结果聚合与用户决策，绝不允许中间繁杂数据与试探命令卡死主会话。
@@ -89,7 +91,7 @@ ZCode's runtime lives at `D:/zcode/resources/glm/zcode.cjs`; `node zcode.cjs -p 
   - **Unified Dual-Agent Retirement & Cleanup Closure**:
     1. *Dual-End Pruning*: Remove target directories on both Hermes and ZCode, followed by physical cleanup of `skills-archived/`.
     2. *Shared Memory & Index*: Record the slimming/retirement rationale in `topics/<name>.md` and update `topics/MEMORY.md`.
-    3. *Dual Commit & Push*: Commit and push `main` on `~/.zcode/cli/memories` (and `hermes` on `~/.hermes` if Hermes profile state changed).
+    3. *Dual Commit & Push*: Commit and push `main` on `D:/ai coding/GitRepos/shared-agent-memory` (and `hermes` on `~/.hermes` if Hermes profile state changed).
     4. *CI & OpenViking Re-Index*: Confirm GitHub Actions CI passes green, and ensure `sync_shared_memory_openviking.py` synchronizes the new commit.
 
 ## 8. Hermes Native Bot Mode & Multi-Profile Orchestration

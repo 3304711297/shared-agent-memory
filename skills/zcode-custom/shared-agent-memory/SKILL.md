@@ -1,20 +1,21 @@
 ---
 name: shared-agent-memory
-description: 读写双 Agent (Hermes & ZCode) 共享的跨端长期记忆库——单一物理真源，变动自动提交推送至 GitHub main 分支
+description: 管理 Hermes 单 Agent 的长期记忆库（真源 D:/ai coding/GitRepos/shared-agent-memory，变动自动提交推送至 GitHub main 分支；历史遗留 zcode 分支为 ZCode 会话归档，只读）
 ---
 
-# 双 Agent 共享记忆库 (shared-agent-memory)
+# Hermes 共享记忆库 (shared-agent-memory)
 
-共享记忆库**只有一份**（2026-09-05 单一真源架构，取代旧双分支镜像模型）：物理位于 ZCode 记忆目录，本 Agent 的 `memories/topics` 是指向它的 NTFS 目录联接（junction）——**读写 topics 即读写共享库本体**，切换 Agent 零拷贝零拉取。
+共享记忆库**只有一份**（2026-09-05 单一真源架构）：物理真源位于 `D:/ai coding/GitRepos/shared-agent-memory`（2026-09-09 起，取代旧 .zcode 内路径），本 Agent 的 `memories/topics` 是指向它的 NTFS 目录联接（junction）——**读写 topics 即读写共享库本体**，零拷贝零拉取。ZCode 客户端已于 2026-09-09 拆除，本库现为 Hermes 单 Agent 所有；历史跨端内容保留作归档。
 
 ## 位置与结构
 
-- **共享库物理真源**：`%USERPROFILE%\.zcode\cli\memories\projects\default-135ef1b9f66d8a7e\memory\`
+- **共享库物理真源**：`D:/ai coding/GitRepos/shared-agent-memory/`（git 仓库根）
 - **远程仓库**：`https://github.com/3304711297/shared-agent-memory.git`，**共享内容在 `main` 分支（默认分支）**
-- **本 Agent 视角（等价路径）**：`%LOCALAPPDATA%\hermes\memories\topics\` = 上述真源的 junction
+- **本 Agent 视角（等价路径）**：`%LOCALAPPDATA%\hermes\memories\topics\` = 上述真源 `projects\default-135ef1b9f66d8a7e\memory\` 的 junction
   - 共享库索引：`topics\MEMORY.md`
   - 单条专题记忆：`topics\<name>.md`（YAML frontmatter + 正文）
-- **分支归属**：`main`=双端共享 | `zcode`=ZCode 专属 | `hermes`=Hermes 专属（home 白名单备份，已排除 topics）
+- **⚠️ 仓库内 `topics/` 目录是遗留副本陷阱（2026-09-09 实证）**：共享库仓库根下的 `topics/` 已被 .gitignore（`/topics`）且内容陈旧，与真源内容不一致——它不再是任何 junction。**读写必须走 git 跟踪的 `projects/default-135ef1b9f66d8a7e/memory/` 路径**；误写仓库内 topics/ 的改动永远不会进 git。判别方法：对两路径同名文件 `git hash-object` 比对，或看 `.gitignore` 是否含 `/topics`。
+- **分支归属**：`main`=记忆真源 | `hermes`=Hermes home 专属备份 | `zcode`=ZCode 会话归档（在姊妹私有仓 shared-agent-sessions，只读历史）
 - **Hermes 专属记忆（不放共享库）**：`memories\USER.md`（用户画像常驻）、根 `memories\MEMORY.md`（系统与环境常驻索引）→ 随 hermes 分支备份
 
 ## 何时读取
@@ -27,7 +28,7 @@ description: 读写双 Agent (Hermes & ZCode) 共享的跨端长期记忆库—�
 
 用户说出值得跨会话保留的事实（偏好、纠正、环境约束、项目进展、拍板决定）时：
 
-1. **跨 Agent 事实** → 在 `topics/` 新建/更新专题 `.md`，并同步更新 `topics/MEMORY.md` 索引；frontmatter 格式：
+1. **跨会话事实** → 在 `topics/` 新建/更新专题 `.md`，并同步更新 `topics/MEMORY.md` 索引；frontmatter 格式：
 
 ```markdown
 ---
@@ -48,7 +49,7 @@ metadata:
 4. **【铁律】修改或新增记忆后，当轮结束前自动静默推送**（无需等待用户提醒；直连失败回退 `-c http.proxy=http://127.0.0.1:3067`）：
    - 共享内容（topics/ 即共享库，git 仓库在真源目录）：
    ```bash
-   git -C "%USERPROFILE%/.zcode/cli/memories" add -A && git -C "%USERPROFILE%/.zcode/cli/memories" commit -m "memory: <简述>" && git -C "%USERPROFILE%/.zcode/cli/memories" push origin main
+   git -C "D:/ai coding/GitRepos/shared-agent-memory" add -A && git -C "D:/ai coding/GitRepos/shared-agent-memory" commit -m "memory: <简述>" && git -C "D:/ai coding/GitRepos/shared-agent-memory" push origin main
    ```
    - Hermes 专属内容（自家 home 仓库）：
    ```bash
@@ -67,7 +68,8 @@ metadata:
   - **提炼模型 (VLM)**：`http://127.0.0.1:18080/v1`（gemini-3.8-flash，用于秒级提炼 L0 摘要与 L1 大纲）
   - **共享记忆挂载点**：`viking://resources/shared-memory/`（客观知识库命名空间，严格与 Agent/User 私有偏好隔离）
 - **双驱动自动同步**：
-  1. **即时驱动（Git Hook）**：在 `%USERPROFILE%\.zcode\cli\memories\.git\hooks\post-commit` 与 `post-merge` 挂接 `sync_shared_memory_openviking.py`，ZCode 或本地有 commit 产生时秒级增量触发 OpenViking 重新扫描；
+  1. **Git Hook 即时驱动**：真源仓库 `D:/ai coding/GitRepos/shared-agent-memory/.git/hooks/post-commit` 与 `post-merge` 挂接 `sync_shared_memory_openviking.py`，本地 commit 产生时秒级增量触发 OpenViking 重新扫描；
+     - **2026-09-09 修复记录**：仓库迁移到 D 盘时 hooks 目录被重置，双钩子丢失导致 OpenViking 同步静默滞后（事发时 last_synced_commit 落后 5 笔提交）。已重建两钩子（bash 后台触发，已 chmod +x）。若发现同步滞后，手动补跑：`python %LOCALAPPDATA%/hermes/scripts/sync_shared_memory_openviking.py`，滞后判据：`%USERPROFILE%/.openviking/last_synced_commit.txt` 中的 SHA ≠ 真源仓库 HEAD；
   2. **兜底探活**：`sync_shared_memory_openviking.py` 记录 `last_synced_commit.txt`，对比 Git HEAD SHA 自动防漂移。
 - **Hermes 召回约束（防 Prompt 污染与注意力稀释）**：
   - `OPENVIKING_RECALL_LIMIT=3`

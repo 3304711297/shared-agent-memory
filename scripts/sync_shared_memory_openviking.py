@@ -13,10 +13,10 @@ import urllib.request
 from pathlib import Path
 
 OPENVIKING_URL = os.environ.get("OPENVIKING_ENDPOINT", "http://127.0.0.1:1933")
-SHARED_TOPICS_DIR = Path("C:/Users/VOS-User/.zcode/cli/memories/projects/default-135ef1b9f66d8a7e/memory")
+SHARED_TOPICS_DIR = Path("D:/ai coding/GitRepos/shared-agent-memory/projects/default-135ef1b9f66d8a7e/memory")
 OV_EXE = Path("C:/Users/VOS-User/.openviking/venv/Scripts/ov.exe")
 STATE_FILE = Path("C:/Users/VOS-User/.openviking/last_synced_commit.txt")
-GIT_DIR = Path("C:/Users/VOS-User/.zcode/cli/memories")
+GIT_DIR = Path("D:/ai coding/GitRepos/shared-agent-memory")
 
 
 def is_openviking_online() -> bool:

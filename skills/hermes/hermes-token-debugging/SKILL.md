@@ -10,7 +10,7 @@ description: Use when analyzing Hermes token usage or cache behavior.
    - 表 `usage_events`；`user_agent` 区分客户端：`OpenAI/Python*`=Hermes，`ZCode/*`=ZCode
    - `cached_tokens` ≡ `cache_read_tokens`（逐条相等，任取其一）
 2. Hermes `state.db`：`session_model_usage`（`task` 字段单独记账 background_review）、`sessions`
-3. ZCode `.zcode/cli/db/db.sqlite`：`model_usage` / `turn_usage`
+3. ~~ZCode `.zcode/cli/db/db.sqlite`：`model_usage` / `turn_usage`~~ **[已失效 2026-09-09 — ZCode 拆除，此数据源不存在]**
 4. 请求转储 `hermes/sessions/*.json`：`request.body.tools` 可直接数工具 schema
 
 ## 口径陷阱（曾三次踩坑，勿重蹈）

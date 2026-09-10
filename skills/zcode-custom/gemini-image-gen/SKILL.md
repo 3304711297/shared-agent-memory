@@ -12,7 +12,7 @@ Use this skill to generate high quality images using Google's Imagen 3 / Gemini 
 Run the generation script via Bash tool:
 
 ```bash
-python "C:/Users/VOS-User/.zcode/skills/gemini-image-gen/generate_image.py" --prompt "YOUR_DETAILED_PROMPT" --aspect-ratio "1:1" --output-dir "generated_images"
+python "%LOCALAPPDATA%/hermes/skills/zcode-custom/gemini-image-gen/generate_image.py" --prompt "YOUR_DETAILED_PROMPT" --aspect-ratio "1:1" --output-dir "generated_images"
 ```
 
 ### Parameters

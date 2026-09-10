@@ -30,5 +30,5 @@ Use this skill to ensure all Chinese technical documentation, articles, and user
 A helper formatting script is bundled in this skill:
 
 ```bash
-python "C:/Users/VOS-User/.zcode/skills/chinese-copywriting/pangu_format.py" path/to/document.md -i
+python "%LOCALAPPDATA%/hermes/skills/zcode-custom/chinese-copywriting/pangu_format.py" path/to/document.md -i
 ```

@@ -1,8 +1,8 @@
-Communicate in Chinese by default. Primary agent Hermes (ZCode backup). Shared lib shared-agent-memory (3304711297/shared-agent-memory): main = dual-end truth; sanitize before writing (no machine usernames or raw profile paths — use %USERPROFILE%/%LOCALAPPDATA%; redact credentials); push main that turn, Hermes-only -> `hermes` branch.
+Communicate in Chinese by default. Hermes is the SOLE primary agent (ZCode client fully decommissioned 09-09; only future use = ZCode promo-token reverse proxy into Hermes). Shared lib shared-agent-memory (3304711297/shared-agent-memory): main = truth, source D:/ai coding/GitRepos/shared-agent-memory; sanitize before writing (no machine usernames or raw profile paths — use %USERPROFILE%/%LOCALAPPDATA%; redact credentials); push main that turn, Hermes-only -> `hermes` branch.
 §
 Skill-First gate: before any edit or command on feature work, bug fix, review, refactor, architecture or 3+ step task, check for a matching skill; if hit, skill_view and follow it exactly — never substitute model intuition (classic fail: hand-rolled sleep poll instead of `gh pr checks --watch`).
 §
-Cross-agent handoff: waiting on ZCode/external long runners requires backgrounding `watch_zcode.py(notify=True)` — no verbal promise then sleeping; wake on process exit.
+Long-runner rule: waiting on any external long runner requires backgrounding (background=True, notify=True) — no verbal promise then sleeping; wake on process exit. (watch_zcode.py retired 09-09 with ZCode decommission.)
 §
 Fork-First: several independent asks -> dispatch parallel subagents first (3-6/batch, max 10), never serially. Never edit user's workspace source while they build.
 §
