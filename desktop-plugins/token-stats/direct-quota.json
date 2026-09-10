@@ -4,7 +4,7 @@
   "activeAccount": "2964251404@qq.com",
   "plan": "Google AI Pro",
   "quota5h": 100,
-  "reset5h": "2026-09-09T16:25:27Z",
+  "reset5h": "2026-09-09T18:15:37Z",
   "quotaWeekly": 1.4,
   "resetWeekly": "2026-09-13T12:55:45Z",
   "claudeQuota5h": 100,
@@ -16,18 +16,31 @@
       "plan": "Google AI Pro",
       "priority": 10,
       "quota5h": 100,
-      "reset5h": "2026-09-09T16:25:27Z",
+      "reset5h": "2026-09-09T18:15:37Z",
       "quotaWeekly": 1.4,
       "resetWeekly": "2026-09-13T12:55:45Z",
       "claudeQuota5h": 100,
       "claudeQuotaWeekly": 100,
       "isActive": true
+    },
+    {
+      "account": "jimygod114514@gmail.com",
+      "email": "jimygod114514@gmail.com",
+      "plan": "Google AI",
+      "priority": 10,
+      "quota5h": 100,
+      "reset5h": "2026-09-09T18:15:42Z",
+      "quotaWeekly": 0,
+      "resetWeekly": "2026-09-11T01:03:50Z",
+      "claudeQuota5h": 100,
+      "claudeQuotaWeekly": 100,
+      "isActive": false
     }
   ],
-  "accountsCount": 1,
+  "accountsCount": 2,
   "source": "Google 官方直连 (Hermes 内置)",
-  "updatedAt": "2026-09-09T11:26:54Z",
-  "updatedAtLocal": "19:26:54",
+  "updatedAt": "2026-09-09T13:17:09Z",
+  "updatedAtLocal": "21:17:09",
   "workbuddy": {
     "id": "workbuddy",
     "name": "WorkBuddy (codebuddy2openai)",
@@ -35,20 +48,20 @@
     "statusLabel": "运行中",
     "endpoint": "http://127.0.0.1:8787/v1",
     "modelsCount": 28,
-    "note": "账号「晚街」· 积分 1309/4109 (31.9%)",
+    "note": "账号「晚街」· 积分 1247/4109 (30.3%)",
     "usage": {
       "nickname": "晚街",
       "total": 4109.0,
-      "remain": 1309.4400016499999,
-      "used": 2799.55999835,
-      "remainPercent": 31.9,
+      "remain": 1246.54000169,
+      "used": 2862.45999831,
+      "remainPercent": 30.3,
       "isPaidUser": false,
       "packages": [
         {
           "code": "TCACA_code_007_nzdH5h4Nl0",
           "total": 2609.0,
-          "remain": 309.44000165,
-          "used": 2299.55999835,
+          "remain": 246.54000169,
+          "used": 2362.45999831,
           "unit": "credits"
         },
         {
@@ -68,22 +81,22 @@
       ]
     },
     "rateLimit": {
-      "model": "hy4-preview",
-      "state": "ok",
-      "resetAt": null,
-      "resetLocal": null,
-      "remainingSec": null,
-      "message": null,
+      "model": "glm-5.3-flash",
+      "state": "limited",
+      "resetAt": "2026-09-09T15:31:49+00:00",
+      "resetLocal": "23:31:49",
+      "remainingSec": 8079,
+      "message": "{\"code\":6004,\"msg\":\"您的使用量已超出频率限制，将在 2026-09-09 23:31:49 UTC+8 重置，您也可以切换其他模型继续使用。\",\"requestId\":\"93ca0937-317d-4b04-939c-072f04da2d98\"}",
       "observed": {
-        "reqs5h": 179,
-        "reqs24h": 393,
-        "tokens5h": 3604729,
-        "tokens24h": 19818783,
-        "err429_5h": 41,
-        "last429Local": "09-09 16:17:34"
+        "reqs5h": 133,
+        "reqs24h": 302,
+        "tokens5h": 3594183,
+        "tokens24h": 8703097,
+        "err429_5h": 0,
+        "last429Local": null
       },
-      "source": "Hermes errors.log (无 6004)",
-      "observedAt": "19:26:54"
+      "source": "codebuddy2openai /api/rate_limit",
+      "observedAt": "21:17:09"
     }
   },
   "providers": [
@@ -98,12 +111,37 @@
         {
           "label": "Gemini 5h 滚动额度",
           "remaining": 100,
-          "reset": "2026-09-09T16:25:27Z"
+          "reset": "2026-09-09T18:15:37Z"
         },
         {
           "label": "Gemini 每周总配额",
           "remaining": 1.4,
           "reset": "2026-09-13T12:55:45Z"
+        },
+        {
+          "label": "3P 协同池 (Claude/GPT)",
+          "remaining": 100,
+          "reset": null
+        }
+      ]
+    },
+    {
+      "id": "antigravity_jimygod114514@gmail.com",
+      "name": "Google AI",
+      "plan": "Google AI",
+      "account": "jimygod114514@gmail.com",
+      "status": "standby",
+      "priority": 10,
+      "windows": [
+        {
+          "label": "Gemini 5h 滚动额度",
+          "remaining": 100,
+          "reset": "2026-09-09T18:15:42Z"
+        },
+        {
+          "label": "Gemini 每周总配额",
+          "remaining": 0,
+          "reset": "2026-09-11T01:03:50Z"
         },
         {
           "label": "3P 协同池 (Claude/GPT)",
@@ -119,20 +157,20 @@
       "statusLabel": "运行中",
       "endpoint": "http://127.0.0.1:8787/v1",
       "modelsCount": 28,
-      "note": "账号「晚街」· 积分 1309/4109 (31.9%)",
+      "note": "账号「晚街」· 积分 1247/4109 (30.3%)",
       "usage": {
         "nickname": "晚街",
         "total": 4109.0,
-        "remain": 1309.4400016499999,
-        "used": 2799.55999835,
-        "remainPercent": 31.9,
+        "remain": 1246.54000169,
+        "used": 2862.45999831,
+        "remainPercent": 30.3,
         "isPaidUser": false,
         "packages": [
           {
             "code": "TCACA_code_007_nzdH5h4Nl0",
             "total": 2609.0,
-            "remain": 309.44000165,
-            "used": 2299.55999835,
+            "remain": 246.54000169,
+            "used": 2362.45999831,
             "unit": "credits"
           },
           {
@@ -152,22 +190,22 @@
         ]
       },
       "rateLimit": {
-        "model": "hy4-preview",
-        "state": "ok",
-        "resetAt": null,
-        "resetLocal": null,
-        "remainingSec": null,
-        "message": null,
+        "model": "glm-5.3-flash",
+        "state": "limited",
+        "resetAt": "2026-09-09T15:31:49+00:00",
+        "resetLocal": "23:31:49",
+        "remainingSec": 8079,
+        "message": "{\"code\":6004,\"msg\":\"您的使用量已超出频率限制，将在 2026-09-09 23:31:49 UTC+8 重置，您也可以切换其他模型继续使用。\",\"requestId\":\"93ca0937-317d-4b04-939c-072f04da2d98\"}",
         "observed": {
-          "reqs5h": 179,
-          "reqs24h": 393,
-          "tokens5h": 3604729,
-          "tokens24h": 19818783,
-          "err429_5h": 41,
-          "last429Local": "09-09 16:17:34"
+          "reqs5h": 133,
+          "reqs24h": 302,
+          "tokens5h": 3594183,
+          "tokens24h": 8703097,
+          "err429_5h": 0,
+          "last429Local": null
         },
-        "source": "Hermes errors.log (无 6004)",
-        "observedAt": "19:26:54"
+        "source": "codebuddy2openai /api/rate_limit",
+        "observedAt": "21:17:09"
       }
     }
   ]

@@ -650,14 +650,14 @@
     "created_by": null,
     "last_patched_at": "2026-09-07T16:26:12.898641+00:00",
     "last_reused_patch_generation": 4,
-    "last_used_at": "2026-09-09T10:02:38.865479+00:00",
-    "last_viewed_at": "2026-09-09T10:02:38.862479+00:00",
+    "last_used_at": "2026-09-09T12:10:19.915889+00:00",
+    "last_viewed_at": "2026-09-09T12:10:19.913889+00:00",
     "patch_count": 4,
     "patch_generation": 4,
     "pinned": false,
     "state": "active",
-    "use_count": 42,
-    "view_count": 41
+    "use_count": 43,
+    "view_count": 42
   },
   "hermes-agent-skill-authoring": {
     "archived_at": null,
@@ -1263,16 +1263,16 @@
     "archived_at": null,
     "created_at": "2026-09-03T07:18:03.731518+00:00",
     "created_by": null,
-    "last_patched_at": "2026-09-06T03:34:01.561764+00:00",
+    "last_patched_at": "2026-09-09T15:18:25.923452+00:00",
     "last_reused_patch_generation": 2,
-    "last_used_at": "2026-09-09T10:33:55.279616+00:00",
-    "last_viewed_at": "2026-09-09T10:33:55.277616+00:00",
-    "patch_count": 2,
-    "patch_generation": 2,
+    "last_used_at": "2026-09-09T14:57:45.973741+00:00",
+    "last_viewed_at": "2026-09-09T14:57:45.970740+00:00",
+    "patch_count": 4,
+    "patch_generation": 4,
     "pinned": false,
     "state": "active",
-    "use_count": 120,
-    "view_count": 120
+    "use_count": 121,
+    "view_count": 121
   },
   "sherlock": {
     "archived_at": null,
@@ -1310,14 +1310,14 @@
     "created_by": "agent",
     "last_patched_at": "2026-09-07T14:22:31.667909+00:00",
     "last_reused_patch_generation": 4,
-    "last_used_at": "2026-09-09T03:53:42.429934+00:00",
-    "last_viewed_at": "2026-09-09T03:53:42.425948+00:00",
+    "last_used_at": "2026-09-09T14:57:46.984146+00:00",
+    "last_viewed_at": "2026-09-09T14:57:46.981641+00:00",
     "patch_count": 4,
     "patch_generation": 4,
     "pinned": false,
     "state": "active",
-    "use_count": 9,
-    "view_count": 9
+    "use_count": 10,
+    "view_count": 10
   },
   "smart-web-crawler": {
     "archived_at": null,
@@ -1340,14 +1340,14 @@
     "created_by": null,
     "last_patched_at": null,
     "last_reused_patch_generation": 0,
-    "last_used_at": "2026-09-09T04:17:28.733665+00:00",
-    "last_viewed_at": "2026-09-09T04:17:28.730675+00:00",
+    "last_used_at": "2026-09-09T15:25:46.836129+00:00",
+    "last_viewed_at": "2026-09-09T15:25:46.834128+00:00",
     "patch_count": 0,
     "patch_generation": 0,
     "pinned": false,
     "state": "active",
-    "use_count": 5,
-    "view_count": 5
+    "use_count": 6,
+    "view_count": 6
   },
   "tauri-desktop-development": {
     "archived_at": null,
@@ -1505,14 +1505,14 @@
     "created_by": "installed",
     "last_patched_at": null,
     "last_reused_patch_generation": 0,
-    "last_used_at": "2026-09-07T09:33:50.608382+00:00",
-    "last_viewed_at": "2026-09-07T09:33:50.605382+00:00",
+    "last_used_at": "2026-09-09T14:02:18.530389+00:00",
+    "last_viewed_at": "2026-09-09T14:02:18.527389+00:00",
     "patch_count": 0,
     "patch_generation": 0,
     "pinned": false,
     "state": "active",
-    "use_count": 2,
-    "view_count": 2
+    "use_count": 3,
+    "view_count": 3
   },
   "windows-crash-diagnostics": {
     "archived_at": null,

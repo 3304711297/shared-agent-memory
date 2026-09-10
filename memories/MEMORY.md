@@ -4,18 +4,16 @@ Windows: Karing proxy 127.0.0.1:3067 (Karing itself 1666). 3067 listens only wit
 §
 WorkBuddy = codebuddy2openai reverse proxy 127.0.0.1:8787/v1 (Tauri v2: multi-acct, credits, tray, Hermes write). Ops detail -> OpenViking.
 §
-Hardware: RTX 4070 Laptop 8GB + 24GB; models/runtime junctioned to D:. D:\HermesModels: bge-m3=OV embedding(18082), MiniCPM5-2B + Qwen3.5-9B chat (R1-7B deleted 09-09, bench worst). OpenViking venv on-demand, sleeps 2min idle. MCP: chrome-devtools (--autoConnect, connect-only) + deepwiki.
-§
-(std v1beta 404s)
+Hardware: RTX 4070 Laptop 8GB + 24GB; models/runtime junctioned to D:. D:\HermesModels: bge-m3=OV embedding(18082), MiniCPM5-2B + Qwen3.5-9B chat. OpenViking venv on-demand, sleeps 2min idle. MCP: chrome-devtools (--autoConnect, connect-only) + deepwiki.
 §
 Memory (09-07): provider=openviking is ADDITIVE, not a replacement — built-in MEMORY.md/USER.md (3000/2000 CHARS) still inject in full every turn. Low-frequency facts -> viking_remember; built-in keeps high-frequency only. Near limit: SUBTRACT, never raise the cap. 09-09: rewritten to English (1525->740 tok); CJK costs 1.10x on Gemini's own tokenizer (measured via zero-quota countTokens) vs 1.34x on o200k, while the char cap counts chars.
 §
-Tools: only pure-read tools (read_file/search_files/web_search/web_extract/skill_view/skills_list/session_search/vision_analyze) may go concurrently; terminal/patch/write_file/memory/delegate_task are sequential barriers, one at a time (shared persistent shell by design). Never call batched terminal calls "parallel" in thinking/reports/summaries — false claim, as serious as fake execution. config.yaml needs no restart (re-read at spawn).
+Tools: only pure-read tools may batch concurrently; terminal/patch/write_file/memory/delegate_task are sequential barriers. Never claim batched terminal calls ran in parallel. config.yaml needs no restart (re-read at spawn). PS5.1: .ps1/.cmd with CJK need UTF-8 BOM else mojibake; bash swallows $_/$var in inline powershell -Command, use .ps1 files. vision_analyze first call may fail, retry once.
 §
 Style: external-AI cross-review -> P0/P1/P2 spec; fixed scope, no opportunistic refactors. Local-First: full CI-equivalent + Release build locally, then push; never block the main session on CI. Config change: list candidates + defaults + cost, wait for the call.
 §
-serena purged.
+serena removed; "(std v1beta 404s)" -> OpenViking.
 §
 Pitfalls: Desktop "session won't run" freeze = model switch injecting a user-role system msg + truncated retry rejected by gateway (upstream #94486); restart won't self-heal — SOP in shared lib topics/hermes-desktop-rewind-deadlock.md. Repo-local website/i18n/zh-Hans translations lag source (curator.md vs tools/skill_usage.py created_by=agent + adopt/ledger) — read source for behavior/defaults, never the translation.
 §
-Sessions: 归档只跑 upload_session.py --latest(严禁 --delete,用户自行删会话);Agent 删活跃会话 state.db 会崩,已两次事故(09-09)。
+ZCode decommissioned (09-09): client+config+sessions wiped; SOUL/USER/skills/shared-lib fully de-dualized; shared lib source = D:/ai coding/GitRepos/shared-agent-memory; ZCode sessions in shared-agent-sessions zcode branch; sole tie = promo tokens via zcode-api proxy. Full change list -> viking card zcode-decommissioned.
