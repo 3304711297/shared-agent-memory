@@ -40,7 +40,7 @@ metadata:
 18. **JulienTant/blogwatcher-cli** — https://github.com/JulienTant/blogwatcher-cli ：本地 `research/blogwatcher` 的上游（31 Stars，2026-05 后停更，仅作溯源用）。
 
 **Hermes 专用生态地图类（2026-09-09 评审收录，按需检索不实装）**
-19. **ksimback/hermes-ecosystem（Hermes Atlas）** — https://github.com/ksimback/hermes-ecosystem （站点 https://hermesatlas.com ）：社区维护的 Hermes 生态项目地图（1229 Stars，bot 自动重建，全量 249 个项目、质量过滤收录 80+，分 12 类：Core/GUI 工作台/技能库/插件/记忆/多智能体/部署/集成/开发工具/领域应用/指南）。亮点：对 25★+ 仓库做过安全审查（`repos/security-review.md`，5 个 WARN：hermes-CCC 与 vessel-browser 有 curl-pipe-bash 安装器、gladiator 有硬编码凭据，使用前先审脚本）；找"某类 Hermes 工具是否存在/哪个成熟"先查它。注意：ECOSYSTEM.md 是 2026-04 快照（星数滞后），实时数据看网站 API；`data/repos.json` 为活数据。基线 sha `bebd922`（2026-09-09）。
+19. **ksimback/hermes-ecosystem（Hermes Atlas）** — https://github.com/ksimback/hermes-ecosystem （站点 https://hermesatlas.com ）：社区维护的 Hermes 生态项目地图（1229 Stars，bot 自动重建，全量 249 个项目、质量过滤收录 80+，分 12 类：Core/GUI 工作台/技能库/插件/记忆/多智能体/部署/集成/开发工具/领域应用/指南）。亮点：对 25★+ 仓库做过安全审查（`repos/security-review.md`，5 个 WARN：hermes-CCC 与 vessel-browser 有 curl-pipe-bash 安装器、gladiator 有硬编码凭据，使用前先审脚本）；找"某类 Hermes 工具是否存在/哪个成熟"先查它。注意：ECOSYSTEM.md 是 2026-04 快照（星数滞后），实时数据看网站 API；`data/repos.json` 为活数据。另含 `research/` 约 70 篇研究文档（2026-04~09 每周 release digest 约 25 篇单篇 40-60KB；实战攻略：多 Agent 团队编队/Telegram 部署/Skills 机制原理/记忆指南/Operator 手册/橙皮书全文等），即其 RAG 聊天机器人的知识库源，按需 `web_extract` 单篇取读（raw.githubusercontent.com 直连），09-09 仍在更新。基线 sha `bebd922`（2026-09-09）。
 
 **索引库规模（2026-09-09 实查）**：15 个 GitHub 技能源合计约 **1,467 个可拉取 SKILL.md**（ECC 898 / hermes-agent 199 / knowledge-work-plugins 212 / science-skills 40 / mattpocock 37 / claude-plugins-official 31 / anthropics 20 / ponytail 13 / gemini-skills 3 等），全部可访问、无归档或禁用；本地实装 84 项，采撷率约 5.7%，符合二八瘦身铁律（技能池控制在 30-50 项为宜，按需从本索引单拉）。第 19 号源 Atlas 为项目地图（不含 SKILL.md），不计入技能源计数。
 
