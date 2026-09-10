@@ -128,13 +128,23 @@ function RateLimitRow({ rl, compact }) {
   const st = rl.state || 'unknown'
   const obs = rl.observed || {}
   const limited = st === 'limited'
+  // 反代 a404e80 起三态：limited=冷却中 / expired=曾限过已恢复 / ok=从未被限
+  const expired = st === 'expired'
   const dot =
-    st === 'limited'
+    limited
       ? 'bg-rose-400 shadow-rose-400/50'
+      : expired
+        ? 'bg-amber-400 shadow-amber-400/50'
+        : st === 'ok'
+          ? 'bg-emerald-400 shadow-emerald-400/50'
+          : 'bg-zinc-500'
+  const textCls = limited
+    ? 'text-rose-300'
+    : expired
+      ? 'text-amber-300/90'
       : st === 'ok'
-        ? 'bg-emerald-400 shadow-emerald-400/50'
-        : 'bg-zinc-500'
-  const textCls = limited ? 'text-rose-300' : st === 'ok' ? 'text-emerald-300/90' : 'text-(--ui-text-tertiary)'
+        ? 'text-emerald-300/90'
+        : 'text-(--ui-text-tertiary)'
 
   // 实时倒计时：每 30s 自减一次，基于绝对值 resetAt 计算（不依赖后端快照的 remainingSec）
   const [, setTick] = useState(0)
@@ -173,7 +183,15 @@ function RateLimitRow({ rl, compact }) {
           }),
           jsx('span', {
             className: cn('font-mono truncate', textCls),
-            children: limited ? '已触发 · 冷却中' : st === 'ok' ? '正常' : st === 'offline' ? '网关离线' : '未知',
+            children: limited
+              ? '已触发 · 冷却中'
+              : expired
+                ? '已恢复'
+                : st === 'ok'
+                  ? '正常'
+                  : st === 'offline'
+                    ? '网关离线'
+                    : '未知',
           }),
         ],
       }),
@@ -188,6 +206,12 @@ function RateLimitRow({ rl, compact }) {
             : null,
           limited && rl.resetLocal
             ? jsx('span', { className: 'text-(--ui-text-tertiary)', children: `@${rl.resetLocal}` })
+            : null,
+          expired && rl.resetLocal
+            ? jsx('span', {
+                className: 'text-(--ui-text-tertiary)',
+                children: `@${rl.resetLocal} 冷却结束`,
+              })
             : null,
           !limited && obs.reqs5h != null
             ? jsxs('span', {
@@ -1550,7 +1574,9 @@ function QuotaPage({ ctx }) {
                 'p-4 rounded-xl border flex flex-col gap-2',
                 data.workbuddy.rateLimit.state === 'limited'
                   ? 'bg-rose-500/5 border-rose-500/25'
-                  : 'bg-black/20 border-white/5'
+                  : data.workbuddy.rateLimit.state === 'expired'
+                    ? 'bg-amber-500/5 border-amber-500/25'
+                    : 'bg-black/20 border-white/5'
               ),
               children: [
                 jsxs('div', {
