@@ -42,6 +42,10 @@ tmp/
 hermes-agent/
 profiles/
 
+# token-stats 插件运行时状态（含账号信息，2026-09-10 起严禁再上传公开分支）
+desktop-plugins/token-stats/direct-quota.json
+desktop-plugins/token-stats/ovlm-state.json
+
 # 共享 topics 已是 NTFS junction（真源在 shared-agent-memory 仓库 main 分支），严禁跟踪
 memories/topics/
 
