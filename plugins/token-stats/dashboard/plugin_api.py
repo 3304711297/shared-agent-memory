@@ -202,6 +202,9 @@ def _workbuddy_rate_limit() -> dict[str, Any]:
                 message=entry.get("message"),
                 source="codebuddy2openai /api/rate_limit",
             )
+            # 反代自 a404e80 起把「冷却已结束」从 ok 细化为 expired，三态语义：
+            #   limited=正在冷却 / expired=曾限过已恢复 / ok=从未被限（无条目）
+            # 这里原样透传给展示层，不做折叠——否则已恢复会被误报成「正常」或「未知」。
     except Exception:
         pass
 
@@ -642,7 +645,7 @@ def format_quota_markdown(data: dict) -> str:
     rl = wb.get("rateLimit") or {}
     if rl:
         st = rl.get("state", "unknown")
-        icon = {"limited": "🔴", "ok": "🟢", "offline": "⚪"}.get(st, "⚪")
+        icon = {"limited": "🔴", "ok": "🟢", "expired": "🟡", "offline": "⚪"}.get(st, "⚪")
         obs = rl.get("observed") or {}
         if st == "limited":
             bits = [f"{icon} **频率限制**：已触发（上游 code 6004）"]
@@ -652,8 +655,15 @@ def format_quota_markdown(data: dict) -> str:
                 h, m2 = divmod(int(rl["remainingSec"]) // 60, 60)
                 bits.append(f"剩余 `{h}h{m2}m`")
             lines.append("- " + " · ".join(bits))
+        elif st == "expired":
+            # 曾触发过 6004 且冷却时刻已过：服务可用，但额度刚被消耗过，值得提示
+            bits = [f"{icon} **频率限制**：已恢复（冷却结束）"]
+            if rl.get("resetLocal"):
+                bits.append(f"重置于 `{rl['resetLocal']}`")
+            lines.append("- " + " · ".join(bits))
         else:
-            lines.append(f"- {icon} **频率限制**：{'正常' if st == 'ok' else '未知'}")
+            label = "正常" if st == "ok" else ("网关离线" if st == "offline" else "未知")
+            lines.append(f"- {icon} **频率限制**：{label}")
         if rl.get("model"):
             lines.append(f"- **监控模型**：`{rl['model']}`")
         if obs:
