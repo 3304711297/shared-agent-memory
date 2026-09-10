@@ -1,7 +1,7 @@
 {
   "version": 2,
   "description": "本地能力组件清单（skill/mcp/plugin/工具核心的已装版本与上游源）。由 capability-upstream-watch 工作流每日比对远端源；本地源组件用 watch-capability.cmd 或任意 Agent 会话跑脚本比对。【维护铁律】升级或新装任何组件后，必须同步更新本清单并随共享库推 main，看门自动收口对应 Issue。",
-  "updatedAt": "2026-09-09",
+  "updatedAt": "2026-09-11",
   "components": [
     {
       "id": "chrome-devtools-mcp",
@@ -416,6 +416,25 @@
           "where": "借鉴雷达（codebuddy2openai 已吸收其 reasoning 合并器/空段清洗/品牌词脱敏）",
           "version": "HEAD@3e6b223",
           "sha": "3e6b223a4c27ff98c9a14e25039e32fec3e33487"
+        }
+      ]
+    },
+    {
+      "id": "c2api-upstream-iceean",
+      "display": "codebuddy2api 衍生库（IceeAn，借鉴雷达）",
+      "checks": [
+        {
+          "type": "github-commits-path",
+          "repo": "IceeAn/codebuddy2api",
+          "path": ".",
+          "note": "腾讯 copilot 系反代的活跃衍生库（MIT，25★），含凭证轮换/令牌管理/多账号调度等codebuddy2openai 尚未具备的能力；监控整仓新提交，出现可采纳改进时评估摘樱桃。【合规红线】上游 xueyue33/codebuddy2api 无 LICENSE（all rights reserved），MIT 仅覆盖 IceeAn 自 bce86ded 起独立重写的当前树；只借鉴思路不整文件搬运，若取代码须出自当前树并在 THIRD_PARTY_NOTICES.md 署名 IceeAn。"
+        }
+      ],
+      "installed": [
+        {
+          "where": "借鉴雷达（codebuddy2openai 已吸收其 Claude 客户端指纹脱敏思路，P0 已落地）",
+          "version": "HEAD@894bc3a",
+          "sha": "894bc3ac645198ff804533afad981e0c3a2c38c7"
         }
       ]
     }
