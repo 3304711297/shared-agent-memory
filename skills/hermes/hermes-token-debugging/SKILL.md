@@ -60,7 +60,7 @@ compression:
   3. 双语复述：英文主导 CoT + 结尾中文成稿（Reply in Chinese 目标语言），同一结论第二遍表述。
 - **rc 回传的定位（2026-09-10 二次修正，勿引用旧结论）**：Hermes 的 `_REASONING_ECHO_RULES` 确实对 model 名含 `deepseek` 的链路做全部历史 rc 回传（dump 实测单请求 281K 字符）；但**本链路（codebuddy/8787 → 上游）实测 rc 字段既不改变 prompt_tokens 也不能被模型引用**（带/不带 7000 字符 rc，prompt_tokens 均为 335/2216 不变；暗号可见性测试 3 组全 FAIL）。早期“rc 放大 7x”观测是 temperature 未固定造成的假象；temp=0 复测 rc=T 与 rc=F 无显著差异（同档位）。**结论：rc 回传是 token 带宽浪费，但不是思考膨胀的加速器**；真正放大器是 effort 档位。
 - **该后端 reasoning 语义实测（腾讯 copilot.tencent.com，2026-09-10）**：`reasoning_effort` **缺位 → 不思考**（5 轮 rtok=0）；**在位（含 `none`）→ 思考**（none 3 轮 3.7k~5.6k rtok——"关"关不掉）；档位值对长度影响不可靠（见上）。输入 `reasoning_content` 被静默丢弃。`chat_template_kwargs` 不在反代透传白名单 `PASSTHROUGH_BODY_KEYS`，客户端直传会被丢弃（早前 ct 探针因此无效）；仅反代控制台 disable 路径自注入（效果未验证）。
-- **归属判决（2026-09-10，用户认同）**：语义紊乱 + rc 丢弃 = **腾讯后端对新模型的适配滞后**（V4.1 Flash 当日 12:00 才发布，552B MoE 新架构；官方称模型对 DeepSeek Harness v0.1.5 的运行配置专项训练，第三方 harness/后端行为易漂移）。反代 codebuddy2openai 忠实透传、Hermes 忠实执行档位——两段皆无过。**用户拍板：保留 ultra 档、反代不加翻译层、等腾讯适配；全局 `agent.reasoning_effort: ultra` 严禁改动。**
+- **归属判决（2026-09-10，用户认同）**：语义紊乱 + rc 丢弃 = **腾讯后端对新模型的适配滞后**（V4.1 Flash 当日 12:00 才发布，552B MoE 新架构；官方称模型对 DeepSeek Harness v0.1.5 的运行配置专项训练，第三方 harness/后端行为易漂移）。反代 workbuddy2api 忠实透传、Hermes 忠实执行档位——两段皆无过。**用户拍板：保留 ultra 档、反代不加翻译层、等腾讯适配；全局 `agent.reasoning_effort: ultra` 严禁改动。**
 - **非诱因排除**：receiving-code-review 等 skill 无因果（未加载该 skill 的共时会话思考量更大 5x）；show_reasoning 类显示开关不影响生成。
 - **排查入口**：`state.db` 的 `messages.reasoning` / `sessions.reasoning_tokens`；`sessions/request_dump_*.json` 查 rc 回传实况。
 - **备注**：本链路调档收益不稳；用户明确要 ultra 质量档（全局默认勿动）。若日后确需压时延：优先换非 deepseek 链路/模型，而非调档。
