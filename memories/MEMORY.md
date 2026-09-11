@@ -6,9 +6,9 @@ WorkBuddy = codebuddy2openai reverse proxy 127.0.0.1:8787/v1 (Tauri v2: multi-ac
 §
 Hardware: RTX 4070 Laptop 8GB + 24GB; models/runtime junctioned to D:. D:\HermesModels: bge-m3=OV embedding(18082), MiniCPM5-2B + Qwen3.5-9B chat. OpenViking venv on-demand, sleeps 2min idle. MCP: chrome-devtools (--autoConnect, connect-only) + deepwiki.
 §
-Memory (09-07): provider=openviking is ADDITIVE, not a replacement — built-in MEMORY.md/USER.md (3000/2000 CHARS) still inject in full every turn. Low-frequency facts -> viking_remember; built-in keeps high-frequency only. Near limit: SUBTRACT, never raise the cap. 09-09: rewritten to English (1525->740 tok); CJK costs 1.10x on Gemini's own tokenizer (measured via zero-quota countTokens) vs 1.34x on o200k, while the char cap counts chars.
+Memory: provider=openviking is ADDITIVE — built-in MEMORY.md/USER.md (3000/2000 chars) still inject in full every turn; low-freq -> viking_remember, built-in keeps high-frequency only. Near limit: SUBTRACT, never raise the cap. CJK costs 1.10x on Gemini's tokenizer vs 1.34x o200k (cap counts chars).
 §
-Tools: only pure-read tools may batch concurrently; terminal/patch/write_file/memory/delegate_task are sequential barriers. Never claim batched terminal calls ran in parallel. config.yaml needs no restart (re-read at spawn). PS5.1: .ps1/.cmd with CJK need UTF-8 BOM else mojibake; bash swallows $_/$var in inline powershell -Command, use .ps1 files. vision_analyze first call may fail, retry once.
+Tools: pure-read tools may batch concurrently; terminal/patch/write_file/memory/delegate_task are sequential barriers — never claim they ran in parallel. config.yaml needs no restart. PS5.1 .ps1/.cmd with CJK need BOM else mojibake; bash swallows $_/$var in inline powershell -Command, use .ps1. vision_analyze first call may fail, retry once.
 §
 Style: external-AI cross-review -> P0/P1/P2 spec; fixed scope, no opportunistic refactors. Local-First: full CI-equivalent + Release build locally, then push; never block the main session on CI. Config change: list candidates + defaults + cost, wait for the call. User keeps reasoning_effort=ultra (global default) — not a candidate for optimization.
 §
@@ -16,4 +16,6 @@ serena removed; "(std v1beta 404s)" -> OpenViking.
 §
 Pitfalls: Desktop "session won't run" freeze = model switch injecting a user-role system msg + truncated retry rejected by gateway (upstream #94486); restart won't self-heal — SOP in shared lib topics/hermes-desktop-rewind-deadlock.md. Repo-local website/i18n/zh-Hans translations lag source (curator.md vs tools/skill_usage.py created_by=agent + adopt/ledger) — read source for behavior/defaults, never the translation.
 §
-ZCode decommissioned (09-09): client+config+sessions wiped; SOUL/USER/skills/shared-lib fully de-dualized; shared lib source = D:/ai coding/GitRepos/shared-agent-memory; ZCode sessions in shared-agent-sessions zcode branch; sole tie = promo tokens via zcode-api proxy. Full change list -> viking card zcode-decommissioned.
+ZCode decommissioned 09-09: client/config/sessions wiped; shared lib = D:/ai coding/GitRepos/shared-agent-memory; sessions in shared-agent-sessions zcode branch; only tie = promo tokens via zcode-api proxy.
+§
+OpenViking writes (viking_remember/add_resource/etc) -> SAME-TURN run D:\openviking-backup\sync.cmd (private repo 3304711297/openviking-backup), regardless of topic. Large-shrink guard aborts exit 2 leaving backup untouched; rerun with OV_BACKUP_FORCE=1 only if the shrink is intentional.

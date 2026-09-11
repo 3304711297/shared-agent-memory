@@ -56,6 +56,17 @@ metadata:
    git -C "%LOCALAPPDATA%/hermes" add -A && git -C "%LOCALAPPDATA%/hermes" commit -m "docs(memory): <简述>" && git -C "%LOCALAPPDATA%/hermes" push origin hermes
    ```
 
+5. **【铁律】OpenViking 写后即时灾备**——本轮只要调用过任何 OpenViking 写入（`viking_remember`、`viking_add_resource`、记忆/资源挂载等），**无论当前任务主题是否与备份相关**，都必须在本轮结束前静默执行：
+   ```bash
+   cmd /c "D:\\openviking-backup\\sync.cmd"
+   ```
+   - 调用方式注意：git-bash 下用 `cd "D:/openviking-backup" && MSYS_NO_PATHCONV=1 cmd /c "sync.cmd"`；直接 `cmd //c` 会落进交互式提示符不执行。
+   - 脚本把 `~/.openviking/data/viking/default/{user,resources}` robocopy 镜像到 `D:\openviking-backup\repo` 再推送私有仓 `3304711297/openviking-backup`；无变更秒退，幂等可重复调用。
+   - **大删守卫（2026-09-11 加固）**：源文件数 < 备份文件数的 70%（且备份 ≥100 文件）时中止并返回 exit 2，备份保持不动，中止记录写入 `D:\openviking-backup\abort.log`。确认是真实删减而非源数据丢失后，才用 `OV_BACKUP_FORCE=1` 覆盖重跑。
+   - 与每日计划任务 `OpenVikingDailyBackup`（09:30）互补：即时同步压缩暴露窗口，计划任务兜底 AI 无感知的异步写入。失败不重试不阻塞。
+
+**规则放置原则（2026-09-11 教训）**：跨会话必须自动执行的约束，**不能只放在语义召回层**（OpenViking 资源 / 共享库文档）——它们仅在话题命中时才进入上下文。凡属「无条件触发」的规则（如写后同步），必须同时写入：(a) 内置 `MEMORY.md`（每轮注入，永远可见）；(b) 对应技能正文（任务命中时加载）。本次就是因规则只存在于召回层，导致修插件 bug 时执行了 `viking_remember` 却整轮无人提醒同步，直到用户手动贴出仓库 URL 才补跑。
+
 **注意**：`memories/topics` 已在 home 仓库 .gitignore 中排除，严禁再往 hermes 分支提交共享 topics 镜像；旧镜像历史存档于 hermes 分支 `957241a`。
 
 ## 智能语义检索与层级加载层 (OpenViking)
