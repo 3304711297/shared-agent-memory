@@ -57,7 +57,7 @@
 - [Hermes Studio Evaluation and Desktop Theming](hermes-studio-evaluation-and-desktop-theming.md) — 第三方客户端 hermes-studio 深度评估（插件SDK缺失/数据库裂脑/双重代理）与官方桌面端 ZCode Dark 沉浸式 IDE 主题 1:1 复刻落地
 - [Hermes Search Provider Exa and Cleanup](hermes-search-provider-exa-and-cleanup.md) — Hermes 检索与抽取全量锁定为 Exa 独享（EXA_API_KEY 固化于 .env）、解构 EasyCLIProxyAPI 网关 gemini-web-search 伪联网本质、清理 duckduckgo 与 searxng 冗余技能
 - [OpenViking Lazy Gateway and Local BGE-M3](openviking-lazy-gateway-and-local-bge-m3.md) — OpenViking 智能语义检索接入、本地 CUDA BGE-M3 向量加速（1024维/8192批处理）、D:\HermesModels 存储重定向与 Serverless 按需唤醒/2分钟空闲自动休眠静默网关落地全貌
-- [Hermes Config Baseline and Sync Protocol](hermes-config-baseline-and-sync-protocol.md) — Hermes 权威完整配置基准快照（双本地网关/自适应上下文/glm-5.3+hy4两级容灾梯队/MoA显式停用）与改动设置模型自识别自动同步记忆库铁律（双端协同规范）
+- [Hermes Config Baseline and Sync Protocol](hermes-config-baseline-and-sync-protocol.md) — Hermes 权威完整配置基准快照（**2026-09-11 刷新至 config_v42**：主力 deepseek-v4.1-flash@workbuddy2api、providers 键控三段 40/11/4 模型、MCP 六服务器、`protected_instruction_files: false`）与改动设置模型自识别自动同步记忆库铁律；含快照再生成流程与公开仓脱敏铁律，内嵌全文已移除改单一真源
 - [OpenViking VLM Dynamic Follow](openviking-vlm-dynamic-follow.md) — OpenViking 记忆提炼模型动态跟随当前聊天模型（token-stats /ovlm 端点+自动跟随；生效机制=改 ov.conf 踢 1934；E2E 已验提炼落 glm@8787、Gemini 零消耗）
 - [ToolRush Evaluation and Latency Optimization](toolrush-evaluation-and-latency-optimization.md) — OnlyTerp/toolrush (ToolRush v2) 针对 Hermes 本地工具调用延迟的深度技术评估、加速机制剖析与暂不安装观望决策
 - [Hermes Bots Mode Team Practice](hermes-bots-mode-team-practice.md) — Hermes Desktop Bot Mode（YanXbt @IBuzovskyi 指南）机制剖析、实践验证回滚与用户偏好（明确仅用普通会话模式）沉淀
