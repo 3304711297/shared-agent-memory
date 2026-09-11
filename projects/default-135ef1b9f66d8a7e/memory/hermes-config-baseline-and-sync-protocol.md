@@ -5,7 +5,7 @@ metadata:
   type: reference
 ---
 
-# Hermes 完整配置基准、版本指纹与自动同步规约 (2026-09-06)
+# Hermes 完整配置基准、版本指纹与自动同步规约 (2026-09-06 创建 · 2026-09-11 刷新)
 
 ## 一、 当前 Hermes 构建版本指纹 (Version Fingerprint)
 
@@ -13,16 +13,17 @@ metadata:
 
 | 组件 / 维度 | 当前版本与标识 | 来源 / 验证方式 |
 | :--- | :--- | :--- |
-| **Hermes Agent 版本** | `v0.21.0 (2026.8.31)` | `hermes --version` |
-| **上游 Git Commit SHA** | `520e63661c8eaa2135ebd60a07192f0d8aa45e6e` (Mon Sep 7 21:08:26 2026) | `git -C hermes-agent log -1` |
-| **Desktop 桌面客户端** | `v0.17.0` | `apps/desktop/package.json` |
-| **配置规范版本** | `_config_version: 41` | `config.yaml` 根字段 |
-| **Python 运行时** | `Python 3.11.16` / `OpenAI SDK 2.24.0` | 内部运行时依赖 |
+| **Hermes Agent 版本** | `v0.21.1 (2026.9.7)` | `hermes --version` |
+| **上游 Git Commit SHA** | `a3190625c0a2ed89ed33356ef8e3184e95dc08e5` (2026-09-11 07:14:55 -0500) | `git -C hermes-agent log -1` |
+| **Desktop 桌面客户端** | `v0.17.2` | `apps/desktop/package.json` |
+| **配置规范版本** | `_config_version: 42` | `config.yaml` 根字段 |
+| **Python 运行时** | `Python 3.11.16` / 内置 3.14 测试解释器 | 内部运行时依赖 |
 | **安装目录与方式** | `%LOCALAPPDATA%\hermes\hermes-agent` (Git source checkout) | 源码检出并可热更新 |
 
 > **版本演进铁律**：后续 Hermes 升级（如执行 `hermes update` 或上游拉取新 commit）时，若检测到 `_config_version` 升级或新增/废弃了配置字段，同步记忆库时必须一并刷新上方表格中的版本号与 Git SHA，并简要记录该版本下的配置变迁（Changelog diff）。
-> 
+>
 > * **2026-09-08 更新**：Hermes 上游合入 commit `520e63661c`（fix: keep command-auth model discovery lazy across config and setup）；本地配置守卫自动化触发全绿通过，启用本地插件 `config-guard`，基线配置快照同步更新。
+> * **2026-09-11 刷新**：`_config_version` 41 → **42**；上游推进至 `a3190625c0`；Desktop `v0.17.2`。配置结构发生**两处重大迁移**——① `custom_providers` 列表格式整体迁移为 `providers:` 键控结构（`radeon-cloud` / `cpa` / `workbuddy2api` 三段，详见第三节）；② 主力模型切换到 `workbuddy2api` 本地反代（`deepseek-v4.1-flash`）。新增 `security.protected_instruction_files: false`（详见第七节）。
 
 ---
 
@@ -36,22 +37,33 @@ metadata:
 
 ---
 
-## 三、 当前核心模型与系统策略基准（实测拍板）
+## 三、 当前核心模型与系统策略基准（2026-09-11 实机刷新）
 
 1. **主力交互模型**：
-   - `cpa-gui` · `gemini-3.8-flash`（经本地 EasyCLIProxyAPI `127.0.0.1:18080` 桥接 Antigravity / Google 个人 Pro 订阅）。
-   - 原生支持 1M~2M 上下文、极速吞吐、免商业额外计费。
+   - `workbuddy2api` · `deepseek-v4.1-flash`（经本地 WorkBuddy2API 反代 `127.0.0.1:8787` 桥接腾讯 CodeBuddy/WorkBuddy 订阅，OpenAI + Anthropic 双协议）。
+   - `model` 段：`default: deepseek-v4.1-flash` / `provider: workbuddy2api` / `base_url: http://127.0.0.1:8787/v1` / `key_env: HERMES_CUSTOM_WORKBUDDY2API_API_KEY`。
+   - 历史：2026-09-10 前主力为 `cpa-gui · gemini-3.8-flash`（经 EasyCLIProxyAPI `127.0.0.1:18080` 桥接 Antigravity）；该通道现保留为 `cpa` provider（见下）。
 2. **上下文窗口 (Context Window)**：
-   - 显式设为 `0`（自适应读取模型原生窗口）。配合内置 `compression.threshold: 0.5` 自动智能压缩，避免人工固定数值造成长文档意外截断。
-3. **备用模型 (Fallback Models) 容灾梯队**：
-   - **备用 1**：`custom:workbuddy-(127.0.0.1:8787)` · `glm-5.3-flash`
-     - 本地实测 15 并发无 429、毫秒级响应、工具调用稳定，为抗 429 瞬间接管主力。
-   - **备用 2**：`custom:workbuddy-(127.0.0.1:8787)` · `hy4-preview`
-     - 二级综合推理容灾模型。
+   - 端点 live `/v1/models` 逐条下发顶层 `context_length`，Hermes 自适应读取；配合 `compression.threshold: 0.5` 自动智能压缩。
+3. **provider 三段式结构（`providers:` 键控，2026-09-10 由 `custom_providers` 列表迁移）**：
+
+   | provider key | 名称 | base_url | 模型数 | 定位 |
+   | :--- | :--- | :--- | :--- | :--- |
+   | `workbuddy2api` | workbuddy2api | `127.0.0.1:8787/v1` | 40 | **主力**（CodeBuddy/WorkBuddy 全量模型，含 `gpt-6-astra`） |
+   | `cpa` | CPA | `127.0.0.1:18080/v1` | 11 | Antigravity/Gemini 通道（备用） |
+   | `radeon-cloud` | AMD | `developer.amd.com.cn/radeon/api/v1` | 4 | AMD Radeon Cloud（Qwen/MiniCPM） |
+
+   - 全部走 `key_env: HERMES_CUSTOM_<SLUG>_API_KEY` 引用形态（密钥在 `.env`，不入 config）。
+   - `model_aliases` 7 条（`workbuddy` / `workbuddy-glm` / `workbuddy-glm53` / `workbuddy-kimi` / `workbuddy-kimi3` / `workbuddy-deepseek` / `workbuddy-hy4`）均指向 `custom` provider + `127.0.0.1:8787/v1`。
+4. **备用模型容灾梯队**：
+   - 备用 1：`glm-5.3-flash`（本地实测 15 并发无 429、毫秒级响应、工具调用稳定）。
+   - 备用 2：`hy4-preview`（二级综合推理容灾）。
    - **严禁挂载项**：坚决剔除 `claude-opus-4-6-thinking` 等高延迟、高消耗的深度思考模型，防止自动静默降级导致 Agent 卡死或吃光贵重配额。
-4. **Mixture of Agents (MoA)**：
+   - ⚠️ 当前 `fallback_providers: []` 为空（未配置自动容灾链），容灾靠人工切模型。
+5. **Mixture of Agents (MoA)**：
    - 全局与预设 `enabled: false` 显式关闭。
    - 避免在 Agent 编程和工具调用（Tool Calling / Function Calling）场景下引入多模型扇出造成的格式破坏、多倍延迟和积分浪费；清理了原残留的 `OpenCode Free` 和 `OpenRouter` 无效通道。
+   - ⚠️ 注：`moa` 段中残留 `provider: codebuddy` 引用（旧 provider 名，现已不存在于 `providers:` 表中），因 `enabled: false` 故无实际影响；若将来启用 MoA 需先修正为 `workbuddy2api`。
 
 ---
 
@@ -70,459 +82,103 @@ metadata:
 
 ## 四、 独立配置文件与全量配置快照
 
-* **同目录下独立配置文件**：[`hermes-config.yaml`](./hermes-config.yaml)（可直接供脚本解析或一键恢复）
-* **本地源文件路径**：`%LOCALAPPDATA%\hermes\config.yaml` (450行全量)
+* **完整脱敏快照**：[`hermes-config.yaml`](./hermes-config.yaml) —— **461 行全量**，可直接供脚本解析或一键恢复。
+  * ⚠️ 2026-09-11 起本节**不再内嵌全文**：此前内嵌副本与独立文件双份维护，两处曾同时过期（内嵌停留在 `cpa-gui` 时代）。现改为单一真源，避免漂移。
+* **本地源文件路径**：`%LOCALAPPDATA%\hermes\config.yaml`（461 行，`_config_version: 42`）
+* **快照再生成流程**：本地 `config.yaml` → 脱敏（`%USERPROFILE%` 路径泛化、第三方应用目录泛化 `<EKKO_STUDIO_HOME>`、QQ chat_id 类账户标识替换 `<REDACTED_*>`；密钥本就全部为 `key_env` 引用形态，无明文） → 覆写本目录 `hermes-config.yaml` → 同步更新本文指纹表与变动表 → 提交推送 `main`。
+
+### 关键段速查（快速比对漂移用）
 
 ```yaml
 model:
-  default: gemini-3.8-flash
-  provider: cpa-gui
-  base_url: http://127.0.0.1:18080/v1
-fallback_providers: []
-database:
-  journal_mode: wal
-runtime:
-  nofile_soft_limit: 4096
-agent:
-  max_turns: 500
-  service_tier: ''
-  fast_auto_seconds: 60
-  verbose: false
-  reasoning_effort: ultra
-  personalities: {}
-terminal:
-  backend: local
-  cwd: .
-  timeout: 180
-  home_mode: auto
-  container_cpu: 1
-  container_memory: 5120
-  container_disk: 51200
-  container_persistent: true
-  docker_mount_cwd_to_workspace: false
-  lifetime_seconds: 300
-web:
-  backend: exa
-  search_backend: exa
-  extract_backend: exa
-browser:
-  inactivity_timeout: 120
-  allow_private_urls: true
-  use_real_profile: false
-  extension_control:
-    enabled: false
-tool_loop_guardrails:
-  warnings_enabled: true
-  hard_stop_enabled: false
-  non_interactive_hard_stop_enabled: true
-  warn_after:
-    exact_failure: 2
-    same_tool_failure: 3
-    idempotent_no_progress: 2
-  hard_stop_after:
-    exact_failure: 5
-    same_tool_failure: 8
-    idempotent_no_progress: 5
-compression:
-  enabled: true
-  checkpoint_required: false
-  progress_notices: false
-  threshold: 0.5
-  target_ratio: 0.2
-  protect_last_n: 35
-  min_tail_user_messages: 1
-  max_attempts: 3
-  proactive_prune_tokens: 0
-  proactive_prune_min_result_chars: 8000
-  proactive_prune_min_reclaim_tokens: 4096
-  hygiene_max_turn_hold_seconds: 10
-  protect_first_n: 3
-  codex_gpt55_autoraise: true
-  codex_app_server_auto: native
-  codex_responses_native: false
-  idle_compact_after_seconds: 0
-prompt_caching:
-  cache_ttl: 5m
-auxiliary:
-  vision:
-    provider: auto
-    model: ''
-  background_review:
-    enabled: false
-display:
-  compact: false
-  busy_input_mode: interrupt
-  bell_on_complete: true
-  bell_on_prompt: false
-  show_reasoning: true
-  background_process_notifications: concise
-  streaming: true
-  skin: default
-  language: zh
-  interim_assistant_messages: true
-  tool_progress: all
-  cleanup_progress: false
-  long_running_notifications: true
-  busy_ack_detail: true
-  message_reactions: false
-stt:
-  enabled: false
-  language: en
-  local:
-    model: base
-  openai:
-    model: whisper-1
-    language: ''
-voice:
-  auto_tts: false
-  beep_volume: 1
-memory:
-  memory_enabled: true
-  user_profile_enabled: true
-  memory_char_limit: 3000
-  user_char_limit: 2000
-  nudge_interval: 0
-  provider: openviking
-  openviking:
-    endpoint: http://127.0.0.1:1933
-    account: default
-    user: default
-    agent: hermes
-    recall_limit: 3
-    recall_score_threshold: 0.35
-    recall_prefer_abstract: true
-    recall_resources: true
-    recall_timeout_seconds: 15.0
-delegation:
-  max_iterations: 250
-moa:
-  presets:
-    default:
-      reference_models:
-      - provider: custom:workbuddy-(127.0.0.1:8787)
-        model: glm-5.3-flash
-        enabled: false
-      aggregator:
-        provider: custom:workbuddy-(127.0.0.1:8787)
-        model: glm-5.3-flash
-      enabled: false
-      degraded_reference_policy: loud
-      fanout: user_turn
-  reference_models:
-  - provider: custom:workbuddy-(127.0.0.1:8787)
-    model: glm-5.3-flash
-    enabled: false
-  aggregator:
-    provider: custom:workbuddy-(127.0.0.1:8787)
-    model: glm-5.3-flash
-  degraded_reference_policy: loud
-  max_tokens: 4096
-  fanout: user_turn
-  enabled: false
-skills:
-  creation_nudge_interval: 0
-  disabled: []
-curator:
-  enabled: false
-approvals:
-  mode: 'off'
-plugins:
-  enabled:
-  - superpowers
-  - token-stats
-  disabled: []
-  entries:
-    superpowers:
-      allow_tool_override: false
-security:
-  allow_private_urls: true
-  allow_data_training_tiers_noninteractive: true
-kanban:
-  review_dispatch: true
-code_execution:
-  timeout: 300
-  max_tool_calls: 50
-streaming:
-  enabled: true
-onboarding:
-  seen:
-    busy_input_prompt: true
-telemetry:
-  shared_metrics:
-    enabled: false
-    send: false
-updates:
-  pre_update_backup: false
-  backup_keep: 5
-  non_interactive_local_changes: stash
-computer_use:
-  backend: cua
-local_runtime:
-  enabled: false
-_config_version: 41
-mcp_servers:
-  chrome-devtools:
-    command: cmd
-    args:
-    - /c
-    - npx
-    - -y
-    - chrome-devtools-mcp@1.8.0
-    - --autoConnect
-    - --ignore-default-chrome-arg=--disable-extensions
-    timeout: 300
-    enabled: true
-    lazy: true
-    idle_timeout_seconds: 60
-  deepwiki:
-    url: https://mcp.deepwiki.com/mcp
-    enabled: true
-session_reset:
-  mode: none
-  idle_minutes: 1440
-  at_hour: 4
-group_sessions_per_user: true
-platform_toolsets:
-  cli:
-  - clarify
-  - code_execution
-  - computer_use
-  - cronjob
-  - delegation
-  - file
-  - image_gen
-  - kanban
-  - memory
-  - session_search
-  - skills
-  - terminal
-  - todo
-  - video
-  - vision
-  - web
-  telegram:
-  - hermes-telegram
-  discord:
-  - hermes-discord
-  whatsapp:
-  - hermes-whatsapp
-  slack:
-  - hermes-slack
-  signal:
-  - hermes-signal
-  homeassistant:
-  - hermes-homeassistant
-  qqbot:
-  - hermes-qqbot
-  yuanbao:
-  - hermes-yuanbao
-  teams:
-  - hermes-teams
-  google_chat:
-  - hermes-google_chat
-custom_providers:
-- api_key: <REDACTED_LOCAL_KEY>
-  api_mode: chat_completions
-  base_url: http://127.0.0.1:18080/v1
-  model: gemini-3.8-flash
-  models:
-    gemini-3-flash: {}
-    gemini-3.1-pro-low: {}
-    gpt-oss-120b-medium: {}
-    claude-opus-4-6-thinking: {}
-    claude-sonnet-4-6: {}
-    gemini-3.8-flash: {}
-    gemini-3.1-flash-image: {}
-    gemini-pro-agent: {}
-    gemini-web-search: {}
-    gemini-3.6-flash: {}
-    gemini-3.7-flash: {}
-  models_discovered: true
-  name: cpa-gui
-- name: WorkBuddy (127.0.0.1:8787)
+  default: deepseek-v4.1-flash          # 主力：本地 workbuddy2api 反代
+  provider: workbuddy2api
   base_url: http://127.0.0.1:8787/v1
-  api_key: local
-  model: auto
-  models:
-    auto: {}
-    hy4-preview: {}
-    hy4-preview-x: {}
-    hy3: {}
-    hy3-x: {}
-    glm-5.3: {}
-    glm-5.3-flash: {}
-    glm-5.2: {}
-    glm-5.1: {}
-    glm-5.0: {}
-    glm-5v-turbo: {}
-    glm-4.7: {}
-    glm-4.6: {}
-    glm-4.6v: {}
-    minimax-m3: {}
-    minimax-m2.5: {}
-    kimi-k3-1: {}
-    kimi-k3: {}
-    kimi-k2.7: {}
-    kimi-k2.6: {}
-    kimi-k2.5: {}
-    kimi-k2-thinking: {}
-    deepseek-v4-pro: {}
-    deepseek-v4-flash: {}
-    deepseek-v3-2-volc: {}
-    hunyuan-2.0-thinking: {}
-    hunyuan-chat: {}
-    default: {}
-  models_discovered: true
-platforms:
-  webhook:
-    enabled: true
-  qqbot:
-    enabled: false
-    home_channel:
-      platform: qqbot
-      chat_id: 078DEECF2FF6867028A5CADEDC823720
-      name: 078DEECF2FF6867028A5CADEDC823720
-      user_id: 078DEECF2FF6867028A5CADEDC823720
-known_plugin_toolsets:
-  cli:
-  - a2a
-  - spotify
-known_builtin_toolsets:
-  cli:
-  - browser
-  - clarify
-  - code_execution
-  - computer_use
-  - context_engine
-  - cronjob
-  - delegation
-  - discord
-  - discord_admin
-  - file
-  - homeassistant
-  - image_gen
-  - memory
-  - session_search
-  - skills
-  - spotify
-  - stt
-  - terminal
-  - todo
-  - tts
-  - video
-  - video_gen
-  - vision
-  - web
-  - x_search
-  - yuanbao
-model_aliases:
-  workbuddy:
-    model: auto
-    provider: custom
-    base_url: http://127.0.0.1:8787/v1
-  workbuddy-glm:
-    model: glm-5.2
-    provider: custom
-    base_url: http://127.0.0.1:8787/v1
-  workbuddy-glm53:
-    model: glm-5.3-flash
-    provider: custom
-    base_url: http://127.0.0.1:8787/v1
-  workbuddy-kimi:
-    model: kimi-k2.7
-    provider: custom
-    base_url: http://127.0.0.1:8787/v1
-  workbuddy-kimi3:
-    model: kimi-k3
-    provider: custom
-    base_url: http://127.0.0.1:8787/v1
-  workbuddy-deepseek:
-    model: deepseek-v4-pro
-    provider: custom
-    base_url: http://127.0.0.1:8787/v1
-  workbuddy-hy4:
-    model: hy4-preview
-    provider: custom
-    base_url: http://127.0.0.1:8787/v1
+  key_env: HERMES_CUSTOM_WORKBUDDY2API_API_KEY
 
-# ── Security ──────────────────────────────────────────────────────────
-# Secret redaction is ON by default — strings that look like API keys,
-# tokens, and passwords are masked in tool output, logs, and chat
-# responses before the model or user ever sees them. Set redact_secrets
-# to false to disable (e.g. when developing the redactor itself).
-# tirith pre-exec scanning is enabled by default when the tirith binary
-# is available. Configure via security.tirith_* keys or env vars
-# (TIRITH_ENABLED, TIRITH_BIN, TIRITH_TIMEOUT, TIRITH_FAIL_OPEN).
-#
-# security:
-#   redact_secrets: true
-#   tirith_enabled: true
-#   tirith_path: "tirith"
-#   tirith_timeout: 5
-#   tirith_fail_open: true
+providers:                              # 键控结构（2026-09-10 由 custom_providers 列表迁移）
+  workbuddy2api:                        # 127.0.0.1:8787/v1 · 40 模型 · 主力（含 gpt-6-astra）
+  cpa:                                  # 127.0.0.1:18080/v1 · 11 模型 · Antigravity 通道
+  radeon-cloud:                         # developer.amd.com.cn · 4 模型 · AMD Radeon Cloud
+  # 全部 key_env 引用，无明文密钥
 
-# ── Fallback Model ────────────────────────────────────────────────────
-# Automatic provider failover when primary is unavailable.
-# Uncomment and configure to enable. Triggers on rate limits (429),
-# overload (529), service errors (503), or connection failures.
-#
-# Supported providers:
-#   openrouter   (OPENROUTER_API_KEY)  — routes to any model
-#   openai-codex (OAuth — hermes auth) — OpenAI Codex
-#   nous         (OAuth — hermes auth) — Nous Portal
-#   zai          (ZAI_API_KEY)         — Z.AI / GLM
-#   kimi-coding  (KIMI_API_KEY)        — Kimi / Moonshot
-#   kimi-coding-cn (KIMI_CN_API_KEY)   — Kimi / Moonshot (China)
-#   minimax      (MINIMAX_API_KEY)     — MiniMax
-#   minimax-cn   (MINIMAX_CN_API_KEY)  — MiniMax (China)
-#   bedrock      (AWS IAM / boto3)     — AWS Bedrock (Converse API)
-#
-# For custom OpenAI-compatible endpoints, add base_url and key_env.
-#
-# fallback_model:
-#   provider: openrouter
-#   model: anthropic/claude-sonnet-4
+fallback_providers: []                  # 空 —— 无自动容灾链，容灾靠人工切模型
+
+agent:
+  reasoning_effort: ultra               # 用户硬约束，严禁改动
+
+approvals:
+  mode: 'off'                           # 危险 shell 命令审批已关闭
+
+security:
+  protected_instruction_files: false    # 指令文件写入门禁已关闭（2026-09-11 拍板，详见独立记忆卡 hermes-approval-two-tier-gates）
+
+memory:
+  provider: openviking                  # 内置字符限额 3000/2000 + OpenViking 召回
+
+plugins:
+  enabled: [superpowers, token-stats, config-guard]
+
+display:
+  language: zh
+  show_reasoning: true
+
+mcp_servers:
+  # 6 个：chrome-devtools（connect-only）、deepwiki、ekko-studio ×4（路径已泛化）
 ```
+
+### 2026-09-11 相比上版快照的结构性变动
+
+| 维度 | 旧值 | 新值 |
+| :--- | :--- | :--- |
+| `_config_version` | 41 | **42** |
+| 主力模型 | `cpa-gui · gemini-3.8-flash`（18080） | **`workbuddy2api · deepseek-v4.1-flash`（8787）** |
+| provider 组织 | `custom_providers` 列表（含 `api_key: <REDACTED_LOCAL_KEY>` 明文形态） | **`providers:` 键控三段**（全部 `key_env` 引用，无明文） |
+| 指令文件门禁 | （默认开启） | `security.protected_instruction_files: false` |
+| `mcp_servers` | 2 个（chrome-devtools 1.8.0 / deepwiki） | **6 个**（chrome-devtools 1.9.0 / deepwiki / ekko-studio ×4） |
+| `model_aliases` | 7 条（`provider: custom`） | 7 条（不变，仍指向 `custom` + 8787） |
+| `moa` 段 | — | ⚠️ 残留 `provider: codebuddy` 旧名引用（`enabled: false` 无实际影响；将来启用前需修正为 `workbuddy2api`） |
+| 行数 | 409 | 461 |
 
 ---
 
-## 五、 工具集 (Toolsets) 与能力体系启用基准矩阵 (2026-09-06 实机快照)
+## 五、 工具集 (Toolsets) 与能力体系启用基准矩阵 (2026-09-11 刷新)
 
-根据 Hermes Desktop 客户端实机控制台与 `platform_toolsets.cli` 严格对齐，当前已完成全量治理与精简定案：
+根据 `platform_toolsets.cli` 与 `known_builtin_toolsets.cli` 严格对齐：
 
-### 1. 活跃启用工具集 (Enabled Toolsets - 11 类)
-| 工具集分类 | 包含能力 / 原子工具 | 调用历史 / 定位 | 状态与策略 |
-| :--- | :--- | :--- | :--- |
-| **Terminal & Processes** | terminal, process_manage | 172 次 | **开启**。原生 Bash 执行主力 |
-| **File Operations** | read_file, write_file, patch, search_files | 122 次 | **开启**。文件读写与精准修补 |
-| **Web Search & Scraping** | web_search, web_extract | 14 次 | **开启**。已全量锁定 Exa 独享后端 |
-| **Skills** | skills_list, skill_view, skill_manage | 10 次 | **开启**。业务技能与工作流引擎 |
-| **Vision / Image Analysis** | vision_analyze | 9 次 | **开启**。多模态截图与界面审查 |
-| **Session Search** | session_search | 6 次 | **开启**。跨会话历史检索 (FTS5) |
-| **Task Delegation** | delegate_task | 2 次 | **开启**。多 Agent 并发编排（上限 10） |
-| **Memory** | memory | 1 次 | **开启**。系统常驻记忆与用户画像 |
-| **Clarifying Questions** | clarify | 1 tool | **开启**。决策前多选/表单式澄清 |
-| **Code Execution** | execute_code | 1 tool | **开启**。Python 复杂脚本执行内核 |
-| **Computer Use** | computer_use (cua) | 1 tool | **开启**。桌面 GUI 控制备用 |
-| **Cron Jobs** | cronjob_manage | 1 tool | **开启**。计划任务编排 |
-| **Image Generation** | image_gen | 1 tool | **开启**。图像生成对接 |
+### 1. 活跃启用工具集（`platform_toolsets.cli` 16 项）
 
-### 2. 裁撤与停用工具集 (Disabled Toolsets - 5 类)
-| 工具集分类 | 包含工具数量 | 停用原因与安全防护决议 |
+terminal, file, web, skills, vision, session_search, delegation, memory, clarify, code_execution, computer_use, cronjob, image_gen, todo, video, kanban。
+
+（`known_builtin_toolsets.cli` 另含 browser / stt / tts / video_gen / x_search / spotify / discord / homeassistant / yuanbao 等，均为已登记但未在 `platform_toolsets.cli` 启用的能力。）
+
+### 2. 关键停用项与安全决议
+
+| 工具集 | 状态 | 原因 |
 | :--- | :--- | :--- |
-| **Browser Automation** | 13 tools (browser_*) | **显式关闭**。曾因无头启动踩踏真实 Edge Dev Profile 导致扩展被删，且网页抓取已由 Exa 独享完美覆盖，彻底关停以杜绝隐患 |
-| **A2A (Agent-to-Agent)** | 5 tools | **关闭**。当前场景无需跨智能体局域网 A2A 协议 |
-| **Home Assistant** | 4 tools | **关闭**。无智能家居集成需求 |
-| **Speech-to-Text (STT)** | 0 tools | **关闭**。停用以避免不必要的麦克风占用 |
-| **Spotify** | 7 tools | **关闭**。多媒体播放非工作流核心能力 |
+| **Browser Automation** | 显式关闭 | 曾因无头启动踩踏真实 Edge Dev Profile 导致扩展被删；网页抓取已由 Exa 后端覆盖。浏览器交互改走 `chrome-devtools` MCP（connect-only） |
+| **A2A (Agent-to-Agent)** | 关闭 | 当前场景无需跨智能体局域网 A2A 协议 |
+| **Home Assistant / Spotify / STT** | 关闭 | 无对应需求；STT 停用避免麦克风占用 |
+| **Computer Use** | 开启（备用） | `computer_use.backend: cua`，桌面 GUI 控制备选通道 |
 
 ### 3. Edge 浏览器接管彻底加固铁律
-- **MCP 纯连接模式**：`chrome-devtools` 严格剔除 `--user-data-dir` 参数，仅保留 `--autoConnect`。若用户未启动 Edge Dev，MCP 立即抛出连接等待异常，严禁擅自在后台拉起带自动化参数的无头实例破坏用户 Profile。
+- **MCP 纯连接模式**：`chrome-devtools` 严格剔除 `--user-data-dir` 参数，仅保留 `--autoConnect`（当前版本 `chrome-devtools-mcp@1.9.0`）。若用户未启动 Edge Dev，MCP 立即抛出连接等待异常，严禁擅自在后台拉起带自动化参数的无头实例破坏用户 Profile。
 - **数据解耦与秒级复活**：扩展安装包与用户数据解耦（脚本及配置保存在 `Local Extension Settings` 中不受影响）。若发生异常，重新在 Edge 商店点击获取对应扩展，因全球唯一 Extension ID 恒定，所有脚本与设置将瞬间自动重新挂载，100% 原地满血复活。
+- **MCP 服务器清单（6 个）**：`chrome-devtools`（lazy, idle 60s）、`deepwiki`（远程 URL）、`ekko-studio-{api,browser,devices,use}`（本地 Electron MCP，`HERMES_WEB_UI_URL: http://127.0.0.1:8748`）。
+
+### 4. 审批与安全门禁现状（2026-09-11）
+
+| 配置项 | 值 | 说明 |
+| :--- | :--- | :--- |
+| `approvals.mode` | `off` | 危险 shell 命令审批关闭 |
+| `security.protected_instruction_files` | `false` | 指令文件（AGENTS.md 等）写入门禁关闭 —— 用户拍板，详见独立记忆卡 `hermes-approval-two-tier-gates.md` |
+| `security.redact_secrets` | 默认（开） | 工具输出密钥脱敏，保持开启 |
+| `security.allow_private_urls` | `true` | 允许访问内网回环地址（本地反代需要） |
 
 ---
 
 ## 六、 关键实施与检索指南
 
 - **Why**: Hermes 拥有复杂的桌面与多模型配置，且随版本持续迭代。将软件构建指纹与全量配置快照绑定，不仅杜绝跨端协作时的信息差，还能在未来版本升级出现配置兼容性问题时秒级追溯回滚。
-- **How to apply**: 当用户提及「我改了设置 / 看一下我改的 / 同步一下设置」时，立即执行 `read_file(%LOCALAPPDATA%/hermes/config.yaml)`，同步核对 `hermes --version`，对比变动点后覆写更新本文件与 `hermes-config.yaml` 并提交推送 `main`。
+- **How to apply**: 当用户提及「我改了设置 / 看一下我改的 / 同步一下设置」时，立即执行 `read_file(%LOCALAPPDATA%/hermes/config.yaml)`，同步核对 `hermes --version` 与 `_config_version`，对比变动点后按第四节「快照再生成流程」覆写 `hermes-config.yaml`、更新本文指纹表与变动表，并提交推送 `main`。
+- **脱敏铁律（公开仓）**：任何写入快照的路径必须泛化为 `%USERPROFILE%` / `%LOCALAPPDATA%` / `<EKKO_STUDIO_HOME>` 等占位；账户标识（QQ chat_id 等）替换为 `<REDACTED_*>`。本仓为 **public**，推导式脱敏永远优先于「看着不像敏感」的主观判断。
