@@ -522,7 +522,9 @@ def main():
                 ]))
                 continue
 
-            behind = bool(total != rec_total)
+            # 误报治理（09-11 同 hermes-skills-hub 原则）：仅社区技能总数增长才计为待跟进（behind = True）
+            # 缩量属社区审核下架或统计波动，无需本地动作，绝不误计入 outdated
+            behind = total > rec_total
             diff_str = f"+{total - rec_total}" if total > rec_total else (f"{total - rec_total}" if total < rec_total else "0")
             state = "🔴 有更新" if behind else "✅ 最新"
             rows.append(f"| {comp['display']} | `{cid}` | {total:,} | {state} |")
@@ -530,7 +532,13 @@ def main():
                 outdated += 1
             detail = [f"### {comp['display']}（{cid}）", ""]
             detail.append(f"- 上游最新：**{total:,}** 社区技能")
-            detail.append(f"- 基线记录：**{rec_total:,}** 技能 → " + (f"**社区有新技能上架（{diff_str} 项）**" if behind else "✅ 一致"))
+            if total > rec_total:
+                trend_desc = f"**社区有新技能上架（+{total - rec_total} 项）**"
+            elif total < rec_total:
+                trend_desc = f"社区审核下架/波动（{total - rec_total} 项，无需动作）"
+            else:
+                trend_desc = "✅ 一致"
+            detail.append(f"- 基线记录：**{rec_total:,}** 技能 → {trend_desc}")
             if behind:
                 detail.append("- 跟进：访问 https://www.skillhub.cn/ 浏览新技能；评估后更新 `capability-inventory.json` 中 `totalSkills` 并推 main。")
             details.append("\n".join(detail))

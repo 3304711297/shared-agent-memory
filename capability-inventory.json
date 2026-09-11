@@ -33,26 +33,6 @@
       }
     },
     {
-      "id": "desktop-commander",
-      "display": "Desktop Commander",
-      "checks": [
-        {
-          "type": "npm",
-          "package": "@wonderwhy-er/desktop-commander"
-        }
-      ],
-      "installed": [
-        {
-          "where": "Hermes 插件 upstream.json 记录",
-          "version": "0.2.48"
-        },
-        {
-          "where": "ZCode 插件 claude-plugins-official（插件壳版本 0.2.0，核心随 git-subdir main）【组件已随 ZCode 拆除移除，2026-09-09】",
-          "version": "0.2.48"
-        }
-      ]
-    },
-    {
       "id": "superpowers",
       "display": "Superpowers 开发纪律套件",
       "checks": [
@@ -232,9 +212,9 @@
       "installed": [
         {
           "where": "官网 Skills Hub 聚合索引（书签真源）",
-          "version": "90699",
-          "totalSkills": 90699,
-          "extractedAt": "2026-09-09"
+          "version": "90700",
+          "totalSkills": 90700,
+          "extractedAt": "2026-09-11"
         }
       ]
     },
@@ -251,9 +231,9 @@
       "installed": [
         {
           "where": "国内社区雷达（书签真源）",
-          "version": "1479",
-          "totalSkills": 1479,
-          "extractedAt": "2026-09-09"
+          "version": "1469",
+          "totalSkills": 1469,
+          "extractedAt": "2026-09-11"
         }
       ]
     },
@@ -440,6 +420,7 @@
     }
   ],
   "notWatched": [
+    "【组件已物理移除 2026-09-06/09】desktop-commander：已随 09-06 插件瘦身（3c948c7）与 09-09 ZCode 拆除从双端彻底移除，本地无安装，不再纳入看门",
     "【索引型收录·不实装 2026-09-09】ksimback/hermes-ecosystem（Hermes Atlas）：社区维护的 Hermes 生态项目地图（1229 Stars，bot 自动重建，全量 249 项目→质量过滤收录 80+，12 分类，含 25★+ 仓库安全审查 repos/security-review.md，5 个 WARN 需先审脚本）。经五步评估：价值达标——现有 18 源均为通用技能库/官方源，无 Hermes 生态项目级地图占位，与 hermes-skills-hub（技能维度聚合）互补不重叠；形态为项目目录而非 SKILL 源（零缓存/Token 影响，二八瘦身不适用）。已作为第 19 号源写入 skill-plugin-resources.md（How to apply：找'某类 Hermes 工具是否存在/哪个成熟'时按需检索）；不提供 SKILL.md，无实装、无漂移检查对象。基线 sha bebd922（2026-09-09）",
     "【定向吸收/雷达源·不整装 2026-09-09】google-deepmind/science-skills：GDM 官方科研技能库（2659 Stars，Apache 2.0，基线 sha 28b8482/2026-09-08）。经五步评估：质量与权威性达标（40 skill、63 个 PEP 723 脚本、纯静态提示词不破坏 Prefix Cache、无 Token 倒挂，本机 uv 0.12.9 实测 arxiv 脚本跑通）；但整装会把技能池推至 125 项，违反二八瘦身铁律（~30-50 为宜），且科研生物域与当前主线（系统调优/代理/桌面工程/视频蒸馏）脱节，用户拍板不实装。已作为第 13 号雷达源写入 skill-plugin-resources.md，需要时只按需单拉单个 skill 目录。⛔ 永久禁用其中 predictingthepast（pickle.load 反序列化 GCS 下载的 .pkl 检查点=远程代码执行面 + 强依赖 jax）；凭据门槛：alphagenome/openalex 必需 key，clinvar/dbsnp/ncbi/pubmed/openfda 需 NCBI_API_KEY 提频",
     "【评估否决 2026-09-08】D4Vinci/Scrapling：Python自适应与反爬虫框架。经评估其MCP与本地无头浏览器与现有Exa独享检索及极简MCP终态倒挂，且重型浏览器依赖侵占C盘空间；日常油猴与系统调优工作流无常驻爬虫刚需，仅定性为按需Python脚本库，不予作为常驻MCP/技能引入看门",
