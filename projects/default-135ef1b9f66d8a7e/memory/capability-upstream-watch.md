@@ -52,6 +52,10 @@ metadata:
     - **Issue #12 待跟进项 2（skillhub-market）**：Issue 报告上游 1,468 技能较基线 1,479 产生 -11 差异，提示「社区有新技能上架（-11 项）」。根因：`check_capability_upstream.py` 原代码使用 `behind = bool(total != rec_total)`，导致社区审核下架/统计缩量时误触发 `behind=True` 误开单。**处置**：对齐 `hermes-skills-hub` 原则，重构判定为 `behind = total > rec_total`（仅总数净增长才计入待跟进，缩量属上游数据波动绝不误报），文案同步细化（增长标新上架、缩量标下架清理波动）；基线按实测时点（1,469 项，2026-09-11）回写更新。
     - **skills-hub 微量漂移对齐**：全网索引增长至 90,700（+1 技能，2026-09-11），清单同步对齐收口。
     - **验证全绿**：本地 `--full` 模式验证 `components=20 outdated=0 skipped=0 has_updates=false`，推 main 后 CI 自动收口 Issue #12。
+  - **第七轮（2026-09-11 纳入 IceeAn/codebuddy2api 借鉴雷达与本地报错修复）**：
+    - **IceeAn/codebuddy2api 借鉴雷达建立**：清单 `capability-inventory.json` 引入组件 `c2api-upstream-iceean`（codebuddy2api 活跃衍生库，MIT，25★，基线 `894bc3a`），专职监控腾讯 copilot 系反代上游改动，为脱敏与多账号轮换提供长期观测雷达；
+    - **未绑定变量异常修复**：修复 `scripts/check_capability_upstream.py` 在触发大面积失败熔断保护（`failed_queries >= 3`）时提前引用未定义变量 `gh_out` 导致的 `UnboundLocalError`，置顶提至条件块外；
+    - **验证全绿**：本地验证 `--local-only` 模式 `components=20 outdated=0 skipped=19 has_updates=false` 干净通过。
 - **schedule 时线（2026-09-05 会话归档时状态）**：workflow 文件当日 03:26 UTC 才建到 main，此前仅手动 dispatch（当日 6 次：1 失败=Issue 创建前标签不存在，已由 `fix(watch): Issue 创建前先确保 capability-watch 标签存在` 自愈，其后全绿）；**首次 schedule 触发预计 2026-09-06 UTC 01:00（北京 09:00），归档时待验证**。
 - **【重大事故复盘 2026-09-05】cli/config.json 的 provider.npm 字段导致整份用户配置被 CLI 静默丢弃**：桌面端/第三方工具写入的 provider 条目含 `npm` 键，而捆绑 CLI（zcode.cjs 0.16.5）的 zod schema 定义 `npm: g.never()`——出现即 parse 失败→配置回退空对象（无任何诊断输出）。症状：marketplace 来源插件（github/claude 市场系）全部显示 disabled、GUI 开关点击弹回、更新徽章异常；bundled 内置插件因走 officialPluginsEnabledByDefault 默认启用列表而看似正常，极具迷惑性。修复=删掉 provider 各条目的 `npm` 键（其他字段 passthrough 全兼容）。排查路径：CLI `plugins list --json` 状态矛盾 → 沙盒复刻（USERPROFILE 重定向+junction plugins 目录+二分 config 段落→字段）。**教训：cli/config.json 是 schema 强校验文件，手工/第三方工具写入前必须过 CLI `plugins list` 冒烟验证**。
 - **无 CLI 的 ZCode 插件手工更新法（复刻安装器行为，已两次实操验证）**：下载 zip/tarball → 校验 sha256/来源 → 解压到 cache 新版本目录（zip 需剥离顶层前缀）→ installed_plugins.json 定向更新 version/installPath/updatedAt/source.sha（勿动 cacheTransactionId 等其余字段）→ 删旧版本目录（.git 只读 pack 需先 chmod -R u+w）→ 本地跑脚本验证全绿。注意 python 脚本内不可用 /tmp 路径（MSYS 虚拟路径，Windows python 看不到）。

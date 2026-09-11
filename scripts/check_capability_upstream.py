@@ -674,6 +674,7 @@ def main():
     report = "\n".join(lines)
 
     # 本地非 local-only 模式且遭遇大面积失败（API 限额或网络中断）时，拒绝写盘覆盖已有报告
+    gh_out = os.environ.get("GITHUB_OUTPUT")
     if not on_actions and not local_only and failed_queries >= 3:
         sys.stderr.write(
             f"\n[WARN] 本地检测到 {failed_queries} 项上游查询失败（如未带 GH_TOKEN 触发 GitHub API 403 限额或网络波动）。\n"
