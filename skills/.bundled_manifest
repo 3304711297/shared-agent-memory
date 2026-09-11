@@ -11,6 +11,7 @@ claude-code:11185c8a90b5600cafe267fff856c427
 claude-design:a839ed75e38167058cb363f63b64c6a3
 codebase-inspection:1775b8518df273a4d671c4afe54696b4
 codex:8822d280c3de7ad5827937b83afa0a88
+collective-wisdom-install:0c7f315ccae40887a610c1db8e19a6ae
 competitor-news-monitor:c9852e669f65b7015a90512fdb6593db
 computer-use:71427f1788e9bb83494610aebfdfb92c
 design-md:b2077c0e0a2414078b14d862f50c49b0
@@ -24,7 +25,7 @@ github:1183b1c0561ace55cc5c353404641922
 google-workspace:7e307aaca1d54706e954220e66c196e3
 grounded-citations:7dc6894246516d00bca5c21de126c770
 hermes-agent:a68ec1e919511f33aafa0d066ab276b0
-hermes-agent-skill-authoring:2ac48f56c490196e4275b5c5f3eed687
+hermes-agent-skill-authoring:753716d3d209ae66ee6201582dc9556a
 himalaya:c08e32ca75e273d79773266f514c5b23
 humanizer:e0e8c8be91ccf05c8ca1601d63439ea8
 imessage:f545da0f5cc64dd9ee1ffd2b7733a11b
