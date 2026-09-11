@@ -1,19 +1,20 @@
 ---
 name: workbuddy-proxy-startup
-description: codebuddy2openai 反代（127.0.0.1:8787）启动、故障排查与 venv 依赖说明
+description: WorkBuddy2API 反代（127.0.0.1:8787）启动、故障排查与 venv 依赖说明
 metadata:
   node_type: memory
   type: reference
   originSessionId: sess_c9f48820-9daf-4a39-9173-ecedab6369dc
 ---
 
-# codebuddy2openai 反代运维速查
+# WorkBuddy2API 反代运维速查
+
+> 2026-09-11 更新：项目已由 `codebuddy2openai` 更名为 `workbuddy2api`；反代（converter.py 内核）现由 Tauri 桌面控制台托管（服务看板「启动/停止」或托盘「启动内核/停止内核/重启内核」），下述 vbs/bat 脚本属早期裸跑方式，仅作历史参考。
 
 ## 启动
-- 无窗口启动（推荐）：双击桌面快捷方式 `start_silent.vbs`（日志追加到项目目录 `proxy_stdout.log`）
-- 窗口模式：`start_workbuddy_proxy.bat`
-- 两者均已改用受管 venv 解释器：`%USERPROFILE%\.workbuddy\binaries\python\envs\default\Scripts\python.exe converter.py --port 8787 --desensitize`
-- 项目目录：`%LOCALAPPDATA%\hermes\codebuddy2openai`
+- **当前推荐**：工作区 `D:/ai coding/GitRepos/workbuddy2api` → 运行 `src-tauri/target/release/workbuddy2api.exe`（或桌面快捷方式），在「服务看板」启动服务，或在托盘菜单启动内核。
+- 历史方式（GUI 引入前）：`start_silent.vbs` / `start_workbuddy_proxy.bat`，用受管 venv 解释器 `%USERPROFILE%\.workbuddy\binaries\python\envs\default\Scripts\python.exe converter.py --port 8787 --desensitize`
+- 数据目录：`%LOCALAPPDATA%\workbuddy2api`（回退兼容旧目录 `%LOCALAPPDATA%\codebuddy2openai`）
 
 > **⚠️ vbs 重定向坑（2026-09-04 已修）**：`WshShell.Run` 不经 cmd.exe，直接写 `python.exe ... >> log 2>&1` 会导致 `>>` 被当作字面参数、CreateProcess 静默失败——双击快捷方式毫无反应（.bat 正常，因为 cmd 原生支持重定向）。vbs 内必须包一层 `cmd /c`：`WshShell.Run "cmd /c """"...python.exe"" converter.py --port 8787 --desensitize >> proxy_stdout.log 2>&1""", 0, False`。
 

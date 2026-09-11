@@ -369,12 +369,12 @@
           "type": "github-commits-path",
           "repo": "xiaofan6ya/workbuddy2api",
           "path": ".",
-          "note": "codebuddy2openai 的借鉴源仓库（workbuddy2api 网关+多账号共享平台）；监控整仓新提交，出现可采纳改进（协议适配器/投影压缩/脱敏词表）时评估摘樱桃。"
+          "note": "workbuddy2api 的借鉴源仓库（同名网关+多账号共享平台）；监控整仓新提交，出现可采纳改进（协议适配器/投影压缩/脱敏词表）时评估摘樱桃。"
         }
       ],
       "installed": [
         {
-          "where": "借鉴雷达（codebuddy2openai 已吸收其 X-Device-Token 注入方案）",
+          "where": "借鉴雷达（workbuddy2api 已吸收其 X-Device-Token 注入方案）",
           "version": "HEAD@74d4473",
           "sha": "74d4473814801968dc478f76d20bbfc43e86bd1c"
         }
@@ -393,7 +393,7 @@
       ],
       "installed": [
         {
-          "where": "借鉴雷达（codebuddy2openai 已吸收其 reasoning 合并器/空段清洗/品牌词脱敏）",
+          "where": "借鉴雷达（workbuddy2api 已吸收其 reasoning 合并器/空段清洗/品牌词脱敏）",
           "version": "HEAD@3e6b223",
           "sha": "3e6b223a4c27ff98c9a14e25039e32fec3e33487"
         }
@@ -407,12 +407,12 @@
           "type": "github-commits-path",
           "repo": "IceeAn/codebuddy2api",
           "path": ".",
-          "note": "腾讯 copilot 系反代的活跃衍生库（MIT，25★），含凭证轮换/令牌管理/多账号调度等codebuddy2openai 尚未具备的能力；监控整仓新提交，出现可采纳改进时评估摘樱桃。【合规红线】上游 xueyue33/codebuddy2api 无 LICENSE（all rights reserved），MIT 仅覆盖 IceeAn 自 bce86ded 起独立重写的当前树；只借鉴思路不整文件搬运，若取代码须出自当前树并在 THIRD_PARTY_NOTICES.md 署名 IceeAn。"
+          "note": "腾讯 copilot 系反代的活跃衍生库（MIT，25★），含凭证轮换/令牌管理/多账号调度等 workbuddy2api 已补齐的能力；监控整仓新提交，出现可采纳改进时评估摘樱桃。【合规红线】上游 xueyue33/codebuddy2api 无 LICENSE（all rights reserved），MIT 仅覆盖 IceeAn 自 bce86ded 起独立重写的当前树；只借鉴思路不整文件搬运，若取代码须出自当前树并在 THIRD_PARTY_NOTICES.md 署名 IceeAn。"
         }
       ],
       "installed": [
         {
-          "where": "借鉴雷达（codebuddy2openai 已吸收其 Claude 客户端指纹脱敏思路，P0 已落地）",
+          "where": "借鉴雷达（workbuddy2api 已吸收其 Claude 客户端指纹脱敏思路，P0 已落地）",
           "version": "HEAD@894bc3a",
           "sha": "894bc3ac645198ff804533afad981e0c3a2c38c7"
         }
