@@ -81,5 +81,6 @@
 - [Local LLM Bench and Model Lineup](local-llm-bench-and-model-lineup.md) — 09-09 本地三模型横评(MiniCPM5-2B 与 Qwen3.5-9B 双满分,R1-7B 已删)+ bench.py 可复用基建(/health 只收 GET 坑)+ 嵌入备选备忘(jina-v5-nano 三理由搁置,重建索引再议)
 - [ZCode Decommissioned](zcode-decommissioned.md) — **2026-09-09 ZCode 客户端全量拆除**：~/.zcode 与 D:\ai coding\.zcode 已删、Roaming 残留与注册表已清；会话转录归档 shared-agent-sessions zcode 分支（GUI db.sqlite.gz 75MB + 24 CLI 会话）；共享记忆库真源迁 D:/ai coding/GitRepos/shared-agent-memory（junction 重指）；唯一遗留关联=智谱活动赠额经 zcode-api 反代进 Hermes（SOP 见 OpenViking zcode_api 卡）
 - [Codebuddy Upstream 11128 Fingerprint Block](codebuddy-upstream-11128-fingerprint-block.md) — 09-10 反代会话突然不可用根因：**code 11128 安全策略拦截**（非 6004 限流）；整串匹配非分词、仅拦 system/assistant 角色（user/tool 不拦，故脱敏范围不用扩）、毒串进 assistant 历史后永久复现故修代码救不回旧会话；二分探针定位法（探针须以 user 开头，否则 11151/11148 会误报为缺陷）
+- [Hy4 Billing Daytime Verified](hy4-billing-daytime-verified.md) — 2026-09-11 白天 hy4 计费实测：限免结束（单次 2500 output tokens 扣 0.73 credits，折合 ~292 credits/1M tokens），60~90s 异步滞后落账，白天计费 vs 夜间（23:00–08:00）免费二元划分成立
 
 
