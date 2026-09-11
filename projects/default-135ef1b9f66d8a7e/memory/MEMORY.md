@@ -82,5 +82,8 @@
 - [ZCode Decommissioned](zcode-decommissioned.md) — **2026-09-09 ZCode 客户端全量拆除**：~/.zcode 与 D:\ai coding\.zcode 已删、Roaming 残留与注册表已清；会话转录归档 shared-agent-sessions zcode 分支（GUI db.sqlite.gz 75MB + 24 CLI 会话）；共享记忆库真源迁 D:/ai coding/GitRepos/shared-agent-memory（junction 重指）；唯一遗留关联=智谱活动赠额经 zcode-api 反代进 Hermes（SOP 见 OpenViking zcode_api 卡）
 - [Codebuddy Upstream 11128 Fingerprint Block](codebuddy-upstream-11128-fingerprint-block.md) — 09-10 反代会话突然不可用根因：**code 11128 安全策略拦截**（非 6004 限流）；整串匹配非分词、仅拦 system/assistant 角色（user/tool 不拦，故脱敏范围不用扩）、毒串进 assistant 历史后永久复现故修代码救不回旧会话；二分探针定位法（探针须以 user 开头，否则 11151/11148 会误报为缺陷）
 - [Hy4 Billing Daytime Verified](hy4-billing-daytime-verified.md) — 2026-09-11 白天 hy4 计费实测：限免结束（单次 2500 output tokens 扣 0.73 credits，折合 ~292 credits/1M tokens），60~90s 异步滞后落账，白天计费 vs 夜间（23:00–08:00）免费二元划分成立
+- [Workbuddy2api Rebrand and Dual Source](workbuddy2api-rebrand-and-dual-source.md) — 项目更名 codebuddy2openai→workbuddy2api（对齐腾讯官方 WorkBuddy 品牌，凸显 OpenAI+Anthropic 双协议）与双源并发聚合模型清单（国内 CodeBuddy 29 + 海外 WorkBuddy 21，按 id 去重优选 1M 上下文元数据，接入 gpt-6-astra）
+- [Workbuddy2api Hot Reload and Rebrand Cleanup](workbuddy2api-hot-reload-and-rebrand-cleanup.md) — 调度策略改运行时热读 settings.json（mtime 签名缓存，`config_source: hot` 可观测，免重启）+ 改名遗留六层清理（托盘/前端/UA/日志器/文档/环境变量兼容层 `_env_compat` 与 `env_compat`，新名优先旧名兜底）；含 `.venv` trampoline 修复
+- [Hermes Approval Two Tier Gates](hermes-approval-two-tier-gates.md) — Hermes 审批弹窗分两层：`approvals.mode` 管危险 shell 命令，`security.protected_instruction_files` 管 AGENTS.md/CLAUDE.md/SOUL.md/.cursorrules 写入（**even under --yolo 绕不过**，fail-closed，单次审批无「始终允许」）；**本机已按用户拍板全局关闭后者**（2026-09-11），恢复命令与副作用已记录
 
 
