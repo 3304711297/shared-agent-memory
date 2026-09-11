@@ -1,6 +1,6 @@
 # Local Custom Provider & Desktop GUI Registration
 
-When exposing a local model proxy/bridge (e.g. `codebuddy2openai`, `antigravity`, `ollama`, or local adapters) to Hermes Desktop and CLI, follow these steps to ensure full visibility across the GUI dropdown and slash commands.
+When exposing a local model proxy/bridge (e.g. `workbuddy2api` (formerly `codebuddy2openai`), `antigravity`, `ollama`, or local adapters) to Hermes Desktop and CLI, follow these steps to ensure full visibility across the GUI dropdown and slash commands.
 
 ## 1. Local Adapter Execution
 - Ensure the local proxy is listening on `127.0.0.1:<PORT>/v1` (e.g., `8787` for CodeBuddy/WorkBuddy, `18080` for Antigravity).
@@ -50,7 +50,7 @@ model_aliases:
     base_url: http://127.0.0.1:<PORT>/v1
 ```
 ## 6. WorkBuddy / CodeBuddy Specific Model Names & Upstream Mapping
-When bridging Tencent CodeBuddy/WorkBuddy via `codebuddy2openai` (`8787`), the upstream backend (`copilot.tencent.com/v2/chat/completions`) recognizes specific model identifiers (extracted and verified from `product.json` & live tests):
+When bridging Tencent CodeBuddy/WorkBuddy via `workbuddy2api` (`8787`), the upstream backend (`copilot.tencent.com/v2/chat/completions`) recognizes specific model identifiers (extracted and verified from `product.json` & live tests):
 - **Hunyuan**: `hy4-preview` (backend ID; map `hy4` -> `hy4-preview`), `hy3-preview-agent` (backend ID; map `hy3` / `hy3-preview` -> `hy3-preview-agent`).
 - **GLM**: `glm-5.3`, `glm-5.3-flash`, `glm-5.2`, `glm-5.1`, `glm-5v-turbo` (`glm-5.0` is retired upstream).
 - **Kimi**: `kimi-k3-1` (map `kimi-k3` -> `kimi-k3-1`), `kimi-k2.7`, `kimi-k2.6`, `kimi-k2.5`.

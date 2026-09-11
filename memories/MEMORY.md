@@ -2,7 +2,7 @@ Model: gemini-3.8-flash via EasyCLIProxyAPI (18080, provider=cpa-gui) -> Antigra
 §
 Windows: Karing proxy 127.0.0.1:3067 (Karing itself 1666). 3067 listens only with an outbound node up; no listener = no route, check node first when push hangs. Bare push: `env -u ALL_PROXY -u HTTP_PROXY -u HTTPS_PROXY`. PyPI CDN = files.pythonhosted.org. gh acct 3304711297. Browser Edge Dev + chrome-devtools MCP. NO_PROXY list & Edge Dev CDP quirk -> OpenViking.
 §
-WorkBuddy = codebuddy2openai reverse proxy 127.0.0.1:8787/v1 (Tauri v2: multi-acct, credits, tray, Hermes write). Ops detail -> OpenViking.
+WorkBuddy2API (原 codebuddy2openai，仓库+工作区已改名) = 本地反代 127.0.0.1:8787/v1，支持 OpenAI + Anthropic 双协议；Tauri v2 桌面控制台（多账号/调度策略 failover·roundrobin/积分）。多账号调度策略热读 settings.json 免重启。Ops detail -> OpenViking。
 §
 Hardware: RTX 4070 Laptop 8GB + 24GB; models/runtime junctioned to D:. D:\HermesModels: bge-m3=OV embedding(18082), MiniCPM5-2B + Qwen3.5-9B chat. OpenViking venv on-demand, sleeps 2min idle. MCP: chrome-devtools (--autoConnect, connect-only) + deepwiki.
 §
