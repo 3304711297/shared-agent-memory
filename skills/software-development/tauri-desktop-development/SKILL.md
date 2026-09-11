@@ -25,6 +25,17 @@ up to date. When the user asks "把本地构建到最新版了吗", answer direc
 real artifact status: distinguish frontend `dist/` from full release installer/exe.
 Before building, `taskkill /IM <app>.exe /F` (see Pitfall 3 on os error 32).
 
+**Verifying a rebuilt exe actually embeds the new frontend** (post-build check):
+grep the exe for the hashed asset filenames from `dist/assets/` (e.g.
+`index-BiRZclqE.js`) — those hashes live in Tauri's generated asset manifest and
+survive embedding, so a hit proves the build picked up the new `dist/`. Do NOT
+grep the exe for frontend *string literals* (Chinese UI text etc.): Tauri embeds
+assets **brotli-compressed** (the `brotli` crate appears in `Cargo.lock`), so raw
+text never appears in the binary and a miss means nothing. Also expect window
+capture to return a 16x16 blank frame when the app is hidden to tray — enumeration
+showing `visible=False` on the main `Tauri Window` class is the explanation, not a
+fault; verify via asset hashes instead of screenshots.
+
 Only after local is green: commit → push → merge.
 **Non-blocking CI Discipline**: Do NOT block the conversation synchronously
 waiting for remote CI (`gh pr checks --watch` in foreground) when the local
