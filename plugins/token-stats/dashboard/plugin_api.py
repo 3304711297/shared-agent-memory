@@ -200,7 +200,7 @@ def _workbuddy_rate_limit() -> dict[str, Any]:
                 resetLocal=entry.get("resetLocal"),
                 remainingSec=entry.get("remainingSec"),
                 message=entry.get("message"),
-                source="codebuddy2openai /api/rate_limit",
+                source="workbuddy2api /api/rate_limit",
             )
             # 反代自 a404e80 起把「冷却已结束」从 ok 细化为 expired，三态语义：
             #   limited=正在冷却 / expired=曾限过已恢复 / ok=从未被限（无条目）
@@ -278,7 +278,9 @@ def _workbuddy_rate_limit() -> dict[str, Any]:
         reqs5 = reqs24 = err5 = 0
         tok5 = tok24 = 0
         last429: Optional[float] = None
-        p = Path(os.environ.get("LOCALAPPDATA", "")) / "codebuddy2openai" / "usage" / "usage.jsonl"
+        p = Path(os.environ.get("LOCALAPPDATA", "")) / "workbuddy2api" / "usage" / "usage.jsonl"
+        if not p.exists():
+            p = Path(os.environ.get("LOCALAPPDATA", "")) / "codebuddy2openai" / "usage" / "usage.jsonl"
         if p.exists():
             with open(p, "r", encoding="utf-8") as f:
                 for line in f:
@@ -349,7 +351,7 @@ def _workbuddy_rate_limit() -> dict[str, Any]:
 
 
 def check_workbuddy_status() -> dict[str, Any]:
-    """Non-blocking check for local WorkBuddy / codebuddy2openai gateway (port 8787).
+    """Non-blocking check for local WorkBuddy / workbuddy2api gateway (port 8787).
 
     Probes /v1/models for liveness, then fetches /api/usage_summary for
     credits & active account (endpoint added by ZCode, commit 5b4381c).
@@ -366,7 +368,7 @@ def check_workbuddy_status() -> dict[str, Any]:
                 models = data.get("data", [])
                 base: dict[str, Any] = {
                     "id": "workbuddy",
-                    "name": "WorkBuddy (codebuddy2openai)",
+                    "name": "WorkBuddy (workbuddy2api)",
                     "status": "online",
                     "statusLabel": "运行中",
                     "endpoint": endpoint,
@@ -409,7 +411,7 @@ def check_workbuddy_status() -> dict[str, Any]:
 
     return {
         "id": "workbuddy",
-        "name": "WorkBuddy (codebuddy2openai)",
+        "name": "WorkBuddy (workbuddy2api)",
         "status": "offline",
         "statusLabel": "未启动",
         "endpoint": endpoint,
@@ -670,7 +672,7 @@ def format_quota_markdown(data: dict) -> str:
         lines.append(f"  - Claude 3p 协同: `{acc.get('claudeQuota5h', 100)}%`")
 
     lines.append("")
-    lines.append("**WorkBuddy (codebuddy2openai)**")
+    lines.append("**WorkBuddy (workbuddy2api)**")
     lines.append(f"- **网关状态**：`{wb_status}` · `{wb_note}`")
     lines.append("- **本地端点**：`http://127.0.0.1:8787/v1`")
 
@@ -819,13 +821,27 @@ def _read_current_chat_route() -> dict[str, Any]:
     return out
 
 
+def _resolve_provider_key(p: dict) -> str:
+    """提取 provider 的可用 API 密钥（兼容环境变量、直接字段与本地默认值）。"""
+    k = str(p.get("api_key") or "")
+    if k:
+        return k
+    key_env = p.get("key_env")
+    if key_env and os.environ.get(key_env):
+        return os.environ[key_env]
+    base_url = str(p.get("base_url") or "")
+    if "127.0.0.1" in base_url or "localhost" in base_url or p.get("id") in ("codebuddy", "workbuddy", "cpa"):
+        return "local"
+    return ""
+
+
 def _map_provider(provider_slug: Optional[str], model_name: Optional[str] = None) -> dict[str, Any]:
-    """把 billing_provider slug 映射到 config.yaml custom_providers 条目。
+    """把 billing_provider slug 映射到 config.yaml providers / custom_providers 条目。
 
     匹配顺序:
-    ① 若 slug 形如 custom:name 或纯 name，先按名字 slug / 端口匹配；
+    ① 若 slug 形如 custom:name、纯 name 或 provider id，先按名字 slug / ID / 端口匹配；
     ② 若 slug 为 "custom" 或未按名称直接命中，通过当前聊天模型 model_name 在各 provider 的 models 目录中反查；
-    ③ 若仍未命中，当 slug 为 custom 或空时兜底使用 config.yaml 的 model.provider 字段定位默认 custom_provider。
+    ③ 若仍未命中，当 slug 为 custom 或空时兜底使用 config.yaml 的 model.provider 字段定位默认 provider。
     """
     fail = {"resolved": False}
     try:
@@ -836,34 +852,59 @@ def _map_provider(provider_slug: Optional[str], model_name: Optional[str] = None
         fail["reason"] = f"config.yaml 读取失败: {exc}"
         return fail
 
-    providers: list[dict] = cfg.get("custom_providers") or []
+    # 规范化：兼容现代 providers (dict) 与旧版 custom_providers (list)
+    raw_providers = cfg.get("providers")
+    providers: list[dict] = []
+    if isinstance(raw_providers, dict):
+        for pid, pdata in raw_providers.items():
+            if isinstance(pdata, dict):
+                p = dict(pdata)
+                p["id"] = str(pid)
+                p.setdefault("name", pdata.get("name") or pid)
+                providers.append(p)
+    elif isinstance(raw_providers, list):
+        providers.extend([p for p in raw_providers if isinstance(p, dict)])
+
+    legacy_custom = cfg.get("custom_providers")
+    if isinstance(legacy_custom, list):
+        for p in legacy_custom:
+            if isinstance(p, dict) and p not in providers:
+                providers.append(p)
+
     if not providers:
-        fail["reason"] = "config.yaml 中未配置任何 custom_providers"
+        fail["reason"] = "config.yaml 中未配置任何 providers"
         return fail
 
     clean_slug = (provider_slug or "").strip()
 
-    # 1. 尝试按名称/端口匹配（当 slug 明确指定了具体 provider 名称或包含端口时）
+    # 1. 尝试按名称/端口/ID匹配（当 slug 明确指定了具体 provider 名称或包含端口时）
     if clean_slug and clean_slug.lower() != "custom":
         slug_body = clean_slug[7:].strip() if clean_slug.lower().startswith("custom:") else clean_slug
         want = "custom:" + _re.sub(r"\s+", "-", slug_body.lower())
         port_m = _re.search(r"\(([\d.]+:\d+)\)", clean_slug)
         for p in providers:
             name = str(p.get("name") or "")
+            pid = str(p.get("id") or "")
             name_slug = "custom:" + _re.sub(r"\s+", "-", name.strip().lower())
+            pid_slug = "custom:" + _re.sub(r"\s+", "-", pid.strip().lower())
             base_url = str(p.get("base_url") or "")
-            matched = (name_slug == want) or (name.strip().lower() == slug_body.lower())
+            matched = (
+                (name_slug == want)
+                or (pid_slug == want)
+                or (name.strip().lower() == slug_body.lower())
+                or (pid.strip().lower() == slug_body.lower())
+            )
             if not matched and port_m and port_m.group(1) in base_url:
                 matched = True
             if matched:
-                api_key = str(p.get("api_key") or "")
+                api_key = _resolve_provider_key(p)
                 if not api_key:
-                    return {"resolved": False, "reason": f"provider「{name}」缺 api_key"}
+                    return {"resolved": False, "reason": f"provider「{name or pid}」缺 api_key"}
                 models_raw = p.get("models") or {}
                 models_list = list(models_raw.keys()) if isinstance(models_raw, dict) else list(models_raw)
                 return {
                     "resolved": True,
-                    "name": name,
+                    "name": name or pid,
                     "base_url": base_url.rstrip("/"),
                     "api_key": api_key,
                     "models": models_list,
@@ -873,15 +914,16 @@ def _map_provider(provider_slug: Optional[str], model_name: Optional[str] = None
     if model_name:
         for p in providers:
             name = str(p.get("name") or "")
+            pid = str(p.get("id") or "")
             models_raw = p.get("models") or {}
             models_list = list(models_raw.keys()) if isinstance(models_raw, dict) else list(models_raw)
             if model_name in models_list:
-                api_key = str(p.get("api_key") or "")
+                api_key = _resolve_provider_key(p)
                 if not api_key:
-                    return {"resolved": False, "reason": f"provider「{name}」缺 api_key"}
+                    return {"resolved": False, "reason": f"provider「{name or pid}」缺 api_key"}
                 return {
                     "resolved": True,
-                    "name": name,
+                    "name": name or pid,
                     "base_url": str(p.get("base_url") or "").rstrip("/"),
                     "api_key": api_key,
                     "models": models_list,
@@ -893,15 +935,19 @@ def _map_provider(provider_slug: Optional[str], model_name: Optional[str] = None
         if default_provider_name:
             for p in providers:
                 name = str(p.get("name") or "")
-                if name.strip().lower() == str(default_provider_name).strip().lower():
-                    api_key = str(p.get("api_key") or "")
+                pid = str(p.get("id") or "")
+                if (
+                    name.strip().lower() == str(default_provider_name).strip().lower()
+                    or pid.strip().lower() == str(default_provider_name).strip().lower()
+                ):
+                    api_key = _resolve_provider_key(p)
                     if not api_key:
-                        return {"resolved": False, "reason": f"默认 provider「{name}」缺 api_key"}
+                        return {"resolved": False, "reason": f"默认 provider「{name or pid}」缺 api_key"}
                     models_raw = p.get("models") or {}
                     models_list = list(models_raw.keys()) if isinstance(models_raw, dict) else list(models_raw)
                     return {
                         "resolved": True,
-                        "name": name,
+                        "name": name or pid,
                         "base_url": str(p.get("base_url") or "").rstrip("/"),
                         "api_key": api_key,
                         "models": models_list,
@@ -909,9 +955,9 @@ def _map_provider(provider_slug: Optional[str], model_name: Optional[str] = None
 
     # 4. 无法映射时的明确原因
     if clean_slug and clean_slug.lower() not in ("custom", ""):
-        fail["reason"] = f"非本地 custom 类型 provider（{clean_slug}），无本地凭据可映射"
+        fail["reason"] = f"未找到匹配「{clean_slug}」且支持模型「{model_name or '未知'}」的本地 provider 凭据"
     else:
-        fail["reason"] = f"custom_providers 中找不到支持模型「{model_name or '未知'}」的本地凭据"
+        fail["reason"] = f"providers 中未找到支持模型「{model_name or '未知'}」的端点配置"
     return fail
 
 

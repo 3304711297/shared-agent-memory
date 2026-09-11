@@ -653,119 +653,7 @@ function AntigravityQuotaChip({ ctx }) {
               ],
             }),
 
-          // 配额核心指标区
-          jsxs('div', {
-            className: 'flex flex-col gap-3 py-1',
-            children: [
-              // 5 小时额度条
-              jsxs('div', {
-                className: 'flex flex-col gap-1.5',
-                children: [
-                  jsxs('div', {
-                    className: 'flex items-center justify-between text-xs',
-                    children: [
-                      jsxs('div', {
-                        className: 'flex items-center gap-1.5',
-                        children: [
-                          jsx('span', {
-                            className: 'text-(--ui-text-secondary) font-medium',
-                            children: 'Gemini 5h 滚动额度',
-                          }),
-                          !viewingAccount.isActive &&
-                            jsx('span', {
-                              className: 'text-[9px] px-1 py-0.2 rounded bg-amber-500/20 text-amber-300 font-mono',
-                              children: '待机预览',
-                            }),
-                        ],
-                      }),
-                      jsxs('span', {
-                        className: cn('font-mono font-semibold', getTextColor(viewingAccount.quota5h)),
-                        children: [viewingAccount.quota5h, '%'],
-                      }),
-                    ],
-                  }),
-                  jsx('div', {
-                    className: 'h-1.5 w-full rounded-full bg-white/10 overflow-hidden',
-                    children: jsx('div', {
-                      className: cn(
-                        'h-full rounded-full transition-all duration-500',
-                        getProgressColor(viewingAccount.quota5h)
-                      ),
-                      style: { width: `${Math.min(100, Math.max(0, viewingAccount.quota5h))}%` },
-                    }),
-                  }),
-                  jsxs('div', {
-                    className: 'flex items-center justify-between text-[0.6875rem] text-(--ui-text-tertiary)',
-                    children: [
-                      jsx('span', { children: '⏳ 重置倒计时' }),
-                      jsx('button', {
-                        type: 'button',
-                        onClick: toggleFormat,
-                        title: '点击切换 相对/绝对 显示格式',
-                        className: 'font-mono text-zinc-300 hover:text-white cursor-pointer transition-colors',
-                        children: formatResetTime(viewingAccount.reset5h, formatMode),
-                      }),
-                    ],
-                  }),
-                ],
-              }),
-
-              jsx(Separator, { className: 'bg-white/5 my-0.5' }),
-
-              // 周额度条
-              jsxs('div', {
-                className: 'flex flex-col gap-1.5',
-                children: [
-                  jsxs('div', {
-                    className: 'flex items-center justify-between text-xs',
-                    children: [
-                      jsxs('div', {
-                        className: 'flex items-center gap-1.5',
-                        children: [
-                          jsx('span', {
-                            className: 'text-(--ui-text-secondary) font-medium',
-                            children: 'Gemini 本周总配额',
-                          }),
-                          !viewingAccount.isActive &&
-                            jsx('span', {
-                              className: 'text-[9px] px-1 py-0.2 rounded bg-amber-500/20 text-amber-300 font-mono',
-                              children: '待机预览',
-                            }),
-                        ],
-                      }),
-                      jsxs('span', {
-                        className: cn('font-mono font-semibold', getTextColor(viewingAccount.quotaWeekly)),
-                        children: [viewingAccount.quotaWeekly, '%'],
-                      }),
-                    ],
-                  }),
-                  jsx('div', {
-                    className: 'h-1.5 w-full rounded-full bg-white/10 overflow-hidden',
-                    children: jsx('div', {
-                      className: cn(
-                        'h-full rounded-full transition-all duration-500',
-                        getProgressColor(viewingAccount.quotaWeekly)
-                      ),
-                      style: { width: `${Math.min(100, Math.max(0, viewingAccount.quotaWeekly))}%` },
-                    }),
-                  }),
-                  jsxs('div', {
-                    className: 'flex items-center justify-between text-[0.6875rem] text-(--ui-text-tertiary)',
-                    children: [
-                      jsx('span', { children: '⏳ 完全刷新' }),
-                      jsx('button', {
-                        type: 'button',
-                        onClick: toggleFormat,
-                        title: '点击切换 相对/绝对 显示格式',
-                        className: 'font-mono text-zinc-300 hover:text-white cursor-pointer transition-colors',
-                        children: formatResetTime(viewingAccount.resetWeekly, formatMode),
-                      }),
-                    ],
-                  }),
-                ],
-              }),
-
-              // 3P 协同池 (Claude / GPT)
+          // 3P 协同池 (Claude / GPT)
               (viewingAccount.claudeQuota5h != null || quotaData.claude5h != null) &&
                 jsxs('div', {
                   className:
@@ -1331,106 +1219,6 @@ function QuotaPage({ ctx }) {
               ],
             }),
 
-          // 核心两列指标：5h 与 每周总配额
-          jsxs('div', {
-            className: 'grid grid-cols-1 md:grid-cols-2 gap-4',
-            children: [
-              // 5 小时卡
-              jsxs('div', {
-                className: 'p-4 rounded-xl bg-black/20 border border-white/5 flex flex-col gap-3',
-                children: [
-                  jsxs('div', {
-                    className: 'flex items-center justify-between',
-                    children: [
-                      jsxs('div', {
-                        className: 'flex items-center gap-2',
-                        children: [
-                          jsx('span', { className: 'text-xs text-(--ui-text-secondary) font-medium', children: 'Gemini 5h 滚动额度' }),
-                          !viewingAccount.isActive &&
-                            jsx('span', {
-                              className: 'text-[10px] font-mono px-1.5 py-0.2 rounded bg-amber-500/15 text-amber-300',
-                              children: '待机预览',
-                            }),
-                        ],
-                      }),
-                      jsxs('span', {
-                        className: cn('font-mono text-2xl font-bold tracking-tight', getTextColor(viewingAccount.quota5h)),
-                        children: [viewingAccount.quota5h, '%'],
-                      }),
-                    ],
-                  }),
-                  jsx('div', {
-                    className: 'h-2 w-full rounded-full bg-white/10 overflow-hidden',
-                    children: jsx('div', {
-                      className: cn('h-full rounded-full transition-all duration-500', getProgressColor(viewingAccount.quota5h)),
-                      style: { width: `${Math.min(100, Math.max(0, viewingAccount.quota5h))}%` },
-                    }),
-                  }),
-                  jsxs('div', {
-                    className: 'flex items-center justify-between text-xs text-(--ui-text-tertiary)',
-                    children: [
-                      jsx('span', { children: '⏳ 重置时间' }),
-                      jsx('button', {
-                        type: 'button',
-                        onClick: toggleFormat,
-                        className: 'font-mono text-zinc-300 hover:text-white transition-colors cursor-pointer',
-                        title: '点击切换 相对倒计时 / 绝对具体时刻',
-                        children: formatResetTime(viewingAccount.reset5h, formatMode),
-                      }),
-                    ],
-                  }),
-                ],
-              }),
-
-              // 每周总配额卡
-              jsxs('div', {
-                className: 'p-4 rounded-xl bg-black/20 border border-white/5 flex flex-col gap-3',
-                children: [
-                  jsxs('div', {
-                    className: 'flex items-center justify-between',
-                    children: [
-                      jsxs('div', {
-                        className: 'flex items-center gap-2',
-                        children: [
-                          jsx('span', { className: 'text-xs text-(--ui-text-secondary) font-medium', children: 'Gemini 每周总配额' }),
-                          !viewingAccount.isActive &&
-                            jsx('span', {
-                              className: 'text-[10px] font-mono px-1.5 py-0.2 rounded bg-amber-500/15 text-amber-300',
-                              children: '待机预览',
-                            }),
-                        ],
-                      }),
-                      jsxs('span', {
-                        className: cn('font-mono text-2xl font-bold tracking-tight', getTextColor(viewingAccount.quotaWeekly)),
-                        children: [viewingAccount.quotaWeekly, '%'],
-                      }),
-                    ],
-                  }),
-                  jsx('div', {
-                    className: 'h-2 w-full rounded-full bg-white/10 overflow-hidden',
-                    children: jsx('div', {
-                      className: cn('h-full rounded-full transition-all duration-500', getProgressColor(viewingAccount.quotaWeekly)),
-                      style: { width: `${Math.min(100, Math.max(0, viewingAccount.quotaWeekly))}%` },
-                    }),
-                  }),
-                  jsxs('div', {
-                    className: 'flex items-center justify-between text-xs text-(--ui-text-tertiary)',
-                    children: [
-                      jsx('span', { children: '⏳ 周期完全刷新' }),
-                      jsx('button', {
-                        type: 'button',
-                        onClick: toggleFormat,
-                        className: 'font-mono text-zinc-300 hover:text-white transition-colors cursor-pointer',
-                        title: '点击切换 相对倒计时 / 绝对具体时刻',
-                        children: formatResetTime(viewingAccount.resetWeekly, formatMode),
-                      }),
-                    ],
-                  }),
-                ],
-              }),
-            ],
-          }),
-
           // 3P 协同模型池
           (viewingAccount.claudeQuota5h != null || data.claude5h != null) &&
             jsxs('div', {
@@ -1456,7 +1244,7 @@ function QuotaPage({ ctx }) {
         ],
       }),
 
-      // 主卡片 2：WorkBuddy (codebuddy2openai 本地网关)
+      // 主卡片 2：WorkBuddy (workbuddy2api 本地网关)
       jsxs('div', {
         className: 'rounded-2xl border border-(--ui-stroke-secondary) bg-(--ui-bg-elevated) p-6 shadow-xl flex flex-col gap-4',
         children: [
@@ -1474,7 +1262,7 @@ function QuotaPage({ ctx }) {
                     children: [
                       jsx('h2', {
                         className: 'text-sm font-semibold text-(--foreground)',
-                        children: 'WorkBuddy (codebuddy2openai 本地反代)',
+                        children: 'WorkBuddy (workbuddy2api 本地网关)',
                       }),
                       jsx('p', {
                         className: 'text-xs font-mono text-(--ui-text-tertiary)',
@@ -1931,25 +1719,48 @@ function OvlmCard({ ctx }) {
             children: [
               jsx('button', {
                 type: 'button',
-                disabled: busy || !ov.mapped.resolved,
-                onClick: () => doSync(false),
+                disabled: busy,
+                onClick: () => {
+                  if (!ov.mapped.resolved) {
+                    host.notify({
+                      kind: 'error',
+                      message: `无法写入: ${ov.mapped.reason || '当前模型未映射到本地端点'}`,
+                    })
+                    return
+                  }
+                  doSync(false)
+                },
                 className: cn(
                   'px-3 py-1.5 rounded-lg bg-(--ui-bg-elevated) hover:bg-(--chrome-action-hover) border border-(--ui-stroke-secondary)',
                   'text-xs font-medium text-(--foreground) transition-all cursor-pointer active:scale-95',
-                  (busy || !ov.mapped.resolved) && 'opacity-60 cursor-wait'
+                  (!ov.mapped.resolved || busy) && 'opacity-60',
+                  busy && 'cursor-wait'
                 ),
+                title: ov.mapped.resolved ? '仅写入 ov.conf，等待服务休眠唤醒' : `无法写入: ${ov.mapped.reason || '未映射'}`,
                 children: '仅写入配置',
               }),
               jsx('button', {
                 type: 'button',
-                disabled: busy || !ov.mapped.resolved,
-                onClick: () => doSync(true),
+                disabled: busy,
+                onClick: () => {
+                  if (!ov.mapped.resolved) {
+                    host.notify({
+                      kind: 'error',
+                      message: `无法同步: ${ov.mapped.reason || '当前模型未映射到本地端点'}`,
+                    })
+                    return
+                  }
+                  doSync(true)
+                },
                 className: cn(
                   'px-3.5 py-1.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30',
                   'text-xs font-semibold text-amber-400 transition-all cursor-pointer active:scale-95',
-                  busy && 'opacity-60 cursor-wait'
+                  (!ov.mapped.resolved || busy) && 'opacity-60',
+                  busy && 'cursor-wait'
                 ),
-                title: '写入 ov.conf 并立刻重启 OpenViking 后端(1934)使其生效',
+                title: ov.mapped.resolved
+                  ? '写入 ov.conf 并立刻重启 OpenViking 后端(1934)使其生效'
+                  : `无法同步: ${ov.mapped.reason || '未映射'}`,
                 children: busy ? '同步中…' : '立即同步并生效',
               }),
             ],
