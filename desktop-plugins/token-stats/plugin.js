@@ -213,10 +213,17 @@ function RateLimitRow({ rl, compact }) {
                 children: `@${rl.resetLocal} 冷却结束`,
               })
             : null,
-          !limited && obs.reqs5h != null
+          !limited && (obs.reqsToday != null || obs.reqs5h != null)
             ? jsxs('span', {
                 className: 'text-(--ui-text-tertiary)',
-                children: ['5h ', obs.reqs5h, '次'],
+                children: [obs.reqsToday != null ? '今日 ' : '5h ', obs.reqsToday ?? obs.reqs5h, '次'],
+              })
+            : null,
+          rl.nightFree
+            ? jsx('span', {
+                className: 'text-emerald-400/90 font-semibold',
+                title: '夜间免费窗口 (23:00–08:00)',
+                children: '🌙 免积分',
               })
             : null,
         ],
@@ -1582,9 +1589,20 @@ function QuotaPage({ ctx }) {
                 jsxs('div', {
                   className: 'flex items-center justify-between',
                   children: [
-                    jsx('span', {
-                      className: 'text-xs font-semibold text-(--ui-text-secondary)',
-                      children: '上游频率限制（腾讯 code 6004）',
+                    jsxs('div', {
+                      className: 'flex items-center gap-1.5',
+                      children: [
+                        jsx('span', {
+                          className: 'text-xs font-semibold text-(--ui-text-secondary)',
+                          children: '上游频率限制（腾讯 code 6004）',
+                        }),
+                        data.workbuddy.rateLimit.nightFree
+                          ? jsx('span', {
+                              className: 'text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-400 border border-emerald-500/30',
+                              children: '🌙 夜间限免中 (23:00–08:00)',
+                            })
+                          : null,
+                      ],
                     }),
                     jsx(RateLimitRow, { rl: data.workbuddy.rateLimit }),
                   ],
@@ -1598,14 +1616,23 @@ function QuotaPage({ ctx }) {
                 (() => {
                   const obs = data.workbuddy.rateLimit.observed || {}
                   if (!Object.keys(obs).length) return null
+                  const isToday = obs.reqsToday !== undefined
+                  const statItems = isToday
+                    ? [
+                        ['今日请求', obs.reqsToday != null ? obs.reqsToday : '—'],
+                        ['今日 tokens', obs.tokensToday != null ? `${(obs.tokensToday / 1e6).toFixed(2)}M` : '—'],
+                        ['今日 429', obs.err429_today != null ? obs.err429_today : '—'],
+                        ['最近 429', obs.last429Local || '—'],
+                      ]
+                    : [
+                        ['近 5h 请求', obs.reqs5h != null ? obs.reqs5h : '—'],
+                        ['近 5h tokens', obs.tokens5h != null ? `${(obs.tokens5h / 1e6).toFixed(2)}M` : '—'],
+                        ['近 5h 429 次数', obs.err429_5h != null ? obs.err429_5h : '—'],
+                        ['最近一次 429', obs.last429Local || '—'],
+                      ]
                   return jsxs('div', {
                     className: 'grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 border-t border-white/5',
-                    children: [
-                      ['近 5h 请求', obs.reqs5h != null ? obs.reqs5h : '—'],
-                      ['近 5h tokens', obs.tokens5h != null ? `${(obs.tokens5h / 1e6).toFixed(2)}M` : '—'],
-                      ['近 5h 429 次数', obs.err429_5h != null ? obs.err429_5h : '—'],
-                      ['最近一次 429', obs.last429Local || '—'],
-                    ].map(([label, val]) =>
+                    children: statItems.map(([label, val]) =>
                       jsxs('div', {
                         className: 'flex flex-col gap-0.5',
                         children: [

@@ -205,6 +205,17 @@ def _workbuddy_rate_limit() -> dict[str, Any]:
             # 反代自 a404e80 起把「冷却已结束」从 ok 细化为 expired，三态语义：
             #   limited=正在冷却 / expired=曾限过已恢复 / ok=从未被限（无条目）
             # 这里原样透传给展示层，不做折叠——否则已恢复会被误报成「正常」或「未知」。
+        if rl:
+            if "nightFree" in rl:
+                out["nightFree"] = bool(rl.get("nightFree"))
+            if "nightWindow" in rl:
+                out["nightWindow"] = rl.get("nightWindow")
+            ru = rl.get("rollingUsage") or {}
+            u_entry = ru.get(model) if model else None
+            if not u_entry and ru:
+                u_entry = next(iter(ru.values()))
+            if u_entry:
+                out.setdefault("observed", {}).update(u_entry)
     except Exception:
         pass
 
@@ -260,6 +271,10 @@ def _workbuddy_rate_limit() -> dict[str, Any]:
     # ---------- 滚动用量观测（usage.jsonl） ----------
     try:
         now_ms = time.time() * 1000
+        tz8 = datetime.timezone(datetime.timedelta(hours=8))
+        now_dt = datetime.datetime.now(tz8)
+        today_start_ms = now_dt.replace(hour=0, minute=0, second=0, microsecond=0).timestamp() * 1000
+        reqs_today = tok_today = err_today = 0
         reqs5 = reqs24 = err5 = 0
         tok5 = tok24 = 0
         last429: Optional[float] = None
@@ -280,18 +295,27 @@ def _workbuddy_rate_limit() -> dict[str, Any]:
                     if model and rec.get("model") != model:
                         continue
                     age5 = (now_ms - ts) <= 5 * 3600 * 1000
+                    tokens = (rec.get("input_tokens") or 0) + (rec.get("output_tokens") or 0)
                     if rec.get("ok"):
                         reqs24 += 1
-                        tok24 += (rec.get("input_tokens") or 0) + (rec.get("output_tokens") or 0)
+                        tok24 += tokens
                         if age5:
                             reqs5 += 1
-                            tok5 += (rec.get("input_tokens") or 0) + (rec.get("output_tokens") or 0)
+                            tok5 += tokens
+                        if ts >= today_start_ms:
+                            reqs_today += 1
+                            tok_today += tokens
                     elif rec.get("error") == "HTTP 429":
                         if age5:
                             err5 += 1
+                        if ts >= today_start_ms:
+                            err_today += 1
                         if last429 is None or ts > last429:
                             last429 = ts
-        out["observed"] = {
+        observed_local = {
+            "reqsToday": reqs_today,
+            "tokensToday": tok_today,
+            "err429_today": err_today,
             "reqs5h": reqs5,
             "reqs24h": reqs24,
             "tokens5h": tok5,
@@ -301,6 +325,14 @@ def _workbuddy_rate_limit() -> dict[str, Any]:
                 time.strftime("%m-%d %H:%M:%S", time.localtime(last429 / 1000)) if last429 else None
             ),
         }
+        if "observed" not in out or not out["observed"]:
+            out["observed"] = observed_local
+        else:
+            # 补齐可能缺失的字段
+            for k, v in observed_local.items():
+                out["observed"].setdefault(k, v)
+        if "nightFree" not in out:
+            out["nightFree"] = (now_dt.hour >= 23 or now_dt.hour < 8)
     except Exception:
         pass
 
@@ -666,7 +698,18 @@ def format_quota_markdown(data: dict) -> str:
             lines.append(f"- {icon} **频率限制**：{label}")
         if rl.get("model"):
             lines.append(f"- **监控模型**：`{rl['model']}`")
+        if rl.get("nightFree"):
+            lines.append("- 🌙 **夜间限免**：`限免中 (23:00–08:00)` · 调用不扣积分")
+        elif rl.get("nightWindow"):
+            lines.append("- ☀️ **时段计费**：`白天按量计费` (夜间 23:00–08:00 免积分)")
         if obs:
+            reqs_today = obs.get("reqsToday")
+            tok_today = obs.get("tokensToday")
+            if reqs_today is not None:
+                lines.append(
+                    f"- **今日用量**：`{reqs_today}` 次 / `{(tok_today or 0)/1e6:.2f}M` tokens"
+                    + (f" · 429 次数 `{obs.get('err429_today', 0)}`" if obs.get("err429_today") else "")
+                )
             lines.append(
                 f"- **近 5h 用量**：`{obs.get('reqs5h', 0)}` 次 / `{(obs.get('tokens5h') or 0)/1e6:.2f}M` tokens"
                 + (f" · 429 次数 `{obs.get('err429_5h', 0)}`" if obs.get("err429_5h") else "")
