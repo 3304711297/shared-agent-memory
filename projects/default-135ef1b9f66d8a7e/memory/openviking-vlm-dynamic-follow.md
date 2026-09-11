@@ -19,7 +19,7 @@ metadata:
 - 后端 `plugins/token-stats/dashboard/plugin_api.py`：`/api/plugins/token-stats/ovlm`（GET 状态；`sync=1` 写 ov.conf；`apply=1` 踢 1934；`toggle=1` 跟随开关，状态存 `desktop-plugins/token-stats/ovlm-state.json`）；`/quota` 轮询顺路自动跟随 `_auto_ovlm_follow`（非阻塞锁 + 30s 冷却 + 会话静默 >90s 不自动切，`follow_enabled=false` 全停；锁必须 finally release）。
 - 前端 `desktop-plugins/token-stats/plugin.js`：面板卡片 `OvlmCard`（状态徽标/跟随开关/手动同步按钮）。
 - **当前聊天模型真源**：`state.db.sessions` 按 `last_activity_at` 最新行的 `model` + `billing_provider` 列（slug = `custom:` + provider 名小写空格转横线；改名前旧 slug 用括号内 host:port 对 base_url 兜底匹配）。`config.yaml` 的 `model.default` 不是真源。
-- 安全阀：provider 非 `custom:*`、custom_providers 无匹配、缺 api_key → 拒绝改写。
+- 安全阀：provider 映射兼容 Hermes v42+ 的 `providers:` 字典结构与旧版 `custom_providers:` 列表，优先支持 `key_env` 环境变量与本地网关（127.0.0.1:8787 / 18080）免密兜底；缺凭据则拒绝改写。
 
 **Why:** 提炼走哪个模型与聊天模型无关（ov.conf 独立钉死），不跟随就会在用户无感知时烧掉 Gemini 订阅额度。
 **How to apply:** 排查提炼走线先看 `ov.conf` vlm 段与 state.db 最新会话；改提炼模型一律走插件端点或直接改 ov.conf 后踢 1934，勿改 openviking 包源码。
