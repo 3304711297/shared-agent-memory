@@ -653,7 +653,11 @@ function AntigravityQuotaChip({ ctx }) {
               ],
             }),
 
-          // 3P 协同池 (Claude / GPT)
+          // 配额核心指标区
+          jsxs('div', {
+            className: 'flex flex-col gap-3 py-1',
+            children: [
+              // 3P 协同池 (Claude / GPT)
               (viewingAccount.claudeQuota5h != null || quotaData.claude5h != null) &&
                 jsxs('div', {
                   className:
