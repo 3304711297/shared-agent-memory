@@ -1,7 +1,7 @@
 {
   "version": 2,
   "description": "本地能力组件清单（skill/mcp/plugin/工具核心的已装版本与上游源）。由 capability-upstream-watch 工作流每日比对远端源；本地源组件用 watch-capability.cmd 或任意 Agent 会话跑脚本比对。【维护铁律】升级或新装任何组件后，必须同步更新本清单并随共享库推 main，看门自动收口对应 Issue。",
-  "updatedAt": "2026-09-12",
+  "updatedAt": "2026-09-13",
   "components": [
     {
       "id": "chrome-devtools-mcp",
@@ -128,7 +128,7 @@
       ],
       "installed": [
         {
-          "where": "Hermes skills/（80 项）+ ZCode ~/.zcode/skills（44 项精简副本）【组件已随 ZCode 拆除移除，2026-09-09】",
+          "where": "Hermes skills/（89 项，2026-09-13 Astra 瘦身审计后）",
           "version": "HEAD@abd83ab5",
           "sha": "abd83ab560327c58f17f8e2ecd9be0307d5c9cf9"
         }
@@ -697,6 +697,7 @@
     }
   ],
   "notWatched": [
+    "【Astra 瘦身审计 2026-09-13】按 OpenAI《Rethinking skills and prompts for GPT-6 Astra》六条标准审计 Hermes 全量 94 项技能，落地三批改动：①删除 5 项 Ekko 生图/生视频技能（apikey-image-gen / grok-image-to-video / hyperframes / minimax-image-to-video / remotion），生图统一收敛至 zcode-custom/gemini-image-gen，视频理解保留自研 agentic-video-distill；②收窄 superpowers/using-superpowers 过宽描述（原「任务开始/对话开启时必用·1%相关也必须先查」→「用户提出新任务且未指定具体 skill 时必用」）；③拆分 3 个巨型 SKILL.md 为「路由主文档 + references/」：cross-agent-collaboration 25.5k→1.8k（8 refs，删除 ZCode 退役章节 1/2/4/5）、llm-wiki 19.9k→2.2k（4 refs）、claude-design 25.0k→2.2k（8 refs）。技能总数 94→89，SKILL.md 总体积 712400→623382 字符。Ekko 系列技能即使用到也可从上游重装，不入 protectedSkills 白名单",
     "【组件已物理移除 2026-09-06/09】desktop-commander：已随 09-06 插件瘦身（3c948c7）与 09-09 ZCode 拆除从双端彻底移除，本地无安装，不再纳入看门",
     "【索引型收录·不实装 2026-09-09】ksimback/hermes-ecosystem（Hermes Atlas）：社区维护的 Hermes 生态项目地图（1229 Stars，bot 自动重建，全量 249 项目→质量过滤收录 80+，12 分类，含 25★+ 仓库安全审查 repos/security-review.md，5 个 WARN 需先审脚本）。经五步评估：价值达标——现有 18 源均为通用技能库/官方源，无 Hermes 生态项目级地图占位，与 hermes-skills-hub（技能维度聚合）互补不重叠；形态为项目目录而非 SKILL 源（零缓存/Token 影响，二八瘦身不适用）。已作为第 19 号源写入 skill-plugin-resources.md（How to apply：找'某类 Hermes 工具是否存在/哪个成熟'时按需检索）；不提供 SKILL.md，无实装、无漂移检查对象。基线 sha bebd922（2026-09-09）",
     "【评估收录·按需单拉不整装 2026-09-12】rlaope/oh-my-hermes（OMH）：Hermes「操作层」全家桶插件（1684 Stars，MIT，活跃，基线 sha 59da662e）。三大件：per-model 路由调度（复杂度评分+类别链+worktree 并行 lanes）、123 个 omh-* 英文触发专家技能、自建审核制长期记忆+终端 HUD。不整装理由：记忆系统与 OpenViking+shared-agent-memory 单一真源双召回冲突；123 技能池违反二八瘦身且英文触发稀释中文触发词前置体系；路由链与 EasyCLIProxyAPI/WorkBuddy2API 网关调度职能重叠；HUD 面向终端而用户在桌面端；omh setup 改模型别名撞 config-guard 拍板基线。按需单拉通道：hermes skills tap add rlaope/oh-my-hermes + hermes skills install rlaope/oh-my-hermes/skills/<name> --yes（装前人工审读）。已作为第 20 号源写入 skill-plugin-resources.md（How to apply：缺执行质量专项如对抗共识评审/ai-slop 清理/agent 运维审查时先查其 skills/ 目录）",
