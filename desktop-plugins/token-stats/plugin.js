@@ -122,6 +122,14 @@ function fmtCooldown(sec) {
   return `${s}s`
 }
 
+// 积分紧凑呈现 -> 「4.8k / 12k / 850」
+function fmtCredits(num) {
+  if (num == null) return '8787'
+  if (num >= 10000) return `${Math.round(num / 1000)}k`
+  if (num >= 1000) return `${(num / 1000).toFixed(1)}k`
+  return `${Math.round(num)}`
+}
+
 // WorkBuddy 频率限制行：只呈现真实观测值，不虚构阈值/百分比
 function RateLimitRow({ rl, compact }) {
   if (!rl) return null
@@ -406,6 +414,45 @@ function AntigravityQuotaChip({ ctx }) {
                   }),
                 ],
               }),
+              // WorkBuddy 本地反代感知微胶囊（仅当在线时紧凑展示，降级/限频优先预警）
+              quotaData.workbuddy?.status === 'online' &&
+                jsx('span', {
+                  className: 'text-[10px] text-white/15 select-none font-mono mx-0.5',
+                  children: '·',
+                }),
+              quotaData.workbuddy?.status === 'online' &&
+                (quotaData.workbuddy.rateLimit?.fallback
+                  ? jsxs('span', {
+                      className: 'inline-flex items-baseline gap-0.5 text-rose-400 font-mono font-bold',
+                      title: `WorkBuddy 模型降级中: ${quotaData.workbuddy.rateLimit.fallback.requested} → ${quotaData.workbuddy.rateLimit.fallback.actual}`,
+                      children: [
+                        jsx('span', { className: 'text-[9px]', children: '⚠️' }),
+                        jsx('span', { className: 'text-[10px]', children: '降级' }),
+                      ],
+                    })
+                  : quotaData.workbuddy.rateLimit?.state === 'limited'
+                  ? jsxs('span', {
+                      className: 'inline-flex items-baseline gap-0.5 text-amber-400 font-mono font-bold',
+                      title: `WorkBuddy 限频冷却中: ${fmtCooldown(quotaData.workbuddy.rateLimit.remainingSec)}`,
+                      children: [
+                        jsx('span', { className: 'text-[9px]', children: '⏳' }),
+                        jsx('span', {
+                          className: 'text-[10px]',
+                          children: fmtCooldown(quotaData.workbuddy.rateLimit.remainingSec),
+                        }),
+                      ],
+                    })
+                  : jsxs('span', {
+                      className: 'inline-flex items-baseline gap-0.5 text-cyan-400/90 font-mono',
+                      title: quotaData.workbuddy.note || 'WorkBuddy 反代在线 (8787)',
+                      children: [
+                        jsx('span', { className: 'text-[9px] text-cyan-400/80', children: '⚡' }),
+                        jsx('span', {
+                          className: 'text-[10px] font-bold tracking-tight',
+                          children: fmtCredits(quotaData.workbuddy.usage?.remain),
+                        }),
+                      ],
+                    })),
             ],
           }),
         }),
@@ -1510,7 +1557,7 @@ function QuotaPage({ ctx }) {
               jsx('span', {
                 className: 'text-[11px] text-(--ui-text-tertiary) font-mono',
                 children: data.workbuddy.rateLimit?.server?.protocols?.length === 3
-                  ? 'Tauri v2 架构 · Chat/Messages/Responses 三协议 · 413 防护'
+                  ? 'Tauri v2 架构 · 三协议 · 413 防护 · Vision 内联 · Codex 投影'
                   : 'Tauri v2 架构 · 28 官方模型矩阵 · 纯净倍率',
               }),
             ],

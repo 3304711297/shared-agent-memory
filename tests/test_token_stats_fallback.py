@@ -115,3 +115,30 @@ def test_rotation_soonest_expiry_and_server_metadata_passed(monkeypatch):
     assert out.get("rotation", {}).get("soonest_expire_day") == "2026-09-15"
     assert out.get("server", {}).get("protocols") == ["chat", "messages", "responses"]
     assert out.get("server", {}).get("maxBodyMb") == 16.0
+
+
+def test_workbuddy_online_status_and_chip_fields(monkeypatch):
+    """验证 check_workbuddy_status 产出的结构包含 usage 与 rateLimit，满足状态栏 Chip 与卡片消费要求。"""
+    class MultiFakeOpener:
+        def open(self, req, timeout=None):
+            url = req.full_url if hasattr(req, "full_url") else str(req)
+            if "/v1/models" in url:
+                return FakeResp({"data": [{"id": "m1"}]})
+            if "/api/usage_summary" in url:
+                return FakeResp({"remain": 4820.5, "total": 5000.0, "nickname": "TestUser"})
+            if "/api/rate_limit" in url:
+                return FakeResp({
+                    "models": {},
+                    "server": {"protocols": ["chat", "messages", "responses"]},
+                    "rotation": {"mode": "failover", "soonest_expire_day": "2026-09-15"},
+                })
+            return FakeResp({})
+
+    monkeypatch.setattr(plugin_api, "_rl_cache", None)
+    monkeypatch.setattr(plugin_api, "_rl_cache_time", 0)
+    monkeypatch.setattr("urllib.request.build_opener", lambda *a, **k: MultiFakeOpener())
+    st = plugin_api.check_workbuddy_status()
+    assert st["status"] == "online"
+    assert st["usage"]["remain"] == 4820.5
+    assert st["usage"]["remainPercent"] == 96.4
+    assert st["rateLimit"]["rotation"]["soonest_expire_day"] == "2026-09-15"
