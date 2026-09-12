@@ -1,7 +1,7 @@
 {
   "version": 2,
   "description": "本地能力组件清单（skill/mcp/plugin/工具核心的已装版本与上游源）。由 capability-upstream-watch 工作流每日比对远端源；本地源组件用 watch-capability.cmd 或任意 Agent 会话跑脚本比对。【维护铁律】升级或新装任何组件后，必须同步更新本清单并随共享库推 main，看门自动收口对应 Issue。",
-  "updatedAt": "2026-09-11",
+  "updatedAt": "2026-09-12",
   "components": [
     {
       "id": "chrome-devtools-mcp",
@@ -26,11 +26,7 @@
           "where": "Hermes config.yaml mcp_servers（钉版，含保护参数）",
           "version": "1.9.0"
         }
-      ],
-      "claudeMarketplaceSha": {
-        "plugin": "chrome-devtools-mcp",
-        "installedSha": "45f187b1e3202c9f32ddba913be5d68751c3caa3"
-      }
+      ]
     },
     {
       "id": "superpowers",
@@ -52,11 +48,7 @@
           "version": "6.3.0",
           "sha": "b36e0829c6d0140e93cfef2ca599b1b07d4a7797"
         }
-      ],
-      "claudeMarketplaceSha": {
-        "plugin": "superpowers",
-        "installedSha": "b36e0829c6d0140e93cfef2ca599b1b07d4a7797"
-      }
+      ]
     },
     {
       "id": "cli-gh",
@@ -212,9 +204,9 @@
       "installed": [
         {
           "where": "官网 Skills Hub 聚合索引（书签真源）",
-          "version": "90700",
-          "totalSkills": 90700,
-          "extractedAt": "2026-09-11"
+          "version": "90701",
+          "totalSkills": 90701,
+          "extractedAt": "2026-09-12"
         }
       ]
     },
@@ -442,6 +434,7 @@
     "hermes token-stats 插件（hermes 专有后端，随 hermes 本体分发，无公开上游）",
     "【本地已改技能 2026-09-07】github、tauri-desktop-development 与 superpowers（14项技能frontmatter中文高频动作词前置紧凑化，突破前57字符截断瓶颈）为本地自有/深度定制技能；本次仅补操作纪律与截断优化，非上游版本变动",
     "【用户拍板 2026-09-07】serena：插件已物理删除（双端均无），uv tool 中 serena-agent 与 ~/.serena 残留另行处置，不再纳入看门",
+    "【ZCode 遗留收口 2026-09-12】claude-plugins-official 市场版本比对（claudeMarketplaceSha）：随 ZCode 拆除（09-09）一并退役。双端现存安装面均不消费该市场——chrome-devtools-mcp 走 Hermes config.yaml npm 钉版、superpowers 直同步 obra/superpowers（Hermes plugins/upstream.json）。市场 pin 持续推进将造成永久性虚假告警（Issue #13 根因），故从 chrome-devtools-mcp 与 superpowers 组件移除该字段；如未来重新接入该市场，需重建本地 sha 基线后再纳入比对",
     "【用户拍板 2026-09-07】cliproxyapi（EasyCLIProxyAPI 网关核心）：退出看门，用户自行在软件内手动检查并更新"
   ],
   "meta": {
