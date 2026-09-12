@@ -191,7 +191,7 @@ function RateLimitRow({ rl, compact }) {
                   ? '正常'
                   : st === 'offline'
                     ? '网关离线'
-                    : '未知',
+                    : '正常',
           }),
         ],
       }),
@@ -1305,14 +1305,19 @@ function QuotaPage({ ctx }) {
                   className: 'flex items-center justify-between',
                   children: [
                     jsxs('span', {
-                      className: 'text-xs text-(--ui-text-secondary)',
+                      className: 'text-xs text-(--ui-text-secondary) flex items-center flex-wrap gap-1',
                       children: [
                         '👤 当前账号: ',
                         jsx('span', { className: 'font-mono text-(--foreground)', children: data.workbuddy.usage.nickname || '—' }),
                         jsx('span', {
-                          className: 'ml-1.5 px-1.5 py-0.5 text-[10px] rounded bg-white/5 text-(--ui-text-tertiary)',
+                          className: 'px-1.5 py-0.5 text-[10px] rounded bg-white/5 text-(--ui-text-tertiary)',
                           children: data.workbuddy.usage.isPaidUser ? '付费版' : '免费版',
                         }),
+                        data.workbuddy.rateLimit?.rotation?.mode &&
+                          jsx('span', {
+                            className: 'px-1.5 py-0.5 text-[10px] rounded bg-purple-500/10 text-purple-400 border border-purple-500/20 font-mono',
+                            children: `🔄 ${data.workbuddy.rateLimit.rotation.mode === 'failover' ? '故障自动避让' : data.workbuddy.rateLimit.rotation.mode === 'roundrobin' ? '轮询分摊' : '单号模式'} (${data.workbuddy.rateLimit.rotation.accounts_count || 1}号)`,
+                          }),
                       ],
                     }),
                     jsxs('span', {
@@ -1405,6 +1410,19 @@ function QuotaPage({ ctx }) {
                     className: 'text-[11px] leading-relaxed text-rose-300/90 font-mono break-all',
                     children: data.workbuddy.rateLimit.message,
                   }),
+                (() => {
+                  const allM = data.workbuddy.rateLimit.allModels || {}
+                  const curM = data.workbuddy.rateLimit.model
+                  const others = Object.entries(allM).filter(([m, v]) => m !== curM && v.state === 'limited')
+                  if (!others.length) return null
+                  return jsxs('div', {
+                    className: 'text-[11px] text-amber-300/90 font-mono flex items-center flex-wrap gap-1.5 bg-amber-500/10 p-2 rounded-lg border border-amber-500/20',
+                    children: [
+                      jsx('span', { className: 'font-semibold', children: '⚠️ 其它受限模型:' }),
+                      ...others.map(([m, v]) => jsx('span', { key: m, className: 'px-1.5 py-0.5 rounded bg-black/30 border border-amber-500/30', children: `${m} (@${v.resetLocal || '冷却中'})` })),
+                    ],
+                  })
+                })(),
                 (() => {
                   const obs = data.workbuddy.rateLimit.observed || {}
                   if (!Object.keys(obs).length) return null
