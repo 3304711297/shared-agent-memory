@@ -735,6 +735,9 @@ function AntigravityQuotaChip({ ctx }) {
                                 '👤 ',
                                 quotaData.workbuddy.usage.nickname || '—',
                                 quotaData.workbuddy.usage.isPaidUser ? '' : ' (免费版)',
+                                quotaData.workbuddy.rateLimit?.rotation?.soonest_expire_day
+                                  ? ` · 临期${quotaData.workbuddy.rateLimit.rotation.soonest_expire_day.slice(5)}`
+                                  : '',
                               ],
                             }),
                             jsxs('span', {
@@ -1326,6 +1329,12 @@ function QuotaPage({ ctx }) {
                             className: 'px-1.5 py-0.5 text-[10px] rounded bg-purple-500/10 text-purple-400 border border-purple-500/20 font-mono',
                             children: `🔄 ${data.workbuddy.rateLimit.rotation.mode === 'failover' ? '故障自动避让' : data.workbuddy.rateLimit.rotation.mode === 'roundrobin' ? '轮询分摊' : '单号模式'} (${data.workbuddy.rateLimit.rotation.accounts_count || 1}号)`,
                           }),
+                        data.workbuddy.rateLimit?.rotation?.soonest_expire_day &&
+                          jsx('span', {
+                            className: 'px-1.5 py-0.5 text-[10px] rounded bg-amber-500/10 text-amber-300 border border-amber-500/20 font-mono',
+                            title: '按积分到期日分层优先调度，避免临期额度作废',
+                            children: `📅 临期优先: ${data.workbuddy.rateLimit.rotation.soonest_expire_day}`,
+                          }),
                       ],
                     }),
                     jsxs('span', {
@@ -1500,7 +1509,9 @@ function QuotaPage({ ctx }) {
               }),
               jsx('span', {
                 className: 'text-[11px] text-(--ui-text-tertiary) font-mono',
-                children: 'Tauri v2 架构 · 28 官方模型矩阵 · 纯净倍率',
+                children: data.workbuddy.rateLimit?.server?.protocols?.length === 3
+                  ? 'Tauri v2 架构 · Chat/Messages/Responses 三协议 · 413 防护'
+                  : 'Tauri v2 架构 · 28 官方模型矩阵 · 纯净倍率',
               }),
             ],
           }),

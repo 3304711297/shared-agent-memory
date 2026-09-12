@@ -213,6 +213,8 @@ def _workbuddy_rate_limit() -> dict[str, Any]:
         if rl:
             if "rotation" in rl:
                 out["rotation"] = rl.get("rotation")
+            if "server" in rl:
+                out["server"] = rl.get("server")
             if "nickname" in rl:
                 out["nickname"] = rl.get("nickname")
             if "models" in rl:
@@ -710,7 +712,8 @@ def format_quota_markdown(data: dict) -> str:
             }.get(rot.get("mode"), rot.get("mode", "off"))
             acc_cnt = rot.get("accounts_count", 1)
             src_tag = "已热加载" if rot.get("config_source") == "hot" else "默认"
-            lines.append(f"- **账号调度**：`{mode_label}` · `{acc_cnt} 个可用账号` *({src_tag})*")
+            soonest_tag = f" · `临期优先: {rot.get('soonest_expire_day')}`" if rot.get("soonest_expire_day") else ""
+            lines.append(f"- **账号调度**：`{mode_label}` · `{acc_cnt} 个可用账号`{soonest_tag} *({src_tag})*")
         if st == "limited":
             bits = [f"{icon} **频率限制**：已触发（上游 code 6004）"]
             if rl.get("resetLocal"):
@@ -742,6 +745,10 @@ def format_quota_markdown(data: dict) -> str:
             lines.append("- 🌙 **夜间限免**：`限免中 (23:00–08:00)` · 调用不扣积分")
         elif rl.get("nightWindow"):
             lines.append("- ☀️ **时段计费**：`白天按量计费` (夜间 23:00–08:00 免积分)")
+        srv = rl.get("server") or {}
+        if srv.get("protocols"):
+            proto_str = "/".join(p.capitalize() for p in srv["protocols"])
+            lines.append(f"- **协议网关**：`{proto_str}` (413保护: {srv.get('maxBodyMb', 16)}MB)")
         if obs:
             reqs_today = obs.get("reqsToday")
             tok_today = obs.get("tokensToday")
