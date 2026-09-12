@@ -1,21 +1,16 @@
 {
-  "generatedAt": "2026-09-12 09:20",
+  "generatedAt": "2026-09-13 00:20",
   "scope": "Hermes skills/ 目录",
-  "totalSkills": 94,
+  "totalSkills": 89,
   "sources": [
     {
       "source": "Hermes Web UI 官方目录（hub/webui 安装）",
-      "count": 7,
+      "count": 2,
       "checkType": null,
       "watchStatus": "⚠️ 官方分发-描述已本地化（09-12 全库中文触发词改造入库）",
       "skills": [
-        "apikey-image-gen",
-        "grok-image-to-video",
-        "hyperframes",
         "markdown-viewer",
-        "minimax-image-to-video",
-        "productivity/collective-wisdom-install",
-        "remotion"
+        "productivity/collective-wisdom-install"
       ]
     },
     {
@@ -281,5 +276,6 @@
         "software-development/tauri-desktop-development"
       ]
     }
-  ]
+  ],
+  "note": "2026-09-13 Astra 瘦身：删除 5 项 Ekko 生图/生视频技能（apikey-image-gen/grok-image-to-video/hyperframes/minimax-image-to-video/remotion），生图统一走 zcode-custom/gemini-image-gen。"
 }
