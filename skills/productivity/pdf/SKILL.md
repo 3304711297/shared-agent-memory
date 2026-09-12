@@ -1,6 +1,6 @@
 ---
 name: pdf
-description: "PDF files: create, read, merge, fill, OCR, edit text."
+description: "处理PDF时必用。创建/读取/合并/填表/OCR/改文。PDF files: create, read, merge, fill, OCR, edit text."
 version: 1.1.0
 author: Nous Research
 license: MIT

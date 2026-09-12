@@ -1,6 +1,6 @@
 ---
 name: rest-graphql-debug
-description: "Debug REST/GraphQL APIs: status codes, auth, schemas, repro."
+description: "调接口报错时必用。REST/GraphQL状态码认证与复现。Debug REST/GraphQL APIs: status codes, auth, schemas, repro."
 version: 1.2.0
 author: eren-karakus0
 license: MIT

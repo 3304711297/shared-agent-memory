@@ -1,6 +1,6 @@
 ---
 name: telegram-channel-ops
-description: Use when managing or posting to Telegram channels. Administer, publish, and automate channel operations.
+description: "运营TG频道时必用。管理发布与自动化频道。Use when managing or posting to Telegram channels."
 ---
 
 # Telegram Channel Operations & Management

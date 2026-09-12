@@ -1,6 +1,6 @@
 ---
 name: codebase-design
-description: "Use when 模块设计/接口设计/深模块/消除臃肿包装。小接口深实现，高杠杆防顺手重构，设计接缝与测试。"
+description: "模块设计/接口设计时必用。小接口深实现，防臃肿包装。Use when designing modules, interfaces, or deep modules."
 version: 1.0.0
 author: "Matt Pocock (mattpocock/skills) + John Ousterhout + Hermes Agent"
 license: MIT

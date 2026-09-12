@@ -1,6 +1,6 @@
 ---
 name: agentic-video-distill
-description: "Use when 视频提炼/视频分析/录屏解析/YouTube技术视频/提取BIOS画面。调用Gemini Agentic引擎极速抽帧与时序下钻，Token省88%。"
+description: "视频提炼/分析录屏时必用。Gemini代理式抽帧蒸馏省88%Token。Use when distilling long videos or screen recordings."
 version: 1.0.0
 author: "Hermes & ZCode Dual-Agent Framework"
 license: MIT

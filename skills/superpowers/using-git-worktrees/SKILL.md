@@ -1,6 +1,6 @@
 ---
 name: using-git-worktrees
-description: "Git工作区隔离/多分支并行开发时必用。轻量切换避免冲突。Use when starting feature work needing isolated worktrees or simultaneous branches."
+description: "多分支并行开发时必用。Git工作区隔离免冲突。Use when starting feature work needing isolated worktrees."
 ---
 
 # Using Git Worktrees

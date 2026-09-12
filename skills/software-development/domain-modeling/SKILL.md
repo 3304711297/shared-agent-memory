@@ -1,6 +1,6 @@
 ---
 name: domain-modeling
-description: "Use when 统一领域模型/定义术语/CONTEXT.md/ADR决策。消除Agent概念漂移，建立通用语言与精确名词边界。"
+description: "统一领域模型/定术语时必用。消概念漂移，建通用语言与ADR。Use when unifying domain models or defining shared terminology."
 version: 1.0.0
 author: "Matt Pocock (mattpocock/skills) + Hermes Agent"
 license: MIT

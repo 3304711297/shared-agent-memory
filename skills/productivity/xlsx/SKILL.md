@@ -1,6 +1,6 @@
 ---
 name: xlsx
-description: Create, read, edit Excel .xlsx workbooks and CSVs.
+description: "做Excel/读CSV时必用。xlsx工作簿读写编辑。Create, read, edit Excel .xlsx workbooks and CSVs."
 version: 1.1.0
 author: Nous Research
 license: MIT

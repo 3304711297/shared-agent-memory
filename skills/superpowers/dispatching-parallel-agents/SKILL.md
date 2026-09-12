@@ -1,6 +1,6 @@
 ---
 name: dispatching-parallel-agents
-description: "面对2个及以上独立并发任务时必用。贯彻Fork-First铁律并行调度。Use when facing 2+ independent tasks; dispatch parallel subagents."
+description: "有2个以上独立任务时必用。Fork-First并行调度子代理。Use when facing 2+ independent tasks; dispatch parallel subagents."
 ---
 
 # Dispatching Parallel Agents

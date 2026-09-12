@@ -1,6 +1,6 @@
 ---
 name: edge-dev-cdp-scraping
-description: Use when scraping login-walled pages via signed-in Edge.
+description: "抓登录墙内容时必用。用已登录Edge走CDP。Use when scraping login-walled pages via signed-in Edge."
 ---
 
 # 复用已登录 Edge Dev + CDP 抓取

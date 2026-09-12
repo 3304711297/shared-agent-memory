@@ -1,6 +1,6 @@
 ---
 name: computer-use
-description: "Drive the desktop background-first; escalate on signal."
+description: "操作桌面/GUI时必用。后台优先驱动桌面，遇信号升级。Drive the desktop background-first; escalate on signal."
 version: 2.0.0
 author: Francesco Bonacci (f-trycua), Hermes Agent
 license: MIT

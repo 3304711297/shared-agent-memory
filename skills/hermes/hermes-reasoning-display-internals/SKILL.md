@@ -1,6 +1,6 @@
 ---
 name: hermes-reasoning-display-internals
-description: "Use when 推理过程块显示异常或 show_reasoning 开关不生效时。"
+description: "推理块显示异常时必用。show_reasoning开关排查。Use when the reasoning display misbehaves or show_reasoning has no effect."
 version: 1.0.0
 license: MIT
 metadata:

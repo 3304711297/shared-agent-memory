@@ -1,6 +1,6 @@
 ---
 name: hermes-custom-provider-models
-description: "Use when custom provider 模型不显示或缺新模型。双真源写入要点。"
+description: "模型不显示/缺新模型时必用。custom provider双真源写入要点。Use when custom provider models are missing or new models absent."
 version: 1.0.0
 author: Hermes Agent
 license: MIT

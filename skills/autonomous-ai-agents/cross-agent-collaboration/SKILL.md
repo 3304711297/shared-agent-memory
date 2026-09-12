@@ -1,6 +1,6 @@
 ---
 name: cross-agent-collaboration
-description: Use when coordinating Hermes with external agents or tools, or handling parallel multi-repo fan-out. (ZCode client was decommissioned 2026-09-09; sections 1-2 remain as archived protocol reference.)
+description: "跨Agent协作/多仓并行时必用。协调外部Agent与工具链。Use when coordinating Hermes with external agents or multi-repo fan-out."
 ---
 
 # Cross-Agent Collaboration & Autonomous Handoff

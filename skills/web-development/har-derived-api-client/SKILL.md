@@ -1,6 +1,6 @@
 ---
 name: har-derived-api-client
-description: Record a site's XHR into a HAR, derive an HTTP client.
+description: "抓接口造客户端时必用。录HAR推导HTTP客户端。Record a site's XHR into a HAR, derive an HTTP client."
 version: 0.1.0
 author: Hermes Agent
 license: MIT

@@ -1,6 +1,6 @@
 ---
 name: browser-bookmarks
-description: Use when searching user browser bookmarks or saved tools.
+description: "找书签/存工具时必用。搜本机浏览器收藏夹。Use when searching user browser bookmarks or saved tools."
 ---
 
 # 本地浏览器书签极速索引与检索系统 (browser-bookmarks)

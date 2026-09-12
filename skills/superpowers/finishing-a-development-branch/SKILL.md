@@ -1,6 +1,6 @@
 ---
 name: finishing-a-development-branch
-description: "功能分支收尾/合并或提PR时必用。指导分支合流与清理工作。Use when implementation is complete and ready to merge, PR, or conclude branch."
+description: "功能分支收尾/提PR时必用。合流清理与结论。Use when implementation is complete and ready to merge, PR, or conclude."
 ---
 
 # Finishing a Development Branch

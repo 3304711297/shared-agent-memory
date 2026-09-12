@@ -1,6 +1,6 @@
 ---
 name: gemini-image-gen
-description: Use this skill whenever the user asks to generate, draw, paint, or render an image, illustration, anime art, or photo using Google Gemini / Imagen 3 backend.
+description: "用Gemini生图时必用。画图/插画/动漫/照片。Use when generating images via Google Gemini / Imagen."
 ---
 
 # Gemini Image Generation Skill

@@ -1,6 +1,6 @@
 ---
 name: cangjie-distill
-description: "长文/长视频/书籍蒸馏成技能必用。RIA提炼方法论并编译为标准Agent技能。Use when distilling books, long videos, podcasts, or transcripts into executable agent skills."
+description: "长文/书/播客蒸馏成技能必用。RIA方法论编译Agent技能。Use when distilling books, long videos, or podcasts into executable agent skills."
 version: 2.5.0
 metadata:
   cangjie.version: "2.5.0"

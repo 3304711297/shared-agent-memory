@@ -1,6 +1,6 @@
 ---
 name: hermes-desktop-theme-authoring
-description: Use when styling Hermes Desktop. Create and style themes.
+description: "做桌面主题/改样式时必用。Hermes Desktop主题编写。Use when styling Hermes Desktop; create and style themes."
 category: hermes
 ---
 

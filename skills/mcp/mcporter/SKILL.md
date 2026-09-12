@@ -1,6 +1,6 @@
 ---
 name: mcporter
-description: List, auth, and call MCP servers/tools from the terminal.
+description: "调MCP/列工具时必用。CLI列举认证调用MCP服务。List, auth, and call MCP servers/tools from the terminal."
 version: 1.0.0
 author: community
 license: MIT

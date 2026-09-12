@@ -1,6 +1,6 @@
 ---
 name: hermes-token-debugging
-description: Use when analyzing Hermes token usage or cache behavior.
+description: "分析token用量/缓存时必用。Hermes token与cache行为。Use when analyzing Hermes token usage or cache behavior."
 ---
 
 # 双端 Token 用量取证（2026-09-06 实证闭环）

@@ -1,6 +1,6 @@
 ---
 name: writing-plans
-description: "复杂多步任务/写方案/立项规划时必用。系统拆解步骤与依赖，不盲目动手。Use when planning multi-step tasks or specs before writing code."
+description: "写方案/立项规划时必用。拆解步骤与依赖再动手。Use when planning multi-step tasks or specs before writing code."
 ---
 
 # Writing Plans

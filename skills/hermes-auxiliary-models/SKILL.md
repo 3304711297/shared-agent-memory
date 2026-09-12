@@ -1,6 +1,6 @@
 ---
 name: hermes-auxiliary-models
-description: "Use when Hermes auxiliary models fail while chat works."
+description: "辅助模型报错时必用。聊天正常但auxiliary失败排查。Use when Hermes auxiliary models fail while chat works."
 version: 1.0.0
 author: Hermes Agent
 license: MIT

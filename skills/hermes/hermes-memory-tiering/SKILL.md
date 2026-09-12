@@ -1,6 +1,6 @@
 ---
 name: hermes-memory-tiering
-description: "Use when 内置记忆库顶格告警或需分层整理。低频迁 OpenViking，内置只留高频。"
+description: "记忆库顶格/要分层时必用。低频迁OpenViking，内置只留高频。Use when built-in memory hits the cap; tier low-frequency items out."
 ---
 
 # Hermes 内置记忆库分层管理（内置双库 + OpenViking）
