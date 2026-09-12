@@ -47,12 +47,16 @@ metadata:
    - 修复未发生限流时误报「未知」的缺陷；
    - 全景透传多账号调度策略模式与可用账号数；
    - 增加跨模型限流透视（当前模型正常时亦可提前看到其他模型的冷却时刻）。
+6. **UI 动态更新（updateModelCells）修复**：
+   - 修复在控制台编辑保存模型配置后，`updateModelCells()` 仍遗留渲染 `默认 (${m.default_effort})` 导致界面退化为具体档位的问题，统一为 `默认 (跟随客户端)`；
+   - 单测 `test_frontend_does_not_hardcode_default_effort_as_label` 加固覆盖模板字符串形式。
 
 ---
 
 ## 三、验证与测试基线
 
 - `workbuddy2api` 仓库：
+  - `npm run build` 前端产物同步构建打包；
   - `pytest tests/`：212 passed（全量覆盖）；
   - `npm test`：32 passed（node:test）；
   - `cargo test`：24 passed。
