@@ -191,7 +191,7 @@ def _workbuddy_rate_limit() -> dict[str, Any]:
             rl = json.loads(r.read().decode("utf-8"))
         models = (rl or {}).get("models") or {}
         entry = models.get(model) if model else None
-        if not entry and models:
+        if not entry and not model and models:
             entry = next(iter(models.values()))
         if entry:
             out.update(
@@ -205,14 +205,25 @@ def _workbuddy_rate_limit() -> dict[str, Any]:
             # 反代自 a404e80 起把「冷却已结束」从 ok 细化为 expired，三态语义：
             #   limited=正在冷却 / expired=曾限过已恢复 / ok=从未被限（无条目）
             # 这里原样透传给展示层，不做折叠——否则已恢复会被误报成「正常」或「未知」。
+        elif rl is not None:
+            out.update(
+                state="ok",
+                source="workbuddy2api /api/rate_limit",
+            )
         if rl:
+            if "rotation" in rl:
+                out["rotation"] = rl.get("rotation")
+            if "nickname" in rl:
+                out["nickname"] = rl.get("nickname")
+            if "models" in rl:
+                out["allModels"] = rl.get("models")
             if "nightFree" in rl:
                 out["nightFree"] = bool(rl.get("nightFree"))
             if "nightWindow" in rl:
                 out["nightWindow"] = rl.get("nightWindow")
             ru = rl.get("rollingUsage") or {}
             u_entry = ru.get(model) if model else None
-            if not u_entry and ru:
+            if not u_entry and not model and ru:
                 u_entry = next(iter(ru.values()))
             if u_entry:
                 out.setdefault("observed", {}).update(u_entry)
@@ -681,6 +692,16 @@ def format_quota_markdown(data: dict) -> str:
         st = rl.get("state", "unknown")
         icon = {"limited": "🔴", "ok": "🟢", "expired": "🟡", "offline": "⚪"}.get(st, "⚪")
         obs = rl.get("observed") or {}
+        rot = rl.get("rotation") or {}
+        if rot:
+            mode_label = {
+                "failover": "故障自动避让 (failover)",
+                "roundrobin": f"按请求轮询 (每 {rot.get('rotate_count', 1)} 次)",
+                "off": "单账号固定 (off)",
+            }.get(rot.get("mode"), rot.get("mode", "off"))
+            acc_cnt = rot.get("accounts_count", 1)
+            src_tag = "已热加载" if rot.get("config_source") == "hot" else "默认"
+            lines.append(f"- **账号调度**：`{mode_label}` · `{acc_cnt} 个可用账号` *({src_tag})*")
         if st == "limited":
             bits = [f"{icon} **频率限制**：已触发（上游 code 6004）"]
             if rl.get("resetLocal"):
@@ -700,6 +721,14 @@ def format_quota_markdown(data: dict) -> str:
             lines.append(f"- {icon} **频率限制**：{label}")
         if rl.get("model"):
             lines.append(f"- **监控模型**：`{rl['model']}`")
+        all_models = rl.get("allModels") or {}
+        limited_others = [
+            f"`{m}` (重置于 `{info.get('resetLocal')}`)"
+            for m, info in all_models.items()
+            if info.get("state") == "limited" and m != rl.get("model")
+        ]
+        if limited_others:
+            lines.append(f"- ⚠️ **其他冷却中模型**：{', '.join(limited_others)}")
         if rl.get("nightFree"):
             lines.append("- 🌙 **夜间限免**：`限免中 (23:00–08:00)` · 调用不扣积分")
         elif rl.get("nightWindow"):
