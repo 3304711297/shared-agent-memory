@@ -1,6 +1,6 @@
 ---
 name: tauri-desktop-development
-description: Use when developing, building, or debugging Tauri apps.
+description: "做Tauri应用时必用。开发构建调试。Use when developing, building, or debugging Tauri apps."
 ---
 
 # Tauri Desktop Development

@@ -1,6 +1,6 @@
 ---
 name: hermes-remote-access
-description: "Use when configuring mobile or LAN access for Hermes."
+description: "手机/局域网连Hermes时必用。移动端与LAN接入配置。Use when configuring mobile or LAN access for Hermes."
 version: 1.0.0
 author: Hermes Agent
 license: MIT

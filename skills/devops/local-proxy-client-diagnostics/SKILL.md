@@ -1,6 +1,6 @@
 ---
 name: local-proxy-client-diagnostics
-description: Diagnose local proxy clients from config and live probes.
+description: "本地代理排查时必用。查配置与实时探活诊断代理客户端。Diagnose local proxy clients from config and live probes."
 version: 0.1.0
 platforms: [windows, macos, linux]
 metadata:

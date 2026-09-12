@@ -1,6 +1,6 @@
 ---
 name: youtube-content
-description: "YouTube transcripts to summaries, threads, blogs."
+description: "YouTube字幕提取时必用。转摘要/推文/博客。YouTube transcripts to summaries, threads, blogs."
 version: 1.0.0
 author: Teknium (teknium1), Hermes Agent
 license: MIT

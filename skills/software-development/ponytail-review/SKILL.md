@@ -1,7 +1,6 @@
 ---
 name: ponytail-review
-description: >
-  Use when user asks to review code/diff for bloat, over-engineering, or says "帮我看下代码", "代码审查", "太臃肿了", "有什么可删的", "代码瘦身", or invokes /ponytail-review. Hunts complexity, dead code, and speculative abstractions to cut lines.
+description: "代码审查/太臃肿了时必用。找复杂死代码与投机抽象。Use when reviewing code/diff for bloat or over-engineering."
 ---
 
 Review diffs for unnecessary complexity. One line per finding: location, what

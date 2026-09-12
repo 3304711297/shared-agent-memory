@@ -1,6 +1,6 @@
 ---
 name: receiving-code-review
-description: "收到评审意见/另一个AI反馈/审查意见时必用。实证求真，禁止盲从迎合。Use when receiving code review feedback before implementing suggestions; requires technical verification."
+description: "收到评审意见时必用。实证求真，禁止盲从迎合。Use when receiving code review feedback; verify before implementing."
 ---
 
 # Code Review Reception

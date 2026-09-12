@@ -1,6 +1,6 @@
 ---
 name: systematic-debugging
-description: "报错排查/测试失败/排查异常时必用。严禁猜测，先调查根因再提方案。Use when encountering any bug, test failure, error, or debugging. Enforces root cause investigation first."
+description: "报错/测试失败排查时必用。先查根因再提方案，禁猜测。Use when encountering any bug, test failure, or debugging."
 ---
 
 # Systematic Debugging

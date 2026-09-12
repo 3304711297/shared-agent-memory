@@ -1,7 +1,6 @@
 ---
 name: ponytail
-description: >
-  Use on coding tasks when user asks for minimal code, refactoring, or says "最简解法", "做个功能", "极简代码", "YAGNI", "最少代码", "别过度封装", "简单写", or invokes /ponytail. Forces the laziest solution that actually works: standard library and native platform features before custom dependencies. Supports lite, full, ultra. Do NOT use for non-coding requests.
+description: "要极简代码/别过度封装时必用。最懒可行解：先用标准库与原生。Use on coding tasks for minimal code (最简解法/YAGNI). Do NOT use for non-coding requests."
 argument-hint: "[lite|full|ultra]"
 license: MIT
 ---

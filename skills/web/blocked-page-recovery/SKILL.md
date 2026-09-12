@@ -1,6 +1,6 @@
 ---
 name: blocked-page-recovery
-description: "Use when a fetch fails: 403/429, paywall, WAF, bot wall."
+description: "网页抓取被拦时必用。403/429/反爬/付费墙绕行。Use when a fetch fails: 403/429, paywall, WAF, bot wall."
 version: 1.0.0
 author: Hermes Agent
 license: MIT

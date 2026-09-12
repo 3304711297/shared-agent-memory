@@ -1,6 +1,6 @@
 ---
 name: executing-plans
-description: "执行任务书/实现计划/分批推进时必用。严格按步骤执行，逐项校验收口。Use when executing a written implementation plan with review checkpoints."
+description: "执行任务书/实现计划时必用。按步骤推进并逐项校验收口。Use when executing a written implementation plan with review checkpoints."
 ---
 
 # Executing Plans

@@ -1,6 +1,6 @@
 ---
 name: frontend-design
-description: Design and build modern, responsive, high-aesthetic web user interfaces and components using Tailwind CSS, React, Vue, HTML/CSS. Trigger whenever the user asks to design a webpage, UI component, dashboard, landing page, or frontend application.
+description: "做前端/UI组件时必用。现代响应式高美感界面。Design and build modern, responsive, high-aesthetic web UIs."
 ---
 
 # Frontend Design & UI Excellence Skill

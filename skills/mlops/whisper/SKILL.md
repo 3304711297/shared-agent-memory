@@ -1,6 +1,6 @@
 ---
 name: whisper
-description: Transcribe and translate speech in 99 languages.
+description: "语音转写/字幕时必用。99种语言转录与翻译。Transcribe and translate speech in 99 languages."
 version: 1.0.0
 author: Orchestra Research
 license: MIT

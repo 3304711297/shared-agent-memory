@@ -1,6 +1,6 @@
 ---
 name: windows-crash-diagnostics
-description: Use when Windows crashes, BSODs, or reboots unexpectedly.
+description: "蓝屏/死机/崩溃排查时必用。Windows BSOD与意外重启诊断。Use when Windows crashes, BSODs, or reboots unexpectedly."
 ---
 
 # Windows Crash & Minidump Diagnostics

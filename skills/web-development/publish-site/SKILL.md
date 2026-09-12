@@ -1,6 +1,6 @@
 ---
 name: publish-site
-description: Versioned site deploys to GitHub/Cloudflare/Netlify Pages.
+description: "发布站点时必用。GitHub/Cloudflare/Netlify多托管版本化部署。Versioned site deploys to GitHub/Cloudflare/Netlify Pages."
 version: 1.0.0
 author: Hermes Agent (Nous Research)
 license: MIT

@@ -1,6 +1,6 @@
 ---
 name: verification-before-completion
-description: "宣称完成/收尾工作/提PR前必用。先出示命令绿灯证据，禁止口头空标通过。Use when about to claim work is complete, fixed, or passing; evidence before assertions always."
+description: "宣称完成/提PR前必用。先出示命令绿灯证据，禁空标。Use when about to claim work is complete; evidence before assertions."
 ---
 
 # Verification Before Completion

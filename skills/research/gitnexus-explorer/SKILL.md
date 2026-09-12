@@ -1,6 +1,6 @@
 ---
 name: gitnexus-explorer
-description: Serve an interactive codebase knowledge graph web UI.
+description: "看代码图谱时必用。交互式代码库知识图Web UI。Serve an interactive codebase knowledge graph web UI."
 version: 1.0.0
 author: Hermes Agent + Teknium
 license: MIT

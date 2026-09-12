@@ -1,6 +1,6 @@
 ---
 name: requesting-code-review
-description: "完成大功能/重大修改求审查时必用。生成结构化差异报告以供评审。Use when completing major tasks before committing code; requests structured review."
+description: "求代码审查时必用。出结构化差异报告供评审。Use when completing major tasks before committing; requests structured review."
 ---
 
 # Requesting Code Review

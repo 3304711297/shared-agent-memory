@@ -1,6 +1,6 @@
 ---
 name: github
-description: "GitHub via gh CLI: PRs, issues, reviews, repos, auth."
+description: "操作GitHub时必用。PR/Issue/评审/仓库/认证。GitHub via gh CLI: PRs, issues, reviews, repos, auth."
 version: 2.0.0
 author: Ben Barclay (benbarclay), Hermes Agent
 license: MIT

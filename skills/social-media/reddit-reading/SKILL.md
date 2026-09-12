@@ -1,6 +1,6 @@
 ---
 name: reddit-reading
-description: "Read Reddit: subreddits, search, threads, users. No browser."
+description: "读Reddit/看帖时必用。子版搜索帖子与用户免浏览器。Read Reddit: subreddits, search, threads, users. No browser."
 version: 1.0.0
 author: Teknium (teknium1), Hermes Agent
 license: MIT

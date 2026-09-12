@@ -1,6 +1,6 @@
 ---
 name: hermes-quota-embedded
-description: Hermes 配额监控内置化架构与排障路径（token-stats 后端插件替代计划任务）
+description: "查配额/额度监控时必用。token-stats内置化架构与排障。Hermes quota monitoring built into the token-stats backend plugin."
 ---
 
 # Hermes 配额监控内置化（token-stats）

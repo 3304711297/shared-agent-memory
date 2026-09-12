@@ -1,6 +1,6 @@
 ---
 name: brainstorming
-description: "创意构想/架构选型/头脑风暴/探索方案时必用。将想法收敛为可行规格。Use before any creative work, architecture design, or exploratory prototyping."
+description: "创意构想/架构选型/头脑风暴时必用。把想法收敛成可行规格。Use before any creative work, architecture design, or prototyping."
 ---
 
 # Brainstorming Ideas Into Designs

@@ -1,6 +1,6 @@
 ---
 name: chinese-copywriting
-description: Professional Chinese copywriting, typography, terminology standardization, and CJK-English spacing (Pangu spacing). Trigger whenever the user asks to polish, format, proofread, or standardize Chinese text, markdown documentation, or technical articles.
+description: "润色中文/排版校对时必用。中英空格与术语规范。Use for Chinese copywriting, typography, and Pangu spacing."
 ---
 
 # Chinese Copywriting & Typography Skill
@@ -32,3 +32,10 @@ A helper formatting script is bundled in this skill:
 ```bash
 python "%LOCALAPPDATA%/hermes/skills/zcode-custom/chinese-copywriting/pangu_format.py" path/to/document.md -i
 ```
+
+**Pitfalls (learned the hard way) — the script only touches prose by design:**
+
+- Code fences and YAML front matter are **never** modified. A naive global regex would insert spaces into code (`C:/Users/name` → `C :/ Users/name`) and corrupt them.
+- Fence language identifiers must not be case-corrected: ` ```python ` → ` ```Python ` silently breaks syntax highlighting. The TERMS_MAP casing pass is therefore **off by default** (`fix_casing=False`); enable it only for prose you have reviewed.
+- For a project with its own CI gates (MkDocs `--strict`, custom link/front-matter checkers), prefer running the formatter on a copy first and diffing — bulk whitespace edits can trip unrelated checks.
+- When auditing for spacing issues programmatically, **strip markdown syntax with sentinel characters, not spaces**. Using spaces as the replacement creates phantom "missing space" reports: emphasis markers (`**bold**`) and inline code removal both produce false positives. Always sample-check reported numbers by hand before acting on them.

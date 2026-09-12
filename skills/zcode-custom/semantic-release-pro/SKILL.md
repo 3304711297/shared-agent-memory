@@ -1,6 +1,6 @@
 ---
 name: semantic-release-pro
-description: Automate conventional git commit messages, calculate semantic version bumps (SemVer), and generate clean GitHub release notes and CHANGELOG entries from commit history. Trigger whenever the user asks to commit changes, draft a release, generate a changelog, or bump version.
+description: "提交/发版/写CHANGELOG时必用。语义化版本与发布说明。Use when committing, drafting a release, changelog, or version bump."
 ---
 
 # Semantic Release Pro Skill

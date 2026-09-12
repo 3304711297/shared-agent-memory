@@ -1,6 +1,6 @@
 ---
 name: fastmcp
-description: Build, test, and deploy Python MCP servers.
+description: "写MCP服务器时必用。Python MCP构建测试部署。Build, test, and deploy Python MCP servers."
 version: 1.0.0
 author: Hermes Agent
 license: MIT

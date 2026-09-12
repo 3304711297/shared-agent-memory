@@ -1,6 +1,6 @@
 ---
 name: shared-agent-memory
-description: 管理 Hermes 单 Agent 的长期记忆库（真源 D:/ai coding/GitRepos/shared-agent-memory，变动自动提交推送至 GitHub main 分支；历史遗留 zcode 分支为 ZCode 会话归档，只读）
+description: "管理记忆库/存记忆时必用。shared-agent-memory真源读写与自动推送。Manage the Hermes shared memory store and auto-push changes."
 ---
 
 # Hermes 共享记忆库 (shared-agent-memory)

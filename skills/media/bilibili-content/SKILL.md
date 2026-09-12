@@ -1,6 +1,6 @@
 ---
 name: bilibili-content
-description: "Use when analyzing Bilibili videos. Extract and summarize."
+description: "分析B站视频时必用。提取要点并总结。Use when analyzing Bilibili videos; extract and summarize."
 version: 1.0.0
 license: MIT
 platforms: [linux, macos, windows]
