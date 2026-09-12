@@ -779,6 +779,14 @@ function AntigravityQuotaChip({ ctx }) {
                   // 上游频率限制（code 6004）状态行
                   quotaData.workbuddy.rateLimit &&
                     jsx('div', { className: 'pt-0.5', children: jsx(RateLimitRow, { rl: quotaData.workbuddy.rateLimit, compact: true }) }),
+
+                  // 降级感知 compact 行：当前会话模型被静默降级
+                  quotaData.workbuddy.rateLimit?.fallback &&
+                    jsx('div', {
+                      className: 'text-[0.625rem] font-mono text-rose-300 bg-rose-500/10 px-1.5 py-0.5 rounded border border-rose-500/25 mt-0.5',
+                      title: `请求 ${quotaData.workbuddy.rateLimit.fallback.requested} 上游未授权 (${quotaData.workbuddy.rateLimit.fallback.reason})，实际运行 ${quotaData.workbuddy.rateLimit.fallback.actual}`,
+                      children: `⚠️ 降级中: ${quotaData.workbuddy.rateLimit.fallback.requested} → 实际 ${quotaData.workbuddy.rateLimit.fallback.actual}`,
+                    }),
                 ],
               }),
             ],
@@ -1383,6 +1391,23 @@ function QuotaPage({ ctx }) {
                     : 'bg-black/20 border-white/5'
               ),
               children: [
+                // 降级感知：当前会话模型被静默降级时显著提示（「你以为在用 ≠ 实际在用」）
+                data.workbuddy.rateLimit.fallback &&
+                  jsxs('div', {
+                    className: 'text-[11px] leading-relaxed font-mono flex flex-col gap-1 bg-rose-500/10 p-2 rounded-lg border border-rose-500/30',
+                    children: [
+                      jsxs('span', {
+                        className: 'font-semibold text-rose-300',
+                        children: [
+                          '⚠️ 模型降级中: 请求的 ',
+                          jsx('span', { className: 'font-bold', children: data.workbuddy.rateLimit.fallback.requested }),
+                          ' 上游未授权，实际运行 ',
+                          jsx('span', { className: 'font-bold text-(--foreground)', children: data.workbuddy.rateLimit.fallback.actual }),
+                        ],
+                      }),
+                      jsx('span', { className: 'text-rose-300/70', children: `已降级 ${data.workbuddy.rateLimit.fallback.count} 次 · 最近 ${data.workbuddy.rateLimit.fallback.lastLocal} · ${data.workbuddy.rateLimit.fallback.reason}` }),
+                    ],
+                  }),
                 jsxs('div', {
                   className: 'flex items-center justify-between',
                   children: [

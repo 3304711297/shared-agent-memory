@@ -221,6 +221,15 @@ def _workbuddy_rate_limit() -> dict[str, Any]:
                 out["nightFree"] = bool(rl.get("nightFree"))
             if "nightWindow" in rl:
                 out["nightWindow"] = rl.get("nightWindow")
+            # 降级感知透传（converter d311129+）：/api/rate_limit.fallbacks =
+            # {requested: {actual, reason, count, lastLocal}}。当前会话模型命中时
+            # 提升为顶层 fallback 字段，展示层据此渲染「你以为在用 ≠ 实际在用」。
+            fbs = rl.get("fallbacks") or {}
+            if fbs:
+                out["allFallbacks"] = fbs
+                hit = fbs.get(model)
+                if hit:
+                    out["fallback"] = {"requested": model, **hit}
             ru = rl.get("rollingUsage") or {}
             u_entry = ru.get(model) if model else None
             if not u_entry and not model and ru:
