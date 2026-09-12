@@ -91,3 +91,27 @@ def test_old_proxy_without_fallbacks_field(monkeypatch):
     out = plugin_api._workbuddy_rate_limit()
     assert "fallback" not in out
     assert "allFallbacks" not in out
+
+
+def test_rotation_soonest_expiry_and_server_metadata_passed(monkeypatch):
+    """验证 rotation.soonest_expire_day 与 server 诊断元数据被完整透传。"""
+    fake_rl = {
+        "models": {},
+        "rotation": {
+            "mode": "failover",
+            "rotate_count": 1,
+            "accounts_count": 2,
+            "soonest_expire_day": "2026-09-15",
+            "config_source": "hot",
+        },
+        "server": {
+            "maxBodyMb": 16.0,
+            "userAgent": "CLI/2.63.2 CodeBuddy/2.63.2",
+            "protocols": ["chat", "messages", "responses"],
+        },
+    }
+    _patch_env(monkeypatch, fake_rl, "glm-5.3-flash")
+    out = plugin_api._workbuddy_rate_limit()
+    assert out.get("rotation", {}).get("soonest_expire_day") == "2026-09-15"
+    assert out.get("server", {}).get("protocols") == ["chat", "messages", "responses"]
+    assert out.get("server", {}).get("maxBodyMb") == 16.0
