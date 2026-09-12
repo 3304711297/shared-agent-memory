@@ -637,6 +637,63 @@
           "sha": "3c0aacf89d4f7f3fc8347a712927d3a30bfb4e49"
         }
       ]
+    },
+    {
+      "id": "wb2api-upstream-neipor",
+      "display": "codebuddy-cli2api 全协议网关（neipor，借鉴雷达）",
+      "checks": [
+        {
+          "type": "github-commits-path",
+          "repo": "neipor/codebuddy-cli2api",
+          "path": ".",
+          "note": "纯标准库实现全协议网关（OpenAI/Anthropic/Gemini/Codex）；首创多模态图片远程 URL 自动下载转 Data-URI（解官方400限制）、前缀哈希亲和性会话保持（极大提升Prompt Cache命中率）、透传ASR/TTS/WebSearch/WebFetch端点；监控整仓新提交。"
+        }
+      ],
+      "installed": [
+        {
+          "where": "借鉴雷达（多模态图片转Data-URI机制、Prompt Cache亲和性调度与扩展资源端点参考）",
+          "version": "HEAD@316ac7f",
+          "sha": "316ac7fb140d8e3d01ab808ab4be8134b4d1e5ae"
+        }
+      ]
+    },
+    {
+      "id": "wb2api-upstream-windoc",
+      "display": "codebuddy-gateway 容器网关（WindoC，借鉴雷达）",
+      "checks": [
+        {
+          "type": "github-commits-path",
+          "repo": "WindoC/codebuddy-gateway",
+          "path": ".",
+          "note": "基于 CodeBuddy Agent SDK (@tencent-ai/agent-sdk) 桥接的容器化 REST 网关，支持持久化凭证与 MCP tools 自动映射；监控整仓新提交。"
+        }
+      ],
+      "installed": [
+        {
+          "where": "借鉴雷达（官方 Agent SDK 容器化桥接模式参考）",
+          "version": "HEAD@fb62c85",
+          "sha": "fb62c85efeb4c08a2f8668fb31aa1c2745b25e8b"
+        }
+      ]
+    },
+    {
+      "id": "wb2api-upstream-orangeboy",
+      "display": "codebuddy2api Next.js 网关（orangeboyChen，借鉴雷达）",
+      "checks": [
+        {
+          "type": "github-commits-path",
+          "repo": "orangeboyChen/codebuddy2api",
+          "path": ".",
+          "note": "Next.js / TypeScript 实现的轻量三协议网关与调试追踪层；监控整仓新提交。"
+        }
+      ],
+      "installed": [
+        {
+          "where": "借鉴雷达（TypeScript/Next.js 架构协议路由参考）",
+          "version": "HEAD@a032516",
+          "sha": "a032516283fe721c6061e7e81664c2a2e923d833"
+        }
+      ]
     }
   ],
   "notWatched": [
