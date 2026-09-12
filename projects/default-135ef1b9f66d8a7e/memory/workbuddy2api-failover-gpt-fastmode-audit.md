@@ -50,6 +50,11 @@ metadata:
 6. **UI 动态更新（updateModelCells）修复**：
    - 修复在控制台编辑保存模型配置后，`updateModelCells()` 仍遗留渲染 `默认 (${m.default_effort})` 导致界面退化为具体档位的问题，统一为 `默认 (跟随客户端)`；
    - 单测 `test_frontend_does_not_hardcode_default_effort_as_label` 加固覆盖模板字符串形式。
+7. **快速模式语义与协议解耦加固**：
+   - 修复 `service_tier: "auto"` 误判为 Fast Mode，明确只有 `"priority"` / `"fast"` 触发；`"auto"` 严格保持系统自动选择语义；
+   - `speed` 与 `fast_mode` 从上游 `PASSTHROUGH_BODY_KEYS` 彻底解耦，仅作网关内部控制识别，不再发往腾讯上游；
+   - 增强 GPT 11102 降级可观测性：在响应头（`X-Actual-Model` / `X-Requested-Model` / `X-Fallback-Reason`）、`_log_finish` / `_log` 与 `usage.jsonl` 中完整追踪请求模型、实际执行模型与降级原因，包括 Anthropic 协议双向映射与日志对齐；
+   - 明确 `fast-model` 为官方端点真实支持的低倍率（0.34 credits）模型，保留于模型列表并作为 Fast Mode 命中时的内部路由目标。
 
 ---
 
@@ -57,7 +62,7 @@ metadata:
 
 - `workbuddy2api` 仓库：
   - `npm run build` 前端产物同步构建打包；
-  - `pytest tests/`：212 passed（全量覆盖）；
+  - `pytest tests/`：214 passed（全量覆盖）；
   - `npm test`：32 passed（node:test）；
   - `cargo test`：24 passed。
 - `token-stats` 插件：
