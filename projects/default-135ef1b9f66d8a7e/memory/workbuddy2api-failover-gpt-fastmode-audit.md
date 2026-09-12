@@ -55,6 +55,9 @@ metadata:
    - `speed` 与 `fast_mode` 从上游 `PASSTHROUGH_BODY_KEYS` 彻底解耦，仅作网关内部控制识别，不再发往腾讯上游；
    - 增强 GPT 11102 降级可观测性：在响应头（`X-Actual-Model` / `X-Requested-Model` / `X-Fallback-Reason`）、`_log_finish` / `_log` 与 `usage.jsonl` 中完整追踪请求模型、实际执行模型与降级原因，包括 Anthropic 协议双向映射与日志对齐；
    - 明确 `fast-model` 为官方端点真实支持的低倍率（0.34 credits）模型，保留于模型列表并作为 Fast Mode 命中时的内部路由目标。
+8. **流式与非流式降级可观测性对称统一**：
+   - 在流式通道中，当发生 11102 降级重试成功后，在首个数据包前向客户端下发符合 W3C 标准的 SSE 注释元数据行 `: fallback: requested_model=... actual_model=... reason=...`；
+   - Anthropic 流式生成器透传该注释行，使 OpenAI 与 Anthropic 两路流式客户端均能实时解析感知降级信号，实现与非流式 HTTP 头的完全对称。
 
 ---
 
@@ -62,7 +65,7 @@ metadata:
 
 - `workbuddy2api` 仓库：
   - `npm run build` 前端产物同步构建打包；
-  - `pytest tests/`：214 passed（全量覆盖）；
+  - `pytest tests/`：216 passed（全量覆盖，含流式与非流式降级可观测性单测）；
   - `npm test`：32 passed（node:test）；
   - `cargo test`：24 passed。
 - `token-stats` 插件：
