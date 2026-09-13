@@ -85,5 +85,7 @@
 - [Workbuddy2api Rebrand and Dual Source](workbuddy2api-rebrand-and-dual-source.md) — 项目更名 codebuddy2openai→workbuddy2api（对齐腾讯官方 WorkBuddy 品牌，凸显 OpenAI+Anthropic 双协议）与双源并发聚合模型清单（国内 CodeBuddy 29 + 海外 WorkBuddy 21，按 id 去重优选 1M 上下文元数据，接入 gpt-6-astra）
 - [Workbuddy2api Hot Reload and Rebrand Cleanup](workbuddy2api-hot-reload-and-rebrand-cleanup.md) — 调度策略改运行时热读 settings.json（mtime 签名缓存，`config_source: hot` 可观测，免重启）+ 改名遗留六层清理（托盘/前端/UA/日志器/文档/环境变量兼容层 `_env_compat` 与 `env_compat`，新名优先旧名兜底）；含 `.venv` trampoline 修复
 - [Hermes Approval Two Tier Gates](hermes-approval-two-tier-gates.md) — Hermes 审批弹窗分两层：`approvals.mode` 管危险 shell 命令，`security.protected_instruction_files` 管 AGENTS.md/CLAUDE.md/SOUL.md/.cursorrules 写入（**even under --yolo 绕不过**，fail-closed，单次审批无「始终允许」）；**本机已按用户拍板全局关闭后者**（2026-09-11），恢复命令与副作用已记录
+- [File Workflow Official Benchmark](file-workflow-official-benchmark.md) — 官方读文件流四件套与 2026-09-13 实测：小读行号税 +7.5%，大文件截断差约 46 倍，批量走 execute_code，CLI 限定 @引用
+- [Opencode Muse Spark Upstream](opencode-muse-spark-upstream.md) — muse-spark-1.3-contributor-free 上游实录：ultra 钳制发 xhigh，summary 写死 auto，/v1/models 无参数，国内 403 RegionError
 
 
