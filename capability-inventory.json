@@ -116,6 +116,38 @@
       ]
     },
     {
+      "id": "cli-bili",
+      "display": "系统 CLI：bilibili-cli（B站无登录搜读备用路）",
+      "checks": [
+        {
+          "type": "pypi",
+          "package": "bilibili-cli"
+        }
+      ],
+      "installed": [
+        {
+          "where": "uv tool 用户级隔离安装（%USERPROFILE%/.local/bin/bili），[audio] 未装；bilibili-content §6 备用路",
+          "version": "0.6.2"
+        }
+      ]
+    },
+    {
+      "id": "cli-twitter",
+      "display": "系统 CLI：twitter-cli（推文搜索/时间线，未解锁）",
+      "checks": [
+        {
+          "type": "pypi",
+          "package": "twitter-cli"
+        }
+      ],
+      "installed": [
+        {
+          "where": "uv tool 用户级隔离安装（%USERPROFILE%/.local/bin/twitter）；未认证，解锁需小号 Cookie 手工导出",
+          "version": "0.8.5"
+        }
+      ]
+    },
+    {
       "id": "hermes-hub-skills",
       "display": "Hermes Hub 技能库（skills/ 目录提交）",
       "checks": [
@@ -716,6 +748,7 @@
     }
   ],
   "notWatched": [
+    "【评估否决·定向单拉 2026-09-13】Panniantong/Agent-Reach：AI Agent 互联网能力路由层（61231 Stars，MIT）。经五步评估整装否决：Exa/YouTube/RSS/GitHub/Reddit 与现有 Exa 主检索及各内容技能重叠约七成；SKILL 注册路径面向 OpenClaw（~/.openclaw/skills）与 Hermes 目录不匹配；OpenCLI 扩展动浏览器扩展基线；小红书/FB/IG/Reddit 登录态路线无刚需且背封号风险；单维护者 bus factor（290 vs 8）+171 open issues。定向单拉已落地（uv tool 隔离）：bilibili-cli（无登录搜读，bilibili-content §6 备用路）与 twitter-cli（未认证，解锁需小号 Cookie 手工导出），见 cli-bili / cli-twitter 组件。WARN：bili-cli 登录后自动嗅探浏览器 Cookie（未登录态不触发）；twitter 写操作需完整 Cookie（仅 auth_token+ct0 会 226）",
     "【Astra 瘦身·路由化冻结 2026-09-13】23 个巨型 skill 已按 Astra 第 2 条拆为「路由主文档 + references/」（清单见 topics/skill-slimming-astrastandards.md）。check_skill_drift.py 会将其中 7 个有上游同名者永久报告为「上游大幅改写」——此为路由化的人为差值，非上游更新（已逐项核对上游最后提交均早于 2026-09-12，obra/superpowers 四项为 07-24/08-12，hermes-agent 三项为 07-24/08-30）。⛔ 禁止用上游版本覆盖这些路由主文档；跟进上游实质更新时只把增量并入对应 references/。另：ponytail 主文档 6.2k 系常驻 discipline（ACTIVE EVERY RESPONSE），有意保持自包含，不拆。",
     "【本地交叉指向 2026-09-13】bilibili-content multimodal 步骤加 agentic-video-distill 指定 fallback（video_analyze 不可用/401 时禁手搓 whisper/抽帧）；agentic-video-distill 描述与 When to Use 补“B站无字幕/video_analyze 失败”触发词。起因：BV1SFNNzxEV6 提炼中 Agent 只在任务开头查一次技能池，video_analyze 401 后手搓转写漏调已装技能。纯本地描述层补强，无上游同名文件可覆盖（agentic-video-distill 自研无上游；bilibili-content 本地技能），不涉及安装/卸载，技能总数不变",
     "【Astra 瘦身审计 2026-09-13】按 OpenAI《Rethinking skills and prompts for GPT-6 Astra》六条标准审计 Hermes 全量 94 项技能，落地三批改动：①删除 5 项 Ekko 生图/生视频技能（apikey-image-gen / grok-image-to-video / hyperframes / minimax-image-to-video / remotion），生图统一收敛至 zcode-custom/gemini-image-gen，视频理解保留自研 agentic-video-distill；②收窄 superpowers/using-superpowers 过宽描述（原「任务开始/对话开启时必用·1%相关也必须先查」→「用户提出新任务且未指定具体 skill 时必用」）；③拆分 3 个巨型 SKILL.md 为「路由主文档 + references/」：cross-agent-collaboration 25.5k→1.8k（8 refs，删除 ZCode 退役章节 1/2/4/5）、llm-wiki 19.9k→2.2k（4 refs）、claude-design 25.0k→2.2k（8 refs）。技能总数 94→89，SKILL.md 总体积 712400→623382 字符。Ekko 系列技能即使用到也可从上游重装，不入 protectedSkills 白名单",

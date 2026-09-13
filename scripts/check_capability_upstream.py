@@ -100,6 +100,11 @@ def upstream_version(check):
         return http_json(
             f"https://registry.npmjs.org/{pkg}/latest", accept="application/json"
         ).get("version")
+    if t == "pypi":
+        pkg = urllib.parse.quote(check["package"], safe="")
+        return http_json(
+            f"https://pypi.org/pypi/{pkg}/json", accept="application/json"
+        ).get("info", {}).get("version")
     if t == "gh-release":
         tag = http_json(
             f"https://api.github.com/repos/{check['repo']}/releases/latest", auth=True
