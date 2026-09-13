@@ -128,7 +128,7 @@
       ],
       "installed": [
         {
-          "where": "Hermes skills/（89 项，2026-09-13 Astra 瘦身审计后）",
+          "where": "Hermes skills/（84 项，2026-09-13 skill审计后）",
           "version": "HEAD@abd83ab5",
           "sha": "abd83ab560327c58f17f8e2ecd9be0307d5c9cf9"
         }
@@ -259,7 +259,7 @@
       ],
       "installed": [
         {
-          "where": "Hermes skills/（6 项）+ ZCode ~/.zcode/skills（6 项副本）【组件已随 ZCode 拆除移除，2026-09-09】",
+          "where": "Hermes skills/（6 项）【ZCode 副本已随 ZCode 拆除移除，2026-09-09】",
           "version": "4.9.0",
           "sha": "974d940a1c5344210874150b98ff0d2c861fab6a"
         }

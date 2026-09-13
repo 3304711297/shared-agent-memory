@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-09-13 00:20",
+  "generatedAt": "2026-09-13 10:20",
   "scope": "Hermes skills/ 目录",
-  "totalSkills": 89,
+  "totalSkills": 84,
   "sources": [
     {
       "source": "Hermes Web UI 官方目录（hub/webui 安装）",
@@ -71,14 +71,13 @@
       ]
     },
     {
-      "source": "Teknium(anthropics系/未知仓库)",
-      "count": 8,
+      "source": "Teknium (teknium1) 社区技能（frontmatter 已署名，无固定仓库）",
+      "count": 7,
       "checkType": null,
-      "watchStatus": "⚠️ 来源不明-待人工确认",
+      "watchStatus": "已确权（09-13）-社区源无固定仓库，免监控",
       "skills": [
         "media/youtube-content",
         "note-taking/obsidian",
-        "research/gitnexus-explorer",
         "research/grounded-citations",
         "research/rss-feeds",
         "social-media/reddit-reading",
@@ -117,7 +116,7 @@
     },
     {
       "source": "自研(无 author)",
-      "count": 8,
+      "count": 7,
       "checkType": null,
       "watchStatus": "自研/无上游-免监控",
       "skills": [
@@ -127,7 +126,6 @@
         "hermes/hermes-custom-provider-models",
         "media/bilibili-content",
         "productivity/telegram-channel-ops",
-        "software-development/diagnosing-probe-false-failures",
         "web/edge-dev-cdp-scraping"
       ]
     },
@@ -142,10 +140,10 @@
       ]
     },
     {
-      "source": "BadTechBandit/skills 或 Cocoon AI 原创",
+      "source": "Cocoon AI 原创（frontmatter 已署名，Hermes 移植）",
       "count": 1,
       "checkType": null,
-      "watchStatus": "⚠️ 来源不明-待人工确认",
+      "watchStatus": "已确权（09-13）-免监控",
       "skills": [
         "creative/architecture-diagram"
       ]
@@ -154,43 +152,25 @@
       "source": "BadTechBandit/skills",
       "count": 1,
       "checkType": "github-commits-path",
-      "watchStatus": "❌ 未纳入",
+      "watchStatus": "已确权（09-13）-❌ 未纳入看门",
       "skills": [
         "creative/claude-design"
       ]
     },
     {
-      "source": "未知(sprmn24)",
+      "source": "Ben Barclay (benbarclay) 个人贡献",
       "count": 1,
       "checkType": null,
-      "watchStatus": "⚠️ 来源不明-待人工确认",
-      "skills": [
-        "devops/docker-management"
-      ]
-    },
-    {
-      "source": "benbarclay 个人贡献",
-      "count": 1,
-      "checkType": null,
-      "watchStatus": "⚠️ 来源不明-待人工确认",
+      "watchStatus": "已确权（09-13）-免监控",
       "skills": [
         "email/email-inbox-triage"
-      ]
-    },
-    {
-      "source": "community",
-      "count": 1,
-      "checkType": null,
-      "watchStatus": "⚠️ 来源不明-待人工确认",
-      "skills": [
-        "mcp/mcporter"
       ]
     },
     {
       "source": "Orchestra Research",
       "count": 1,
       "checkType": null,
-      "watchStatus": "⚠️ 来源不明-待人工确认",
+      "watchStatus": "已确权（09-13）-署名一致，免监控",
       "skills": [
         "mlops/whisper"
       ]
@@ -205,37 +185,28 @@
       ]
     },
     {
-      "source": "JulienTant/blogwatcher-cli",
-      "count": 1,
-      "checkType": "gh-release",
-      "watchStatus": "❌ 未纳入",
-      "skills": [
-        "research/blogwatcher"
-      ]
-    },
-    {
-      "source": "code-yeongyu 系 OhMyOpenAgent",
+      "source": "Yeongyu Kim (code-yeongyu)",
       "count": 1,
       "checkType": null,
-      "watchStatus": "⚠️ 来源不明-待人工确认",
+      "watchStatus": "已确权（09-13）-免监控",
       "skills": [
         "software-development/ast-grep"
       ]
     },
     {
-      "source": "benbarclay",
+      "source": "Ben Barclay (benbarclay)",
       "count": 1,
       "checkType": null,
-      "watchStatus": "⚠️ 来源不明-待人工确认",
+      "watchStatus": "已确权（09-13）-免监控",
       "skills": [
         "software-development/github"
       ]
     },
     {
-      "source": "rafaumeu",
+      "source": "Rafael Zendron (rafaumeu) + Matt Pocock",
       "count": 1,
       "checkType": null,
-      "watchStatus": "⚠️ 来源不明-待人工确认",
+      "watchStatus": "已确权（09-13）-免监控",
       "skills": [
         "software-development/grill-me"
       ]
@@ -244,25 +215,25 @@
       "source": "eren-karakus0",
       "count": 1,
       "checkType": null,
-      "watchStatus": "⚠️ 来源不明-待人工确认",
+      "watchStatus": "已确权（09-13）-免监控",
       "skills": [
         "software-development/rest-graphql-debug"
       ]
     },
     {
-      "source": "Claude Code /simplify 启发",
+      "source": "Hermes 自研（Claude Code /simplify 启发）",
       "count": 1,
       "checkType": null,
-      "watchStatus": "⚠️ 来源不明-待人工确认",
+      "watchStatus": "自研/无上游-免监控",
       "skills": [
         "software-development/simplify-code"
       ]
     },
     {
-      "source": "gsd-build/get-shit-done",
+      "source": "Hermes 自研（gsd-build/get-shit-done 改编）",
       "count": 1,
       "checkType": null,
-      "watchStatus": "⚠️ 来源不明-待人工确认",
+      "watchStatus": "自研/无上游-免监控",
       "skills": [
         "software-development/spike"
       ]
@@ -277,5 +248,5 @@
       ]
     }
   ],
-  "note": "2026-09-13 Astra 瘦身：删除 5 项 Ekko 生图/生视频技能（apikey-image-gen/grok-image-to-video/hyperframes/minimax-image-to-video/remotion），生图统一走 zcode-custom/gemini-image-gen。"
+  "note": "2026-09-13 skill审计：删5项（blogwatcher由rss-feeds替代、diagnosing-probe并入systematic-debugging、mcporter由hermes-agent原生MCP覆盖、gitnexus-explorer由code-wiki替代、docker-management用户不用docker）；补3项上游增量（adversarial-WhyThisWorks、dispatching-WhenToUse、worktrees-Step0）；14项社区源frontmatter确权入库；using-superpowers描述瘦身178→~105字符。"
 }
