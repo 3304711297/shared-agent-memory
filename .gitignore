@@ -17,6 +17,8 @@
 !desktop-plugins/**
 !scripts/
 !scripts/**
+!tests/
+!tests/**
 !.github/
 !.github/**
 
