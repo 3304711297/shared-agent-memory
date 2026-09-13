@@ -87,5 +87,6 @@
 - [Hermes Approval Two Tier Gates](hermes-approval-two-tier-gates.md) — Hermes 审批弹窗分两层：`approvals.mode` 管危险 shell 命令，`security.protected_instruction_files` 管 AGENTS.md/CLAUDE.md/SOUL.md/.cursorrules 写入（**even under --yolo 绕不过**，fail-closed，单次审批无「始终允许」）；**本机已按用户拍板全局关闭后者**（2026-09-11），恢复命令与副作用已记录
 - [File Workflow Official Benchmark](file-workflow-official-benchmark.md) — 官方读文件流四件套与 2026-09-13 实测：小读行号税 +7.5%，大文件截断差约 46 倍，批量走 execute_code，CLI 限定 @引用
 - [Opencode Muse Spark Upstream](opencode-muse-spark-upstream.md) — muse-spark-1.3-contributor-free 上游实录：ultra 钳制发 xhigh，summary 写死 auto，/v1/models 无参数，国内 403 RegionError
+- [Lookup Before Build](lookup-before-build.md) — **先检索再造轮子铁律**（2026-09-13 用户拍板）：手搓任何解析/签名/抓取/协议适配/胶水前必先查技能池→官方文档→成熟开源实现源码；反例判据（换过 3 组参数仍失败 / 依传闻调参 / 要写 50+ 行无关胶水 / 说不清错误码语义）出现即停下检索；实战案例为 B 站 `-352` 风控（手搓猜参数徒劳，检索得「只能换出口 IP 或换接口」的定论）
 
 
