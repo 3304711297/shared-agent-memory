@@ -9,7 +9,7 @@ metadata:
   hermes:
     tags: [MCP, FastMCP, Python, Tools, Resources, Prompts, Deployment]
     homepage: https://gofastmcp.com
-    related_skills: [hermes-agent, mcporter]
+    related_skills: [hermes-agent]
 prerequisites:
   commands: [python]
 ---
@@ -29,7 +29,7 @@ Use this skill when the task is to:
 - install a server into Claude Code, Claude Desktop, Cursor, or a similar MCP client
 - prepare a FastMCP server repo for HTTP deployment
 
-Use `native-mcp` when the server already exists and only needs to be connected to Hermes. Use `mcporter` when the goal is ad-hoc CLI access to an existing MCP server instead of building one.
+Use `native-mcp` (hermes-agent skill) when the server already exists and only needs to be connected to Hermes.
 
 ## Prerequisites
 

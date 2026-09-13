@@ -1,0 +1,5 @@
+### Cross-Repo Knowledge Lock Invariant (`tweakbyjie` <-> `youshouldknow`)
+When maintaining interdependent repositories where one locks the documentation commit of the other (e.g. `tweakbyjie/tools/knowledge.lock.json` tracking `youshouldknow`):
+- **Exact 40-Hex Commit SHA**: Always retrieve the commit SHA programmatically using `git -C <path> rev-parse HEAD` or `gh api repos/<owner>/<repo>/commits/main --jq .sha`.
+- **Zero-Splicing / Zero-Truncation**: Never hand-type or splice truncated SHAs into lock files. Audit scripts (e.g. `Test-CrossRepoCoverage.ps1`) construct direct Raw GitHub URLs (`raw.githubusercontent.com/.../<ref>/...`); a malformed or non-existent commit SHA immediately fails with HTTP 404, blocking Coverage and CI pipelines.
+- **Push Order Constraint**: Always commit and push the knowledge documentation repository first, verify the commit exists on remote `main`, update the downstream lock file, run local cross-repo coverage and test suites (`Invoke-Pester`), and only then push the downstream repository.

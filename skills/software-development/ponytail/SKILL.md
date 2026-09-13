@@ -41,6 +41,16 @@ the root-cause fix: one guard in the shared function is a smaller diff than a
 guard in every caller — and patching only the path the ticket names leaves
 every sibling caller still broken. Fix it once, where all callers route through.
 
+## Sub-skills (one-shot, invoke on demand)
+
+| Skill | Trigger |
+|---|---|
+| `ponytail-help` | `/ponytail-help` — 模式/技能/命令速查卡 |
+| `ponytail-review` | `/ponytail-review` — 审 diff 找臃肿，一行一条 |
+| `ponytail-audit` | `/ponytail-audit` — 全库扫过度工程，按可删行数排名 |
+| `ponytail-debt` | `/ponytail-debt` — 收 `ponytail:` 注释成债务台账 |
+| `ponytail-gain` | `/ponytail-gain` — 极简收益计分板（benchmark 中位数，非本仓实测） |
+
 ## Rules
 
 - No unrequested abstractions: no interface with one implementation, no factory for one product, no config for a value that never changes.

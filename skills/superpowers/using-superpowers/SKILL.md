@@ -1,6 +1,6 @@
 ---
 name: using-superpowers
-description: "任务开始/对话开启时必用。技能自检总纲：1%相关也必须先查。Use when starting tasks; enforces skill invocation before responses."
+description: "用户提出新任务且未指定具体 skill 时必用。技能自检总纲：先查池再动手。Use when a new task arrives with no skill named; check pool first."
 ---
 
 <SUBAGENT-STOP>

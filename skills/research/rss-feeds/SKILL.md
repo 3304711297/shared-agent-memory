@@ -8,7 +8,7 @@ platforms: [linux, macos, windows]
 metadata:
   hermes:
     tags: [RSS, Atom, Feeds, Monitoring, Research, Blogs, Releases]
-    related_skills: [reddit-reading, competitor-news-monitor, grounded-citations, youtube-content, blogwatcher]
+    related_skills: [reddit-reading, competitor-news-monitor, grounded-citations, youtube-content]
 ---
 
 # RSS Feeds Skill
@@ -24,8 +24,8 @@ that.
 - "What's new on <blog/site>", "latest releases of <GitHub repo>", "recent posts in
   <subreddit>", "read this feed", "does this site have an RSS feed".
 - Building a recurring digest with `cronjob_manage` (feeds are cheaper and more stable than
-  scraping the HTML front page every run). For a persistent read/unread database across
-  many feeds install the optional `blogwatcher` skill; this skill is the zero-install read.
+  scraping the HTML front page every run). This skill is the zero-install read; persist
+  read/unread state in a local file if you need it across runs.
 - Anything where a structured list of `title / link / date / author / summary` beats a
   rendered page: podcasts, changelogs, YouTube channels, newsrooms, forum categories.
 
