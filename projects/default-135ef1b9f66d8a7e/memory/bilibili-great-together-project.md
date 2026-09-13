@@ -264,3 +264,13 @@ AbortController 穿透 fetchLike / userscript 纯函数覆盖评估（拦截点/
   - **根本原因**：原 `.github/workflows/upstream-watch.yml` 仅按 `state=open` 检索 Issue；当旧 Issue 被评估处置并关闭后，检索结果为空，导致 `RECORDED` SHA 丢失并回退至全量检查，造成每日定时调度误开新 Issue（历史 Issue #2、#8、#9 循环触发的根本原因）。
   - **修复实现**：检索条件调整为全量 Issue（`state=all`），通过最近一条带 `upstream-sync` 标签的 Issue 稳定提取基准 SHA；检测到上游实际前进时自动收口旧 open Issue 并开新 Issue。
   - **验证**：本地 143 项单测与全量构建通过；推送后 GitHub Actions CI（Run `33847625201`）与 Version Release（Run `33847625252`）34s 全绿；手动触发 `upstream-watch`（Run `33847700806`）验证成功命中已关闭 Issue #9 的 SHA `19ac3ae`，日志确认输出「记录 SHA 与上游一致，无更新，幂等空转」，0 误报开单。
+
+## 2026-09-13 Dependabot 第二批处置 + v0.3.6 发版 + 分支收口 ✓
+
+- **Dependabot 5 笔 PR 全量处置（#10–#14）**：5 笔 CI 全绿且均为 devDeps version-bump（package.json + pnpm-lock.yaml）；
+  - #10（`eslint` 10.9.1→10.10.0）直接 squash 合并（`e585cb0`）；
+  - #11（`@rollup/plugin-typescript` 11→12.3.0）/#12（`vitest` 3→5 major）/#13（`typescript-eslint` 8.0.0→8.69.0，实际落 8.70.0）/#14（`happy-dom` 20.12.0→20.14.0）：四笔同改 `pnpm-lock.yaml`，串行合并必冲突，沿用 09-03 收口方式——本地一次并完单 commit 入 `main`（`0e36b5c`），4 笔 PR 留言说明后关闭、分支删除。
+  - vitest major 先行本地 CI 等价验证（lint + 122 core + 21 userscript 测试 + build + 产物断言 + frozen-lockfile 一致性）全绿才并入；远端 CI 与 Version Release 在合并后双绿。
+- **残留分支收口**：远端 `plan5-polish` 验证为 `main` 祖先且零 diff，按惯例远端+本地双删；dependabot 远端 tracking 经 prune 清理。远端现仅 `main`，本地亦仅 `main`。
+- **v0.3.6 发版**（`e51bbec`，三处版本号 patch bump，无功能改动）：Version Release 全绿，tag `v0.3.6` + 双资产（extension.zip / .user.js）正常；此前最新为 v0.3.5（09-05）。
+- 收尾：0 open Issue、0 open PR，本地与远端同步。
