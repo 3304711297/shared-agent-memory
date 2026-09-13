@@ -52,11 +52,51 @@
 
 内容零丢失，全部进 `references/`。`cross-agent-collaboration` 顺带删除 ZCode 退役章节（原 §1/§2 观察协议、§4 反向握手、§5 headless 探针）——2026-09-09 ZCode 拆除后已是死重。
 
+## 扫尾（2026-09-13 接力，P0-B + P1/P2 收敛判定）
+
+### ④ P0-B：拆剩余 20 个无 refs 巨石（全部路由化，内容零丢失）
+
+| 批次 | Skill | 前 → 后 | refs |
+|---|---|---|---|
+| P0-A | `computer-use` | 15,758 → **1,186** | 5 |
+| P0-A | `rest-graphql-debug` | 15,564 → **1,206** | 6 |
+| P0-A | `simplify-code` | 14,650 → **979** | 4 |
+| P0-B | `hermes-agent-skill-authoring` | 14,610 → **1,007** | 4 |
+| P0-B | `python-debugpy` | 13,365 → **918** | 4 |
+| P0-B | `node-inspect-debugger` | 10,909 → **944** | 4 |
+| P0-B | `docker-management` | 10,416 → **888** | 3 |
+| P0-B | `skill-evaluation-and-admission` | 9,625 → **890** | 3（纯路由化，SOP 语义零改动） |
+| P0-B | `adversarial-ux-test` | 8,921 → **736** | 2 |
+| P0-B | `spike` | 8,632 → **836** | 2 |
+| P0-B | `publish-site` | 8,626 → **767** | 2 |
+| P0-B | `finishing-a-development-branch` | 7,724 → **564** | 3 |
+| P0-B | `agent-merge-conflict-arbiter` | 7,622 → **661** | 2 |
+| P0-B | `receiving-code-review` | 7,420 → **658** | 5 |
+| P0-B | `collective-wisdom-install` | 7,238 → **638** | 2 |
+| P0-B | `readme-master` | 6,780 → **443** | 2 |
+| P0-B | `using-git-worktrees` | 6,690 → **495** | 2 |
+| P0-B | `blogwatcher` | 6,235 → **768** | 2 |
+| P0-B | `inspecting-hermes-desktop-dom` | 6,207 → **742** | 3 |
+| P0-B | `dispatching-parallel-agents` | 6,045 → **502** | 2 |
+
+累计：技能数保持 **89**，SKILL.md 总体积 623,892 → **446,812** 字符（再降 177,080，-28%）。
+`>6000c 无 refs` 残余仅 1 项：`ponytail` 主文档 6,264c——系常驻 discipline（ACTIVE EVERY RESPONSE），有意保持自包含，不拆。
+其余 24 个 `>6000c` 均已有附属文件（上游 prompts/scripts/templates 或已路由化），不动。
+
+### ⑤ P1/P2 收敛判定（经作者归属核查后修正执行）
+
+- **P1a ponytail 家族**：原计划 6→1 物理合并**已否决**——主文档是常驻 discipline（必须常驻加载），5 个子技能全是 one-shot（help 速查卡本身就是路由器），当前 factored 状态正是 progressive disclosure 的正确形态；且整族被 `ponytail-skills` 看门（gh-release DietrichGebert/ponytail）跟踪，物理合并会断上游同步。实际执行：主文档加 Sub-skills 路由表；`ponytail-audit` 的 Tags 重复段改为指向 `ponytail-review` 的指针（-6 行）。
+- **P1b 审查类**：`simplify-code`（已路由化）/ `ponytail-review`（diff 臃肿一行一条）/ `grill-me`（动手前对抗性质询）/ `receiving-code-review`（已路由化）/ `requesting-code-review`（结构化送审报告）——触发词已正交，**无需合并**。
+- **P2**：`systematic-debugging` / `test-driven-development` 为上游 superpowers 套件成员（看门 gh-release 跟踪），**禁止删除**；`diagnosing-probe-false-failures`（本地自研 v0.1.0，探针真伪判定）与 `dogfood`（Web 探索性 QA）/ `adversarial-ux-test`（敌意 UX persona）触发词均正交，**保留**。
+
+### ⑥ 看门语义补丁
+
+`check_skill_drift.py` 无白名单机制，路由化后 7 个有上游同名者会被永久报告为「上游大幅改写」。已逐项核对上游最后提交（obra/superpowers 四项 07-24/08-12、hermes-agent 三项 07-24/08-30，均早于基线），确认为路由化人为差值，已在 `capability-inventory.json` → `notWatched` 首条写入「路由化冻结」声明：禁止用上游覆盖路由主文档，跟进上游增量时只并入 `references/`。
+
 ## 后续待办（本轮未做）
 
-- **P1 合并**：生图/生视频 7→1、ponytail 家族 6→1（主文档改路由表）、代码审查类 4→2。
-- **P2 删除**：`systematic-debugging` / `test-driven-development` / `diagnosing-probe-false-failures` 对"跑测试/自查"的强调重复（官方第 4 条：旧刹车）。
-- **P0 剩余**：`computer-use`(15.8k)、`rest-graphql-debug`(15.6k)、`simplify-code`(14.7k)、`hermes-agent-skill-authoring`(14.6k)、`python-debugpy`(13.4k) 等 23 个无 refs 的 >6k 巨石，按同一模板拆。
+- ~~**P1 合并**~~（已判定：保持现状，见⑤） / ~~**P2 删除**~~（已否决） / ~~**P0 剩余**~~（已清零，见④）。
+- 新事项：上游若对 7 个已路由技能有实质更新，需人工把增量并入 `references/`（看门误报已屏蔽语义，需主动 `gh api .../commits?path=` 抽查）。
 
 ## 复用要点
 
