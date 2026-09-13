@@ -122,6 +122,14 @@ function fmtCooldown(sec) {
   return `${s}s`
 }
 
+// 积分紧凑呈现 -> 「4.8k / 12k / 850」
+function fmtCredits(num) {
+  if (num == null) return '8787'
+  if (num >= 10000) return `${Math.round(num / 1000)}k`
+  if (num >= 1000) return `${(num / 1000).toFixed(1)}k`
+  return `${Math.round(num)}`
+}
+
 // WorkBuddy 频率限制行：只呈现真实观测值，不虚构阈值/百分比
 function RateLimitRow({ rl, compact }) {
   if (!rl) return null
@@ -406,6 +414,45 @@ function AntigravityQuotaChip({ ctx }) {
                   }),
                 ],
               }),
+              // WorkBuddy 本地反代感知微胶囊（仅当在线时紧凑展示，降级/限频优先预警）
+              quotaData.workbuddy?.status === 'online' &&
+                jsx('span', {
+                  className: 'text-[10px] text-white/15 select-none font-mono mx-0.5',
+                  children: '·',
+                }),
+              quotaData.workbuddy?.status === 'online' &&
+                (quotaData.workbuddy.rateLimit?.fallback
+                  ? jsxs('span', {
+                      className: 'inline-flex items-baseline gap-0.5 text-rose-400 font-mono font-bold',
+                      title: `WorkBuddy 模型降级中: ${quotaData.workbuddy.rateLimit.fallback.requested} → ${quotaData.workbuddy.rateLimit.fallback.actual}`,
+                      children: [
+                        jsx('span', { className: 'text-[9px]', children: '⚠️' }),
+                        jsx('span', { className: 'text-[10px]', children: '降级' }),
+                      ],
+                    })
+                  : quotaData.workbuddy.rateLimit?.state === 'limited'
+                  ? jsxs('span', {
+                      className: 'inline-flex items-baseline gap-0.5 text-amber-400 font-mono font-bold',
+                      title: `WorkBuddy 限频冷却中: ${fmtCooldown(quotaData.workbuddy.rateLimit.remainingSec)}`,
+                      children: [
+                        jsx('span', { className: 'text-[9px]', children: '⏳' }),
+                        jsx('span', {
+                          className: 'text-[10px]',
+                          children: fmtCooldown(quotaData.workbuddy.rateLimit.remainingSec),
+                        }),
+                      ],
+                    })
+                  : jsxs('span', {
+                      className: 'inline-flex items-baseline gap-0.5 text-cyan-400/90 font-mono',
+                      title: quotaData.workbuddy.note || 'WorkBuddy 反代在线 (8787)',
+                      children: [
+                        jsx('span', { className: 'text-[9px] text-cyan-400/80', children: '⚡' }),
+                        jsx('span', {
+                          className: 'text-[10px] font-bold tracking-tight',
+                          children: fmtCredits(quotaData.workbuddy.usage?.remain),
+                        }),
+                      ],
+                    })),
             ],
           }),
         }),
@@ -735,6 +782,9 @@ function AntigravityQuotaChip({ ctx }) {
                                 '👤 ',
                                 quotaData.workbuddy.usage.nickname || '—',
                                 quotaData.workbuddy.usage.isPaidUser ? '' : ' (免费版)',
+                                quotaData.workbuddy.rateLimit?.rotation?.soonest_expire_day
+                                  ? ` · 临期${quotaData.workbuddy.rateLimit.rotation.soonest_expire_day.slice(5)}`
+                                  : '',
                               ],
                             }),
                             jsxs('span', {
@@ -779,6 +829,14 @@ function AntigravityQuotaChip({ ctx }) {
                   // 上游频率限制（code 6004）状态行
                   quotaData.workbuddy.rateLimit &&
                     jsx('div', { className: 'pt-0.5', children: jsx(RateLimitRow, { rl: quotaData.workbuddy.rateLimit, compact: true }) }),
+
+                  // 降级感知 compact 行：当前会话模型被静默降级
+                  quotaData.workbuddy.rateLimit?.fallback &&
+                    jsx('div', {
+                      className: 'text-[0.625rem] font-mono text-rose-300 bg-rose-500/10 px-1.5 py-0.5 rounded border border-rose-500/25 mt-0.5',
+                      title: `请求 ${quotaData.workbuddy.rateLimit.fallback.requested} 上游未授权 (${quotaData.workbuddy.rateLimit.fallback.reason})，实际运行 ${quotaData.workbuddy.rateLimit.fallback.actual}`,
+                      children: `⚠️ 降级中: ${quotaData.workbuddy.rateLimit.fallback.requested} → 实际 ${quotaData.workbuddy.rateLimit.fallback.actual}`,
+                    }),
                 ],
               }),
             ],
@@ -1318,6 +1376,12 @@ function QuotaPage({ ctx }) {
                             className: 'px-1.5 py-0.5 text-[10px] rounded bg-purple-500/10 text-purple-400 border border-purple-500/20 font-mono',
                             children: `🔄 ${data.workbuddy.rateLimit.rotation.mode === 'failover' ? '故障自动避让' : data.workbuddy.rateLimit.rotation.mode === 'roundrobin' ? '轮询分摊' : '单号模式'} (${data.workbuddy.rateLimit.rotation.accounts_count || 1}号)`,
                           }),
+                        data.workbuddy.rateLimit?.rotation?.soonest_expire_day &&
+                          jsx('span', {
+                            className: 'px-1.5 py-0.5 text-[10px] rounded bg-amber-500/10 text-amber-300 border border-amber-500/20 font-mono',
+                            title: '按积分到期日分层优先调度，避免临期额度作废',
+                            children: `📅 临期优先: ${data.workbuddy.rateLimit.rotation.soonest_expire_day}`,
+                          }),
                       ],
                     }),
                     jsxs('span', {
@@ -1383,6 +1447,23 @@ function QuotaPage({ ctx }) {
                     : 'bg-black/20 border-white/5'
               ),
               children: [
+                // 降级感知：当前会话模型被静默降级时显著提示（「你以为在用 ≠ 实际在用」）
+                data.workbuddy.rateLimit.fallback &&
+                  jsxs('div', {
+                    className: 'text-[11px] leading-relaxed font-mono flex flex-col gap-1 bg-rose-500/10 p-2 rounded-lg border border-rose-500/30',
+                    children: [
+                      jsxs('span', {
+                        className: 'font-semibold text-rose-300',
+                        children: [
+                          '⚠️ 模型降级中: 请求的 ',
+                          jsx('span', { className: 'font-bold', children: data.workbuddy.rateLimit.fallback.requested }),
+                          ' 上游未授权，实际运行 ',
+                          jsx('span', { className: 'font-bold text-(--foreground)', children: data.workbuddy.rateLimit.fallback.actual }),
+                        ],
+                      }),
+                      jsx('span', { className: 'text-rose-300/70', children: `已降级 ${data.workbuddy.rateLimit.fallback.count} 次 · 最近 ${data.workbuddy.rateLimit.fallback.lastLocal} · ${data.workbuddy.rateLimit.fallback.reason}` }),
+                    ],
+                  }),
                 jsxs('div', {
                   className: 'flex items-center justify-between',
                   children: [
@@ -1475,7 +1556,9 @@ function QuotaPage({ ctx }) {
               }),
               jsx('span', {
                 className: 'text-[11px] text-(--ui-text-tertiary) font-mono',
-                children: 'Tauri v2 架构 · 28 官方模型矩阵 · 纯净倍率',
+                children: data.workbuddy.rateLimit?.server?.protocols?.length === 3
+                  ? 'Tauri v2 架构 · 三协议 · 413 防护 · Vision 内联 · Codex 投影'
+                  : 'Tauri v2 架构 · 28 官方模型矩阵 · 纯净倍率',
               }),
             ],
           }),
