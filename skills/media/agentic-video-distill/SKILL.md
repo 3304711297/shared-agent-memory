@@ -1,6 +1,6 @@
 ---
 name: agentic-video-distill
-description: "视频提炼/分析录屏时必用。Gemini代理式抽帧蒸馏省88%Token。Use when distilling long videos or screen recordings."
+description: "视频提炼/分析录屏时必用。Gemini代理式抽帧蒸馏省88%Token。B站无字幕视频与video_analyze失败时走本技能。Use when distilling long videos or screen recordings."
 version: 1.0.0
 author: "Hermes & ZCode Dual-Agent Framework"
 license: MIT
@@ -31,6 +31,7 @@ metadata:
 ## When to Use
 
 - 用户发送或指定本地视频文件路径（`.mp4`, `.mkv` 等）或公开 YouTube URL（`https://youtu.be/...`）；
+- B 站无字幕视频，或 `video_analyze` 不可用/调用失败（401 等）时的指定 fallback——先于任何手搓 whisper/抽帧方案；
 - 需要从视频中精准提取**屏幕画面证据**（如 UEFI/BIOS 菜单层级路径、拓扑结构图、代码 12 等设备管理器报错、性能跑分曲线）；
 - 需要将长视频/技术演讲高保真转化为 Markdown 学习笔记或供 `cangjie-distill` 提取方法论。
 
@@ -64,3 +65,14 @@ python "<SKILL_DIR>/scripts/distill.py" "<VIDEO_SOURCE>" -o "<OUTPUT_MD_PATH>"
 3. **底层原理与避坑红线**。
 
 主模型根据用户当前的特定问题，以精炼有据的语言向用户呈现最终结论。
+
+---
+
+## 批量场景的配额纪律（务必遵守）
+
+免费档 Gemini 配额为 **每模型 20 次/窗口**，因此：
+
+- **绝不要并行跑多个 distill**：多路并发会在几秒内把配额打爆，此时 `gemini-3.8-flash` 与平替的 `gemini-3.7-flash` 会同时返回 `quota_exceeded`，脚本按 Key 轮询（Key #1 → Key #2）也救不回来，症状是「所有候选模型均未能返回有效分析内容」。
+- **批量一律单路串行 + 间隔**：一个进程内 `for` 循环逐个跑，条目之间 `sleep 60`，失败重试之间 `sleep 180`，并让循环跳过已产出的文件（`[ -f "$OUT" ] && continue`）。这样即使中途被限流，已完成的结果也保住了。
+- **已被配额挡住时不要硬等**：同一视频连续 3 次重试仍失败，就换 `vision_analyze` 抽帧拼图路线（见 `bilibili-content` 技能第 4 节），不要无限重试。
+- 命中 `high demand`（`api_error`）也计入重试预算；它与 `quota_exceeded` 的处置相同，都是换路而不是加并发。

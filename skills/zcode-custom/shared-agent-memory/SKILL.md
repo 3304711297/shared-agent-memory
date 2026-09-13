@@ -14,7 +14,7 @@ description: "管理记忆库/存记忆时必用。shared-agent-memory真源读�
 - **本 Agent 视角（等价路径）**：`%LOCALAPPDATA%\hermes\memories\topics\` = 上述真源 `projects\default-135ef1b9f66d8a7e\memory\` 的 junction
   - 共享库索引：`topics\MEMORY.md`
   - 单条专题记忆：`topics\<name>.md`（YAML frontmatter + 正文）
-- **⚠️ 仓库内 `topics/` 目录是遗留副本陷阱（2026-09-09 实证）**：共享库仓库根下的 `topics/` 已被 .gitignore（`/topics`）且内容陈旧，与真源内容不一致——它不再是任何 junction。**读写必须走 git 跟踪的 `projects/default-135ef1b9f66d8a7e/memory/` 路径**；误写仓库内 topics/ 的改动永远不会进 git。判别方法：对两路径同名文件 `git hash-object` 比对，或看 `.gitignore` 是否含 `/topics`。
+- **⚠️ 仓库内 `topics/` 目录是遗留副本陷阱（2026-09-09 实证）**：共享库仓库根下的 `topics/` 已被 .gitignore（`/topics`）且内容陈旧，与真源内容不一致——它不再是任何 junction。**读写必须走 git 跟踪的 `projects/default-135ef1b9f66d8a7e/memory/` 路径**；误写仓库内 topics/ 的改动永远不会进 git。判别方法：对两路径同名文件 `git hash-object` 比对，或看 `.gitignore` 是否含 `/topics`。2026-09-13 已 `git clean -fdX topics/` 清空 80 个幽灵文件（仅保留被跟踪的 `skill-slimming-astrastandards.md`），并立本地警示牌 `topics/__DO_NOT_WRITE_HERE__.md`（ignored，不进仓，仅防 filesystem 浏览误入）。健康状态=该目录仅 1 被跟踪文件 + 1 警示牌；若看到几十个 md，说明又有写入误入陷阱，按上法清理。
 - **分支归属**：`main`=记忆真源 | `hermes`=Hermes home 专属备份 | `zcode`=ZCode 会话归档（在姊妹私有仓 shared-agent-sessions，只读历史）
 - **Hermes 专属记忆（不放共享库）**：`memories\USER.md`（用户画像常驻）、根 `memories\MEMORY.md`（系统与环境常驻索引）→ 随 hermes 分支备份
 
@@ -66,6 +66,32 @@ metadata:
    - 与每日计划任务 `OpenVikingDailyBackup`（09:30）互补：即时同步压缩暴露窗口，计划任务兜底 AI 无感知的异步写入。失败不重试不阻塞。
 
 **规则放置原则（2026-09-11 教训）**：跨会话必须自动执行的约束，**不能只放在语义召回层**（OpenViking 资源 / 共享库文档）——它们仅在话题命中时才进入上下文。凡属「无条件触发」的规则（如写后同步），必须同时写入：(a) 内置 `MEMORY.md`（每轮注入，永远可见）；(b) 对应技能正文（任务命中时加载）。本次就是因规则只存在于召回层，导致修插件 bug 时执行了 `viking_remember` 却整轮无人提醒同步，直到用户手动贴出仓库 URL 才补跑。
+
+## 先检索再造轮子（Lookup-Before-Build，2026-09-13 用户拍板）
+
+**铁律：在自行实现任何解析、签名、抓取、协议适配或样板代码之前，必须先检索是否已有成熟方案；严禁把「手搓」当作默认动作。**
+
+触发场景（任一命中即适用）：
+
+- 要写签名/验签、加密、编码、正则解析之类「看起来有标准答案」的算法；
+- 要适配第三方平台的私有接口、私有协议、反爬逻辑；
+- 要写数据格式转换、导入导出、迁移脚本；
+- 即将写出超过约 50 行「与业务逻辑无关的胶水代码」；
+- 遇到陌生的报错码 / 风控码 / 限流码，准备靠调参数试出来时。
+
+必查的三个来源（按优先级）：
+
+1. **本机已装技能池**（Skill-First Rule 的延伸）——先 `skills_list` / `skill_view`，别重复造已封装的轮子；
+2. **官方文档与官方 API 文档**（`web_search` / `web_extract`）——确认字段语义、限额、已废弃接口；
+3. **成熟开源实现的源码**（GitHub 仓库源码，不只是 README）——看社区是如何绕过同一个坑的，往往能直接得到正确参数组合或结论。
+
+**反面案例（2026-09-13，B 站看门接入）**：为绕过 `-352 风控校验失败`，连续试了伪造 buvid3、`finger/spi` 换取真实 buvid、多组请求头组合、动态接口——都是在「手搓猜参数」。一次检索后立刻拿到决定性证据：官方库文档明写「可使用代理，绕过 b 站风控策略」、RSSHub 同路由源码要 `getCookie()` + wbi 校验串且标注反爬严格——**结论是该风控解不掉，只能换出口 IP 或换接口**。即「不必手搓」不是省事，而是避免朝错误方向白烧一轮。
+
+**反例判据（出现任一即停下来检索）**：同一问题已换过 3 组参数仍失败；正在根据「社区传闻」而非文档调参；准备写超过 50 行与业务无关的胶水；解释不清某个字段/错误码的官方语义。
+
+**Why**：手搓的成本不是行数，而是**方向成本**——在错误假设上迭代会消耗大量轮次且结论不可信；成熟方案已经过社区大规模验证，还能顺带得到边界条件与已知缺陷。
+
+**How to apply**：动手前先花一次 `web_search`（或读官方文档/参考实现源码）；若检索确有结果，优先复用其思路与参数，只写业务差异部分；若检索无结果，**写明「已检索 X/Y/Z 未找到现成方案」再手搓**，让「为什么自研」有据可查。
 
 **注意**：`memories/topics` 已在 home 仓库 .gitignore 中排除，严禁再往 hermes 分支提交共享 topics 镜像；旧镜像历史存档于 hermes 分支 `957241a`。
 

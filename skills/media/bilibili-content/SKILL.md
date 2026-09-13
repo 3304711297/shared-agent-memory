@@ -83,9 +83,34 @@ If subtitles are disabled or missing, extract a lightweight video stream for mul
 
 4. **Multimodal Analysis**:
    Call `video_analyze(video_url="C:/.../bili_temp.mp4", question="...")` to perform holistic audio, visual UI, and slide text analysis.
+   **If `video_analyze` is unavailable or fails (e.g. 401/invalid key): do NOT hand-roll whisper/ffmpeg-frame workarounds.** Load the `agentic-video-distill` skill and run its `scripts/distill.py` on the downloaded mp4 instead — it is the designated fallback for Bilibili videos without subtitles.
 
 5. **Mandatory Immediate Cleanup**:
    Immediately delete temporary `.mp4` files from disk as soon as `video_analyze` returns to prevent disk bloat.
+
+### 4. Subtitle-less video via frame sheets (`vision_analyze` fallback)
+
+When `distill.py` is quota-blocked or unavailable, do NOT hand-roll whisper/ffmpeg-per-frame loops. Build a **contact sheet** and read it with `vision_analyze`:
+
+```bash
+# 3 sheets of 12 frames each (4x3 tile) covering a ~9 min video
+ffmpeg -y -v error -ss 5 -i in.mp4 -vf "fps=1/12,scale=768:-1,tile=4x3" -frames:v 3 sheet_%d.jpg
+# zoom a single moment at full resolution when text is unreadable
+ffmpeg -y -v error -ss 200 -i in.mp4 -frames:v 1 -vf "scale=960:-1" zoom.jpg
+# stack several sheets/zooms into one image to cut vision round-trips
+ffmpeg -y -v error -i a.jpg -i b.jpg -filter_complex "[0:v][1:v]hstack=inputs=2" out.jpg
+```
+
+Rules that save round-trips: sheets are downscaled for vision (a 3072px sheet becomes ~768px — on-screen text is unreadable), so **always follow a sheet read with `region`-cropped zooms** of the frames holding registry paths/commands. `hstack`/`vstack` need `inputs=N` (bare `hstack=top` errors). Naming a sheet after the wrong video is a real risk when processing many files — label temp paths with the BVID.
+
+### 5. Downloading many bilibili videos
+
+The `x/space/arc/search` and `x/space/navnum` endpoints need **wbi signing**; unsigned calls return the 412 HTML error page, not JSON. Two shortcuts that avoid implementing signing:
+
+- **Video count**: `https://api.bilibili.com/x/space/navnum?mid=<UID>&jsonp=jsonp` — works unsigned, gives `data.video`.
+- **Full upload list**: `https://api.bilibili.com/x/web-interface/search/type?search_type=video&keyword=<UP名>&order=pubdate&page=N` works unsigned (with `Referer: https://search.bilibili.com/` and a `buvid3` cookie); filter results by `mid == target_UID`. Search pages caps at ~3 pages / ~40 uploads, so cross-check the count against `navnum` and say so when the list may be partial.
+
+For high-volume streams, sleep ≥2 s between `playurl` calls — the HTML5 endpoint starts returning the 412 page instead of JSON once throttled, and a failed `durl` extraction writes a 600-byte "mp4" that ffmpeg then rejects.
 
 ## Pitfalls & Guidelines
 

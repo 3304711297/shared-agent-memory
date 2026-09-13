@@ -19,6 +19,14 @@ This is not negotiable. You cannot rationalize your way out of this.
 
 **Invoke relevant or requested skills BEFORE any response or action** — including clarifying questions, exploring the codebase, or checking files. If it turns out wrong for the situation, you don't have to use it.
 
+## Lookup Before Build (先检索再造轮子)
+
+Before hand-rolling any parser, signature/checksum, scraper, protocol adapter, or boilerplate — **search first**: installed skills pool, official docs/API docs, then mature open-source implementations' source. Writing it yourself is the last resort, not the default.
+
+Stop and search when any of these is true: three parameter combinations have already failed; you are tuning based on hearsay rather than documentation; you are about to write >50 lines of glue unrelated to the business logic; or you cannot state the official semantics of the field/error code you are fighting.
+
+State the search outcome before building: "searched A/B/C, no existing solution" — so self-implementation is a documented decision rather than an omission.
+
 **Before entering plan mode:** if you haven't already brainstormed, invoke the brainstorming skill first.
 
 Then announce "Using [skill] to [purpose]" and follow the skill exactly. If it has a checklist, create a todo per item.
