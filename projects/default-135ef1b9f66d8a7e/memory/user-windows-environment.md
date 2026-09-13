@@ -96,3 +96,8 @@ metadata:
 
 **2026-09-01 更新**：本地代理 3067 端口出现"监听但转发被重置"状态（curl --proxy 返回 000/Connection reset），同时直连 github.com 反而 200——代理可能切了 TUN/系统模式。git push 时先试直连（`git push`），直连失败再回退 `git -c http.proxy=...`，两种都要备着。
 **2026-09-02 更新**：接入 ZCode-Antigravity 本地桥（18080 端口），配置 gemini-3.1-flash-image 生图 Skill 及 5 个高质量日常开发 Skill（前端/README/爬虫/文案/发布）；全开源项目 README 现代化重构完成。
+
+## 自换网卡与手机热点（2026-09-13 实测）
+- 无线网卡为用户自换 **MediaTek Wi-Fi 6E MT7922 160MHz**（`PCI\VEN_14C3&DEV_7922&SUBSYS_380411AD`，Acer Aspire A514-55 拆机卡），非原装——整机厂商驱动页不适用，用 MediaTek 通用版
+- 驱动钉在 **3.6.0.1427（2026-06-11）**：这是支持 380411AD 的最新版；station-drivers 上更新的包（3.6.0.1434、3.6.2.1427/1438）INF 支持列表已删该 SUBSYS，装不上不用试
+- 手机 5G 移动数据热点 SSID 即 `jojo`（不是路由器）；2026-09-13 一次"开 Karing 节点后热点断连"报障，经查是网卡驱动主动断开（WLAN-AutoConfig 8003，原因"网络被驱动程序断开连接"），Karing 当时 TUN 关闭、节点健康，已洗清——下次同类报障先看事件查看器断开原因码再定责
