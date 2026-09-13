@@ -694,6 +694,25 @@
           "sha": "a032516283fe721c6061e7e81664c2a2e923d833"
         }
       ]
+    },
+    {
+      "id": "wb2api-upstream-hanhan",
+      "display": "codebuddy2openai 原上游基座（HanHan666666，借鉴雷达）",
+      "checks": [
+        {
+          "type": "github-commits-path",
+          "repo": "HanHan666666/codebuddy2openai",
+          "path": ".",
+          "note": "workbuddy2api 脱离 fork 前的上游基座（LICENSE 基座声明）；基座已深度二次开发，上游近 3 个月无更新，仅作上游复活感知，出现可采纳改进时评估摘樱桃。"
+        }
+      ],
+      "installed": [
+        {
+          "where": "借鉴雷达（基座代码来源，fork 关系已于 2026-09-13 自助脱离）",
+          "version": "HEAD@7eda3c1",
+          "sha": "7eda3c17f1aa0354b2fe7e22f4b6c21796c0d08a"
+        }
+      ]
     }
   ],
   "notWatched": [
