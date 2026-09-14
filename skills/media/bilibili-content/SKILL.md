@@ -112,6 +112,18 @@ The `x/space/arc/search` and `x/space/navnum` endpoints need **wbi signing**; un
 
 For high-volume streams, sleep ≥2 s between `playurl` calls — the HTML5 endpoint starts returning the 412 page instead of JSON once throttled, and a failed `durl` extraction writes a 600-byte "mp4" that ffmpeg then rejects.
 
+### 6. Fallback backend: `bili-cli` (uv tool, verified 2026-09-13 v0.6.2)
+
+When direct `api.bilibili.com` calls hit the 412 throttle twice (stop-and-ask limit reached), switch to the local `bili` binary instead of tuning parameters:
+
+```bash
+bili search "关键词" --type video --max 5   # no login needed
+bili video BV1BMtU6uEc6 --yaml              # no-login details (non-TTY defaults to YAML)
+bili status --yaml                          # auth check; expect not_authenticated
+```
+
+Rules: `--subtitle` and feed/favorites require login — do NOT attempt; fall through to the subtitle probe (§2) and multimodal chain (§3–4) instead. NEVER run `bili login` (QR login touches login state — ask the user first). Same ≥2 s pacing for bulk queries.
+
 ## Pitfalls & Guidelines
 
 - **Anti-Scraping 412**: Direct `urllib` or `curl` on the HTML video page will trigger HTTP 412 (Precondition Failed). Always use the JSON API endpoints (`api.bilibili.com/x/web-interface/view` and HTML5/Wbi playurl).
