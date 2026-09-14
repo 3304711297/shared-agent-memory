@@ -59,8 +59,24 @@ def load_keys(cli_key: str = None) -> list[str]:
 
     return keys
 
+def clean_gemini_model_name(name: str) -> str:
+    """清洗网关别名与思考强度后缀，映射回 Google 官方模型 ID"""
+    if not name:
+        return "gemini-3.6-flash"
+    # 剥除 provider 前缀 (如 cpa-gui/ 或 custom/)
+    if "/" in name and not name.startswith("models/"):
+        name = name.split("/")[-1]
+    # 剥除网关思考等级后缀 (-high, -low, -medium, -ultra 等)
+    for suffix in ["-high", "-low", "-medium", "-ultra"]:
+        if name.lower().endswith(suffix):
+            name = name[:-len(suffix)]
+            break
+    name = name.strip()
+    return name or "gemini-3.6-flash"
+
 def detect_current_gemini_model() -> str:
     """智能动态探测当前环境首选的 Gemini 模型"""
+    raw_model = ""
     state_db = Path.home() / "AppData/Local/hermes/state.db"
     if state_db.exists():
         try:
@@ -70,23 +86,27 @@ def detect_current_gemini_model() -> str:
             cur.execute("SELECT model FROM sessions ORDER BY last_activity_at DESC LIMIT 1")
             row = cur.fetchone()
             if row and row[0] and "gemini" in row[0].lower():
-                return row[0].strip()
+                raw_model = row[0].strip()
         except Exception:
             pass
 
-    cfg_path = Path.home() / "AppData/Local/hermes/config.yaml"
-    if cfg_path.exists():
-        try:
-            import yaml
-            with open(cfg_path, "r", encoding="utf-8") as f:
-                cfg = yaml.safe_load(f)
-            m = cfg.get("model", {}).get("default", "")
-            if "gemini" in m.lower():
-                return m
-        except Exception:
-            pass
+    if not raw_model:
+        cfg_path = Path.home() / "AppData/Local/hermes/config.yaml"
+        if cfg_path.exists():
+            try:
+                import yaml
+                with open(cfg_path, "r", encoding="utf-8") as f:
+                    cfg = yaml.safe_load(f)
+                m = cfg.get("model", {}).get("default", "")
+                if "gemini" in m.lower():
+                    raw_model = m
+            except Exception:
+                pass
 
-    return os.environ.get("GEMINI_VIDEO_MODEL", "gemini-3.8-flash")
+    if not raw_model:
+        raw_model = os.environ.get("GEMINI_VIDEO_MODEL", "gemini-3.6-flash")
+
+    return clean_gemini_model_name(raw_model)
 
 def main():
     detected_model = detect_current_gemini_model()
@@ -167,12 +187,13 @@ def main():
                     "processing": "agentic"
                 }
 
-            # 自动探测或传参的模型，支持高负载时的动态平替 fallback
-            models_to_try = [args.model]
-            if "3.8" in args.model:
-                models_to_try.append("gemini-3.7-flash")
-            elif "3.7" in args.model:
-                models_to_try.append("gemini-3.8-flash")
+            # 自动清洗模型名并构建智能平替候选队列（防止别名或单一版本 404/503）
+            primary_model = clean_gemini_model_name(args.model)
+            models_to_try = [primary_model]
+            candidates = ["gemini-3.6-flash", "gemini-3.8-flash", "gemini-3.7-flash", "gemini-3-flash-preview", "gemini-2.5-flash"]
+            for cand in candidates:
+                if cand not in models_to_try:
+                    models_to_try.append(cand)
 
             success = False
             for target_model in models_to_try:
