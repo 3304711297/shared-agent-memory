@@ -1,0 +1,26 @@
+name: CI & Hygiene Check
+
+on:
+  push:
+    branches: [ hermes ]
+  pull_request:
+    branches: [ hermes ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  hygiene:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.11'
+
+      - name: Run repository hygiene and secret scan
+        run: python scripts/check_hygiene.py
