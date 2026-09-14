@@ -13,10 +13,10 @@ metadata:
 
 | 组件 / 维度 | 当前版本与标识 | 来源 / 验证方式 |
 | :--- | :--- | :--- |
-| **Hermes Agent 版本** | `v0.21.1 (2026.9.7)` | `hermes --version` |
-| **上游 Git Commit SHA** | `a3190625c0a2ed89ed33356ef8e3184e95dc08e5` (2026-09-11 07:14:55 -0500) | `git -C hermes-agent log -1` |
+| **Hermes Agent 版本** | `v0.21.2 (2026.9.11)` | `hermes --version` |
+| **上游 Git Commit SHA** | `afe06f21f45f476c25034c4529818d9a2f9fdf1c` (2026-09-13 19:19:36 -0700) | `git -C hermes-agent log -1` |
 | **Desktop 桌面客户端** | `v0.17.2` | `apps/desktop/package.json` |
-| **配置规范版本** | `_config_version: 42` | `config.yaml` 根字段 |
+| **配置规范版本** | `_config_version: 44` | `config.yaml` 根字段 |
 | **Python 运行时** | `Python 3.11.16` / 内置 3.14 测试解释器 | 内部运行时依赖 |
 | **安装目录与方式** | `%LOCALAPPDATA%\hermes\hermes-agent` (Git source checkout) | 源码检出并可热更新 |
 
@@ -24,6 +24,7 @@ metadata:
 >
 > * **2026-09-08 更新**：Hermes 上游合入 commit `520e63661c`（fix: keep command-auth model discovery lazy across config and setup）；本地配置守卫自动化触发全绿通过，启用本地插件 `config-guard`，基线配置快照同步更新。
 > * **2026-09-11 刷新**：`_config_version` 41 → **42**；上游推进至 `a3190625c0`；Desktop `v0.17.2`。配置结构发生**两处重大迁移**——① `custom_providers` 列表格式整体迁移为 `providers:` 键控结构（`radeon-cloud` / `cpa` / `workbuddy2api` 三段，详见第三节）；② 主力模型切换到 `workbuddy2api` 本地反代（`deepseek-v4.1-flash`）。新增 `security.protected_instruction_files: false`（详见第七节）。
+> * **2026-09-14 刷新**：`_config_version` 42 → **44**；上游推进至 `afe06f21`；`providers:` 节点下正式登记 `devin-acp`（Devin Subscription 本地 stdio ACP 管道，覆盖 `swe` / `swe-1.6-slow` / `swe-2`）。
 
 ---
 
@@ -52,6 +53,7 @@ metadata:
    | `workbuddy2api` | workbuddy2api | `127.0.0.1:8787/v1` | 40 | **主力**（CodeBuddy/WorkBuddy 全量模型，含 `gpt-6-astra`） |
    | `cpa` | CPA | `127.0.0.1:18080/v1` | 11 | Antigravity/Gemini 通道（备用） |
    | `radeon-cloud` | AMD | `developer.amd.com.cn/radeon/api/v1` | 4 | AMD Radeon Cloud（Qwen/MiniCPM） |
+   | `devin-acp` | Devin Subscription | `acp://devin` | 3 | 本地 stdio ACP 代理（SWE-1.6 Slow / SWE-2） |
 
    - 全部走 `key_env: HERMES_CUSTOM_<SLUG>_API_KEY` 引用形态（密钥在 `.env`，不入 config）。
    - `model_aliases` 7 条（`workbuddy` / `workbuddy-glm` / `workbuddy-glm53` / `workbuddy-kimi` / `workbuddy-kimi3` / `workbuddy-deepseek` / `workbuddy-hy4`）均指向 `custom` provider + `127.0.0.1:8787/v1`。
