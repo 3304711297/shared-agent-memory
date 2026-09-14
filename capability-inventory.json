@@ -25,7 +25,8 @@
       "checks": [
         {
           "type": "gh-repo",
-          "repo": "3304711297/hermes-devin-acp"
+          "repo": "3304711297/hermes-devin-acp",
+          "file": "plugins/model-providers/devin-acp/plugin.yaml"
         }
       ],
       "installed": [
@@ -268,9 +269,9 @@
       "installed": [
         {
           "where": "官网 Skills Hub 聚合索引（书签真源）",
-          "version": "90701",
-          "totalSkills": 90701,
-          "extractedAt": "2026-09-12"
+          "version": "100421",
+          "totalSkills": 100421,
+          "extractedAt": "2026-09-14"
         }
       ]
     },
@@ -287,9 +288,9 @@
       "installed": [
         {
           "where": "国内社区雷达（书签真源）",
-          "version": "1469",
-          "totalSkills": 1469,
-          "extractedAt": "2026-09-11"
+          "version": "1470",
+          "totalSkills": 1470,
+          "extractedAt": "2026-09-14"
         }
       ]
     },

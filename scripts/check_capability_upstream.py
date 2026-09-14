@@ -126,6 +126,60 @@ def upstream_version(check):
     if t == "hermes-skills-hub":
         data = http_json(check["url"], accept="application/json")
         return str(data.get("totalSkills", ""))
+    if t == "gh-repo":
+        repo = check["repo"]
+        target_file = check.get("file")
+        if target_file:
+            repo_info = http_json(f"https://api.github.com/repos/{repo}", auth=True)
+            branch = repo_info.get("default_branch", "main")
+            raw = fetch_text(
+                f"https://raw.githubusercontent.com/{repo}/{branch}/{target_file}",
+                auth=True,
+            )
+            m = re.search(r'version["\']?\s*[:=]\s*["\']?([^"\'\s]+)', raw)
+            if m:
+                return m.group(1).strip()
+            try:
+                data = json.loads(raw)
+                if isinstance(data, dict) and "version" in data:
+                    return str(data["version"])
+            except Exception:
+                pass
+        try:
+            rel = http_json(f"https://api.github.com/repos/{repo}/releases/latest", auth=True)
+            tag = rel.get("tag_name")
+            if tag:
+                strip = check.get("tag_strip")
+                return re.sub(strip, "", tag) if strip else tag
+        except Exception:
+            pass
+        try:
+            tags = http_json(f"https://api.github.com/repos/{repo}/tags", auth=True)
+            if tags and isinstance(tags, list) and len(tags) > 0:
+                tag = tags[0].get("name")
+                strip = check.get("tag_strip")
+                return re.sub(strip, "", tag) if strip else tag
+        except Exception:
+            pass
+        repo_info = http_json(f"https://api.github.com/repos/{repo}", auth=True)
+        branch = repo_info.get("default_branch", "main")
+        for probe_file in ("plugin.yaml", "package.json", "pyproject.toml"):
+            try:
+                raw = fetch_text(
+                    f"https://raw.githubusercontent.com/{repo}/{branch}/{probe_file}",
+                    auth=True,
+                )
+                m = re.search(r'version["\']?\s*[:=]\s*["\']?([^"\'\s]+)', raw)
+                if m:
+                    return m.group(1).strip()
+            except Exception:
+                continue
+        commits = http_json(f"https://api.github.com/repos/{repo}/commits?per_page=1", auth=True)
+        if commits and isinstance(commits, list) and len(commits) > 0:
+            return commits[0].get("sha")[:8]
+        return None
+    if t == "manual":
+        return None
     raise ValueError(f"unknown check type: {t}")
 
 
@@ -419,6 +473,21 @@ def main():
                 head.append("- ✅ 拍板配置齐全、无 stash 残留、核心技能未被 curator 标记。")
                 head.append("")
             details.append("\n".join(head + detail))
+            continue
+
+        # 手动核对组件：无公开自动比对源，展示已装基线与参考链接，永不计入 outdated
+        if check["type"] == "manual":
+            rec_ver = comp.get("installed", [{}])[0].get("version", "已装")
+            note = check.get("note", "")
+            rows.append(f"| {comp['display']} | `{cid}` | {rec_ver} | ℹ️ 手动核对 |")
+            detail = [
+                f"### {comp['display']}（{cid}）", "",
+                f"- 当前基线：**{rec_ver}**" + (f"（手动核对：{note}）" if note else "（手动核对）"),
+                "- ℹ️ **本项为手动维护组件**：无公开自动比对源，由本地环境或独立安装器管理，不触发自动告警。",
+            ]
+            for loc in comp.get("installed", []):
+                detail.append(f"- `{loc.get('where','')}`：已装 **{loc.get('version','')}**")
+            details.append("\n".join(detail))
             continue
 
         # 技能库路径提交检查：【语义变更 2026-09-09 用户拍板】
