@@ -187,10 +187,10 @@ def main():
                     "processing": "agentic"
                 }
 
-            # 自动清洗模型名并构建智能平替候选队列（防止别名或单一版本 404/503）
+            # 自动清洗模型名并构建智能平替候选队列（按版本能力降序优雅平替）
             primary_model = clean_gemini_model_name(args.model)
             models_to_try = [primary_model]
-            candidates = ["gemini-3.6-flash", "gemini-3.8-flash", "gemini-3.7-flash", "gemini-3-flash-preview", "gemini-2.5-flash"]
+            candidates = ["gemini-3.8-flash", "gemini-3.7-flash", "gemini-3.6-flash", "gemini-3-flash-preview", "gemini-2.5-flash"]
             for cand in candidates:
                 if cand not in models_to_try:
                     models_to_try.append(cand)
