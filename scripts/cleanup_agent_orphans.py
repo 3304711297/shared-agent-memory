@@ -18,7 +18,7 @@ try:
 except ImportError:
     psutil = None
 
-LOG_DIR = Path(r"C:\Users\<username>\AppData\Local\hermes\logs")
+LOG_DIR = Path.home() / "AppData/Local/hermes/logs"
 LOG_FILE = LOG_DIR / "agent_cleanup.log"
 
 CREATE_NO_WINDOW = 0x08000000
@@ -124,7 +124,7 @@ def cleanup_orphans(force_all: bool = False, stop_openviking: bool = True) -> di
     # 4. Stop OpenViking stack if requested and GUI is closed
     if stop_openviking and (not gui_active or force_all):
         try:
-            sys.path.insert(0, r"C:\Users\<username>\AppData\Local\hermes\scripts")
+            sys.path.insert(0, str(Path.home() / "AppData/Local/hermes/scripts"))
             import openviking_service
             openviking_service.stop()
             killed_counts["other"] += 1

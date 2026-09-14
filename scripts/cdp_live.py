@@ -7,13 +7,14 @@ Usage:
   python cdp_live.py fix-register            # re-register scriptcat-scripting content script
 """
 import json
+import os
 import sys
 import threading
 import time
 
 import websocket
 
-USER_DATA = r"C:\Users\<username>\AppData\Local\Microsoft\Edge Dev\User Data"
+USER_DATA = os.path.expandvars(r"%USERPROFILE%\AppData\Local\Microsoft\Edge Dev\User Data")
 
 
 def browser_ws_url():

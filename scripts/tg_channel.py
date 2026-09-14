@@ -1,6 +1,6 @@
 """Telegram Channel Management CLI & Helper for @emoegg.
 
-Uses bot token stored in C:/Users/<username>/AppData/Local/hermes/auth/telegram_channel.json
+Uses bot token stored in %USERPROFILE%\AppData\Local\hermes\auth\telegram_channel.json
 and proxies through 127.0.0.1:3067.
 """
 

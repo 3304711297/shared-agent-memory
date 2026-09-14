@@ -23,8 +23,8 @@ LISTEN_PORT = 1933
 BACKEND_PORT = 1934
 EMBEDDING_PORT = 18082
 
-PYTHONW_EXE = Path(r"C:\Users\<username>\.openviking\venv\Scripts\pythonw.exe")
-LAZY_GATEWAY_SCRIPT = Path(r"C:\Users\<username>\AppData\Local\hermes\scripts\openviking_lazy_gateway.py")
+PYTHONW_EXE = Path.home() / ".openviking/venv/Scripts/pythonw.exe"
+LAZY_GATEWAY_SCRIPT = Path.home() / "AppData/Local/hermes/scripts/openviking_lazy_gateway.py"
 CREATE_NO_WINDOW = 0x08000000
 
 

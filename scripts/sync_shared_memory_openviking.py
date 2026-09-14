@@ -14,8 +14,8 @@ from pathlib import Path
 
 OPENVIKING_URL = os.environ.get("OPENVIKING_ENDPOINT", "http://127.0.0.1:1933")
 SHARED_TOPICS_DIR = Path("D:/ai coding/GitRepos/shared-agent-memory/projects/default-135ef1b9f66d8a7e/memory")
-OV_EXE = Path("C:/Users/<username>/.openviking/venv/Scripts/ov.exe")
-STATE_FILE = Path("C:/Users/<username>/.openviking/last_synced_commit.txt")
+OV_EXE = Path.home() / ".openviking/venv/Scripts/ov.exe"
+STATE_FILE = Path.home() / ".openviking/last_synced_commit.txt"
 GIT_DIR = Path("D:/ai coding/GitRepos/shared-agent-memory")
 
 

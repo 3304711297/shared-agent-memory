@@ -31,8 +31,8 @@ if str(SCRIPT_DIR) not in sys.path:
 import psutil
 from cleanup_agent_orphans import cleanup_orphans, is_agent_gui_running, log
 
-PID_FILE = Path(r"C:\Users\<username>\AppData\Local\hermes\cache\agent_guard.pid")
-PYTHONW_EXE = Path(r"C:\Users\<username>\.openviking\venv\Scripts\pythonw.exe")
+PID_FILE = Path.home() / "AppData/Local/hermes/cache/agent_guard.pid"
+PYTHONW_EXE = Path.home() / ".openviking/venv/Scripts/pythonw.exe"
 SCRIPT_PATH = SCRIPT_DIR / "agent_guard.py"
 CREATE_NO_WINDOW = 0x08000000
 

@@ -16,9 +16,9 @@ import sys
 import time
 import urllib.request
 
-GATEWAY_SCRIPT = r"C:\Users\<username>\AppData\Local\hermes\scripts\openviking_lazy_gateway.py"
-SERVICE_SCRIPT = r"C:\Users\<username>\AppData\Local\hermes\scripts\openviking_service.py"
-PYTHONW = r"C:\Users\<username>\.openviking\venv\Scripts\pythonw.exe"
+GATEWAY_SCRIPT = os.path.expandvars(r"%USERPROFILE%\AppData\Local\hermes\scripts\openviking_lazy_gateway.py")
+SERVICE_SCRIPT = os.path.expandvars(r"%USERPROFILE%\AppData\Local\hermes\scripts\openviking_service.py")
+PYTHONW = os.path.expandvars(r"%USERPROFILE%\.openviking\venv\Scripts\pythonw.exe")
 CREATE_NO_WINDOW = 0x08000000
 
 

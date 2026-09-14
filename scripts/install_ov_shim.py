@@ -4,9 +4,9 @@ import ctypes
 import os
 import winreg
 
-SHIM_DIR = r"C:\Users\<username>\.openviking\shim-bin"
-PYW = r"C:\Users\<username>\.openviking\venv\Scripts\pythonw.exe"
-OV_SHIM_PY = r"C:\Users\<username>\AppData\Local\hermes\scripts\ov_shim_server.py"
+SHIM_DIR = os.path.expandvars(r"%USERPROFILE%\.openviking\shim-bin")
+PYW = os.path.expandvars(r"%USERPROFILE%\.openviking\venv\Scripts\pythonw.exe")
+OV_SHIM_PY = os.path.expandvars(r"%USERPROFILE%\AppData\Local\hermes\scripts\ov_shim_server.py")
 
 
 def main() -> None:
