@@ -11,10 +11,14 @@ import sys
 
 # High-risk patterns
 SENSITIVE_PATTERNS = [
-    (r"C:[/\\]Users[/\\]<username>\b", "Hardcoded machine username path (<username>)"),
-    (r"D:[/\\]Users[/\\]<username>\b", "Hardcoded machine username path (<username>)"),
+    (r"C:[/\\\\]Users[/\\\\]<username>\b", "Hardcoded machine username path (<username>)"),
+    (r"D:[/\\\\]Users[/\\\\]<username>\b", "Hardcoded machine username path (<username>)"),
     (r"ghp_[A-Za-z0-9]{20,}", "GitHub Personal Access Token"),
     (r"github_pat_[A-Za-z0-9_]{30,}", "GitHub Fine-Grained Token"),
+    (r"AIza[0-9A-Za-z\-_]{35}", "Google API Key"),
+    (r"\bsk-(?:ant-|proj-)?[a-zA-Z0-9_-]{32,}\b", "OpenAI/Anthropic API Key"),
+    (r"\b\d{8,10}:[A-Za-z0-9_-]{35}\b", "Telegram Bot Token"),
+    (r"\bxox[baprs]-[0-9a-zA-Z]{10,48}\b", "Slack Token"),
     (r"AKIA[0-9A-Z]{16}", "AWS Access Key ID"),
     (r"-----BEGIN [A-Z ]*PRIVATE KEY-----", "Private key block"),
 ]

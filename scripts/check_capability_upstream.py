@@ -366,9 +366,106 @@ def github_commits_for_path(repo, path):
     )
 
 
+SUPPORTED_CHECK_TYPES = {
+    "npm",
+    "pypi",
+    "gh-release",
+    "gh-repo",
+    "github-commits-path",
+    "manual",
+    "hermes-skills-hub",
+    "skillhub-market",
+    "colaskill-market",
+    "local-merged-marketplace",
+    "local-config-guard",
+    "zcode-marketplace",
+}
+
+
+def lint_inventory(inv):
+    """静态语法与结构守卫：断言清单结构、已知 check type 与必填字段，杜绝脏配置入库。"""
+    errors = []
+    if not isinstance(inv, dict):
+        return ["清单根节点必须为 JSON Object"]
+
+    comps = inv.get("components")
+    if not isinstance(comps, list):
+        return ["清单缺少 components 列表"]
+
+    seen_ids = set()
+    for idx, comp in enumerate(comps):
+        cid = comp.get("id")
+        display = comp.get("display")
+        pos = f"components[{idx}] (id={cid or 'MISSING'})"
+
+        if not cid or not isinstance(cid, str):
+            errors.append(f"{pos}: 缺少有效 'id' 字符串")
+        elif cid in seen_ids:
+            errors.append(f"{pos}: 重复的组件 id '{cid}'")
+        else:
+            seen_ids.add(cid)
+
+        if not display or not isinstance(display, str):
+            errors.append(f"{pos}: 缺少有效 'display' 显示名称")
+
+        checks = comp.get("checks")
+        if not checks or not isinstance(checks, list):
+            errors.append(f"{pos}: 'checks' 必须是非空列表")
+            continue
+
+        for c_idx, check in enumerate(checks):
+            c_pos = f"{pos}.checks[{c_idx}]"
+            if not isinstance(check, dict):
+                errors.append(f"{c_pos}: check 必须为 Object")
+                continue
+
+            ctype = check.get("type")
+            if not ctype:
+                errors.append(f"{c_pos}: 缺少 check 'type'")
+                continue
+            if ctype not in SUPPORTED_CHECK_TYPES:
+                errors.append(
+                    f"{c_pos}: 不支持的 check type '{ctype}' (当前支持: {', '.join(sorted(SUPPORTED_CHECK_TYPES))})"
+                )
+                continue
+
+            # 必填字段断言
+            if ctype in ("npm", "pypi") and not check.get("package"):
+                errors.append(f"{c_pos} ({ctype}): 缺少必填字段 'package'")
+            elif ctype in ("gh-release", "gh-repo") and not check.get("repo"):
+                errors.append(f"{c_pos} ({ctype}): 缺少必填字段 'repo'")
+            elif ctype == "github-commits-path":
+                if not check.get("repo"):
+                    errors.append(f"{c_pos} (github-commits-path): 缺少必填字段 'repo'")
+                if "path" not in check:
+                    errors.append(f"{c_pos} (github-commits-path): 缺少 'path' 字段")
+            elif ctype in ("hermes-skills-hub", "skillhub-market", "colaskill-market") and not check.get("url"):
+                errors.append(f"{c_pos} ({ctype}): 缺少必填字段 'url'")
+            elif ctype in ("local-merged-marketplace", "local-config-guard") and not check.get("file"):
+                errors.append(f"{c_pos} ({ctype}): 缺少必填字段 'file'")
+
+        installed = comp.get("installed")
+        if not installed or not isinstance(installed, list):
+            errors.append(f"{pos}: 'installed' 必须是非空列表")
+
+    return errors
+
+
 def main():
     with open(INV_PATH, encoding="utf-8") as f:
         inv = json.load(f)
+
+    # 静态语法与结构守卫
+    errors = lint_inventory(inv)
+    if errors:
+        sys.stderr.write(f"❌ capability-inventory.json 静态校验失败，发现 {len(errors)} 处错误:\n")
+        for err in errors:
+            sys.stderr.write(f"  - {err}\n")
+        return 1
+
+    if "--lint" in sys.argv or "--lint-inventory" in sys.argv:
+        print(f"✅ capability-inventory.json 静态校验通过: 共校验 {len(inv.get('components', []))} 个组件，0 错误。")
+        return 0
 
     now = datetime.now(timezone(timedelta(hours=8)))
     lines = [

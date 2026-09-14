@@ -25,5 +25,8 @@ jobs:
       - name: Run repository hygiene and secret scan
         run: python scripts/check_hygiene.py
 
-      - name: Verify capability inventory syntax and local parser
+      - name: Verify capability inventory schema and syntax
+        run: python scripts/check_capability_upstream.py --lint
+
+      - name: Verify capability inventory parser and local guard
         run: python scripts/check_capability_upstream.py --local-only
