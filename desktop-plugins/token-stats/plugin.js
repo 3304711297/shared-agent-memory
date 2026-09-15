@@ -138,21 +138,27 @@ function RateLimitRow({ rl, compact }) {
   const limited = st === 'limited'
   // 反代 a404e80 起三态：limited=冷却中 / expired=曾限过已恢复 / ok=从未被限
   const expired = st === 'expired'
+  const isSelfLimited = Boolean(limited && rl.isActiveAccountLimited !== false)
+  const isFailoverCooling = Boolean(limited && rl.isActiveAccountLimited === false)
   const dot =
-    limited
+    isSelfLimited
       ? 'bg-rose-400 shadow-rose-400/50'
-      : expired
+      : isFailoverCooling
         ? 'bg-amber-400 shadow-amber-400/50'
-        : st === 'ok'
-          ? 'bg-emerald-400 shadow-emerald-400/50'
-          : 'bg-zinc-500'
-  const textCls = limited
+        : expired
+          ? 'bg-amber-400 shadow-amber-400/50'
+          : st === 'ok'
+            ? 'bg-emerald-400 shadow-emerald-400/50'
+            : 'bg-zinc-500'
+  const textCls = isSelfLimited
     ? 'text-rose-300'
-    : expired
+    : isFailoverCooling
       ? 'text-amber-300/90'
-      : st === 'ok'
-        ? 'text-emerald-300/90'
-        : 'text-(--ui-text-tertiary)'
+      : expired
+        ? 'text-amber-300/90'
+        : st === 'ok'
+          ? 'text-emerald-300/90'
+          : 'text-(--ui-text-tertiary)'
 
   // 实时倒计时：每 30s 自减一次，基于绝对值 resetAt 计算（不依赖后端快照的 remainingSec）
   const [, setTick] = useState(0)
@@ -177,13 +183,15 @@ function RateLimitRow({ rl, compact }) {
       'flex items-center justify-between gap-2',
       compact ? 'text-[10px]' : 'text-[0.6875rem]'
     ),
-    title: rl.message || rl.source || '上游频率限制（腾讯 code 6004）',
+    title: isFailoverCooling
+      ? `备用账号 (${rl.limitedNickname || rl.limitedUid || '备用号'}) 触发 6004 频率限制，已避让至当前账号正常运行`
+      : (rl.message || rl.source || '上游频率限制（腾讯 code 6004）'),
     children: [
       jsxs('div', {
         className: 'flex items-center gap-1.5 min-w-0',
         children: [
           jsx('span', {
-            className: cn('w-1.5 h-1.5 rounded-full shrink-0', limited && 'animate-pulse', dot),
+            className: cn('w-1.5 h-1.5 rounded-full shrink-0', isSelfLimited && 'animate-pulse', dot),
           }),
           jsx('span', {
             className: 'text-(--ui-text-tertiary) shrink-0',
@@ -191,15 +199,17 @@ function RateLimitRow({ rl, compact }) {
           }),
           jsx('span', {
             className: cn('font-mono truncate', textCls),
-            children: limited
+            children: isSelfLimited
               ? '已触发 · 冷却中'
-              : expired
-                ? '已恢复'
-                : st === 'ok'
-                  ? '正常'
-                  : st === 'offline'
-                    ? '网关离线'
-                    : '正常',
+              : isFailoverCooling
+                ? `已避让 (${rl.limitedNickname || '备用号'}冷却)`
+                : expired
+                  ? '已恢复'
+                  : st === 'ok'
+                    ? '正常'
+                    : st === 'offline'
+                      ? '网关离线'
+                      : '正常',
           }),
         ],
       }),
@@ -430,7 +440,7 @@ function AntigravityQuotaChip({ ctx }) {
                         jsx('span', { className: 'text-[10px]', children: '降级' }),
                       ],
                     })
-                  : quotaData.workbuddy.rateLimit?.state === 'limited'
+                  : (quotaData.workbuddy.rateLimit?.state === 'limited' && quotaData.workbuddy.rateLimit?.isActiveAccountLimited !== false)
                   ? jsxs('span', {
                       className: 'inline-flex items-baseline gap-0.5 text-amber-400 font-mono font-bold',
                       title: `WorkBuddy 限频冷却中: ${fmtCooldown(quotaData.workbuddy.rateLimit.remainingSec)}`,

@@ -201,6 +201,9 @@ def _workbuddy_rate_limit() -> dict[str, Any]:
                 remainingSec=entry.get("remainingSec"),
                 message=entry.get("message"),
                 source="workbuddy2api /api/rate_limit",
+                limitedUid=entry.get("limitedUid"),
+                limitedNickname=entry.get("limitedNickname"),
+                isActiveAccountLimited=entry.get("isActiveAccountLimited"),
             )
             # 反代自 a404e80 起把「冷却已结束」从 ok 细化为 expired，三态语义：
             #   limited=正在冷却 / expired=曾限过已恢复 / ok=从未被限（无条目）
@@ -219,6 +222,8 @@ def _workbuddy_rate_limit() -> dict[str, Any]:
                 out["nickname"] = rl.get("nickname")
             if "models" in rl:
                 out["allModels"] = rl.get("models")
+            if "accountCooldowns" in rl:
+                out["accountCooldowns"] = rl.get("accountCooldowns")
             if "nightFree" in rl:
                 out["nightFree"] = bool(rl.get("nightFree"))
             if "nightWindow" in rl:
