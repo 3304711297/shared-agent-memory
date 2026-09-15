@@ -14,6 +14,9 @@ import subprocess
 import sys
 
 # Secret patterns (kept in sync with the main branch scanner)
+# NOTE: this copy additionally allowlists documentation placeholders that merely
+# LOOK like secrets (see _is_secret_placeholder); the main-branch copy allowlists
+# paths only. Do not blind-copy one over the other.
 SENSITIVE_PATTERNS = [
     (r"ghp_[A-Za-z0-9]{20,}", "GitHub Personal Access Token"),
     (r"github_pat_[A-Za-z0-9_]{30,}", "GitHub Fine-Grained Token"),
@@ -50,6 +53,26 @@ SELF_EXCLUDED = {"scripts/check_hygiene.py"}
 
 TRAILING_JUNK = "`'\".)>,;:]"
 
+# Secret-shaped strings that are documentation placeholders, not credentials.
+# A real key is high-entropy; docs write marked or repeated-character forms
+# (e.g. a GitHub PAT example = the ghp_ prefix plus a run of x's).
+SECRET_PLACEHOLDER_MARKERS = ("...", "…", "redacted", "placeholder", "example", "your", "<", ">")
+
+
+def _is_secret_placeholder(token):
+    """True when a secret-pattern match is clearly a doc placeholder.
+
+    Two independent signals, both cheap and both safe against real keys:
+      1. a marker word/bracket that only appears in documentation;
+      2. a run of 8+ identical characters — a real key never repeats one
+         character that many times in a row (covers AKIAxxxx… as well as
+         ghp_xxxx…, without needing to know each vendor's prefix shape).
+    """
+    low = token.lower()
+    if any(m in low for m in SECRET_PLACEHOLDER_MARKERS):
+        return True
+    return re.search(r"(.)\1{7,}", low) is not None
+
 
 def scan_text(rel_path, content, verbose):
     """Return (violations, allowlisted) for one file's text."""
@@ -57,7 +80,11 @@ def scan_text(rel_path, content, verbose):
     for pattern, desc in SENSITIVE_PATTERNS:
         for m in re.finditer(pattern, content, re.IGNORECASE):
             line_no = content[:m.start()].count("\n") + 1
-            violations.append(f"{rel_path}:{line_no} - {desc}: '{m.group(0)}'")
+            token = m.group(0)
+            if _is_secret_placeholder(token):
+                allowlisted.append(f"{rel_path}:{line_no} - placeholder secret: '{token}'")
+                continue
+            violations.append(f"{rel_path}:{line_no} - {desc}: '{token}'")
 
     for m in MACHINE_PATH_PATTERN.finditer(content):
         token = m.group(1).strip()

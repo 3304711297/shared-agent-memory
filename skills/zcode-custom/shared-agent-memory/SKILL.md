@@ -146,6 +146,7 @@ metadata:
   ```
   写成 `data["components"]["ponytail-skills"]` 会抛 `TypeError: list indices must be integers or slices, not str`。同理 `skills-provenance.json` 的 `sources` 是数组、每项内嵌 `skills` 数组——**本库所有清单顶层都是列表**，先看类型再索引。
 - 改完必须跑三项本地门禁再推 main：`python scripts/check_hygiene.py`（机器路径/密钥）、`python scripts/check_capability_upstream.py --lint`（清单结构）、`python scripts/check_capability_upstream.py --local-only`（本地源比对）。三者全绿才推。
+- **【假绿铁律】门禁只扫 `git ls-files` 的已跟踪文件**——`git add` 之前跑，新增文件全部不参与扫描，本地绿灯但 CI 必红（2026-09-15 实测踩坑：新纳入 22 个技能文件，本地报 0 违规，CI 报 2 处密钥占位符）。**顺序必须是：`git add -A` → 跑门禁 → 绿了才 commit**。若要预览、还不想入暂存区，用 `git ls-files --cached --others --exclude-standard` 自建文件列表。
 - **`read_file` 在 `execute_code` 内核里读同一文件有去重守卫**：第 2 次返回 `{status:"unchanged", dedup:true}`（**无 `content` 键**），第 3 次返回 `{error:"BLOCKED…"}`。批量脚本里读本库 JSON 时直接用 `json.load(open(...))` 或 `if "content" in r` 先判形状，不要硬取 `r["content"]`。
 
 ## Hermes home 仓库 `.gitignore` 的锚定坑（2026-09-15 实测修复）
