@@ -156,6 +156,51 @@ COPY failed: file not found in build context
 
 ---
 
+## Local vs CI Divergence (local green / CI red, or the reverse)
+
+A gate that passes locally can still be wrong. Three distinct failure modes, each with its own tell — do not lump them together:
+
+### 1. Same rule, different network egress
+
+**Signature:** local and CI run the *same* tool+config on the same revision, and every counter matches except the error count (`Total`/`Unique`/`Excluded` identical, `Errors` differs).
+
+**Meaning:** the input set was identical, so the only remaining variable is the network path. A domain reachable from a GitHub runner but WAF-blocked from a CN residential/corporate egress (or vice versa) shows up exactly this way.
+
+**Do NOT "fix" it by excluding the domain from the checker's config** — that silently drops real monitoring for that domain, so a future genuine dead link goes unnoticed. Record it as a local false positive instead, and keep the checker's coverage intact.
+
+```bash
+# Decide which side is authoritative by comparing the summary blocks
+gh run view <RUN_ID> --log | grep -E "Total|Unique|Excluded|Errors"
+# Then reproduce the green locally WITHOUT editing tracked config:
+lychee --config lychee.toml --exclude 'https://www\.example\.com/' "./**/*.md"
+```
+
+### 2. Scanner cannot see the new files
+
+**Signature:** local gate reports 0 violations, CI reports some in files you just added.
+
+**Root cause (very common):** scanners that enumerate `git ls-files` only see *tracked* files. Run before staging, newly created files are invisible — a false green.
+
+**Rule:** `git add` → run the gate → only commit when green. To preview without staging: `git ls-files --cached --others --exclude-standard`.
+
+### 3. Two copies of the same checker have drifted
+
+**Signature:** identical file content passes in one repo/branch and fails in another.
+
+**Root cause:** duplicated checker scripts (per-branch or per-repo copies) edited separately. Their rules diverge — e.g. one accepts a placeholder the other rejects, or an allowlist has 15 entries in one copy and 26 in the other.
+
+**Rule:** a checker duplicated across branches/repos must be kept **byte-identical**; after editing any copy, overwrite the others and compare hashes. Pin behaviour with a regression test that is itself provably effective (see below).
+
+### Proving a gate test actually guards anything (mutation test)
+
+A test asserting "no violations" passes forever if it silently stops checking. Verify it can fail:
+
+1. Inject a defect the gate should catch (flip a quantifier, disable the check, delete an allowlist entry);
+2. Confirm the test goes red — if it stays green, the test has a coverage hole, not the code;
+3. Restore and confirm the original hash to prove clean rollback.
+
+Beware circular tests: if the case list is generated *from* the config under test (e.g. iterating the allowlist to build cases), deleting an entry shrinks the case list too and nothing fails. Add a hardcoded snapshot assertion of the expected config to break the circularity.
+
 ## Node.js 20 Deprecation Warnings (Annotations)
 
 **Signature (warning annotation on every run, often under a job like `hygiene`):**
