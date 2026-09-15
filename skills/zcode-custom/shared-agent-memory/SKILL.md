@@ -138,3 +138,21 @@ metadata:
 2. **必须显式调用 Hermes 原生 `todo_list` 工具**初始化任务看板（`tasks: [{id, content, status}]`）；
 3. 每完成一个原子步骤，必须实时调用 `todo_list` 将对应步骤推进为 `completed` 并激活下一步为 `in_progress`，使阶段进度在桌面端原生控件中实时可视化。
 
+## 本库清单与脚本的结构陷阱（改 `capability-inventory.json` 前必读）
+
+- **`components` 是 JSON 数组，不是以 id 为键的对象**。取某组件必须过滤，不能下标：
+  ```python
+  comp = next(c for c in data["components"] if c["id"] == "ponytail-skills")
+  ```
+  写成 `data["components"]["ponytail-skills"]` 会抛 `TypeError: list indices must be integers or slices, not str`。同理 `skills-provenance.json` 的 `sources` 是数组、每项内嵌 `skills` 数组——**本库所有清单顶层都是列表**，先看类型再索引。
+- 改完必须跑三项本地门禁再推 main：`python scripts/check_hygiene.py`（机器路径/密钥）、`python scripts/check_capability_upstream.py --lint`（清单结构）、`python scripts/check_capability_upstream.py --local-only`（本地源比对）。三者全绿才推。
+- **`read_file` 在 `execute_code` 内核里读同一文件有去重守卫**：第 2 次返回 `{status:"unchanged", dedup:true}`（**无 `content` 键**），第 3 次返回 `{error:"BLOCKED…"}`。批量脚本里读本库 JSON 时直接用 `json.load(open(...))` 或 `if "content" in r` 先判形状，不要硬取 `r["content"]`。
+
+## Hermes home 仓库 `.gitignore` 的锚定坑（2026-09-15 实测修复）
+
+本 home 仓库（hermes 分支）的 `.gitignore` 采用「默认忽略全部 `*` + 白名单 `!skills/**`」结构，**白名单之外的无锚定目录规则会连嵌套同名目录一起排除**：
+
+- 实例：第 44 行原为 `hermes-agent/`（本意只排除根目录 3.7G 源码目录），但因无前导斜杠，`skills/autonomous-ai-agents/hermes-agent/` 这个**官方技能**被一并忽略，从未进过 hermes 分支备份。已改为 `/hermes-agent/`（只匹配仓库根）。
+- **判据与自检**：新增或修改忽略规则后，用 `git check-ignore -v <path>` 验证目标路径的匹配来源；对 `skills/ plugins/ desktop-plugins/` 三个白名单区跑 `git status --short --ignored skills/ | grep '^!!'`，凡是技能/插件目录出现在 `!!` 列表里就是误伤（`.usage.json.lock`、`__pycache__/` 之类的运行时残留属预期）。
+- **通用规则**：本仓库里任何要排除「根目录下的某目录」的规则，一律加前导 `/`；无锚定的写法只适用于运行时产物名（`*.log`、`__pycache__/`）。
+

@@ -41,7 +41,7 @@ cache/
 logs/
 sessions/
 tmp/
-hermes-agent/
+/hermes-agent/
 profiles/
 
 # token-stats 插件运行时状态（含账号信息，2026-09-10 起严禁再上传公开分支）
