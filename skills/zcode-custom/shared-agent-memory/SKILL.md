@@ -167,3 +167,15 @@ metadata:
 - **判别某路径是否为「第二份存档」**：`os.path.realpath()` 看是否指向 D 盘真源——是则为 junction（无副本，安全），否则是独立文件（副本，需核验后清理）。
 - **自检命令**：hermes home 仓跑 `git ls-files projects/` 应恒为空；跑 `git status --short --ignored skills/ plugins/` 确认无技能/插件目录被误伤。
 
+## `%TEMP%` 临时克隆的清理规范（2026-09-15 实操沉淀）
+
+排查问题时在 `%TEMP%` 下留的仓库克隆会长期堆积（本次清出 11 个/179MB）。清理按四步走，**不得直接 `rm -rf`**：
+
+1. **枚举 + 判据**：`os.path.isdir(<dir>/.git)` 筛出克隆（非 git 目录的普通临时文件不属此列）。
+2. **查未推送提交（最关键）**：`git log --oneline --branches --not --remotes` —— 非空即含本地独有工作，**先抢救再谈删除**。本次 11 个全部为 0，才继续。
+3. **查脏改动性质**：`git status --porcelain` 后区分——`D`（文件被删，检出后未还原，取消即恢复）与 `??`（生成残渣）通常无害；`M`（内容修改）需逐条与真源比对，确认是「真源的旧版本」而非「未提交的新内容」（比对法：真源工作区/HEAD vs 副本，看副本独有行是旧措辞/旧结构还是新信息）。
+4. **留存 → 删除**：把脏改动导成补丁（`git diff` + `git diff --cached` 合并），连同 `manifest.json`（记录各副本 remote/HEAD/日期）存到 `%TEMP%\_temp_repos_patches_<日期>\`，然后才删。
+
+- **进程占用预检**：删除前用 `wmic process get processid,commandline` 搜目录名，确认无进程引用（尤其名字与在跑服务相关的副本，如 `easycliproxyapi`）。
+- **本次结果**：11 个副本（含 agent 自身于 09-06 留的 `sam_view`、09-05 的 `easycliproxyapi`）全部无未推送提交；3 个有脏改动的已存补丁；释放 179MB。
+
