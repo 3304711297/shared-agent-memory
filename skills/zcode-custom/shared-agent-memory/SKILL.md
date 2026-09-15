@@ -16,6 +16,10 @@ description: "管理记忆库/存记忆时必用。shared-agent-memory真源读�
   - 单条专题记忆：`topics\<name>.md`（YAML frontmatter + 正文）
 - **⚠️ 仓库内 `topics/` 目录是遗留副本陷阱（2026-09-09 实证）**：共享库仓库根下的 `topics/` 已被 .gitignore（`/topics`）且内容陈旧，与真源内容不一致——它不再是任何 junction。**读写必须走 git 跟踪的 `projects/default-135ef1b9f66d8a7e/memory/` 路径**；误写仓库内 topics/ 的改动永远不会进 git。判别方法：对两路径同名文件 `git hash-object` 比对，或看 `.gitignore` 是否含 `/topics`。2026-09-13 已 `git clean -fdX topics/` 清空 80 个幽灵文件（仅保留被跟踪的 `skill-slimming-astrastandards.md`），并立本地警示牌 `topics/__DO_NOT_WRITE_HERE__.md`（ignored，不进仓，仅防 filesystem 浏览误入）。健康状态=该目录仅 1 被跟踪文件 + 1 警示牌；若看到几十个 md，说明又有写入误入陷阱，按上法清理。
 - **分支归属**：`main`=记忆真源 | `hermes`=Hermes home 专属备份 | `zcode`=ZCode 会话归档（在姊妹私有仓 shared-agent-sessions，只读历史）
+
+**⚠️ hermes 分支有两个独立克隆（2026-09-15 实证）**：`%LOCALAPPDATA%\hermes`（Hermes 运行 home，日常备份提交源）与 `D:/ai coding/GitRepos/shared-agent-memory`（物理真源，常驻 main）。两者都 fetch/push 同一 origin/hermes。**严禁在 D 盘克隆里 `git checkout hermes`**——真源目录的 `projects/` 会被换成 hermes 分支版本，且 `memories/topics` junction 指向的 `projects/default-.../memory/` 会随之消失（因为该路径被 .gitignore 排除、hermes 上无此目录），共享库当场「断链」。需要改 hermes 分支时用 `git worktree add <临时目录> hermes`，改完 `git worktree remove`。
+
+**推送代理回退（2026-09-15 实证）**：本机对 github.com 直连会 `Recv failure: Connection was reset`，`env -u ALL_PROXY -u HTTP_PROXY -u HTTPS_PROXY git ls-remote/push` 同样失败；必须显式走本地代理 `git -c http.proxy=http://127.0.0.1:3067 push origin <branch>`。`gh` CLI 走 keyring 不受影响（`gh run list/view` 可查 CI 结果）。
 - **Hermes 专属记忆（不放共享库）**：`memories\USER.md`（用户画像常驻）、根 `memories\MEMORY.md`（系统与环境常驻索引）→ 随 hermes 分支备份
 
 ## 何时读取
@@ -44,17 +48,26 @@ metadata:
 2. **Hermes 专属事实**（仅本 Agent 运行时需要）→ 更新 `memories/USER.md` 或根 `memories/MEMORY.md`。
 3. **【入库前脱敏门禁铁律】**：由于 shared-agent-memory 属于公开仓库（Public Repo），任何 Agent 在写入或更新任何记忆正文前，**必须执行前置脱敏**：
    - **严禁硬编码开发机用户名与机器物理路径**：任何涉及用户主目录、应用数据目录的路径，必须强制转换为标准环境变量（如 `%USERPROFILE%`、`%LOCALAPPDATA%` 或 `$HOME`），严禁出现真实个人机器名或用户名（含示例、注释与配置文件）；
+   - **【路径替换手法，2026-09-15 实证】**：
+     - `.cmd`/`.vbs`：直接用 `%USERPROFILE%\...` 原生写法即可。已实测 `WshShell.Run` 会展开 `%VAR%`（无论命令串外层是否走 `cmd /c`，嵌套引号 `"""%USERPROFILE%\x.exe"" ""y.py"" --flag"` 也能正确展开且参数不漏）；
+     - `.py`：**按文件既有惯例二选一**——`Path.home() / "AppData/Local/hermes/..."`（Path 对象，最简）或 `os.path.expandvars(r"%USERPROFILE%\...")`（保留原字符串形态）。注意 `Path.home()` 返回 `C:\Users\<当前用户>`，与原字面量逐字节等价；
+     - **改完必须逐条验证运行期取值**：用 `importlib` 动态加载改后的 .py，断言常量解析出的绝对路径与原字面量相同（本次 17 个常量全 PASS），不要只靠肉眼 diff；
+     - 脚本若**只**因新增 `os` 用法而需要 import，要顺手补 `import os`（注意该分支文本文件是 **CRLF**，替换串里 `\n` 要写成 `\r\n`）。
+   - **通用检测正则不要含真实用户名**：门禁脚本应匹配 `[A-Za-z]:[\\/]{1,2}Users[\\/]{1,2}(名字)` 的**通用**形态（大小写不敏感，防小写盘符绕过），而不是硬编码具体用户名——否则检测器自身在公开仓里就是一处泄露（`main` 分支现状即如此）。文档占位符（`<user>`/`name`）要走白名单，否则误伤正常技能文档；检测器自身文件要自我排除，否则携带检测正则自判失败。
+   - **【脱敏不消除历史】**：`git grep` 只看 tip，历史中的旧值仍在。评估残留要遍历 `git rev-list --objects <ref>` 的全部 blob（不只 commit）；本次 hermes 分支历史残留 174 个 blob / 48 条路径，而 tip 已 0 残留——公开仓的历史同样可读，彻底消除需 `filter-repo` + force push（会重写他人克隆，需用户明确授权）。
    - **严禁泄漏任何真实密钥与凭据**：包含 Token、API Key、Bearer 授权头、Password、Cookie 等一律脱敏为 `<REDACTED_*>` 或占位符；
    - **客观技术知识规范**：通用系统知识保留标准规范写法，个人专属目录与工作区全部变量化泛化。
 4. **【铁律】修改或新增记忆后，当轮结束前自动静默推送**（无需等待用户提醒；直连失败回退 `-c http.proxy=http://127.0.0.1:3067`）：
    - 共享内容（topics/ 即共享库，git 仓库在真源目录）：
    ```bash
-   git -C "D:/ai coding/GitRepos/shared-agent-memory" add -A && git -C "D:/ai coding/GitRepos/shared-agent-memory" commit -m "memory: <简述>" && git -C "D:/ai coding/GitRepos/shared-agent-memory" push origin main
+   git -C "D:/ai coding/GitRepos/shared-agent-memory" add -A && git -C "D:/ai coding/GitRepos/shared-agent-memory" commit -m "memory: <简述>" && git -C "D:/ai coding/GitRepos/shared-agent-memory" -c http.proxy=http://127.0.0.1:3067 push origin main
    ```
    - Hermes 专属内容（自家 home 仓库）：
    ```bash
-   git -C "%LOCALAPPDATA%/hermes" add -A && git -C "%LOCALAPPDATA%/hermes" commit -m "docs(memory): <简述>" && git -C "%LOCALAPPDATA%/hermes" push origin hermes
+   git -C "%LOCALAPPDATA%/hermes" add -A && git -C "%LOCALAPPDATA%/hermes" commit -m "docs(memory): <简述>" && git -C "%LOCALAPPDATA%/hermes" -c http.proxy=http://127.0.0.1:3067 push origin hermes
    ```
+   - **【公开仓 hygiene 门禁】**：`hermes` 与 `main` 分支各自带 `.github/workflows/ci.yml`，推送即触发 `python scripts/check_hygiene.py`（exit 1 = 违规阻断）。它扫**所有被跟踪文件**的密钥与通用机器路径（`<盘符>:/\Users\<名字>`），文档占位符与检测器自身已白名单。提交前可本地先跑一次同名脚本（两分支各有一份，接口/返回码一致）避免推上去才红。
+   - **【推送后自检】**：`gh run list --repo 3304711297/shared-agent-memory --limit 5` 确认 CI 绿灯；`git ls-remote origin <branch>` 确认远端 hash 已变。
 
 5. **【铁律】OpenViking 写后即时灾备**——本轮只要调用过任何 OpenViking 写入（`viking_remember`、`viking_add_resource`、记忆/资源挂载等），**无论当前任务主题是否与备份相关**，都必须在本轮结束前静默执行：
    ```bash

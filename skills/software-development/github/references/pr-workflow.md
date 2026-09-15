@@ -96,6 +96,33 @@ Types: `feat`, `fix`, `refactor`, `docs`, `test`, `ci`, `chore`, `perf`
 git push -u origin HEAD
 ```
 
+**Push fails with `Recv failure: Connection was reset` / `Operation timed out`?** Check for a local
+proxy before doubting auth. Read the env: `env | grep -i proxy`. Two traps:
+
+- **Unsetting the proxy vars can be the wrong move.** The common "push hung, retry with
+  `env -u ALL_PROXY -u HTTP_PROXY -u HTTPS_PROXY git push`" fix only helps when the proxy is
+  *stale*. If `curl --noproxy '*' https://github.com` times out but the same URL through the
+  proxy returns 200, the proxy is **required** — proceed to the next bullet.
+- **Explicit `-c http.proxy=` beats inheriting env.** Git does not always pick up
+  `HTTPS_PROXY` from git-bash/MSYS, and a stale value can shadow the live one. Pass it
+  directly for one command (repo config left untouched):
+
+```bash
+git -c http.proxy=http://127.0.0.1:<port> -c https.proxy=http://127.0.0.1:<port> push origin main
+```
+
+Probe liveness first and trust the port that answers:
+
+```bash
+curl -sS -o /dev/null -w 'via_proxy=%{http_code}\n' --max-time 15 -x http://127.0.0.1:<port> https://github.com
+curl -sS -o /dev/null -w 'direct=%{http_code}\n'   --max-time 15 --noproxy '*' https://github.com
+```
+
+(`curl: (23) client returned ERROR on write` alongside a `200` code is a harmless pipe/write
+artifact from `-o /dev/null` — the HTTP result is still valid.)
+
+The same `-c http.proxy=...` form applies to `git ls-remote`, `git fetch`, and `git clone`.
+
 ### Create the PR
 
 **With gh:**

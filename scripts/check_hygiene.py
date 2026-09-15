@@ -39,6 +39,10 @@ PLACEHOLDER_TOKENS = {
     "<user>", "<username>", "<user-name>", "<your-user>", "<your-username>",
     "username", "user", "name", "yourname", "public", "default",
     "%username%", "%userprofile%", "$user", "wdagutilityaccount",
+    # CJK / localized placeholders (docs are Chinese here)
+    "<当前用户>", "<用户名>", "<使用者>", "<你的用户名>", "当前用户", "用户名",
+    # ellipsis / redaction forms
+    "...", "…", "<...>", "***", "xxxx",
 }
 
 # The scanner itself necessarily describes the patterns it hunts for; skip it.
