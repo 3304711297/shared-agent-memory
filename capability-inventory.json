@@ -1,7 +1,7 @@
 {
   "version": 2,
   "description": "本地能力组件清单（skill/mcp/plugin/工具核心的已装版本与上游源）。由 capability-upstream-watch 工作流每日比对远端源；本地源组件用 watch-capability.cmd 或任意 Agent 会话跑脚本比对。【维护铁律】升级或新装任何组件后，必须同步更新本清单并随共享库推 main，看门自动收口对应 Issue。",
-  "updatedAt": "2026-09-14",
+  "updatedAt": "2026-09-15",
   "components": [
     {
       "id": "cli-devin",
@@ -325,8 +325,9 @@
       "installed": [
         {
           "where": "Hermes skills/（6 项）【ZCode 副本已随 ZCode 拆除移除，2026-09-09】",
-          "version": "4.9.0",
-          "sha": "974d940a1c5344210874150b98ff0d2c861fab6a"
+          "version": "4.10.0",
+          "sha": "1d95ff7d39de12d87014ea40d4e22201bddc501b",
+          "note": "2026-09-15 核对：v4.9.0→v4.10.0 的 skills/ 子树逐字节未变（两侧 tree hash 均为 d15d0642），上游改动集中在 hooks/ 与 Cursor/Grok 适配器；本机按「收技法、避常驻」只用 skills、不装 plugin，故无需同步文件，仅回写基线版本与 tag 提交。"
         }
       ]
     },
@@ -414,7 +415,8 @@
       "installed": [
         {
           "where": "本地专属环境 %USERPROFILE%/.openviking/venv",
-          "version": "0.4.19"
+          "version": "0.4.20",
+          "note": "2026-09-15 升级。0.4.20 起记忆抽取默认输出协议由 JSON 改为受限 Python DSL，抽取输出上限默认 32768（可经 vlm.max_tokens 覆盖）；本机 VLM 为 deepseek-v4.1-flash（reasoning 占比高），升级后实测抽取任务 completed（memory_write 4 / memory_edit 2）链路正常。"
         }
       ]
     },

@@ -96,4 +96,20 @@ Hermes 桌面端「提供方 → 本地模型」下的「已安装 llama.cpp 运
 - 强制全量同步：`python %LOCALAPPDATA%/hermes/scripts/sync_shared_memory_openviking.py --force`
 - 语义检索验证：`%USERPROFILE%/.openviking/venv/Scripts/ov.exe find "<query>"`
 
+## 五、版本升级 SOP 与 0.4.20 变更要点
+
+**升级步骤（顺序不可颠倒，否则 pip 卸载会撞 WinError 32 文件占用）**：
+1. `python %LOCALAPPDATA%/hermes/scripts/openviking_service.py stop`，并用 `wmic process where "name='pythonw.exe'" get processid,commandline` 复核无 `openviking_lazy_gateway.py` / `openviking-server.exe` 残留（**不能只信 status 输出**）；
+2. `%USERPROFILE%/.openviking/venv/Scripts/python.exe -m pip install --upgrade openviking==<ver>`；
+3. `openviking_service.py start`，确认 1933/1934/18082 三端 ONLINE；
+4. 实发一条记忆（`viking_remember`）→ `ov task status <task_id>` 等到 `completed`，验证抽取链路端到端可用；
+5. `agent_guard.py run` 的常驻进程（进程名 pythonw.exe，命令行含 agent_guard）**必须在 stop/start 前后保持存活**，严禁随 openviking 进程一并清掉。
+
+**0.4.20 关键变更（2026-09-15 升级实测）**：
+- **记忆抽取默认输出协议 json → 受限 Python DSL**（`memory.extraction_output_format` 默认值变为 `python`）。它是受限语法解析器，不开模块导入/文件系统/网络；原 JSON 协议需显式配置回退。本机实测新协议下抽取任务正常（`memory_write 4 / memory_edit 2`）。
+- **抽取输出 token 上限**：未显式指定时依次取 `vlm.max_tokens`、默认 `32768`。本机 VLM 为带 reasoning 的模型（reasoning 占 output 大头），默认值实测够用；若换用输出上限更小的模型，必须在 `ov.conf` 配 `vlm.max_tokens` 覆盖。
+- **Compile 接口迁移**：`/bot/v1/compile` 创建/查询/取消全部停用，改用 `POST /api/v1/compile` + `/api/v1/tasks/{task_id}`（`/cancel` 子路径）；`ov compile` 移除 `--wait`/`--timeout`/`--runtime-timeout`，`--reason` 改为 `--instruction`，脚本须保存 `task_id` 后单独查询。资源导入的 `reason` 参数不受影响。
+- **技能 CLI**：`ov add-skill` 去掉 `--timeout`，`--wait` 保留；`ov add-resource` 的 `--to`/`--parent`/`--wait` 接口未变（本机同步脚本 `sync_shared_memory_openviking.py` 依赖的命令形态升级后实测仍可用）。
+- 任务记录新增 `execution_events` 持久化字段，v0.4.18/v0.4.19 不含该字段的兼容读取——回滚目标若低于含兼容修复的提交会读不通新版任务记录。
+
 [[shared-agent-memory]] [[hermes-shared-memory]] [[user-windows-environment]] [[hermes-agent-install]]
