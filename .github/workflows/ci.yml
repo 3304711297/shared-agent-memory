@@ -25,6 +25,9 @@ jobs:
       - name: Run repository hygiene and secret scan
         run: python scripts/check_hygiene.py
 
+      - name: Regression-test the hygiene scanner
+        run: python tests/test_check_hygiene.py
+
       - name: Verify capability inventory schema and syntax
         run: python scripts/check_capability_upstream.py --lint
 

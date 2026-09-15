@@ -61,6 +61,18 @@ PLACEHOLDER_TOKENS = {
 
 TRAILING_JUNK = "`'\".)>,;:]"
 
+
+def _normalise_placeholder(token):
+    """Strip bracket/quote decoration and lowercase, for set comparison."""
+    return token.strip("<>{}[]()`'\"").strip().lower()
+
+
+# Matching strips decoration from the captured name BEFORE comparing, so the
+# comparison set must be normalised the same way. Without this, an entry written
+# '<user-name>' could never equal the captured 'user-name' — a dead entry that
+# silently turns a legitimate doc path into a reported violation.
+PLACEHOLDER_LOOKUP = {_normalise_placeholder(t) for t in PLACEHOLDER_TOKENS}
+
 # Secret-shaped strings that are documentation placeholders, not credentials.
 # A real key is high-entropy; docs write marked or repeated-character forms
 # (e.g. a GitHub PAT example = the ghp_ prefix plus a run of x's).
@@ -100,8 +112,8 @@ def scan_text(rel_path, content):
         shown = m.group(0).rstrip(TRAILING_JUNK)
         # Normalise away bracket/quote decoration so '<user>' and '`name`' count as
         # placeholders while a real account name does not.
-        name = token.strip("<>{}[]()`'\"").strip().lower()
-        if name in PLACEHOLDER_TOKENS:
+        name = _normalise_placeholder(token)
+        if name in PLACEHOLDER_LOOKUP:
             allowlisted.append(f"{rel_path}:{line_no} - placeholder: '{shown}'")
         else:
             violations.append(
