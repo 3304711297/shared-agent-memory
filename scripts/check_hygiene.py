@@ -4,6 +4,13 @@
 Scans all git-tracked files for machine-specific hardcoded usernames and private credentials.
 Exits with code 1 if violations are found.
 
+This file is duplicated byte-identical in two places and must stay that way:
+shared-agent-memory (main + hermes branches) and the hermes home repo
+(hermes branch). Edit one copy, then copy it over the other and compare
+sha256 — divergence is real risk, not cosmetics: the two copies once grew
+different secret-placeholder rules, so identical content passed in one repo
+and failed CI in the other.
+
 Usage:
     python scripts/check_hygiene.py            # scan tracked files, exit 1 on violation
     python scripts/check_hygiene.py --verbose  # also list allowlisted placeholders
@@ -13,11 +20,8 @@ import re
 import subprocess
 import sys
 
-# Secret patterns (kept in sync with the main branch scanner)
-# NOTE: this copy additionally allowlists documentation placeholders that merely
-# LOOK like secrets (see _is_secret_placeholder); the main-branch copy allowlists
-# paths only. Do not blind-copy one over the other.
-SENSITIVE_PATTERNS = [
+# High-risk secret patterns.
+SECRET_PATTERNS = [
     (r"ghp_[A-Za-z0-9]{20,}", "GitHub Personal Access Token"),
     (r"github_pat_[A-Za-z0-9_]{30,}", "GitHub Fine-Grained Token"),
     (r"AIza[0-9A-Za-z\-_]{35}", "Google API Key"),
@@ -29,27 +33,31 @@ SENSITIVE_PATTERNS = [
 ]
 
 # Machine-absolute home paths: <drive>:\Users\<name> / <drive>:/Users/<name>.
-# A generic rule is used instead of enumerating known usernames so that any machine
-# identity is caught, including paths copied in from someone else's computer.
-# Matching is case-insensitive so a lower-cased drive letter cannot slip past.
+# A generic rule is used instead of enumerating known usernames so that any
+# machine identity is caught, including paths copied in from someone else's
+# computer; enumerating real names would leak them into this public file.
+# The trailing `+` (not `*`) is deliberate: a bare "C:/Users/" carries no
+# identity and must not be matched, or the empty capture becomes a false
+# positive. Matching is case-insensitive so a lower-cased drive letter cannot
+# slip past.
 MACHINE_PATH_PATTERN = re.compile(
-    r"[A-Za-z]:[\\/]{1,2}Users[\\/]{1,2}([^\\/\"'`\s,;)\]}]*)",
+    r"[A-Za-z]:[\\/]{1,2}Users[\\/]{1,2}([^\\/\"'`\s,;)\]}]+)",
     re.IGNORECASE,
 )
 
 # Tokens that are documentation placeholders rather than a real account name.
+# Maintenance rule: only genuinely generic placeholders belong here; adding a
+# real account name would defeat the rule this file exists to enforce.
 PLACEHOLDER_TOKENS = {
-    "<user>", "<username>", "<user-name>", "<your-user>", "<your-username>",
-    "username", "user", "name", "yourname", "public", "default",
+    "name", "username", "user", "yourname", "your-name", "your_user", "myuser",
+    "account", "default", "public", "xxx", "xxxx",
     "%username%", "%userprofile%", "$user", "wdagutilityaccount",
-    # CJK / localized placeholders (docs are Chinese here)
+    "<user>", "<username>", "<user-name>", "<your-user>", "<your-username>",
+    # CJK / localized placeholders (docs are Chinese in these repos)
     "<当前用户>", "<用户名>", "<使用者>", "<你的用户名>", "当前用户", "用户名",
     # ellipsis / redaction forms
-    "...", "…", "<...>", "***", "xxxx",
+    "...", "…", "<...>", "***",
 }
-
-# The scanner itself necessarily describes the patterns it hunts for; skip it.
-SELF_EXCLUDED = {"scripts/check_hygiene.py"}
 
 TRAILING_JUNK = "`'\".)>,;:]"
 
@@ -74,10 +82,10 @@ def _is_secret_placeholder(token):
     return re.search(r"(.)\1{7,}", low) is not None
 
 
-def scan_text(rel_path, content, verbose):
+def scan_text(rel_path, content):
     """Return (violations, allowlisted) for one file's text."""
     violations, allowlisted = [], []
-    for pattern, desc in SENSITIVE_PATTERNS:
+    for pattern, desc in SECRET_PATTERNS:
         for m in re.finditer(pattern, content, re.IGNORECASE):
             line_no = content[:m.start()].count("\n") + 1
             token = m.group(0)
@@ -126,9 +134,7 @@ def main():
         except UnicodeDecodeError:
             continue
         scanned += 1
-        if rel_path.replace(os.sep, "/") in SELF_EXCLUDED:
-            continue
-        v, a = scan_text(rel_path, content, verbose)
+        v, a = scan_text(rel_path, content)
         violations.extend(v)
         allowlisted.extend(a)
 
