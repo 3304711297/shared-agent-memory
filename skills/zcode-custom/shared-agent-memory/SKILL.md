@@ -158,3 +158,12 @@ metadata:
 - **判据与自检**：新增或修改忽略规则后，用 `git check-ignore -v <path>` 验证目标路径的匹配来源；对 `skills/ plugins/ desktop-plugins/` 三个白名单区跑 `git status --short --ignored skills/ | grep '^!!'`，凡是技能/插件目录出现在 `!!` 列表里就是误伤（`.usage.json.lock`、`__pycache__/` 之类的运行时残留属预期）。
 - **通用规则**：本仓库里任何要排除「根目录下的某目录」的规则，一律加前导 `/`；无锚定的写法只适用于运行时产物名（`*.log`、`__pycache__/`）。
 
+## 记忆真源唯一（单点存储铁律，2026-09-15 清理落地）
+
+**记忆只存一处：共享库 `main` 分支的 `projects/<project>/memory/`**（即 `memories/topics` junction 的指向）。任何第二份存档都是分叉隐患，一经发现即清除。
+
+- **实例（已清理）**：hermes home 仓曾跟踪 `projects/default-…/memory/hermes-agent-install.md`——zcode 时代遗留的**独立副本**（真实文件，非 junction），内容停滞在共享库 main 的 `fd540fc`（2026-09-04），比现值少 21 行。两处存档各自演化，正是分叉的温床。处置：`git rm --cached` 脱离跟踪 + 删磁盘副本 + `.gitignore` 加 `/projects/` 防复发。
+- **清理前的三项核验（缺一不可，避免误删真源）**：① 副本内容是否为共享库版本的严格子集（比对两侧行集，确认独有 0 行）；② 全仓是否有引用指向该副本路径（`grep` 搜 `LOCALAPPDATA.*projects/` 与 `hermes.*projects/`，本次 0 处——相关脚本引用的是 D 盘真源）；③ 留一份可回滚备份再删。
+- **判别某路径是否为「第二份存档」**：`os.path.realpath()` 看是否指向 D 盘真源——是则为 junction（无副本，安全），否则是独立文件（副本，需核验后清理）。
+- **自检命令**：hermes home 仓跑 `git ls-files projects/` 应恒为空；跑 `git status --short --ignored skills/ plugins/` 确认无技能/插件目录被误伤。
+
