@@ -88,5 +88,6 @@
 - [File Workflow Official Benchmark](file-workflow-official-benchmark.md) — 官方读文件流四件套与 2026-09-13 实测：小读行号税 +7.5%，大文件截断差约 46 倍，批量走 execute_code，CLI 限定 @引用
 - [Opencode Muse Spark Upstream](opencode-muse-spark-upstream.md) — muse-spark-1.3-contributor-free 上游实录：ultra 钳制发 xhigh，summary 写死 auto，/v1/models 无参数，国内 403 RegionError
 - [Lookup Before Build](lookup-before-build.md) — **先检索再造轮子铁律**（2026-09-13 用户拍板）：手搓任何解析/签名/抓取/协议适配/胶水前必先查技能池→官方文档→成熟开源实现源码；反例判据（换过 3 组参数仍失败 / 依传闻调参 / 要写 50+ 行无关胶水 / 说不清错误码语义）出现即停下检索；实战案例为 B 站 `-352` 风控（手搓猜参数徒劳，检索得「只能换出口 IP 或换接口」的定论）
-
-
+- [Audit Count Is Not Impact Scope](audit-count-is-not-impact-scope.md) — 审计报告的「N 处不达标」按元素计数，遇共享变量/公共样式/公共函数必须改按「真源 × 全部使用点」重算影响面（实例：以为 3 处对比度问题，实为共享 CSS 变量名下 8/8 全不达标）；「多点同症状」先归因到真源再谈修复面
+- [Test Assert Invariant Not Literal](test-assert-invariant-not-literal.md) — 契约测试断言「不变量」而非「具体字面量」：锁色号会误报、锁阈值+关系才既防退化又允许合规替换；必须取最坏输入（否则测试绿灯但缺陷仍在）；关系型断言能抓「提亮到同值」这类假修复
+- [Self Health Checks Can Fabricate Failures](self-health-checks-can-fabricate-failures.md) — 自己的排查/验证动作会制造假失败：变异测试 copy2 回滚留旧 mtime 骗过 make（跑的是变异版二进制）、误跑裸 build 覆盖正确产物、裸 python 命中错解释器；下结论前先排除自身污染，产物结论必须直查产物本身
