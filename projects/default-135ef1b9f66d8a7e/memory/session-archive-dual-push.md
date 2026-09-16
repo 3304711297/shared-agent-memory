@@ -7,8 +7,13 @@
 1. **会话转录归档**（私有库，含未脱敏真实路径）
    ```bash
    cd "$HOME/GitRepos/shared-agent-sessions"   # 或实际克隆位置
-   python tools/upload_session.py --latest            # 仅归档
+   python tools/upload_session.py --session-id <本会话ID>   # ⚠️ 用显式 ID，勿用 --latest
    ```
+   **⛔ `--latest` 在有并行会话时会归档错会话（2026-09-16 实测）**：它按 `sessions.last_activity_at DESC` 取第一条，但同一时刻可能有多个会话在跑（本次并存 5 个）——`--check --latest` 报的是**另一条并行会话**（反代前端排查那条），而真正要归档的本会话（capability-watch 这条）被跳过。**正确姿势：先用 state.db 反查「含本轮用户消息的 session_id」，再显式传 `--session-id`**。
+   ```bash
+   python -c "import sqlite3,os;p=os.path.expandvars(r'%LOCALAPPDATA%\\hermes\\state.db');c=sqlite3.connect(f'file:{p}?mode=ro',uri=True);print(c.execute(\"SELECT session_id FROM messages WHERE content LIKE '%<用户最后一句的关键词>%' ORDER BY timestamp DESC LIMIT 1\").fetchone())"
+   ```
+   另：`sessions.message_count` 常小于 `messages` 表实际行数（本次 202 vs 286），**条目数以 `--check` 打印的条数为准**。
    **⚠️ 铁律（2026-09-09 两次事故定案，2026-09-10 强化）：脚本只归档、不删除——`--delete` 参数已从 upload_session.py 移除；本地会话由用户在桌面端手动删除。**
    历史事故：Agent 跑 `--delete` 删掉活跃会话的 state.db 行 → 桌面端写入失败 →
    "session storage could not be written" 回合中止 + 历史丢失（需从归档回灌）。
