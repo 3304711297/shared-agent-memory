@@ -20,4 +20,6 @@ ZCode decommissioned 09-09: sessions in shared-agent-sessions zcode branch; only
 §
 OpenViking writes (viking_remember/add_resource/etc) -> SAME-TURN run D:\openviking-backup\sync.cmd (private repo 3304711297/openviking-backup), regardless of topic. Large-shrink guard aborts exit 2 leaving backup untouched; rerun with OV_BACKUP_FORCE=1 only if the shrink is intentional.
 §
-Hermes 工具三坑（本机复现）：① search_files pattern 里反斜杠被转成 /（\( → /( 、\d → /d ）→静默 0 命中（最危险：会误判「不存在」），改用字符类 [(] / [0-9]；② read_file 重复读同一文件返回 {status:unchanged} 或 {error,already_read}，无 content 键，循环取值必须 .get('content')；③ execute_code 的 Python 是原生 Windows（PATH 无 /usr/bin），subprocess 调 grep/rg 必 FileNotFoundError，用 terminal 工具或纯 pathlib。
+Hermes 工具三坑（本机复现）: ① search_files pattern 反斜杠被转成 /（\( → /( 、\d → /d）→静默 0 命中，改用字符类 [(] / [0-9]；上游已报 #92260，修复 PR #92267（唯一能打在 main 上的）；② read_file 重复读同一文件返回 {status:unchanged}/{error,already_read} 无 content 键，循环取值必须 .get('content')；③ execute_code 的 Python 是原生 Windows，subprocess 调 grep/rg 必 FileNotFoundError，用 terminal 工具或纯 pathlib。
+§
+workbuddy2api 构建由用户自己跑 `npm run tauri build`（PowerShell @ 仓库根）；我只说「可以构建了」，不自行琢磨隔离目录/替换脚本等绕行方案。

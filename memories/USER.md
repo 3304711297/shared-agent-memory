@@ -17,3 +17,5 @@ UI (09-08): micro-interaction, in-desktop embedding, dark geek-IDE aesthetic; 3+
 Skill-watchdog: skill install/upgrade/prune/rejection syncs capability-inventory.json + pushes main for CI that turn; new-skill eval runs 5-step SOP.
 §
 CI & notifications: on all-green completion, DELETE /notifications/threads/{id} to mark related notifications Done.
+§
+构建/部署 gui 应用（workbuddy2api 等 Tauri 桌面端）：**用户自己构建**，用 `npm run tauri build`（在仓库根的 PowerShell 里跑）。我不得自行琢磨"如何在不影响会话的情况下构建"，也不要搬文件到隔离目录或写替换脚本——会把会话链路搞断或产出空壳。**改完代码只需告知一声"可以构建了"，用户自己来。**

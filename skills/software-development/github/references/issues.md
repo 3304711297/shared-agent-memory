@@ -91,6 +91,59 @@ for i in json.load(sys.stdin)['items']:
     print(f\"#{i['number']}  {i['state']:6}  {i['title']}\")"
 ```
 
+## 1b. Pre-filing duplicate sweep (do this BEFORE writing the issue)
+
+The expensive failure isn't a duplicate title — it's filing a fresh, well-researched
+report for a bug that already has a ticket **and** open fix PRs. Sweep in three steps,
+in this order:
+
+```bash
+# 1) exact-symptom search (error string, not paraphrase)
+gh issue list -R <owner>/<repo> --search "unclosed group" --state all --limit 10
+# 2) the fix side — an open PR may already cover it
+gh pr list -R <owner>/<repo> --search "<issue-number>" --state all --limit 10
+gh pr list -R <owner>/<repo> --search "<root-cause keyword>" --state all --limit 10
+# 3) read the matched thread before writing anything
+gh issue view <n> -R <owner>/<repo> --comments
+```
+
+If a ticket exists, do NOT open a second one. Ask what your session knows that the
+thread does not, and post that as a comment.
+
+### When open fix PRs exist: test whether each still applies
+
+Old PRs silently rot. A PR that "fixes #N" six weeks ago may no longer apply at all,
+because the buggy code was refactored into a different module in the meantime — and
+that fact is exactly what maintainers need to triage.
+
+```bash
+# does it still apply to current HEAD? (--check, never apply blindly)
+cd <repo> && git apply --check /path/to/pr.patch; echo "EXIT=$?"
+# where does the code live NOW vs where the PR patches it?
+gh pr diff <n> -R <owner>/<repo> --name-only
+git log --follow --format='%h %ci %s' -- <file_the_pr_touches>
+```
+
+Verify a fix claim at the right level rather than trusting the PR description:
+
+- apply in a **throwaway worktree** (`git worktree add`), never the main tree;
+- run the PR's own test file;
+- measure the actual boundary the bug crosses (e.g. the argv/stdin the child process
+  receives) by stubbing the environment, so you can state "before: X, after: Y".
+
+Then report the applicability matrix (PR × applies? × covers current module? × verified
+how) so consolidation can be decided on evidence. Credit the other authors; propose
+consolidation rather than claim it.
+
+### Verification before claiming the comment landed
+
+`gh issue comment` returning a URL is not proof. Read it back:
+
+```bash
+gh issue view <n> -R <owner>/<repo> --json comments \
+  --jq '.comments | length, (.[-1] | {author:.author.login, url, chars:(.body|length)})'
+```
+
 ## 2. Creating Issues
 
 **With gh:**
