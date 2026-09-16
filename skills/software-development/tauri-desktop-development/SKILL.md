@@ -6,6 +6,7 @@ description: "做Tauri应用时必用。开发构建调试。Use when developing
 # Tauri Desktop Development
 
 ## Verification Before Push (Local-First)
+- Mutation-test every new assertion you write, in the same sitting. A contract test whose assertion is written as a tautology (`a === false` as the first clause of a filter) or that only checks "the result is right" without pinning *which* branch produced it will survive the mutation it exists to catch. Real record this round: a frontend suite and a Rust suite each had 1 of 4–5 mutations slip through — both were assertion-design faults, not implementation faults.
 
 Every CI step in this project's GitHub Actions has a local equivalent. Run them
 locally BEFORE committing — waiting ~4.5 min for CI to catch what local would
@@ -81,7 +82,8 @@ In Tauri v2, `window.open(url, '_blank')` is blocked or silently swallowed by We
 - **BUILDING IS THE USER'S JOB on this machine — do not engineer around it.** The user builds WorkBuddy2API themselves with `npm run tauri build` (from the repo root, PowerShell). Do NOT invent isolated-target-dir builds, in-place-swap scripts, or any other scheme to build "without disturbing the session": the daemon is a child of the GUI, so any restart cuts the session — the user accepts that and owns the timing. **After changing code, just say so ("可以构建了") and stop.** Writing a build/swap helper for them is wasted work at best; at worst it produces an exe with no embedded frontend (see below) and wastes a rebuild cycle.
 - **Why the shared target dir is the correct approach for the user's build:** `npm run tauri build` uses the normal `src-tauri/target`. An isolated `CARGO_TARGET_DIR` adds a 1.5 GB duplicate tree and, if you then run a plain `cargo build --release` in it, silently replaces the good artifact with a frontend-less one.
 - **`cargo build --release` produces a SILENTLY BROKEN exe — always `cargo tauri build`.** `Cargo.toml` ships `[features] custom-protocol = ["tauri/custom-protocol"]`, which only the tauri CLI enables. A plain cargo release build links without it, so Tauri treats the app as *dev* mode: `frontendDist` is never embedded and the window loads `http://localhost:5173` instead (users see `ERR_CONNECTION_REFUSED` on a machine with no Vite server). It still prints `Built application at: ...` and exits 0. Tell them apart by size and embedded asset names:
-  - correct tauri artifact ≈ **15,641,088 bytes** for this app; the broken plain-cargo one ≈ **15,572,992 bytes** (≈68 KB smaller).
+  - correct tauri artifact for this app: **re-derive the number, don't trust a literal** — it grows with every feature (observed 15,641,088 → 15,663,616 after one Rust+frontend change). The broken plain-cargo one was 15,572,992 at the same time (≈68 KB smaller); the **gap** is the stable signal, the absolute size is not.
+  - **Do not search the exe for frontend string literals.** They live in the brotli-compressed JS bundle and will read as 0 hits even when correctly embedded — reporting that as "not embedded" is a false alarm (this exact mistake was made while verifying a Chinese UI hint). Rust-side ASCII identifiers (field names like `hermes_proxy_base_url`) are NOT compressed and do verify directly. To confirm frontend text landed, read `dist/assets/*.js` instead.
   - decisive check (run from the repo root) — the hashed bundle filename is stored uncompressed in the asset manifest:
     ```powershell
     $js=(Get-ChildItem dist\assets -Filter 'index-*.js').Name
@@ -375,6 +377,18 @@ feature silently never works (e.g. native window background never follows the th
 Check `src-tauri/gen/schemas/acl-manifests.json` for the permission identifier, then confirm
 it is actually listed under the plugin's `default_permission.permissions`; if not, add it
 explicitly to `src-tauri/capabilities/default.json`.
+
+### 20. Local-Service Detection Needs the PORT, Not the Shape of the URL
+An "is the client pointed at us?" check written as *loopback host + path contains `/v1`* misidentifies every other local `/v1` service on the machine. On a real box there were two (a proxy-gateway on `18080` and the app's own `8787`); the detector happily reported the foreign one, so the badge claimed the integration was configured when it was not — and then, after the port was compared, correctly refused.
+- **Rule**: compare the port (from config, never hardcoded) plus the scheme; loopback alone proves nothing on a developer machine.
+- Widening a too-narrow detector is the fix for "configured but shows unconfigured" **only after confirming the path actually is the current one** — here the client's config path was right all along and the *criteria* were wrong. Verify which before rewriting.
+- Scan **every** place the address can appear (`model`, `providers.<name>`, `model_aliases.<alias>`, `custom_providers[]`), not just the top-level block; users legitimately route through one provider while another carries the endpoint.
+
+### 21. A Switch That Only Governs One Side of a Boundary Must Say So in the UI
+A control that changes what the *producer* exposes (e.g. "only list available models" shaping an HTTP endpoint) silently fails to affect a client that never calls that endpoint — it uses its own hardcoded list (here: a `discover_models: false` client, 42 static entries vs the endpoint's filtered 36). The user toggles the switch, sees no change, and reports it as broken.
+- **Rule**: when a setting's effect stops at a process boundary, put that boundary in the UI — name the client-side counterpart setting and what to do there — and make the hint follow the current selection so it appears exactly when the wrong expectation is likely.
+- **Do not promise what the code cannot deliver**: writing "pick this to hide them in your client" would be a false claim. State the scope instead ("this only changes the list the daemon serves") even though a promise reads better.
+- Dead-CSS guard: before reusing a class that *looks* standard (`notice-box`, `notice-info`), confirm it is defined in the stylesheet — greping the HTML/CSS pair takes seconds and prevents inventing styles that render as nothing.
 
 ## References & Deep-Dives
 - `references/proxy-console-architecture-and-pitfalls.md` — Detailed recipes and code patterns for subprocess window suppression (`CREATE_NO_WINDOW`), full-stack UTF-8 stream decoding, 3-tier daemon tray management with bi-directional event broadcast, Tauri v2 snake_case IPC deserialization, upstream model matrix reverse-engineering, and local network security boundary enforcement.
