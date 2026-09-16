@@ -167,6 +167,20 @@ metadata:
 - **判别某路径是否为「第二份存档」**：`os.path.realpath()` 看是否指向 D 盘真源——是则为 junction（无副本，安全），否则是独立文件（副本，需核验后清理）。
 - **自检命令**：hermes home 仓跑 `git ls-files projects/` 应恒为空；跑 `git status --short --ignored skills/ plugins/` 确认无技能/插件目录被误伤。
 
+## 本地看门比对是选测，不是全测（实跑优先，勿臆断）
+
+跑 `check_capability_upstream.py --local-only` **不能**当作「全清单零待跟进」的通用证据：该模式只跑 `local-merged-marketplace` / `local-config-guard` 两类本地源（本机 40 个组件里仅 2 个），其余 38 项输出「⏭️ 本地模式跳过」。真正的判据是**先看云端看门上一次运行报告里的「待跟进组件数」**，再决定要不要本地重跑。
+
+- **正确取证顺序**：① `gh run list --workflow capability-upstream-watch.yml` 取最近成功的 run → 读其结论；② 只余本地专属项时才跑 `--local-only`；③ 外部源项若确需本地复核，用 `GH_TOKEN=$(gh auth token) python scripts/check_capability_upstream.py`（**必须带 GH_TOKEN**，否则 GitHub API 无鉴权、脚本因 `failed_queries >= 3` 直接以 exit 1 中止并不写报告）。
+- **告警阈值与噪声的换算**：`hermes-skills-hub` 的判定是 `behind = total > rec_total`（严格大于）。回写当前快照后，把**当次真实值**写进 `version`/`totalSkills`，不要沿用旧值——写成大于上游的值，等价于给未来所有低于它的数当噪声滤掉；写成小于上游的值，会在下次运行立刻再亮 🔴。
+- **报出「某分类计数」前先复算自查**：聚合源（skills-hub）单看分类计数不可靠——按 `bySource` 逐项相加后必须等于 `totalSkills`、并且 `localSkills + externalSkills == totalSkills`；三项对不上说明拿到的是缓存/非权威分片，此时不要下结论（本次实测 ClawHub 78,478 与总差 2,277，用样本序号无法对上）。
+
+## `capability-inventory.json` 回写实操（收口看门 Issue 的标准动作）
+
+1. **文件是混合行尾**：既有 CRLF 行也有 LF 行（本文件有一行是 LF、其余 CRLF）。做文本替换时**逐段以各自实际字节为模板**（用 `open(path,'rb')` + `count(check)==1` 断言命中唯一），不要假定全文件统一行尾，更不要用文本模式整体重写（会把 40 个组件全部 reflow 成同一行尾）。
+2. **`note` 字段承载「为何这样回写」**：把取证与判据写进被改条目的 `note`（如「上游峰值 X 后回落、连采 N 次稳定于 Y、判定为源波动而非新版」），下次被问到时有据可查。
+3. **公开仓禁写账号标识**：回写 note 常牵涉 `gh auth status` 之类的取证，产出里要写「凭据与 token scopes 不变」，**不要**写用户名/账号 ID——`check_hygiene.py` 拦不住它，但公开仓铁律拦得住。
+
 ## `%TEMP%` 临时克隆的清理规范（2026-09-15 实操沉淀）
 
 排查问题时在 `%TEMP%` 下留的仓库克隆会长期堆积（本次清出 11 个/179MB）。清理按四步走，**不得直接 `rm -rf`**：
