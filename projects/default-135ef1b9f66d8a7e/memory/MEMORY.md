@@ -91,3 +91,6 @@
 - [Audit Count Is Not Impact Scope](audit-count-is-not-impact-scope.md) — 审计报告的「N 处不达标」按元素计数，遇共享变量/公共样式/公共函数必须改按「真源 × 全部使用点」重算影响面（实例：以为 3 处对比度问题，实为共享 CSS 变量名下 8/8 全不达标）；「多点同症状」先归因到真源再谈修复面
 - [Test Assert Invariant Not Literal](test-assert-invariant-not-literal.md) — 契约测试断言「不变量」而非「具体字面量」：锁色号会误报、锁阈值+关系才既防退化又允许合规替换；必须取最坏输入（否则测试绿灯但缺陷仍在）；关系型断言能抓「提亮到同值」这类假修复
 - [Self Health Checks Can Fabricate Failures](self-health-checks-can-fabricate-failures.md) — 自己的排查/验证动作会制造假失败：变异测试 copy2 回滚留旧 mtime 骗过 make（跑的是变异版二进制）、误跑裸 build 覆盖正确产物、裸 python 命中错解释器；下结论前先排除自身污染，产物结论必须直查产物本身
+- [Local Service Detection Needs Port](local-service-detection-needs-port.md) — 判断「客户端是否指向本工具」不能只看 URL 形状（回环 + `/v1` 会命中本机其它回环服务，实测认错 18080）；须比 scheme + 端口（端口取自配置不写死）；「已配置却显示未配置」先分清是**路径探测错**还是**判据太窄**，本例路径一直正确、判据太窄
+- [Packed Artifact Verification](packed-artifact-verification.md) — 验证打包产物是否含某项改动时先分清压缩区：前端文案进了 brotli 压缩的 bundle，在 exe 里搜明文**必然 0 命中**（我据此误报过「未进包」）；未压缩区（Rust 字面量/资源文件名）才可直接搜；产物合格判据用「比坏产物大」的关系而非具体字节数（尺寸随功能漂移），资源 hash 因注入 git hash + 日期而不可作新鲜度判据
+- [Setting Scope Must Be Visible In UI](setting-scope-must-be-visible-in-ui.md) — 设置作用范围跨进程/组件边界时，边界必须写进 UI：说明管什么、不管什么、对端要改哪个开关、是否需重启；说明挂在开关旁并随选择变化；**绝不写代码做不到的承诺**（「选此项即可让客户端隐藏」是假承诺），并用反向断言锁住防回归；用户把「没生效」报成 bug 时先分清客户端侧操作 vs 软件侧缺陷（重装端点改不了软件侧判据，且删除有切断在用链路的风险）
