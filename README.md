@@ -72,6 +72,7 @@ cmd /c mklink /J "%LOCALAPPDATA%\hermes\memories\topics" "<MEMORY_DIR>"
   watch-capability.cmd          # 本地检查（默认只查本地专属组件）
   watch-capability.cmd --full   # 强制跑全量上游比对
   ```
+  > 看门范围（2026-09-16 收敛，40→33 项）：只登记**与本地实装版本有真实关联**的组件（CLI / 插件 / MCP / 已装技能套件 / 本地配置守卫 / 借鉴雷达）。技能库与技能市场索引（SkillHub、Cola Skill、Hermes 官方目录等）**不在此清单**——「已装组件是否落后」由看门与漂移检查负责，「有什么新技能可拉」一律查 `skill-plugin-resources.md` 索引库。
 - **技能漂移检查**：只回答「已安装的技能是否落后于上游同名技能」，不构成自动更新依据：
   ```bash
   watch-skill-drift.cmd

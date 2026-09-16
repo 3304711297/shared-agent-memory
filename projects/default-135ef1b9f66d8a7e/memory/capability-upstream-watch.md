@@ -10,7 +10,7 @@ metadata:
 **能力组件上游看门**（2026-09-05 建立，位于 shared-agent-memory 仓库 main 分支，用户感知 skill/mcp/plugin/核心工具新版本的统一渠道）：
 
 - **组成**：`capability-inventory.json`（v2 已装版本清单）+ `scripts/check_capability_upstream.py`（stdlib 比对）+ `.github/workflows/capability-upstream-watch.yml`（每天北京时间 09:00 定时 + 手动 dispatch）+ `watch-capability.cmd`（本地一键全量检查并同步 Issue）。
-- **检查源八类**：npm registry、GitHub Releases、ZCode 官方市场 CDN manifest（github 插件）、claude-plugins-official 市场 pinned sha、**local-merged-marketplace（客户端本地合并清单，仅本地运行，Actions 跳过）**、**github-commits-path（多源技能库与插件路径提交基线，含 hermes-hub-skills、anthropics/skills、google-gemini/gemini-skills、affaan-m/ECC）**、**hermes-skills-hub（Hermes 官网 Skills Hub 9万+ 全网聚合技能索引）**、**社区/策展市场源（SkillHub 1393 社区技能与 Cola Skill 16 精品策展技能）**。2026-09-05 纳入系统级 CLI（共 12 组件）；**2026-09-07 依用户指示完成看门雷达全量扩充与深度去重治理**：
+- **检查源八类**：npm registry、GitHub Releases、ZCode 官方市场 CDN manifest（github 插件）、claude-plugins-official 市场 pinned sha、**local-merged-marketplace（客户端本地合并清单，仅本地运行，Actions 跳过）**、**github-commits-path（路径提交基线，现用于 19 个 workbuddy2api 借鉴雷达）**、**hermes-skills-hub（Hermes 官网 Skills Hub 全网聚合技能索引）**、**社区/策展市场源（SkillHub 与 Cola Skill）**。2026-09-05 纳入系统级 CLI（共 12 组件）；**2026-09-07 依用户指示完成看门雷达全量扩充与深度去重治理**：
   1. **看门去重机制**：剔除 `claude-plugins-official` 整仓提交监控，避免与内部已装核心组件（`superpowers` 与 `chrome-devtools-mcp` 的 `claudeMarketplaceSha`）产生同源双重告警；同时排除 `opensquilla` 等 Agent 独立框架；
   2. **非 GitHub 爬虫防失效与优雅降级铁律**：针对 SkillHub API 与 Cola Skill 页面解析，配置浏览器 UA 伪装、结构守卫与异常捕获。上游网络超时、WAF 拦截或模板微调时，严格标记为 `⚠️ 抓取暂不可达` 并保持当前基线，`behind` 严格为 False，绝不误计入 `outdated`，绝不触发误报 Issue，不阻塞整体检查；
   3. **受控组件规模**：全网立体监控总计达到 **18 项**。
@@ -69,6 +69,12 @@ metadata:
 - **【用户拍板 2026-09-05】hermes-agent 与 ZCode CLI 本体永久不纳入看门**（各自自带更新机制；注意 hermes-agent 仓库的 skills/ 子目录提交监控属于技能库不属于本体）；未安装的市场插件（cloudbase-skills/example-plugin/代码安全防护）也不监控，代码安全防护在两份清单均未见、来源待查。
 - **脚本坑位**：npm scoped 包需全量 URL 编码（@ 和 /）且必须用普通 Accept 头（GitHub 专用 Accept 会 406）；GitHub API 匿名限流需带 token；工作流建 Issue 前先确保标签存在；内置插件 zip 在 CDN 上连已装版本都 404，勿再试。
 - **覆盖盲区**（清单 notWatched 同步维护）：hermes hub 技能（hermes GUI 自带提示）、http 远端 MCP（永远最新）、zcode-custom 自有 skill（无上游）。
+- **【看门收敛 2026-09-16 用户拍板】技能库/市场雷达退出看门（40→33 项）**：用户提出「这几个技能库好像没必要加入看门了，我也没从里面下过 skill」——核查确认其判断成立，且比预期更彻底：
+  - **退出 7 项**：`hermes-hub-skills` / `anthropic-skills` / `gemini-skills` / `ecc-skills`（4 个 `github-commits-path`，2026-09-09 语义变更后**永不计入 outdated**，每日仅打印上游 HEAD/基线文字，零可执行价值；其中 hermes-hub-skills 的 27 项已装技能由 `check_skill_drift.py` 独立保护，脚本不读清单，退看门不损失任何保护）；`hermes-skills-hub` / `skillhub-market` / `colaskill-market`（3 个市场计数型，本地实装 0 项，历史净收益为零次真实动作、两次误报治理——#12 缩量误报逼出判定逻辑修复、#15 的 100,679 峰值当日回落到 100,402）。
+  - **关键洞察**：这 7 项的告警面是空的（要么永不触发、要么只报计数波动），但它们的展示段每天都占据报告版面，稀释「🔴 有更新」的信号强度。看门应只保留**与本地实装版本有真实关联**的组件。
+  - **代码零改动**：`hermes-skills-hub`/`skillhub-market`/`colaskill-market` 三种 check 类型与 `github-commits-path` 分支的实现**全部保留在 `check_capability_upstream.py`**（`SUPPORTED_CHECK_TYPES` 未删），仅清单侧不再登记组件；未来重新纳入只需补清单条目，无需改代码。**注**：`github-commits-path` 仍有 19 个 workbuddy 借鉴雷达在使用（它们是活雷达，区别于纯台账 —— 用户口径是「借鉴雷达保留」），故该类型并未退役。
+  - **职责边界固化**：「已装版本是否落后」= 看门 + 漂移检查；「技能生态有什么新东西」= `skill-plugin-resources.md` 索引库按需检索。两者不再交叉。四个技能源留在索引库第 4/5/7 号源，三个市场入口留在第 1/2/3 号源。
+  - **落盘**：清单 `notWatched` 追加三条（两条【看门瘦身】+ 一条【退役口径说明】），`meta.inventorySlimming_20260916` 记口径；`skills-provenance.json` 的 hermes-agent 源 watchStatus 由「已在看门(hermes-hub-skills)」改指 `check_skill_drift.py`，新增顶层 `watchSlimming_20260916`。**踩坑**：首次改清单时手拼 JSON 字符串转义写坏文件（`Invalid control character`），`git checkout --` 恢复后改用 `json.loads` + `json.dumps(..., ensure_ascii=False, indent=2)` 往返重写；改前已实测该文件 json 往返**逐字节一致**（全 CRLF、末尾有换行），故整体重写安全——**这个往返一致性检查是改此类大 JSON 的前置动作**，通不过就只能逐段字节替换。
 
 **Why:** 更新源分散在 npm/GitHub/两个市场/客户端种子，人工逐个查不可持续；统一看门 + Issue 通知让用户及时用上新版本。
 

@@ -182,139 +182,6 @@
       ]
     },
     {
-      "id": "hermes-hub-skills",
-      "display": "Hermes Hub 技能库（skills/ 目录提交）",
-      "checks": [
-        {
-          "type": "github-commits-path",
-          "repo": "NousResearch/hermes-agent",
-          "path": "skills",
-          "note": "hermes 内置注册表技能的上游仓库；监控 skills/ 路径新提交，同步后回写基线 sha。"
-        }
-      ],
-      "installed": [
-        {
-          "where": "Hermes skills/（84 项，2026-09-13 skill审计后）",
-          "version": "HEAD@abd83ab5",
-          "sha": "abd83ab560327c58f17f8e2ecd9be0307d5c9cf9"
-        }
-      ]
-    },
-    {
-      "id": "anthropic-skills",
-      "display": "Anthropic 官方技能库（skills/ 目录提交）",
-      "checks": [
-        {
-          "type": "github-commits-path",
-          "repo": "anthropics/skills",
-          "path": "skills",
-          "note": "Anthropic 官方 Agent Skills 公共仓库；监控 skills/ 路径新提交。"
-        }
-      ],
-      "installed": [
-        {
-          "where": "官方技能雷达（书签真源）",
-          "version": "HEAD@41bbe19d",
-          "sha": "41bbe19d1a1a7eaab5e7bb9050a417e5c6cffc8f"
-        }
-      ]
-    },
-    {
-      "id": "gemini-skills",
-      "display": "Google Gemini 官方技能库（skills/ 目录提交）",
-      "checks": [
-        {
-          "type": "github-commits-path",
-          "repo": "google-gemini/gemini-skills",
-          "path": "skills",
-          "note": "Google Gemini 官方 API/SDK 与模型交互技能库；监控 skills/ 路径新提交。"
-        }
-      ],
-      "installed": [
-        {
-          "where": "官方技能雷达（书签真源）",
-          "version": "HEAD@0fa937a5",
-          "sha": "0fa937a5b79e902b86be5792e8bc7188747286ae"
-        }
-      ]
-    },
-    {
-      "id": "ecc-skills",
-      "display": "ECC Agent 优化技能库（skills/ 目录提交）",
-      "checks": [
-        {
-          "type": "github-commits-path",
-          "repo": "affaan-m/ECC",
-          "path": "skills",
-          "note": "affaan-m/ECC 性能与工程化调优技能系统；监控 skills/ 路径新提交。"
-        }
-      ],
-      "installed": [
-        {
-          "where": "开源技能雷达（书签真源）",
-          "version": "HEAD@c11753d0",
-          "sha": "c11753d0b94d3a8cc379564609a740c5e68599e3"
-        }
-      ]
-    },
-    {
-      "id": "hermes-skills-hub",
-      "display": "Hermes 官网 Skills Hub 全网技能索引",
-      "checks": [
-        {
-          "type": "hermes-skills-hub",
-          "url": "https://hermes-agent.nousresearch.com/docs/api/skills-meta.json",
-          "note": "Hermes 官网聚合的 9万+ 全网技能统一索引（ClawHub/skills.sh/LobeHub等）；监控全网索引总数与生成时间。"
-        }
-      ],
-      "installed": [
-        {
-          "where": "官网 Skills Hub 聚合索引（书签真源）",
-          "version": "100402",
-          "totalSkills": 100402,
-          "extractedAt": "2026-09-16",
-          "note": "2026-09-16 复核：看门快照峰值 100,679（判为 ClawHub 源瞬时增量）后上游回落，连采 4 次稳定于 100,402（indexGeneratedAt 2026-09-16T07:02Z），较 09-14 基线 100,421 反降 19——判定为聚合源波动而非新技能上架，无本地动作，仅回写当前快照。"
-        }
-      ]
-    },
-    {
-      "id": "skillhub-market",
-      "display": "SkillHub 社区精选技能库",
-      "checks": [
-        {
-          "type": "skillhub-market",
-          "url": "https://api.skillhub.cn/api/v1/contest/skills?page=1&pageSize=1",
-          "note": "SkillHub 国内精选技能社区（腾讯云生态）；监控社区审核上架技能总数。"
-        }
-      ],
-      "installed": [
-        {
-          "where": "国内社区雷达（书签真源）",
-          "version": "1470",
-          "totalSkills": 1470,
-          "extractedAt": "2026-09-14"
-        }
-      ]
-    },
-    {
-      "id": "colaskill-market",
-      "display": "Cola Skill 精品技能策展市场",
-      "checks": [
-        {
-          "type": "colaskill-market",
-          "url": "https://colaskill.com/zh/",
-          "note": "Cola Skill 优质 Claude/Agent 实战技能策展站点；监控精品技能数量与新增列表。"
-        }
-      ],
-      "installed": [
-        {
-          "where": "精品策展雷达（书签真源）",
-          "version": "16",
-          "totalSkills": 16
-        }
-      ]
-    },
-    {
       "id": "ponytail-skills",
       "display": "Ponytail 代码极简与反过度工程技能套件",
       "checks": [
@@ -813,9 +680,13 @@
     "【本地已改技能 2026-09-07】github、tauri-desktop-development 与 superpowers（14项技能frontmatter中文高频动作词前置紧凑化，突破前57字符截断瓶颈）为本地自有/深度定制技能；本次仅补操作纪律与截断优化，非上游版本变动",
     "【用户拍板 2026-09-07】serena：插件已物理删除（双端均无），uv tool 中 serena-agent 与 ~/.serena 残留另行处置，不再纳入看门",
     "【ZCode 遗留收口 2026-09-12】claude-plugins-official 市场版本比对（claudeMarketplaceSha）：随 ZCode 拆除（09-09）一并退役。双端现存安装面均不消费该市场——chrome-devtools-mcp 走 Hermes config.yaml npm 钉版、superpowers 直同步 obra/superpowers（Hermes plugins/upstream.json）。市场 pin 持续推进将造成永久性虚假告警（Issue #13 根因），故从 chrome-devtools-mcp 与 superpowers 组件移除该字段；如未来重新接入该市场，需重建本地 sha 基线后再纳入比对",
-    "【用户拍板 2026-09-07】cliproxyapi（EasyCLIProxyAPI 网关核心）：退出看门，用户自行在软件内手动检查并更新"
+    "【用户拍板 2026-09-07】cliproxyapi（EasyCLIProxyAPI 网关核心）：退出看门，用户自行在软件内手动检查并更新",
+    "【看门瘦身 2026-09-16 用户拍板】4 个纯台账技能库雷达退出看门（hermes-hub-skills / anthropic-skills / gemini-skills / ecc-skills）：均为 github-commits-path 类型，2026-09-09 语义变更后永不计入 outdated，每日仅在报告里展示上游 HEAD/基线文字，零可执行价值。其中 hermes-hub-skills 的 27 项已装技能本就由 check_skill_drift.py 做技能级保护（脚本独立运行、不读清单），退看门不损失任何保护；anthropic/gemini/ecc 三项本地实装 0 项，仅作书签式台账。四个源在 skill-plugin-resources.md 索引库中继续保留（第 4/5/7 号源），需新技能时照旧按需检索。",
+    "【看门瘦身 2026-09-16 用户拍板】3 个市场计数型雷达退出看门（hermes-skills-hub 10 万级聚合索引 / skillhub-market 社区市场 / colaskill-market 精品策展）：本地实装 0 项，纯「按需检索书签」性质，进入看门只产生计数噪声——hermes-skills-hub 于 Issue #15 报峰值 100,679 后当日即回落至 100,402；skillhub-market 曾因 -11 缩量误报逼出 Issue #12 的判定逻辑修复；colaskill-market 判定用 !=，任何波动都算更新。历史净收益为零次真实动作、两次误报治理。技能发现已由索引库按需检索承担，不需每日轮询市场总数。三站入口保留在 skill-plugin-resources.md 第 1/2/3 号源。",
+    "【退役口径说明 2026-09-16】以上 7 项退出后看门清单由 40 项收敛为 33 项：报告只保留与本地实装版本存在真实关联的组件（CLI / 插件 / MCP / 已装技能套件 / 本地配置守卫 / 借鉴雷达）。技能生态「有什么新东西」统一由 skill-plugin-resources.md 索引库按需回答，两项职责不再交叉。脚本中 hermes-skills-hub / skillhub-market / colaskill-market 三种 check 类型与对应解析逻辑保留在源码（SUPPORTED_CHECK_TYPES 与实现均未删），仅清单侧不再登记组件；未来若要重新纳入，补清单条目即可，无需改代码。"
   ],
   "meta": {
-    "zcodeDecommissioned": "2026-09-09: ZCode 客户端已拆除，zcode-github / zcode-bundled-plugins 组件条目移除（组件物理消失，看门无法再检查）；skills 条目中 'ZCode ~/.zcode/skills 副本' 表述已过时，Hermes 侧为唯一副本"
+    "zcodeDecommissioned": "2026-09-09: ZCode 客户端已拆除，zcode-github / zcode-bundled-plugins 组件条目移除（组件物理消失，看门无法再检查）；skills 条目中 'ZCode ~/.zcode/skills 副本' 表述已过时，Hermes 侧为唯一副本",
+    "inventorySlimming_20260916": "看门收敛 40→33 项：7 个技能库/市场雷达退出（判据见 notWatched 三条【看门瘦身】【退役口径说明】）。本次仅改清单与台账，未改任何 check 逻辑。"
   }
 }

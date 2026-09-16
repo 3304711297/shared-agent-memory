@@ -44,4 +44,6 @@ metadata:
 
 **索引库规模（2026-09-09 实查）**：15 个 GitHub 技能源合计约 **1,467 个可拉取 SKILL.md**（ECC 898 / hermes-agent 199 / knowledge-work-plugins 212 / science-skills 40 / mattpocock 37 / claude-plugins-official 31 / anthropics 20 / ponytail 13 / gemini-skills 3 等），全部可访问、无归档或禁用；本地实装 84 项，采撷率约 5.7%，符合二八瘦身铁律（技能池控制在 30-50 项为宜，按需从本索引单拉）。第 19 号源 Atlas 为项目地图（不含 SKILL.md），不计入技能源计数。
 
+**本索引库是技能发现的唯一入口（2026-09-16 加固）**：`capability-inventory.json` 看门已收敛，7 个技能库/市场雷达（hermes-hub-skills / anthropic-skills / gemini-skills / ecc-skills / hermes-skills-hub / skillhub-market / colaskill-market）全部退出——**看门只管「已装的组件是否落后」，本索引库管「有什么新东西可拉」**。第 1/2/3 号（SkillHub / Cola / Hermes 官方目录）与第 4/5/7 号（ECC / gemini-skills / anthropics/skills）此前是看门组件、现在只在本库保留入口，需要新能力时照旧来这里按需检索，不要因为看门里看不到它们就以为源失效。
+
 **How to apply:** 用户要找某类能力（如 PPT/SEO/安全审计技能）或 ZCode/Hermes 缺功能时，先查 1/2 的中文目录定位技能名，再回 GitHub 拿源码审读后安装；Claude 系官方技能/插件直接用 7/8/9（源头真源，优先于第三方转译）；Gemini/ZCode 官方需求直接用 5/6；Token 优化与架构借鉴看 10；长文/长视频方法论提炼看 11；领域建模与深模块架构看 12；科研数据库（蛋白/基因/化合物/文献/临床）查文献需求看 13（按需单拉，不整装）；**已装技能的溯源与重装查 14-18**；找 Hermes 生态里的成熟工具/插件/集成项目（含安全审查结论）看 19。第三方 skill 安装前必须人工审内容（提示词注入面），不盲装。

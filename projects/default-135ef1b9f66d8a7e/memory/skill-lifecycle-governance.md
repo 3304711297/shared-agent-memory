@@ -16,6 +16,8 @@ metadata:
 | **维护** | `scripts/check_skill_drift.py` | 已装技能 vs 上游同名技能**内容比对**，判是否落后 | 不发现新技能 |
 | **同步** | `capability-inventory.json` + `skills-provenance.json` | 记录已装版本与出处 | 不判定更新 |
 
+**看门范围收敛（2026-09-16 用户拍板，40→33 项）**：7 个技能库/市场雷达退出 `capability-inventory.json` —— `hermes-hub-skills`、`anthropic-skills`、`gemini-skills`、`ecc-skills`（4 个 `github-commits-path` 纯台账，永不计入 outdated，零可执行价值）与 `hermes-skills-hub`、`skillhub-market`、`colaskill-market`（3 个市场计数型，本地实装 0 项，历史上只贡献过两次误报治理）。看门因此只保留「与本地实装版本有真实关联」的组件；三个市场入口与四个技能源继续留在索引库（第 1/2/3 与 4/5/7 号），技能发现一律走索引库按需检索。三种市场 check 类型与 `github-commits-path` 分支的代码**均保留在源码**，未来重新纳入只需补清单条目。
+
 **关键分界**：看门（`check_capability_upstream.py`）的 `github-commits-path` 分支**永不计入 outdated**，仅展示 HEAD/基线信息（2026-09-09 语义变更）。「上游仓库有 N 笔新提交」不构成更新信号——它可能改的是你没装的技能。
 
 ## 漂移检查三层判定（check_skill_drift.py）
@@ -29,6 +31,7 @@ metadata:
 - **本地增强禁止覆盖**：`hermes-agent`（UI 消歧/禁止假称并行铁律）、superpowers 13 项（中文强触发词）等本地定制，同步上游会毁掉 2026-09-07 的 57 字符截断优化成果
 - **上游缩小支持范围不跟进**：如 `python-debugpy` 上游把 `platforms` 改为 `[linux, macos]` 去掉 windows，本地保留 windows 才正确
 - **技能变动与看门绝对同步**：新装/升级/裁撤/否决，当轮必同步 `capability-inventory.json` 与 `skills-provenance.json` 并推 main
+- **看门只收「与本地实装有关」的组件**：`github-commits-path`（永不计入 outdated）与市场计数（本地实装 0 项）两类雷达一律不进看门，登记进 `notWatched` 与索引库即可；退看门不减保护（已装技能由 `check_skill_drift.py` 独立保护），只减噪声
 - **二八瘦身**：技能池控制在 30-50 项，索引库 1467 个技能按需单拉，严禁整装（ECC 898 项整装会冲破铁律）
 - **安装前人工审读**：第三方 skill 是提示词注入面，不盲装；⛔ `science-skills/predictingthepast`（pickle.load 远程代码执行面）
 
