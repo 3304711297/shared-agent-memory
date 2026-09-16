@@ -12,10 +12,12 @@ PS scenarios -> pwsh -NoProfile (Store alias, version-independent) + [Console]::
 §
 Style: ext-AI cross-review -> P0/P1/P2 spec; fixed scope, no opportunistic refactors. Local-First: full CI-equivalent + Release build locally, then push; never block main session on CI. Config change: list candidates + defaults + cost, wait for the call. reasoning_effort=ultra stays (global default).
 §
-Lookup-Before-Build (先检索再造轮子, 09-13 拍板): before hand-rolling ANY parser/signature/scraper/protocol adapter/boilerplate, search first — skills pool -> official docs -> mature OSS source. Stop-and-search: 3 param combos already failed, tuning from hearsay not docs, >50 lines of glue, or can't state the official semantics of the error code you're fighting. Hand-rolling's real cost is direction cost; say "searched X/Y/Z, none exists" before writing your own. Case: bilibili -352 risk control unsolvable by param tuning — one search gave "change egress IP or endpoint".
+Lookup-Before-Build 09-13 拍板：规则全文见系统提示；案例：bilibili -352 调参无解→换出口IP。
 §
 Pitfalls: Desktop "session won't run" freeze = model switch injecting a user-role system msg + truncated retry rejected by gateway (upstream #94486); restart won't self-heal — SOP in shared lib topics/hermes-desktop-rewind-deadlock.md.
 §
 ZCode decommissioned 09-09: sessions in shared-agent-sessions zcode branch; only tie = promo tokens via zcode-api proxy.
 §
 OpenViking writes (viking_remember/add_resource/etc) -> SAME-TURN run D:\openviking-backup\sync.cmd (private repo 3304711297/openviking-backup), regardless of topic. Large-shrink guard aborts exit 2 leaving backup untouched; rerun with OV_BACKUP_FORCE=1 only if the shrink is intentional.
+§
+Hermes 工具三坑（本机复现）：① search_files pattern 里反斜杠被转成 /（\( → /( 、\d → /d ）→静默 0 命中（最危险：会误判「不存在」），改用字符类 [(] / [0-9]；② read_file 重复读同一文件返回 {status:unchanged} 或 {error,already_read}，无 content 键，循环取值必须 .get('content')；③ execute_code 的 Python 是原生 Windows（PATH 无 /usr/bin），subprocess 调 grep/rg 必 FileNotFoundError，用 terminal 工具或纯 pathlib。

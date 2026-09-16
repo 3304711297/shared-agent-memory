@@ -181,6 +181,27 @@ metadata:
 2. **`note` 字段承载「为何这样回写」**：把取证与判据写进被改条目的 `note`（如「上游峰值 X 后回落、连采 N 次稳定于 Y、判定为源波动而非新版」），下次被问到时有据可查。
 3. **公开仓禁写账号标识**：回写 note 常牵涉 `gh auth status` 之类的取证，产出里要写「凭据与 token scopes 不变」，**不要**写用户名/账号 ID——`check_hygiene.py` 拦不住它，但公开仓铁律拦得住。
 
+## 改大 JSON 清单前先做「往返一致性」预检（2026-09-16 踩坑）
+
+`capability-inventory.json` / `skills-provenance.json` 这类 40KB 级清单，**不要手拼 JSON 字符串做插入**——转义引号极易写坏文件（本次写出 `Invalid control character at line 686`，整个清单报废，只能 `git checkout --` 恢复重做）。正确顺序：
+
+1. **先量行尾**：`txt.count("\r\n")` vs `txt.count("\n")` —— 逐字节确认是「全 CRLF」「全 LF」还是**混合**（混合则禁止整体重写，只能逐段字节替换）。
+2. **做往返预检**：`json.dumps(json.loads(txt), ensure_ascii=False, indent=2)` 归一化行尾后**逐字节比对原文**。相等才可整体重写（本次清单相等 → 安全；provenance 差一个末尾换行 → 按原样补/去）。
+3. **整体重写**：`json.dump` + `newline=""` 写回，行尾用归一化后的形态。
+4. **写后立刻 `json.load` 回读断言**字段值与组件数，别信写入成功。
+
+— 另：若某个 `note` / `meta` 字段里要写引号，用中文引号或改写措辞，不要靠 `\"` 嵌套；中文的 `“”` 不需要转义。
+
+## 看门范围口径：只收「与本地实装有关」的组件（2026-09-16 拍板）
+
+判断某组件该不该进看门，问一句就够：**它落后了我会不会真的去动本地？**
+
+- 两类不进：① `github-commits-path` 纯台账型（2026-09-09 后永不计入 outdated，每日只打印上游 HEAD/基线，零可执行价值）；② 市场/索引计数型（本地实装 0 项，只会因源侧波动刷计数噪声）。
+- 三类必进：已装 CLI / 插件 / MCP（`gh-release`/`pypi`/`npm`/`gh-repo`，落后就要升级）、已装技能套件（`gh-release`）、本地配置守卫（`local-config-guard`）。
+- **两个易错点**：① 同一种 check 类型可能两类都在用——本次误判 `github-commits-path` 整体退役，实际还有 19 个 workbuddy 借鉴雷达在用；**下结论前先跑一遍类型计数**（`Counter(c["checks"][0]["type"] for c in components)`）。② 退役**只改清单、不改代码**——三种市场 check 类型与 `github-commits-path` 分支保留在 `check_capability_upstream.py`，未来重启只需补清单条目。
+- **退看门 ≠ 失去保护**：已装技能的落后判定由 `check_skill_drift.py` 独立完成（脚本自带 `CATEGORY_TO_SOURCE` 映射，**不读清单、不读 provenance**），清单里删掉技能库条目不会削弱任何保护；要确认某技能还受保护，只需看它所属 category 是否在 `CATEGORY_TO_SOURCE` 里。
+- **落盘三件套**（缺一即半成品）：清单 `notWatched` 写退役判据 + `meta` 记口径 + `skills-provenance.json` 的 `watchStatus`/`checkType` 改指新保护来源；再同步 README、`MEMORY.md` 索引行、运维与治理两篇专题（索引库那条要说清「为什么它仍是发现入口」）。
+
 ## `%TEMP%` 临时克隆的清理规范（2026-09-15 实操沉淀）
 
 排查问题时在 `%TEMP%` 下留的仓库克隆会长期堆积（本次清出 11 个/179MB）。清理按四步走，**不得直接 `rm -rf`**：
