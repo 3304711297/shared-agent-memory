@@ -37,6 +37,47 @@ metadata:
 
 ---
 
+## 路线选择（先看这张表，再动手）
+
+**铁律：`video_analyze` 失败时不要立刻手搓 ffmpeg 抽帧 + 拼图。**低分辨率小字经抽帧拼接后只剩十几像素，视觉模型会互相打脸（同一区域两次读出不同文字），既烧轮次又得不出可信结论。按下列顺序走：
+
+| 优先级 | 路线 | 适用条件 | 命令 |
+|---|---|---|---|
+| ① | `video_analyze` 工具 | 默认先试 | 直接调用 |
+| ② | **cpa 端点工具集路线**（本机首选 fallback） | ① 报「视频内容已被过滤」时 | `python scripts/agentic-video-cpa.py <视频>` |
+| ③ | `distill.py` Google 官方直连 | 持有有效 `GEMINI_API_KEY` 且官方模型 ID 可用 | `python scripts/distill.py <视频>` |
+| ④ | 手搓抽帧 + `vision_analyze` | 仅在 ②③ 均不可用时，且接受精度损失 | 自建，勿作为默认 |
+
+### `video_analyze` 的失效模式（本机实测）
+
+`video_analyze` 把视频交给**主聊天模型链路**，而非 `auxiliary.vision`。主模型是 deepseek-v4.1-flash 时不支持视频输入，直接返回「当前模型不支持视频输入，视频内容已被过滤」。**这与图片不同**——`vision_analyze` 走 `auxiliary.vision`（provider=auto），能正常看图，所以「图片能看」不代表「视频能看」，不要据此误判工具坏了。
+
+### cpa 端点工具集路线（本机首选 fallback）
+
+`scripts/agentic-video-cpa.py` 让本地反代端点（默认 `http://127.0.0.1:18080/v1`）的 `gemini-3.8-flash-high` **带着工具集自主分析**视频：模型自己决定抽哪一帧、放大哪块区域、要不要听音频。
+
+```bash
+python scripts/agentic-video-cpa.py "<视频路径>" -o "<输出.md>"
+python scripts/agentic-video-cpa.py "<视频路径>" --question "这次点击触发了什么？" --budget 6
+```
+
+该端点实测同时具备**视频输入**与**工具调用**两项能力（`tool_calls` 正常返回）。
+
+**三条设计要点，改脚本时勿删**：
+
+1. **收敛纪律必须有**：不设预算上限时模型会无限次重复放大同一区域——实测 14 轮不收敛、上下文滚到 63 万 token，仍未给结论。脚本的 `TOOL_BUDGET`（默认 8）+ 只回带最近 `KEEP_RECENT_SETS`（3）组工具结果 + 强制每轮写「已确认」笔记，三件套共同保证第 5 轮左右收口。
+2. **防幻觉锚点必须写进 SYSTEM**：低分辨率小字极易诱发先验填补。实测 `gemini-3-flash-preview` 分析本机录屏时，凭空编出 `GPT-4o` / `o1-preview` / `Llama 3.1 405B` / `0 / 2000` 等画面中**根本不存在**的 UI。SYSTEM 里必须显式禁止用常见 AI 界面先验去补全，并要求「小于 14px 的文字先放大再读」。
+3. **交叉验证仍不可省**：即使模型声称「已放大核对」，低分辨率下不同轮次仍可能给出互相矛盾的具体读数（如鼠标移动方向、最右端图标形状）。交付前用 `vision_analyze` 对**原始帧的裁剪区域**独立复核关键结论，不要直接采信单一叙述。
+
+### `distill.py`（Google 官方直连）的已知坑
+
+- **中文文件名必失败**：`files.upload` 的 multipart 头按 ascii 编码，路径含中文报 `'ascii' codec can't encode characters in position 0-3`。先复制成 ASCII 文件名（如 `clip.mp4`）再上传。
+- **候选模型名可能全部失配**：脚本内置候选队列是 `gemini-3.8/3.7/3.6-flash` 等，但**实际 Key 上可用的模型 ID 需现查**（`client.models.list()`）。曾实测某 Key 只有 `gemini-3.5-flash` / `gemini-3-flash-preview` / `gemini-3.1-pro-preview`，候选队列全落空。
+- **`g​emini-3.1-pro-preview` 可能返回空串**（上传成功、`LEN 0`），而 `g​emini-3-flash-preview` 会返回内容但幻觉严重（见上）。官方直连路线对本机屏录的可靠性低于 cpa 路线。
+- **出口 SSL 不稳**：经本地代理访问 `generativelanguage.googleapis.com` 时实测间歇性 `SSL: UNEXPECTED_EOF_WHILE_READING`，需退避重试（脚本已含 Key 轮询，但同一 Key 内的连接抖动仍需外层重试）。
+
+---
+
 ## Operating Workflow (执行规程)
 
 当用户提出视频分析或提炼需求时，严格按以下步骤推进：
@@ -51,7 +92,14 @@ metadata:
   - 网络自动走本地代理 `http://127.0.0.1:3067`。
 
 ### 2. 调用内置执行器（后台执行，主会话非阻塞）
-在终端中执行技能内置脚本：
+
+**首选 cpa 工具集路线**（见「路线选择」表）：
+
+```bash
+python "<SKILL_DIR>/scripts/agentic-video-cpa.py" "<VIDEO_SOURCE>" -o "<OUTPUT_MD_PATH>"
+```
+
+**备选 Google 官方直连**（需有效 Key，且注意中文文件名坑）：
 
 ```bash
 # 优先使用当前技能目录下的 scripts/distill.py（或 ~/.hermes/scripts/distill_gemini_video.py）
