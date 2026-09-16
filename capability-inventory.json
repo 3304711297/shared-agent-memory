@@ -1,7 +1,7 @@
 {
   "version": 2,
   "description": "本地能力组件清单（skill/mcp/plugin/工具核心的已装版本与上游源）。由 capability-upstream-watch 工作流每日比对远端源；本地源组件用 watch-capability.cmd 或任意 Agent 会话跑脚本比对。【维护铁律】升级或新装任何组件后，必须同步更新本清单并随共享库推 main，看门自动收口对应 Issue。",
-  "updatedAt": "2026-09-15",
+  "updatedAt": "2026-09-16",
   "components": [
     {
       "id": "cli-devin",
@@ -95,7 +95,8 @@
       "installed": [
         {
           "where": "MSI 机器级安装（gh auth 走 keyring）",
-          "version": "2.100.0"
+          "version": "2.101.0",
+          "note": "2026-09-16 经 winget upgrade 就地升级 2.100.0→2.101.0（MSI 机器级，安装路径与 keyring 凭据不变）；升级后实测 `gh --version` = 2.101.0、`gh auth status` 正常（凭据与 token scopes 不变）。"
         }
       ]
     },
@@ -269,9 +270,10 @@
       "installed": [
         {
           "where": "官网 Skills Hub 聚合索引（书签真源）",
-          "version": "100421",
-          "totalSkills": 100421,
-          "extractedAt": "2026-09-14"
+          "version": "100402",
+          "totalSkills": 100402,
+          "extractedAt": "2026-09-16",
+          "note": "2026-09-16 复核：看门快照峰值 100,679（判为 ClawHub 源瞬时增量）后上游回落，连采 4 次稳定于 100,402（indexGeneratedAt 2026-09-16T07:02Z），较 09-14 基线 100,421 反降 19——判定为聚合源波动而非新技能上架，无本地动作，仅回写当前快照。"
         }
       ]
     },
