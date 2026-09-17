@@ -81,15 +81,6 @@ providers:
       deep-model: {}
       hy4-preview-f: {}
     key_env: HERMES_CUSTOM_WORKBUDDY2API_API_KEY
-  devin-acp:
-    name: Devin Subscription
-    base_url: acp://devin
-    model: swe
-    discover_models: false
-    models:
-      swe: {}
-      swe-1.6-slow: {}
-      swe-2: {}
 fallback_providers: []
 database:
   journal_mode: wal
