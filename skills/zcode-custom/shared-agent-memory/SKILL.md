@@ -199,6 +199,7 @@ metadata:
 - 两类不进：① `github-commits-path` 纯台账型（2026-09-09 后永不计入 outdated，每日只打印上游 HEAD/基线，零可执行价值）；② 市场/索引计数型（本地实装 0 项，只会因源侧波动刷计数噪声）。
 - 三类必进：已装 CLI / 插件 / MCP（`gh-release`/`pypi`/`npm`/`gh-repo`，落后就要升级）、已装技能套件（`gh-release`）、本地配置守卫（`local-config-guard`）。
 - **两个易错点**：① 同一种 check 类型可能两类都在用——本次误判 `github-commits-path` 整体退役，实际还有 19 个 workbuddy 借鉴雷达在用；**下结论前先跑一遍类型计数**（`Counter(c["checks"][0]["type"] for c in components)`）。② 退役**只改清单、不改代码**——三种市场 check 类型与 `github-commits-path` 分支保留在 `check_capability_upstream.py`，未来重启只需补清单条目。
+- **借鉴雷达与纯台账区分（2026-09-17 修复落地）**：`github-commits-path` 严格细分为两类：纯技能库路径（`is_radar=False`，保持 09-09 规则不计 outdated 避免噪声）；而**借鉴雷达**（`is_radar=True`，含 `radar: true`、display 含「借鉴雷达」、或 id 为 `wb2api-upstream-*` / `c2api-upstream-*`）上游产生新 commit 时必须判定 `behind=True`、计入 `outdated` 触发 Issue 告警，并输出 compare 对比链接供评估摘樱桃（Cherry-pick）。评估落地或无需采纳后，更新清单中的 sha 基线推 main 即可自动收口 Issue。
 - **退看门 ≠ 失去保护**：已装技能的落后判定由 `check_skill_drift.py` 独立完成（脚本自带 `CATEGORY_TO_SOURCE` 映射，**不读清单、不读 provenance**），清单里删掉技能库条目不会削弱任何保护；要确认某技能还受保护，只需看它所属 category 是否在 `CATEGORY_TO_SOURCE` 里。
 - **落盘三件套**（缺一即半成品）：清单 `notWatched` 写退役判据 + `meta` 记口径 + `skills-provenance.json` 的 `watchStatus`/`checkType` 改指新保护来源；再同步 README、`MEMORY.md` 索引行、运维与治理两篇专题（索引库那条要说清「为什么它仍是发现入口」）。
 
