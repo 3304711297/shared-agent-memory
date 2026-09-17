@@ -270,8 +270,8 @@
       "installed": [
         {
           "where": "借鉴雷达（workbuddy2api 已吸收其 X-Device-Token 注入方案）",
-          "version": "HEAD@74d4473",
-          "sha": "74d4473814801968dc478f76d20bbfc43e86bd1c"
+          "version": "HEAD@56bb51c",
+          "sha": "56bb51c3e390c52f20668b5a8e0cb20b22037746"
         }
       ]
     },
@@ -327,8 +327,8 @@
       "installed": [
         {
           "where": "借鉴雷达（workbuddy2api 已吸收其积分到期日分层调度与到期时间解析）",
-          "version": "HEAD@6a4cc7e",
-          "sha": "6a4cc7eb78c2c50f25a58e714b2f2afd16a81ecc"
+          "version": "HEAD@50e88ae",
+          "sha": "50e88ae046294713eaeb4ee6f06a011dca42b474"
         }
       ]
     },
@@ -346,8 +346,8 @@
       "installed": [
         {
           "where": "借鉴雷达（workbuddy2api 已吸收其 413 请求体上限保护中间件机制）",
-          "version": "HEAD@1cd2d16",
-          "sha": "1cd2d16c89ae47ed06362c92599e988339cf3a3c"
+          "version": "HEAD@d3488be",
+          "sha": "d3488bec8fbe5804d6e0f6dd956eda2c890650e9"
         }
       ]
     },
@@ -384,8 +384,8 @@
       "installed": [
         {
           "where": "借鉴雷达（横向对比与特性雷达）",
-          "version": "HEAD@8b1f97d",
-          "sha": "8b1f97d73e13c143f2f317a4c3a08cac4cebe761"
+          "version": "HEAD@620b55c",
+          "sha": "620b55c994f1c9c7b960caee1eec051c518eb359"
         }
       ]
     },
@@ -403,8 +403,8 @@
       "installed": [
         {
           "where": "借鉴雷达（workbuddy2api 已吸收其 Responses 协议双向转换与流式语义状态机）",
-          "version": "HEAD@db8ec2f",
-          "sha": "db8ec2fb686da031e343bb342e3a83325cb736af"
+          "version": "HEAD@984dc46",
+          "sha": "984dc46b960211de21a3b12fef588045d5c7547c"
         }
       ]
     },
@@ -422,8 +422,8 @@
       "installed": [
         {
           "where": "借鉴雷达（workbuddy2api 已吸收其国际版客户端 UA 仿真规范）",
-          "version": "HEAD@cc96656",
-          "sha": "cc966567f7dec0fd836007740a1f17fb04dbbe93"
+          "version": "HEAD@7c93b46",
+          "sha": "7c93b46a9e3e3b3e6c0245a4918e7e17cb1db0c4"
         }
       ]
     },
@@ -459,9 +459,9 @@
       ],
       "installed": [
         {
-          "where": "借鉴雷达（横向对比与配额感知调度参考）",
-          "version": "HEAD@a1a259c",
-          "sha": "a1a259c840aa9e8b1fb60e40fd01152ca9953e85"
+          "where": "借鉴雷达（workbuddy2api 已吸收其 11140 内容安全审核拦截防误判机制与配额调度参考）",
+          "version": "HEAD@0ced9ab",
+          "sha": "0ced9aba59bdf114620f51ae94916a03cb1a3a4c"
         }
       ]
     },
@@ -479,8 +479,8 @@
       "installed": [
         {
           "where": "借鉴雷达（横向对比与上游错误分类参考）",
-          "version": "HEAD@894daa0",
-          "sha": "894daa0b0641c50af26c8e4e27b36456edc2e487"
+          "version": "HEAD@ed6c2d9",
+          "sha": "ed6c2d9e5b7b9b7e7d6928e469ba1f618a803975"
         }
       ]
     },
@@ -517,8 +517,8 @@
       "installed": [
         {
           "where": "借鉴雷达（横向对比与会话粘性/熔断模型参考）",
-          "version": "HEAD@5be5bf7",
-          "sha": "5be5bf790a246b32004570cc83fdb915969a0e3d"
+          "version": "HEAD@ed8a0b3",
+          "sha": "ed8a0b35b2e957380f2d5ee1639d675685d8205f"
         }
       ]
     },
@@ -536,8 +536,8 @@
       "installed": [
         {
           "where": "借鉴雷达（横向对比与加权调度/多账号池核心架构参考）",
-          "version": "HEAD@3c0aacf",
-          "sha": "3c0aacf89d4f7f3fc8347a712927d3a30bfb4e49"
+          "version": "HEAD@9d1a21b",
+          "sha": "9d1a21bdcb143527a4d1a0937c4495c026dbd783"
         }
       ]
     },
@@ -574,8 +574,8 @@
       "installed": [
         {
           "where": "借鉴雷达（官方 Agent SDK 容器化桥接模式参考）",
-          "version": "HEAD@fb62c85",
-          "sha": "fb62c85efeb4c08a2f8668fb31aa1c2745b25e8b"
+          "version": "HEAD@e26411c",
+          "sha": "e26411c6cf054b4b1c13f7dde1c20ca44a4d804d"
         }
       ]
     },
@@ -593,8 +593,8 @@
       "installed": [
         {
           "where": "借鉴雷达（TypeScript/Next.js 架构协议路由参考）",
-          "version": "HEAD@a032516",
-          "sha": "a032516283fe721c6061e7e81664c2a2e923d833"
+          "version": "HEAD@45227c5",
+          "sha": "45227c5417ae41a995e9276d4993ad43ef8ca5f8"
         }
       ]
     },
