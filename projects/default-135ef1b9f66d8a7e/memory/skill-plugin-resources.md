@@ -39,6 +39,9 @@ metadata:
 17. **BadTechBandit/skills** — https://github.com/BadTechBandit/skills ：本地 `c​laude-design` 与 `architecture-diagram` 的可能来源（4 Stars，2026-04 后停更，**已停维护**，仅作溯源用）。
 18. **JulienTant/blogwatcher-cli** — https://github.com/JulienTant/blogwatcher-cli ：本地 `research/blogwatcher` 的上游（31 Stars，2026-05 后停更，仅作溯源用）。
 
+**已在本地实装的高阶浏览器交互上游源（2026-09-17 评审实装，全面取代 CDP 临时 profile）**
+20. **Tencent/BrowserSkill** — https://github.com/Tencent/BrowserSkill ：腾讯开源的真实 Chromium 浏览器接管工具（基于 Edge/Chrome 商店扩展 + 本地 bsk CLI/Daemon，免 CDP 远程调试授权弹窗，独立 Agent Window 隔离运行，原生复用已登录会话与 Cookie）。本地实装 `web/browser-skill`，取代历史妥协方案 `edge-dev-cdp-scraping`。
+
 **Hermes 专用生态地图类（2026-09-09 评审收录，按需检索不实装）**
 19. **ksimback/hermes-ecosystem（Hermes Atlas）** — https://github.com/ksimback/hermes-ecosystem （站点 https://hermesatlas.com ）：社区维护的 Hermes 生态项目地图（1229 Stars，bot 自动重建，全量 249 个项目、质量过滤收录 80+，分 12 类：Core/GUI 工作台/技能库/插件/记忆/多智能体/部署/集成/开发工具/领域应用/指南）。亮点：对 25★+ 仓库做过安全审查（`repos/security-review.md`，5 个 WARN：hermes-CCC 与 vessel-browser 有 curl-pipe-bash 安装器、gladiator 有硬编码凭据，使用前先审脚本）；找"某类 Hermes 工具是否存在/哪个成熟"先查它。注意：ECOSYSTEM.md 是 2026-04 快照（星数滞后），实时数据看网站 API；`data/repos.json` 为活数据。另含 `research/` 约 70 篇研究文档（2026-04~09 每周 release digest 约 25 篇单篇 40-60KB；实战攻略：多 Agent 团队编队/Telegram 部署/Skills 机制原理/记忆指南/Operator 手册/橙皮书全文等），即其 RAG 聊天机器人的知识库源，按需 `web_extract` 单篇取读（raw.githubusercontent.com 直连），09-09 仍在更新。基线 sha `bebd922`（2026-09-09）。
 

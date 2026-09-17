@@ -616,9 +616,27 @@
           "sha": "7eda3c17f1aa0354b2fe7e22f4b6c21796c0d08a"
         }
       ]
+    },
+    {
+      "id": "cli-bsk",
+      "display": "系统 CLI：BrowserSkill (bsk)",
+      "checks": [
+        {
+          "type": "gh-release",
+          "repo": "Tencent/BrowserSkill",
+          "tag_strip": "^cli-v?"
+        }
+      ],
+      "installed": [
+        {
+          "where": "%USERPROFILE%\\.local\\bin\\bsk.exe",
+          "version": "0.3.0"
+        }
+      ]
     }
   ],
   "notWatched": [
+    "【技能淘汰·能力升级 2026-09-17】edge-dev-cdp-scraping：已彻底废弃淘汰并物理删除。原先因 Edge Dev 默认 Profile 无法开启 9222 CDP 端口而妥协使用的临时独立 Profile + 手动 WebSocket 抓取方案，已被 Tencent/BrowserSkill（基于 WebExtension + 本地 WebSocket Daemon，直接复用已登录 Edge Dev 且在独立 Agent Window 运行）完全取代；系统 CLI 组件新增 cli-bsk 纳入监控",
     "【组件已物理移除 2026-09-17】cli-devin / hermes-devin-acp：用户决定暂缓 Devin ACP 研究，Devin CLI 经官方卸载（devin uninstall --clean --force）与残留清理已彻底卸载，hermes-devin-acp 插件与 Hermes config.yaml providers 配置已移除，不再纳入看门",
     "【评估否决·定向单拉 2026-09-13】Panniantong/Agent-Reach：AI Agent 互联网能力路由层（61231 Stars，MIT）。经五步评估整装否决：Exa/YouTube/RSS/GitHub/Reddit 与现有 Exa 主检索及各内容技能重叠约七成；SKILL 注册路径面向 OpenClaw（~/.openclaw/skills）与 Hermes 目录不匹配；OpenCLI 扩展动浏览器扩展基线；小红书/FB/IG/Reddit 登录态路线无刚需且背封号风险；单维护者 bus factor（290 vs 8）+171 open issues。定向单拉已落地（uv tool 隔离）：bilibili-cli（无登录搜读，bilibili-content §6 备用路）与 twitter-cli（未认证，解锁需小号 Cookie 手工导出），见 cli-bili / cli-twitter 组件。WARN：bili-cli 登录后自动嗅探浏览器 Cookie（未登录态不触发）；twitter 写操作需完整 Cookie（仅 auth_token+ct0 会 226）",
     "【Astra 瘦身·路由化冻结 2026-09-13】23 个巨型 skill 已按 Astra 第 2 条拆为「路由主文档 + references/」（清单见 topics/skill-slimming-astrastandards.md）。check_skill_drift.py 会将其中 7 个有上游同名者永久报告为「上游大幅改写」——此为路由化的人为差值，非上游更新（已逐项核对上游最后提交均早于 2026-09-12，obra/superpowers 四项为 07-24/08-12，hermes-agent 三项为 07-24/08-30）。⛔ 禁止用上游版本覆盖这些路由主文档；跟进上游实质更新时只把增量并入对应 references/。另：ponytail 主文档 6.2k 系常驻 discipline（ACTIVE EVERY RESPONSE），有意保持自包含，不拆。",

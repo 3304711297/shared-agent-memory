@@ -116,7 +116,7 @@
     },
     {
       "source": "自研(无 author)",
-      "count": 8,
+      "count": 7,
       "checkType": null,
       "watchStatus": "自研/无上游-免监控",
       "skills": [
@@ -126,8 +126,16 @@
         "hermes/hermes-custom-provider-models",
         "media/bilibili-content",
         "productivity/telegram-channel-ops",
-        "web/edge-dev-cdp-scraping",
         "software-development/repo-health-audit"
+      ]
+    },
+    {
+      "source": "Tencent/BrowserSkill",
+      "count": 1,
+      "checkType": "gh-release",
+      "watchStatus": "已在看门(cli-bsk)",
+      "skills": [
+        "web/browser-skill"
       ]
     },
     {
