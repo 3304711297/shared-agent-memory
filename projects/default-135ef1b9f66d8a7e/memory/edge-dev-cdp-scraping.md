@@ -1,4 +1,8 @@
-# Edge Dev 复用已登录 Profile + CDP 抓取（2026-09-08 实证）
+# Edge Dev 复用已登录 Profile + CDP 抓取（2026-09-08 实证·历史归档）
+
+> ⚠️ **方案升级与归档说明（2026-09-17）**：
+> 本文记录的「独立 Profile + 命令行 CDP 抓取」妥协方案及 `edge-dev-cdp-scraping` 技能已正式废弃归档。
+> 现已由 **Tencent/BrowserSkill**（基于 Edge 官方扩展 + 本地 bsk CLI/Daemon，免 CDP 远程调试弹窗，独立 Agent Window 隔离运行，原生复用日常 Profile 登录态）全面替代。
 
 ## 环境事实
 
