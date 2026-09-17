@@ -587,11 +587,12 @@ def main():
             details.append("\n".join(detail))
             continue
 
-        # 技能库路径提交检查：【语义变更 2026-09-09 用户拍板】
-        # 旧语义：仓库有新提交即报「有更新」→ 会误导用户去同步（实为误导性噪音）。
-        # 新语义：新增技能由 skill-plugin-resources.md 索引库按需检索，本看门不负责「发现新技能」；
-        #        此处仅保留基线 sha 作为信息展示，且**永不计入 outdated**，
-        #        真正的「已装技能是否落后」由 scripts/check_skill_drift.py 做技能级内容比对。
+        # GitHub 仓库路径提交检查：
+        # 区分两类用途：
+        # ① 借鉴雷达（is_radar=True，如反代项目借鉴库）：监控上游新提交，出现新提交即标红并计入 outdated，
+        #    触发 Issue 告警，供评估是否摘樱桃（Cherry-pick）或吸收新特性；
+        # ② 通用/纯技能库路径（is_radar=False）：【2026-09-09 语义变更】，仅展示基线与最新 HEAD，
+        #    永不计入 outdated，避免技能库频繁提交产生噪音，技能漂移由 check_skill_drift.py 负责。
         if check["type"] == "github-commits-path":
             try:
                 commits = github_commits_for_path(check["repo"], check["path"])
@@ -603,11 +604,51 @@ def main():
                     f"- ⚠️ 上游查询失败：{type(e).__name__}: {e}",
                 ]))
                 continue
+
             head = commits[0]["sha"] if commits else None
             rec = next((loc.get("sha") for loc in comp.get("installed", []) if loc.get("sha")), None)
-            # 不再判定 behind / 不再计入 outdated
             head_msg = (commits[0]["commit"]["message"].split("\n")[0][:60]) if commits else ""
             head_date = commits[0]["commit"]["committer"]["date"][:10] if commits else ""
+
+            is_radar = (
+                check.get("radar") is True
+                or "借鉴雷达" in comp.get("display", "")
+                or cid.startswith(("wb2api-upstream-", "c2api-upstream-"))
+            )
+
+            if is_radar:
+                behind = False
+                if head and rec:
+                    behind = (head[:8] != rec[:8])
+                elif head and not rec:
+                    behind = True
+
+                state = "🔴 有新提交" if behind else "✅ 最新"
+                rows.append(f"| {comp['display']} | `{cid}` | {head[:8] if head else 'N/A'} | {state} |")
+                if behind:
+                    outdated += 1
+
+                detail = [f"### {comp['display']}（{cid}）", ""]
+                if head:
+                    detail.append(f"- 上游最新 HEAD：**{head[:8]}**（{head_date}）{head_msg}")
+                detail.append(f"- 本地基线：`{(rec or '未记录')[:8]}`")
+
+                if behind:
+                    detail.append("- 状态：🔴 **上游有新提交，待评估是否摘樱桃（Cherry-pick）**")
+                    if head and rec:
+                        detail.append(f"- 变更对比：https://github.com/{check['repo']}/compare/{rec[:8]}...{head[:8]}")
+                    detail.append(
+                        "- 跟进：审查上述提交是否包含可吸收机制（如协议逆向、风控对抗、流式状态机、UA仿真等）；"
+                        f"若吸收落地并署名致谢，随后将清单中该条目的 sha 更新为 `{head[:8]}` 并推 main 收口。"
+                        f"若评估后无需采纳，直接更新 sha 推进基线并推 main 收口。"
+                    )
+                else:
+                    detail.append("- 状态：✅ **与基线一致（无未评估新提交）**")
+
+                details.append("\n".join(detail))
+                continue
+
+            # 纯技能库/非雷达路径：保持 2026-09-09 语义，永不计入 outdated
             rows.append(f"| {comp['display']} | `{cid}` | {head[:8] if head else 'N/A'} | ℹ️ 漂移检查 |")
             detail = [f"### {comp['display']}（{cid}）", ""]
             if head:
