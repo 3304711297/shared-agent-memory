@@ -219,9 +219,11 @@ Pitfall: the picker shows the 快速 toggle whenever `model_supports_fast_mode()
 - **Message role alternation** — never two assistant or two user messages in a row; only `tool` results can repeat.
 - **Secrets in `.env`, settings in `config.yaml`** — never tell a user to put a non-credential setting in `.env`.
 - **Profile-safe paths** — `get_hermes_home()` in code, `$HERMES_HOME` when resolving paths in a session.
-- **Never hand-edit `config.yaml` for the user** — use `hermes config set KEY VAL`; a stray indent can corrupt the file and break the live gateway.
+- **Never hand-edit or patch `config.yaml` directly** — Hermes file tools enforce a hard security guard (`Refusing to write to Hermes config file...`). Always use `hermes config set KEY VAL` or `hermes config unset KEY`; a stray indent can corrupt the file and break the live gateway.
 
 ## UI Disambiguation & Tool Concurrency Semantics
+
+**`search_files` pattern vs glob distinction (`target='content'` vs `target='files'`):** In content mode, `pattern` is evaluated strictly as a ripgrep regular expression, NOT a shell glob. Passing glob wildcards like `*keyword*` triggers `rg: regex parse error: repetition operator missing expression` (`*` at the start has no operand). Use plain literal substrings (e.g. `keyword`) or valid regex (`.*keyword.*`). Reserve glob patterns like `*.py` exclusively for `target='files'` or the `file_glob` filter.
 
 **HARD RULE — never claim terminal runs in parallel.** The kernel whitelist `_PARALLEL_SAFE_TOOLS` (`agent/tool_dispatch_helpers.py`) is read-only-only: read_file, search_files, web_search, web_extract, skill_view, skills_list, session_search, vision_analyze. `terminal`, `patch`, `write_file`, `memory`, `delegate_task` are **sequential barriers** — even when batched in one turn they execute strictly one-at-a-time. In thinking, reports, and summaries NEVER write「并行执行命令」/"executed in parallel" for terminal batches — the correct phrase is 「逐条串行」. A false parallelism claim is a fake-execution report and is treated as seriously as fabricating tool output. Terminal commands appearing one-by-one in the UI is intentional safety design (shared persistent shell session: cwd/env persist across calls), never a bug to debug.
 
