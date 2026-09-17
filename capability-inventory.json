@@ -272,6 +272,26 @@
           "version": "0.3.0"
         }
       ]
+    },
+    {
+      "id": "dp-minimalist-themes",
+      "display": "Hermes 桌面插件：Minimalist Themes 极简主题（mykeura）",
+      "checks": [
+        {
+          "type": "github-commits-path",
+          "repo": "mykeura/minimalist-themes-for-hermes",
+          "path": "desktop-plugins/minimalist-themes/plugin.js",
+          "radar": true,
+          "note": "本地实装桌面主题插件（18款暖浅色）；监控上游插件源码新提交，有新代码改动时同步更新本地 plugin.js。"
+        }
+      ],
+      "installed": [
+        {
+          "where": "%LOCALAPPDATA%/hermes/desktop-plugins/minimalist-themes/plugin.js",
+          "version": "HEAD@6bc74f9",
+          "sha": "6bc74f9fae7a7d2b0bdb3eb9e0a38af07a86fd58"
+        }
+      ]
     }
   ],
   "notWatched": [
