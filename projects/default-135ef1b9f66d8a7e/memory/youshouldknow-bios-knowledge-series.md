@@ -17,6 +17,6 @@ metadata:
 - 站内链接：docs/系统知识/安装系统时跳过硬件和TPM检测.md 的 firpe.cn 外链在 runner 上曾瞬时连接失败（本地 200），属偶发，重跑即绿。
 
 **Why:** 用户指定把该系列整理进 ysk（可单开分类或完善已有内容、必须提及出处）；BIOS与固件分类被选为落点，XMP 篇放内存超频分类并互链。
-**How to apply:** 后续该 UP 主出新集或用户要求补内容时，复用 [[bilibili-video-transcription-pipeline]] 的管线；转录稿与模型留在 `D:\ai coding\.zcode\workspace\default\bios_knowledge\`（transcripts/ 41 份 srt + text/ 纯文本 + ggml 模型约 600MB，可按需清理）。
+**How to apply:** 后续该 UP 主出新集或用户要求补内容时，优先使用 `agentic-video-distill` 技能（`scripts/distill.py` / `agentic-video-cpa.py`，Gemini 代理式视频理解），辅以本地 Whisper（ZCode 已于 2026-09-09 拆除退役，旧 .zcode 工作区已作废清空；youshouldknow 仓库物理路径位于 `D:/ai coding/GitRepos/youshouldknow`）。
 
 [[desktop-projects-tweak-youshouldknow]] [[cross-repo-coverage-audit]]

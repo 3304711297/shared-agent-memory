@@ -9,7 +9,7 @@ metadata:
 
 把 B 站视频内容喂给模型的省 token 方案（用户认可）：提取音频轨 → 本地 whisper 转录 → 按领域知识校对总结。2026-09-02 已跑通并用于整理「所盼皆欣然」两个 BIOS 合集共 41 集。
 
-**可复用管线**（脚本在 `D:\ai coding\.zcode\workspace\default\bios_knowledge\`：download_audio.py / batch_transcribe.py / fetch_lists.py）：
+**可复用管线**（历史脚本原在 .zcode 工作区；2026-09-08 起首选 `agentic-video-distill` 技能，支持 Gemini 代理式画面穿透与本地 Whisper 降级）：
 
 1. **直连 B 站 API（无需浏览器）**：请求带完整浏览器头（UA+Accept+Accept-Language+Referer）并先 GET 首页拿 buvid3 cookie，否则 412。view API 拿 cid → `x/player/playurl?fnval=16` 拿 DASH 音频流（选 bandwidth 最大的 30280），下载时带 Referer+UA。
 2. **转录**：ffmpeg（gyan.dev full build 自带 `--enable-whisper`）的 whisper filter：`ffmpeg -i in.wav -af "whisper=model=ggml-small.bin:language=zh:format=srt:destination=out.srt" -f null -`。注意 **destination 路径必须用正斜杠**（反斜杠会被 filter 参数解析吃掉，文件会写到错误名字）。
