@@ -471,9 +471,13 @@ function AntigravityQuotaChip({ ctx }) {
         align: 'end',
         side: 'top',
         sideOffset: 8,
+        onOpenAutoFocus: (e) => e.preventDefault(),
+        onCloseAutoFocus: (e) => e.preventDefault(),
+        onFocusOutside: (e) => e.preventDefault(),
         className: cn(
           'w-88 p-4 rounded-xl border border-(--ui-stroke-secondary) bg-(--ui-bg-elevated) shadow-2xl backdrop-blur-xl',
-          'text-(--foreground) font-sans select-none flex flex-col gap-3.5 z-50'
+          'text-(--foreground) font-sans select-none flex flex-col gap-3.5 z-50',
+          'shadow-[0_20px_50px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.08)]'
         ),
         children: [
           // 降级模式横幅：Google 配额不可用（token 过期/网关未运行），Google 数字为缓存快照
