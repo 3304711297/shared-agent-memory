@@ -16,6 +16,8 @@ metadata:
 - **代码基座**：新仓库、移植 SukkaW 架构（MIT 保留版权+致谢），不 fork 不重写，保留 cherry-pick 上游更新的能力
 - **点睛功能**（三选三全要）：①CDN 智能选优（SukkaW 现在是 pickOne 随机镜像，改为延迟探测+失败换源）②拦截统计看板（展示被拦的跟踪/上报/PCDN/P2P 数）③设置+共存面板（页面内设置面板，扩展侧复用为 options 页，展示检测到哪个扩展、哪些模块被自动禁用）
 - **技术方案**：A 单核双产物 pnpm monorepo——packages/core（引擎+模块+features+platform 存储适配接口）、packages/userscript（rollup 单文件 .user.js）、packages/extension（MV3：MAIN world document_start 注入同一份 core + declarativeNetRequest 静态规则挡 data/cm.bilibili.com 上报 + options 页）
+- **扩展 manifest 约束（早期快照补充，事实仍有效）**：`minimum_chrome_version: 111`；DNR 静态规则拦 `data.bilibili.com` 与 `cm.bilibili.com` 上报（新卡正文写作 `data/cm` 简称，此处补全域名）。
+- **老卡记录的测试数是历史值**：早期快照记 core vitest `67/67` 通过；后续轮次已增长（见本卡 vitest major 验证记录里的 `122 core + 21 userscript`），以新数为准。
 - **共存感知设计**：模块带 compat 元数据（conflicts: [{extension, feature}]），MutationObserver 探测扩展注入的 DOM 特征，命中即自动禁用并在看板标注原因；用户可在面板强制开启（手动覆盖优先）；两扩展同装时以 BewlyCat 冲突表为准
 - **仓库名（已拍板）**：`make-bilibili-great-together`（2026-08-30 用户从三候选中选定）
 
