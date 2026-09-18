@@ -12,4 +12,5 @@ $RECYCLE.BIN/
 __pycache__/
 /topics
 capability-report.md
+pr-watch-report.md
 .pytest_cache/

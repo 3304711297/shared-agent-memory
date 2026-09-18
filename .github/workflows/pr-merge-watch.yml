@@ -1,0 +1,74 @@
+name: PR Merge Watch
+
+# 上游 PR 合并守望：只在「PR 已合并」或「已关闭未合并」时开 Issue 叫人。
+# 与 capability-upstream-watch 同一套路，但关注对象是「尚未合并的 PR」——
+# 为什么不用 cron + agent：cron 投递依赖模型路由快照，用户切模型即失效；
+# 本工作流在 GitHub 云端跑，只依赖公开 API，通知走 GitHub 自身 issue 通知链。
+
+on:
+  schedule:
+    # 每天 UTC 02:00（北京时间 10:00）
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+    paths:
+      - 'capability-inventory.json'
+      - 'scripts/check_pr_merge_watch.py'
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  watch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.11'
+
+      - name: Check watched PRs
+        id: check
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python scripts/check_pr_merge_watch.py
+
+      - name: Ensure pr-watch label exists
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh label create pr-watch --color "1d76db" --description "上游 PR 合并守望" --force || true
+
+      - name: Create tracking issue
+        if: steps.check.outputs.has_update == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          COUNT="${{ steps.check.outputs.pending_count }}"
+          TITLE="🔀 [PR Watch] 上游 PR 状态有变（${COUNT} 项待跟进）"
+          EXISTING=$(gh issue list --state open --label "pr-watch" --json number --jq '.[0].number')
+          if [ -n "$EXISTING" ]; then
+            echo "更新已存在的 Issue #$EXISTING"
+            gh issue edit "$EXISTING" --title "$TITLE" --body-file pr-watch-report.md
+          else
+            gh issue create \
+              --title "$TITLE" \
+              --body-file pr-watch-report.md \
+              --label "pr-watch"
+          fi
+
+      - name: Auto-close when nothing pending
+        if: steps.check.outputs.has_update == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          EXISTING=$(gh issue list --state open --label "pr-watch" --json number --jq '.[0].number')
+          if [ -n "$EXISTING" ]; then
+            gh issue close "$EXISTING" --comment "✅ 守望目标均已处理完，自动收口。下次有新变化会重新开 Issue。"
+          else
+            echo "无需跟进项，也无未关闭 Issue，跳过。"
+          fi

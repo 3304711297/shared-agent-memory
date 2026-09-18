@@ -1,7 +1,7 @@
 {
   "version": 2,
   "description": "本地能力组件清单（skill/mcp/plugin/工具核心的已装版本与上游源）。由 capability-upstream-watch 工作流每日比对远端源；本地源组件用 watch-capability.cmd 或任意 Agent 会话跑脚本比对。【维护铁律】升级或新装任何组件后，必须同步更新本清单并随共享库推 main，看门自动收口对应 Issue。",
-  "updatedAt": "2026-09-17",
+  "updatedAt": "2026-09-18T23:40:00+08:00",
   "components": [
     {
       "id": "chrome-devtools-mcp",
@@ -195,6 +195,10 @@
             {
               "path": "updates.non_interactive_local_changes",
               "value": "stash"
+            },
+            {
+              "path": "tool_output.max_bytes",
+              "value": 8000
             }
           ],
           "stashRepos": [
