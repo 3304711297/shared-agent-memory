@@ -24,4 +24,15 @@ metadata:
   3. **左侧导航入口默认隐藏与按需启闭**：为了避免让人误以为配额入口是 Hermes 官方原生自带菜单，左侧导航栏的「配额」按钮（Pulse 图标）默认设置为**关闭/隐藏**；并在状态栏 Popover 底部与 `/quota` 全景看板顶部新增了即时开关，支持 `ctx.storage` 本地持久化与运行时动态热启闭（无感生效）。
   4. **OpenViking 记忆提炼联动映射修复**：修复了 `plugin_api.py` 中因写死 `custom:` 前缀而导致 `billing_provider == "custom"` 时误报“非 custom 类型 provider，无本地凭据可映射”及“模型不在目录”的逻辑反转 Bug；现采用支持当前模型名称反查 custom_providers 目录与默认 provider 的多级健壮映射。
 
+## 积分精确显示（2026-09-18 用户要求，铁律）
+**积分一律精确显示，禁止约数/截断。** 原实现三类失真已被清除：① 状态栏 chip 的 `fmtCredits` 把 1833.33 压成 `1.8k`（且 null 时回退成端口号 `8787`）；② 看板/Popover 用 `toFixed(1)`/`Math.round` 截断；③ 后端 markdown 用 `:.0f`/`:.1f`。
+
+- **真值口径**：上游 `CycleRemainCapacity` 是**量化到 2 位小数的字符串**，经 float64 呈现带二进制尾数 —— 实测 `"833.33000192"` 真值即 833.33（`833.33000192 + 3316.66999808 == 4150` 精确闭合，证明尾数是浮点噪声）。故「精确」= **保留 2 位小数**，既不截断也不展示噪声。
+- **两个等价格式化函数**：后端 `plugin_api.py::_fmt_credits_exact()`、前端 `plugin.js::fmtExactCredits()` —— `2 位小数 → 去尾零`，`None`/非数 → `'—'`（**不得**回退成硬编码值）。
+- **禁止写法**：`fmtCredits`、`toFixed(0|1)`、`Math.round()` 截断积分、后端 `:.0f`/`:.1f`。
+- **五个消费点**（漏一处即不一致）：状态栏 chip、Popover 账号行、/quota 看板大卡、积分包明细、后端 `note` 与 markdown 摘要。
+- 契约测试 `tests/test_token_stats_exact_credits.py`（4 条，含负向断言）。注意 **hermes home 仓自带 venv 无 pytest**，借用 `D:/ai coding/GitRepos/workbuddy2api/.venv/Scripts/python.exe -m pytest tests/ -q`。
+- **生效方式**：前端是静态资源，刷新界面即生效；后端 `plugin_api.py` 需重启桌面端（模块级加载，无热重载）。
+- 提交：hermes 分支 `2f828f5`（修）+ `d96caf2`（技能固化）。
+
 **How to apply:** 排障顺序：1) `config.yaml` 的 `plugins.enabled` 必须含 `token-stats`（用户插件后端代码挂载的硬性安全门 GHSA-mcfc-hp25-cjv7，漏掉即 404）；2) 插件发现扫 `<plugins root>/*/dashboard/manifest.json`，`api` 字段必须是 dashboard 目录内相对路径；3) `tab.hidden: true` 只挂 API 不出标签页；4) 前端 runtime 插件只许 import `@hermes/plugin-sdk` 与 react，`ctx.rest` 需在 `register(ctx)` 捕获 context。改 `config.yaml` 用 python yaml 读写（patch/write_file 工具拒写该文件），改后抽查关键字段。旧计划任务 `Hermes_Quota_Service`、`Hermes_Gateway`、`cua-driver-serve` 登录触发器均已停用（保留任务体可手动 Start-ScheduledTask 按需拉起）。
