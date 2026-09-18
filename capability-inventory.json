@@ -1,7 +1,7 @@
 {
   "version": 2,
   "description": "本地能力组件清单（skill/mcp/plugin/工具核心的已装版本与上游源）。由 capability-upstream-watch 工作流每日比对远端源；本地源组件用 watch-capability.cmd 或任意 Agent 会话跑脚本比对。【维护铁律】升级或新装任何组件后，必须同步更新本清单并随共享库推 main，看门自动收口对应 Issue。",
-  "updatedAt": "2026-09-18T23:40:00+08:00",
+  "updatedAt": "2026-09-18T23:50:00+08:00",
   "components": [
     {
       "id": "chrome-devtools-mcp",
@@ -215,7 +215,16 @@
             "hermes-config-baseline-and-sync-protocol",
             "agentic-video-distill"
           ],
-          "note": "Hermes 更新后必跑：① 用户拍板过的配置键是否仍为拍板值（上游深合并加新默认值不会冲掉叶子，但要确认没被重置）；② 桌面端更新会 stash 本地源码改动且不自动 pop；③ 核心自研技能若被误打 created_by:agent 会进入 curator 归档倒计时。Actions 上跳过，仅本地运行。"
+          "note": "Hermes 更新后必跑：① 用户拍板过的配置键是否仍为拍板值（上游深合并加新默认值不会冲掉叶子，但要确认没被重置）；② 桌面端更新会 stash 本地源码改动且不自动 pop；③ 核心自研技能若被误打 created_by:agent 会进入 curator 归档倒计时。Actions 上跳过，仅本地运行。",
+          "gitProxy": {
+            "scope": "global",
+            "value": "http://127.0.0.1:3067",
+            "keys": [
+              "http.https://github.com.proxy",
+              "https.https://github.com.proxy"
+            ],
+            "note": "全局 URL-scoped 代理：新仓库 git init 即自动继承，无需逐仓配置。为什么必须用 git config 而非环境变量：Hermes 的 terminal 会剥掉 ALL_PROXY/HTTP(S)_PROXY，实测直连 ls-remote 45s 超时。升级 2026-09-18：原先只有 10 个仓库逐仓配置；URL-scoped 后新建仓自动生效。"
+          }
         }
       ],
       "installed": [

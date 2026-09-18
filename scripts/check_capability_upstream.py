@@ -355,6 +355,54 @@ def check_config_guard(check):
     else:
         detail.append("- ⏭️ 未配置 usageFile / protectedSkills，跳过")
 
+    # ④ git 全局代理规矩（新仓库自动继承，靠全局 URL-scoped 配置而非环境变量）
+    #    为什么查这个：Hermes 的 terminal 会剥掉 ALL_PROXY/HTTP(S)_PROXY，
+    #    只依赖环境变量时 git 必然被墙（实测直连 ls-remote 45s 超时）。
+    #    全局 URL-scoped 配置 + 仓库本地 proxy 是双保险，任一处丢失都要能发现。
+    git_proxy = check.get("gitProxy")
+    if git_proxy:
+        detail.append("")
+        detail.append("**④ git 全局代理规矩（新仓库自动继承）**")
+        detail.append("")
+        import subprocess as _sp
+        scope = git_proxy.get("scope", "global")
+        want = git_proxy.get("value")
+        keys = git_proxy.get("keys", [])
+        for key in keys:
+            try:
+                out = _sp.run(["git", "config", f"--{scope}", "--get", key],
+                              capture_output=True, text=True, timeout=15)
+                got = (out.stdout or "").strip()
+            except Exception as e:
+                detail.append(f"- ⚠️ `{key}` 读取失败：{type(e).__name__}: {e}")
+                continue
+            if got == want:
+                detail.append(f"- ✅ `{key}` = `{got}`")
+            else:
+                detail.append(f"- 🔴 `{key}` = `{got or '<未设置>'}`（期望 `{want}`）— 新仓库将失去代理")
+                problems.append(f"git {scope} 配置 {key} 期望 {want!r}，实际 {got!r}")
+        # 新仓库实际继承验证：临时目录 git init，读它继承到的值
+        try:
+            import tempfile as _tf
+            with _tf.TemporaryDirectory(prefix="gitproxy-probe-") as td:
+                _sp.run(["git", "init", "-q", td], capture_output=True, text=True, timeout=20)
+                probe = _sp.run(["git", "-C", td, "config", "--get-urlmatch", "http.proxy",
+                                 "https://github.com/a/b.git"],
+                                capture_output=True, text=True, timeout=20)
+                inherited = (probe.stdout or "").strip()
+            if inherited == want:
+                detail.append(f"- ✅ 新建仓库实测继承：`{inherited}`")
+            else:
+                detail.append(f"- 🔴 新建仓库实测继承 `{inherited or '<空>'}`（期望 `{want}`）")
+                problems.append(f"新仓库未继承 git 代理（实测 {inherited!r}）")
+        except Exception as e:
+            detail.append(f"- ⚠️ 新仓库继承实测失败：{type(e).__name__}: {e}")
+    else:
+        detail.append("")
+        detail.append("**④ git 全局代理规矩**")
+        detail.append("")
+        detail.append("- ⏭️ 未配置 gitProxy，跳过")
+
     return problems, detail
 
 
