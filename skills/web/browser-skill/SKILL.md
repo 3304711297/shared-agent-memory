@@ -140,6 +140,7 @@ confirmation wait (default 60s); custom waits require daemon and extension proto
 The extension's saved Automation settings control borrow confirmation and human
 help independently; both default on and apply to existing sessions too. Read
 `interaction` in `session start --json` or `session list --json` when needed.
+- **User Environment Invariant (2026-09-18)**: In Edge extension Automation Settings, "Borrow confirmation" (借用标签页前确认) must be turned **OFF** to permit silent tab borrowing without popup interruption and 60s timeout. "Allow human help" (允许请求人工协助) stays **ON**. If `no_browser_connected` occurs, Edge is not running; keep Edge running in the background.
 Deprecated `--unattended`, `--no-confirm`, and `BSK_REQUEST_HELP=off` cannot override
 these settings. Never change browser storage/settings to bypass them. Human-help
 availability does not require permission for every action or grant extra authority.
