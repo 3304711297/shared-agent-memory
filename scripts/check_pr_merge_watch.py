@@ -98,7 +98,6 @@ def state_badge(info):
 def main():
     now = datetime.now(timezone(timedelta(hours=8)))
     results = []
-    pending = 0
     errors = 0
 
     for w in WATCHED:
@@ -107,11 +106,13 @@ def main():
         results.append(info)
         if info.get("error"):
             errors += 1
-            pending += 1
-        elif not info.get("merged") and info.get("state") == "open":
-            pending += 1
 
-    # has_update: 有任何一项「已合并」或「已关闭未合并」才算需要叫人
+    # 分两个计数，别混用：
+    #   waiting    = 还没合并（open）—— 用于正文说明
+    #   actionable = 需要人跟进（已合并 / 已关闭）—— 用于标题与 has_update
+    # 若把 waiting 当标题计数，「刚合并」时它会归零，标题就成了「0 项待跟进」，误导。
+    waiting = sum(1 for r in results
+                  if not r.get("error") and r.get("state") == "open" and not r.get("merged"))
     actionable = [r for r in results
                   if not r.get("error") and (r.get("merged") or r.get("state") == "closed")]
     has_update = bool(actionable)
@@ -151,7 +152,7 @@ def main():
     lines += [
         "---",
         "",
-        f"**待合并：{pending}** · **查询失败：{errors}** · "
+        f"**待合并：{waiting}** · **待跟进：{len(actionable)}** · **查询失败：{errors}** · "
         f"{'✅ 无需跟进时本 Issue 会自动关闭' if not has_update else '⬆️ 有可跟进项'}",
     ]
 
@@ -165,7 +166,8 @@ def main():
     if out:
         with open(out, "a", encoding="utf-8") as f:
             f.write(f"has_update={'true' if has_update else 'false'}\n")
-            f.write(f"pending_count={pending}\n")
+            f.write(f"waiting_count={waiting}\n")
+            f.write(f"actionable_count={len(actionable)}\n")
             f.write(f"error_count={errors}\n")
 
     return 0

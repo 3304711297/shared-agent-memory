@@ -48,7 +48,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          COUNT="${{ steps.check.outputs.pending_count }}"
+          COUNT="${{ steps.check.outputs.actionable_count }}"
           TITLE="🔀 [PR Watch] 上游 PR 状态有变（${COUNT} 项待跟进）"
           EXISTING=$(gh issue list --state open --label "pr-watch" --json number --jq '.[0].number')
           if [ -n "$EXISTING" ]; then
