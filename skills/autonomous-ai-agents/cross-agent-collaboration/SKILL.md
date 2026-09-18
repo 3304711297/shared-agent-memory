@@ -23,7 +23,8 @@ Read a reference *only* when the task actually needs it.
 |---|---|
 | 2+ 独立任务 / 多仓 fan-out / delegate_task 分派 | `references/parallel-execution.md` |
 | 外部长跑进程等待（后台 + notify 唤醒） | `references/parallel-execution.md` §Anti-Patterns |
-| 浏览器 ChatGPT 对话接管与跨 Agent 交叉复核 SOP | `references/chatgpt-browser-collaboration.md` |
+| 浏览器 Arena AI (arena.ai) 对话接管与跨 Agent 协作 SOP（首选） | `references/arena-ai-browser-collaboration.md` |
+| 浏览器 ChatGPT 对话接管与跨 Agent 交叉复核 SOP（备选） | `references/chatgpt-browser-collaboration.md` |
 | Windows MCP 进程树 / 孤儿进程清理 / OpenViking 懒启动 | `references/windows-process-invariants.md` |
 | chrome-devtools MCP / Edge 配置保护 | `references/browser-boundary.md` |
 | 多 profile / bot 编排 | `references/profile-orchestration.md` |
