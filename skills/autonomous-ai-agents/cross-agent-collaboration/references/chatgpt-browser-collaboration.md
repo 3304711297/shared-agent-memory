@@ -53,7 +53,7 @@ env BSK_AUTO_START=0 bsk observe --session <id>
 - **必须使用 `bsk-compact-page-read` (jev)**：
   调用 `bsk-compact-page-read/scripts/table.py` 或提取最新回复正文，以 0.14x~0.3x 的紧凑体积获取页面状态与目标控件，保护会话上下文：
   ```bash
-  python "C:/Users/VOS-User/AppData/Local/hermes/skills/web/bsk-compact-page-read/scripts/table.py" --session <id>
+  python "%LOCALAPPDATA%/hermes/skills/web/bsk-compact-page-read/scripts/table.py" --session <id>
   ```
 - **轮询判定完成**：输入框状态恢复为 enabled/empty，页面不再出现“停止回答”；
 - **回读正文**：仅在判定 ChatGPT 生成结束后，通过紧凑提取或 targeted evaluation / 局部文本读取获取审查复核结论。
