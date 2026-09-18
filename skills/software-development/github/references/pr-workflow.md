@@ -103,6 +103,12 @@ proxy before doubting auth. Read the env: `env | grep -i proxy`. Two traps:
   `env -u ALL_PROXY -u HTTP_PROXY -u HTTPS_PROXY git push`" fix only helps when the proxy is
   *stale*. If `curl --noproxy '*' https://github.com` times out but the same URL through the
   proxy returns 200, the proxy is **required** — proceed to the next bullet.
+- **`api.github.com` reachable ≠ `github.com` reachable.** They are separate hosts with
+  separate egress paths/WAF rules. `gh api rate_limit` succeeding (and `curl` to
+  `api.github.com` returning 200) proves nothing about `git push`, which talks to
+  `github.com`. Probe the host you actually need — a push hung with `Recv failure:
+  Connection was reset` while `api.github.com` was answering 200 both directly and via proxy,
+  and only the direct `https://github.com/` probe exposed the truth (`000`, 20s timeout).
 - **Explicit `-c http.proxy=` beats inheriting env.** Git does not always pick up
   `HTTPS_PROXY` from git-bash/MSYS, and a stale value can shadow the live one. Pass it
   directly for one command (repo config left untouched):
