@@ -410,14 +410,14 @@
     "created_by": null,
     "last_patched_at": "2026-09-16T08:32:03.371584+00:00",
     "last_reused_patch_generation": 3,
-    "last_used_at": "2026-09-18T09:17:11.239628+00:00",
-    "last_viewed_at": "2026-09-18T09:17:11.232116+00:00",
+    "last_used_at": "2026-09-18T12:19:55.046675+00:00",
+    "last_viewed_at": "2026-09-18T12:19:55.042172+00:00",
     "patch_count": 3,
     "patch_generation": 3,
     "pinned": false,
     "state": "active",
-    "use_count": 53,
-    "view_count": 52
+    "use_count": 55,
+    "view_count": 54
   },
   "grill-me": {
     "archived_at": null,
@@ -648,16 +648,16 @@
     "archived_at": null,
     "created_at": "2026-09-07T05:17:18.937354+00:00",
     "created_by": "agent",
-    "last_patched_at": "2026-09-07T05:17:18.981378+00:00",
+    "last_patched_at": "2026-09-18T13:10:02.486483+00:00",
     "last_reused_patch_generation": 1,
-    "last_used_at": "2026-09-14T16:35:10.196500+00:00",
-    "last_viewed_at": "2026-09-14T16:35:10.194500+00:00",
-    "patch_count": 1,
-    "patch_generation": 1,
+    "last_used_at": "2026-09-18T13:09:36.672503+00:00",
+    "last_viewed_at": "2026-09-18T13:09:36.670503+00:00",
+    "patch_count": 2,
+    "patch_generation": 2,
     "pinned": false,
     "state": "active",
-    "use_count": 9,
-    "view_count": 9
+    "use_count": 10,
+    "view_count": 10
   },
   "obsidian": {
     "archived_at": null,
@@ -815,14 +815,14 @@
     "created_by": "installed",
     "last_patched_at": null,
     "last_reused_patch_generation": 0,
-    "last_used_at": "2026-09-07T06:28:16.596360+00:00",
-    "last_viewed_at": "2026-09-07T06:28:16.594363+00:00",
+    "last_used_at": "2026-09-18T13:05:05.438682+00:00",
+    "last_viewed_at": "2026-09-18T13:05:05.436682+00:00",
     "patch_count": 0,
     "patch_generation": 0,
     "pinned": false,
     "state": "active",
-    "use_count": 2,
-    "view_count": 2
+    "use_count": 3,
+    "view_count": 3
   },
   "semantic-release-pro": {
     "archived_at": null,
@@ -844,15 +844,15 @@
     "created_at": "2026-09-03T07:18:03.731518+00:00",
     "created_by": null,
     "last_patched_at": "2026-09-18T09:10:47.007645+00:00",
-    "last_reused_patch_generation": 12,
-    "last_used_at": "2026-09-18T08:46:06.201994+00:00",
-    "last_viewed_at": "2026-09-18T08:46:06.199994+00:00",
+    "last_reused_patch_generation": 13,
+    "last_used_at": "2026-09-18T13:14:24.846333+00:00",
+    "last_viewed_at": "2026-09-18T13:14:24.843331+00:00",
     "patch_count": 13,
     "patch_generation": 13,
     "pinned": false,
     "state": "active",
-    "use_count": 161,
-    "view_count": 161
+    "use_count": 162,
+    "view_count": 162
   },
   "simplify-code": {
     "archived_at": null,
@@ -905,14 +905,14 @@
     "created_by": null,
     "last_patched_at": null,
     "last_reused_patch_generation": 0,
-    "last_used_at": "2026-09-17T12:55:06.412043+00:00",
-    "last_viewed_at": "2026-09-17T12:55:06.409043+00:00",
+    "last_used_at": "2026-09-18T13:05:28.186564+00:00",
+    "last_viewed_at": "2026-09-18T13:05:28.183564+00:00",
     "patch_count": 0,
     "patch_generation": 0,
     "pinned": false,
     "state": "active",
-    "use_count": 20,
-    "view_count": 20
+    "use_count": 21,
+    "view_count": 21
   },
   "tauri-desktop-development": {
     "archived_at": null,

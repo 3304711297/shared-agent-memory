@@ -72,3 +72,13 @@ clean output. For CJK output, prefix
 bash arrives as GBK mojibake (inherited console codepage); verified on
 pwsh 7.6.6 and Windows PowerShell 5.1.
 
+**Native Windows CLIs from git-bash: use SINGLE-slash flags** (2026-09-18
+verified on `tasklist`). MSYS path conversion is disabled in this
+environment, so a flag like `/FI` is NOT rewritten and must be passed as
+`/FI "IMAGENAME eq x.exe"`; the classic MSYS workaround `//FI` is what
+actually breaks — Windows tools parse `//FO` / `//FI` as an *invalid*
+`/` option ("无效参数/选项 - '//FO'"), while `tasklist /FO CSV /FI "..."`
+runs clean. Don't blind-copy `//`-style flags from MSYS-era notes; test the
+single-slash form first. When output only needs filtering, let bash do it
+(`tasklist | grep -i foo`) and skip Windows flag syntax entirely.
+
