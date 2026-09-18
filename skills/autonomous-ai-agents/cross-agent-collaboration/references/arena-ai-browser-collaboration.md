@@ -8,7 +8,7 @@
 
 - **首选协同平台 (Primary)**：**Arena AI (`https://arena.ai/`)**
   - **核心优势**：完全免费开放业界顶级前沿大模型全家桶（Anthropic Claude Sonnet 4.6 / Claude Sonnet 5 High、OpenAI GPT-5.2 High / o3、Google Gemini 3.8 Flash High、DeepSeek V4.1 Max、xAI Grok 4.6、Qwen 3.7 Max 等）；
-  - **多维对拍能力**：原生支持 `Direct Mode`（单模型精准对话）与 `Side by Side`（双模型并行对拍），单轮提问即可同时获取两家顶尖实验室视角的对抗式审查意见，无需消耗任何个人 API 配额。
+  - **多维协同能力**：原生支持 `Agent Mode`（挂载 GitHub 仓库在非主分支独立探路与打样开发）、`Side by Side`（双模型并行对拍审查）与 `Direct Mode`（单模型精准对话），无需消耗任何个人 API 配额。
 - **备选协同平台 (Fallback / Secondary)**：**ChatGPT (`https://chatgpt.com/`)**
   - 保留作为特定历史会话复用或 Arena 遇临时网络波动时的兜底审计通道。
 
@@ -20,9 +20,9 @@
 
 | 模式名称 | 页面入口指示 | 协作角色 | 核心用途与工作特性 |
 | :--- | :--- | :---: | :--- |
-| **Side by Side** | Combobox 选 `Side by Side` + 选 Model 1 & 2 | **Reviewer (审查)** | **日常代码审查与方案对拍第一主力（绝对保底高阶）**。单轮同时获取两家顶尖模型独立出具的审查报告。推荐在白名单三款中两两对拍。 |
+| **Agent Mode** | Combobox 选 `Agent Mode` + 挂载 GitHub 仓库 | **Producer (生产)** | **协同开发第一优先模式（云端副产线）**。天然在非主分支（隔离分支/临时 PR/独立工作区）中运行，完全不影响 `main` 主干和本地工作树。具备完整 Workspace 沙箱、文件树与终端预览，自主通读全仓开发新功能原型与重型探路。 |
+| **Side by Side** | Combobox 选 `Side by Side` + 选 Model 1 & 2 | **Reviewer (审查)** | **方案对拍与多模型交叉审查主力**。单轮同时获取两家顶尖模型独立出具的审查报告。推荐在白名单三款中两两对拍。 |
 | **Direct Mode** | Combobox 选 `Direct` + 选目标模型 | **Reviewer (审查)** | **特定问题多轮深度追问**。定向绑定特定模型（首选 `claude-sonnet-5-high`），进行连续上下文推演。 |
-| **Agent Mode** | Combobox 选 `Agent Mode` + 挂载 GitHub 仓库 | **Producer (生产)** | **全工程自主代码生成与新模块开发**。支持挂载 GitHub 仓库分支，具备完整 Workspace 沙箱、文件树与终端预览，适合让外部 Agent 独立探路开发新功能原型。 |
 | **Battle Mode** | Combobox 选 `Battle` | **探索性抽卡** | **匿名竞技场盲测**。后台全池随机分配两款模型（有机会撞上未公开发布的超新代模型如 Fable 5.1 / GPT 6 Astra / Opus 5，但下限可能抽到 7B/8B 小模型，无保底且缺乏审查连续性）。 |
 
 ### 5. 本地子代理 + Arena 云端多产线并发编排（Fork-First 扩展）
