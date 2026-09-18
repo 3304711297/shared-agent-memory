@@ -14,18 +14,37 @@
 
 ---
 
-## 二、四大工作模式与适用场景
+## 二、四大工作模式与职责角色分工
 
-| 模式名称 | 页面入口指示 | 核心用途与工作特性 |
-| :--- | :--- | :--- |
-| **Direct Mode** | Combobox 选 `Direct` + 点击模型选择器 | **日常代码审查与迭代对拍首选**。定向绑定特定前沿模型（如 `claude-sonnet-4-6`），进行深度连续对话。 |
-| **Side by Side** | Combobox 选 `Side by Side` + 选 Model 1 & 2 | **高难度架构与关键重构审查**。同时指定两款顶尖模型（如 Claude Sonnet 4.6 vs GPT-5.2 High），一键获得双重视角审查报告。 |
-| **Agent Mode** | Combobox 选 `Agent Mode` | **复杂工程与仓库级自主任务**。支持挂载 GitHub 仓库与指定分支，进行上下文长工程分析。 |
-| **Battle Mode** | Combobox 选 `Battle` | **匿名竞技场盲测**。由平台随机分派两个匿名模型回答，投票后揭晓真实身份。 |
+在跨 Agent 协作中，必须严格区分 **Reviewer（审查者）** 与 **Producer（生产者）** 角色：
+
+| 模式名称 | 页面入口指示 | 协作角色 | 核心用途与工作特性 |
+| :--- | :--- | :---: | :--- |
+| **Side by Side** | Combobox 选 `Side by Side` + 选 Model 1 & 2 | **Reviewer (审查)** | **日常代码审查与方案对拍第一主力（绝对保底高阶）**。单轮同时获取两家顶尖模型独立出具的审查报告。推荐锁定 `claude-sonnet-5-high` + `gpt-5.5-instant`。 |
+| **Direct Mode** | Combobox 选 `Direct` + 选目标模型 | **Reviewer (审查)** | **特定问题多轮深度追问**。定向绑定特定模型（首选 `claude-sonnet-5-high`），进行连续上下文推演。 |
+| **Agent Mode** | Combobox 选 `Agent Mode` + 挂载 GitHub 仓库 | **Producer (生产)** | **全工程自主代码生成与新模块开发**。支持挂载 GitHub 仓库分支，具备完整 Workspace 沙箱、文件树与终端预览，适合让外部 Agent 独立探路开发新功能原型。 |
+| **Battle Mode** | Combobox 选 `Battle` | **探索性抽卡** | **匿名竞技场盲测**。后台全池随机分配两款模型（有机会撞上未公开发布的超新代模型如 Fable 5.1 / GPT 6 Astra / Opus 5，但下限可能抽到 7B/8B 小模型，无保底且缺乏审查连续性）。 |
 
 ---
 
-## 三、核心执行协议 (SOP)
+## 三、模型选型策略与平台机制
+
+### 1. 开放直选池（133 款模型，确定性审查主力）
+无需盲测抽卡，在 Direct 与 Side by Side 模式下拉菜单中可手动直接指定当前最顶阶模型：
+- 🟣 **Anthropic 梯队**：`claude-sonnet-5-high`（目前直选池最强，代码与协议审查首选）、`claude-sonnet-4-6`、`claude-sonnet-4-5-thinking-32k`；
+- 🟢 **OpenAI 梯队**：`gpt-5.5-instant`（目前直选池最强 GPT）、`gpt-5.2-high`、`o3-2025-04-16`；
+- 🔵 **国产/开源旗舰**：`glm-5.2 (max)`、`deepseek-v4.1-flash-max`、`qwen3.7-max`、`qwen3-coder-480b-a35b-instruct`；
+- 🔴 **xAI / Google 梯队**：`grok-4.6-high`、`gemini-3.8-flash-high`；
+- ⚡ **智能上限路由**：`Max Router`（Arena 官方路由器，自动导向直选池最高性能上限）。
+
+### 2. 榜首未发布模型（Battle 独占机制）
+- **现象说明**：Arena 排行榜（Leaderboard）榜首常年位居未公开的超新代模型（如 `Claude Fable 5.1 (Max)`、`GPT 6 Astra (Max)`、`Claude Opus 5`、`GPT 5.6 Sol`、`Kimi K3`）；
+- **机制真相**：这些属于实验室匿名盲测模型，**平台未开放直选入口**（直选池中不存在），仅在 `Battle Mode` 随机分配；
+- **决策建议**：工程审查严禁依赖 Battle 盲抽（因为可能抽中 8B 小模型导致审查质量崩溃）；**真正的顶阶保底是在 `Side by Side` 中手动锁定 `claude-sonnet-5-high` + `gpt-5.5-instant`**。
+
+---
+
+## 四、核心执行协议 (SOP)
 
 ### 1. 守护进程与会话启动
 MSYS/Git-Bash 环境下执行 `bsk` 必须携带 `env BSK_AUTO_START=0`：
@@ -85,7 +104,7 @@ env BSK_AUTO_START=0 bsk session start --json
 
 ---
 
-## 四、安全与数据脱敏铁律
+## 五、安全与数据脱敏铁律
 
 **由于 Arena AI 明确声明对话数据可能被脱敏后公开用于学术研究数据集（"Your prompts may be shared publicly to support AI research"）**：
 1. **严禁包含任何敏感凭据**：严禁发送真实 Token、API Key、Bearer 授权头、Password、Cookie、内部私网 IP 或项目专有凭据；
@@ -94,7 +113,7 @@ env BSK_AUTO_START=0 bsk session start --json
 
 ---
 
-## 五、浏览器与会话生命周期
+## 六、浏览器与会话生命周期
 
 - **严禁误杀浏览器进程**：严禁调用 `taskkill` 或直接关闭用户的 Edge 浏览器主进程；
 - **会话句柄主动释放**：任务对拍完成后，调用：
