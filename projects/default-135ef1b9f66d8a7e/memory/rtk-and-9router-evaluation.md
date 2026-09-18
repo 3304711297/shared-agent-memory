@@ -1,6 +1,6 @@
 # rtk-ai/rtk 与 decolua/9router 评估（2026-09-18）
 
-**Why:** 用户 @url 引入这两个仓库问「适合我吗」。结论是 **rtk 不装**，理由建立在自机实测数据上而非项目宣称。这条结论无其他持久落点（skill 里只记了平台机制），故单列。
+**Why:** 用户 @url 引入这两个仓库问「适合我吗」。结论是 **rtk 不装、9router 不用**，理由建立在自机实测数据、代码实现排查与缓存架构验证上。这条结论无其他持久落点（skill 里只记了平台机制），故单列。
 
 ## rtk-ai/rtk —— 不装
 
@@ -34,9 +34,9 @@
 
 **命令级改写**：`gh run watch <id> -R <repo>` → `gh run view <id> -R <repo> --json status,conclusion,jobs --jq '{status,conclusion,jobs:[.jobs[]|{name,conclusion}]}'`（33.5K → 几十字符）。模板见 hermes-agent skill 的 `templates/pre_tool_call_rewrite_plugin.py`。
 
-## decolua/9router —— 已做源码级勘查（结论待裁决）
+## decolua/9router —— 裁决：不采用（0 收益，高维护负债，强退行风险）
 
-**仓库事实（2026-09-18 实测）**：29255 stars / 5400 forks / 2144 open issues / MIT / 当天仍在推送（`pushed_at=2026-09-18T11:32`）。
+**仓库事实（2026-09-18 实测）**：29255 stars / 5400 forks / 2144 open issues / MIT。
 
 **定位**：JS/Next.js 本地 LLM 网关（`localhost:20128`），把各 CLI 工具统一指向它，做格式翻译 + 三级 fallback + 配额追踪 + 多账号轮询。**与本机 EasyCLIProxyAPI(18080) + WorkBuddy2API(8787) 生态位重合**。
 
@@ -44,11 +44,11 @@
 
 | 宣称 | 实际实现 | 关键事实 |
 |---|---|---|
-| **RTK Token Saver**（默认开） | **JS 移植版 rtk 过滤器**，跑在**请求层** | 不是调 rtk 二进制，是把 rtk 的 filter 逻辑用 JS 重写。peek `tool_result` 前 1KB 自动选 filter：`git-diff`/`git-status`/`grep`/`find`/`ls`/`tree`/`dedup-log`/`smart-truncate`/`read-numbered`/`search-list`。失败即静默保留原文（fail-open） |
-| **Headroom Token Saver**（可选） | **外部 Python 包** `headroom-ai`（`chopratejas/headroom`），9router 只是个进程管理器（`src/lib/headroom/process.js` 负责 spawn/pid/log） | ⚠️ **默认端口 8787 —— 与本机 WorkBuddy2API 正面撞车**。v0.37.0、Apache-2.0、Beta；依赖重（litellm + tiktoken + ast-grep-cli + opentelemetry）。可注入 `HEADROOM_URL` 改地址 |
-| **Caveman Mode / Ponytail** | **提示词注入**，不是压缩 | Caveman 注入穴居人语提示（省输出 token）；**Ponytail 就是你已在用的那个 skill** |
+| **RTK Token Saver**（默认开） | **JS 移植版 rtk 过滤器**，跑在**请求层** | 不是调 rtk 二进制，是把 rtk 的 filter 逻辑用 JS 重写（`open-sse/rtk/`）。peek `tool_result` 前 1KB 自动选 filter。针对传统终端纯文本，无法妥善处理 Hermes 的原生结构化 JSON 与带行号格式。失败即静默保留原文（fail-open） |
+| **Headroom Token Saver**（可选） | **外部 Python 包** `headroom-ai`（`chopratejas/headroom`），9router 只是个进程管理器 | ⚠️ **默认端口 8787 —— 与本机 WorkBuddy2API 正面撞车**。依赖重（litellm + tiktoken + ast-grep-cli + opentelemetry）。默认 `--mode cache` 仅压单轮 Delta；若压历史（`--mode token`）会击穿上游 Prefix Cache；CCR 假工具篡改上下文 |
+| **Caveman Mode / Ponytail** | **提示词注入**，不是压缩 | Caveman 注入穴居人语提示（省输出 token）；**Ponytail 就是本机已有的 skill** |
 
-### 本机实测：这块蛋糕有多大
+### 本机实测天花板与 5 个核心问题裁决（2026-09-19 最终拍板）
 
 | 口径 | 数值 |
 |---|---|
@@ -56,17 +56,26 @@
 | headroom 过滤器可覆盖的工具族 | **79.1%**（terminal 38.6% + read_file 27.2% + search_files 7.2% + patch 6.2%） |
 | 无对应 filter 的 | 20.9%（execute_code 8.9%、skill_view 3.3%、web_* 等） |
 
-⇒ **请求层压缩的天花板是 `tool_result` 那 47%**，而其中约 79% 落在 headroom 的 filter 族内。这比 rtk 命令层的 3.1% 高一个数量级。
+1. **不替换现有双反代（18080 + 8787）**：
+   - `EasyCLIProxyAPI (18080)`：极轻 Go 原生反代，专精 Antigravity (Gemini 主力)，带零配额感知、两账号轮询与 1h sticky 会话绑定。
+   - `WorkBuddy2API (8787)`：自研维护的 Tauri v2 桌面客户端，承载账号池配额、积分、调度策略热读 `settings.json` 与双向协议桥接。9router 根本无法承载这套业务控制台。
+   - 9router 是常驻 200~500MB+ 内存的 Next.js 全家桶，2144 open issues，引入只会增加巨量维护负债与退行风险。
+2. **不剥离复用 RTK 纯 JS 模块**：
+   - 自机遵守 Skill-First / Tool efficiency，终端绝不用 `cat/grep/find/ls`，全走原生 `read_file`、`search_files`、`patch`。
+   - RTK 对 JSON 结构和带行号文本几乎无法识别（fail-open，压缩率 <2%）；若被 `smart-truncate` 误伤折叠行号，将直接导致 `patch` 锚定失败。
+3. **不单独接入 headroom-ai**：
+   - 击穿缓存：主力模型 Gemini 3.8 Flash（Antigravity）依赖前缀缓存降本增效，历史消息压缩导致 Prefix Cache 命中率归零，成本反增；
+   - 假工具污染：Headroom 的 CCR 依赖注入 `headroom_retrieve` 假工具，破坏 Agent 原生工具流与代码还原。
+4. **端口冲突处理策略**：
+   - 若未来任何临时实验测试，坚持「第三方外来工具避让」，使用 `--port 8788`，严禁改动已绑定的 WorkBuddy2API (8787)。
+5. **与 `tool_output.max_bytes: 8000` 关系**：
+   - `max_bytes: 8000` 已经在管道源头直接截断 36.6% 超大终端输出（自动落盘保真），留给后置压缩的边际收益微弱；截断后的内容更易导致请求层压缩器语法解析失败而 fail-open，两者无叠加必要。
 
-### 待裁决的问题（下一会话）
+### 扩展裁决：反代 ZCode 的生态位澄清
 
-1. **是否替换现有双反代**？本机已有 EasyCLIProxyAPI(18080) + WorkBuddy2API(8787) 承担同一职责，9router 是"更重的同件事"（Next.js 全家桶 + 2144 open issues）。
-2. **能否只摘取 token saver 部分**而不换整个网关？RTK Token Saver 是纯 JS 模块，理论上可独立复用。
-3. **headroom 是否值得单独用**（不经 9router）？它是独立 Python 包 + CLI，可直接 `headroom proxy --port <非8787>`，对任意上游生效。
-4. **端口冲突**：若启用 headroom，必须改端口或改 WorkBuddy2API。
-5. 与已实施的 `tool_output.max_bytes: 8000`（命令/输出层，省 36.6% terminal）是否重叠、可否叠加。
-
-**建议评估方式**：按 rtk 同样口径——先量化收益（已有上表），再验实现（读源码/本地起实例抓包），最后才谈替换。
+- **本质差异**：9router 是「聚合路由网关」（不产出 Token，自带无效/有毒压缩）；而反代 ZCode（`TriDefender/zcode-api` / SOP）是「临时上游 Token 供给源」（智谱官方活动真实放水，如周末 3 亿 GLM-5.3-Flash）。
+- **质量对比**：ZCode 走官方高速通道，直连低延迟，GLM-5.3 代码质量高；纯透传 `/v1/chat/completions` 不篡改系统 Prompt 和工具调用，体验远优于 9router 的公共免费池。
+- **定位原则**：ZCode 反代维持既定 SOP（战备型活动羊毛：平时不折腾、不上常驻；活动开领时起在 `:8080`，活动结束即停），与日常主力双反代各司其职，坚决不引入 9router。
 
 
 ## 上游关联
