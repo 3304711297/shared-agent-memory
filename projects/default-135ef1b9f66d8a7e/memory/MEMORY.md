@@ -5,6 +5,7 @@
 - [Bilibili Great Together Project](bilibili-great-together-project.md) — make-bilibili-great-together：**v0.3.5 已发版（09-05 bump，本地 dist 已重建待用户 reload）；用户日常已切换=仅 BewlyCat+mbgt 扩展启用**；bump 后扩展 dist 需本地重建+developerPrivate.reload；卡片「错误」=playinfo WARN 非故障；铁律：钩子读被 mock 全局走闭包原引用
 - [User Windows Environment](user-windows-environment.md) — Windows 环境：本地代理 127.0.0.1:3067、gh 账号 3304711297（**delete_repo scope 已授权**）、PS 5.1/7 双版本规则、浏览器是 Edge Dev、模型网关=官方 EasyCLIProxyAPI（ZCode-Antigravity 桥与 tubatoolsPlugin 已删，ZCode 现行走 v2 OAuth 套餐）、配额微服务 18088、扩展清单与 D 盘摆放规范
 - [Edge Dev CDP MCP Setup](edge-dev-cdp-mcp-setup.md) — 最终方案：edge://inspect 开关（持久化）+ 每浏览器会话点一次「允许」+ MCP autoConnect；工具超时=弹窗在等点；根因 zh_CN default_locale 被 Edge 153 拒 → 空降助手+青柠+小黑盒(better-XiaoHeiHe v1.2)三个解压版统一在 D:\extensions\（manifest 已 key 固定 ID + locale 改 en，无自动更新）；勿装 Tampermonkey；用户拍板只接管原封不动日常 Edge；反馈闭环：微软×2 + issue#316 + issue k1m0206/better-XiaoHeiHe#13 + B站私信（毛布斯只此一条，勿再发）
+- [BrowserSkill Extension Setup and Configuration](browserskill-extension-setup-and-configuration.md) — 换系统/重装环境 BrowserSkill (Edge 扩展) 配置与自动化 SOP：Edge 保持常驻后台（防 no browser connected）；【自动化设置】中「借用标签页前确认」必须彻底关闭（OFF）以支持静默无感复用标签页，「允许请求人工协助」保持开启（ON）；执行期 Session/标签常驻复用，全局收口才释放
 - [Answer Every User Question](answer-every-user-question.md) — 用户逐条追踪问题，漏答或括号带过会被反复追问；回复前自查每个问题都有成段明确回答
 - [Desktop Commander Overview](desktop-commander-overview.md) — DC 与内置工具重叠高，仅四类场景必选它：大数据 REPL 分析/长跑进程盯日志/SSH 持久会话/超大目录流式搜索；一次性命令用内置即可
 - [Superpowers Usage](superpowers-usage.md) — 开发纪律套件（TDD/计划/调试方法论），用于编码项目而非运维型工作
