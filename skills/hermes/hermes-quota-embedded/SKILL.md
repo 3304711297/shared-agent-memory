@@ -12,6 +12,20 @@ description: "查配额/额度监控时必用。token-stats内置化架构与排
 - 多账号与待机账号重置监控（2026-09-07 升级）：多账号凭据池在 Popover 列表和 /quota 看板卡片均直接内联展示各个账号（包括非活跃/待机轮询账号）独立的 5h 滚动与周配额重置倒计时（支持 compact 紧凑与相对/绝对格式），并支持点击任意账号卡片将核心指标大卡（进度条、绝对时刻）切换为该账号的待机聚焦预览。
 - 数据聚合：直连 Google Antigravity 官方配额，并集成 WorkBuddy (workbuddy2api 8787 端口) 本地网关无感探测。
 
+## 积分显示：精确优先（2026-09-18 用户要求，改动必读）
+
+**铁律：积分一律精确显示，禁止约数/截断。**
+
+- **真值口径**：上游 `CycleRemainCapacity` 是**量化到 2 位小数的字符串**，但经 float64 呈现带二进制尾数 —— 实测 `"833.33000192"` 真值即 833.33（`833.33000192 + 3316.66999808 == 4150` 精确闭合，证明尾数是浮点噪声而非真实额度）。故「精确」= **保留 2 位小数**，既不截断真值也不展示噪声。
+- **两个等价格式化函数**（口径必须一致）：后端 `plugin_api.py::_fmt_credits_exact()`、前端 `plugin.js::fmtExactCredits()` —— 都是 `2 位小数 → 去尾零`，`None`/非数/NaN → `'—'`（**不得**回退成硬编码值）。
+- **禁止出现的写法**：`fmtCredits` 这类缩约函数（原会把 1833.33 压成 `1.8k`、null 时回退成端口号 `8787`）、`toFixed(0|1)`、`Math.round()` 截断积分、后端 `:.0f` / `:.1f`。
+- **全部消费点**（漏一处即不一致）：状态栏 chip、Popover 账号行、/ quota 看板大卡、积分包明细、后端 `note` 字段与 `/quota` markdown 摘要。
+- 契约锁定：`tests/test_token_stats_exact_credits.py`（4 条：格式化口径、后端无 `:.0f/.1f` 残留、前端无 `fmtCredits` 且 chip 用精确格式、看板与明细无 `toFixed/Math.round`）。改完跑：
+  ```bash
+  cd "%LOCALAPPDATA%/hermes" && "<有 pytest 的解释器>" -m pytest tests/ -q
+  ```
+  注：hermes home 仓**自带 venv 无 pytest**（精简安装），借用 `D:/ai coding/GitRepos/workbuddy2api/.venv/Scripts/python.exe` 即可；hermes home 无 JS 测试基建，前端只能靠静态契约断言 + 手工验证。
+
 ## 降级模式（2026-09-07 修复）
 - 根因链：EasyCLIProxyAPI 网关(18080)未运行 → auth/*.json 的 access_token 无人续期（1h 有效期，字段 `expired`）→ retrieveUserQuotaSummary 401 → 旧代码整体退回磁盘缓存，WorkBuddy 积分被冻结在旧快照且 force=1 也刷不动。
 - 现行为：Google 拉取全败时返回 `status=degraded`（非 error），Google 数字=磁盘缓存快照并附 `degradedReason`；WorkBuddy 8787 积分独立实时探测，与 Google 成败解耦；降级时清内存缓存，恢复后自动回到全实时。
