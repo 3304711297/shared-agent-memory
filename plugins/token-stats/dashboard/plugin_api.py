@@ -150,6 +150,24 @@ _rl_cache_time = 0.0
 RL_CACHE_TTL = 20  # seconds — log scanning is cheap but not free; panel polls every 15s
 
 
+def _fmt_credits_exact(value: Any) -> str:
+    """积分的精确呈现（保留 2 位小数、去尾零，不约数、不显示浮点噪声）。
+
+    上游 `CycleRemainCapacity` 是量化到 2 位小数的字符串，经 float64 呈现会带二进制
+    尾数（实测 `"833.33000192"` 真值即 833.33 —— `833.33000192 + 3316.66999808 == 4150`
+    精确闭合，证明尾数是浮点噪声而非真实额度）。故此处按 2 位小数量化后再去尾零：
+    既保住真值精度，也不把噪声当有效数字展示。
+    """
+    try:
+        num = float(value)
+    except (TypeError, ValueError):
+        return "—"
+    if num != num or num in (float("inf"), float("-inf")):  # NaN / inf
+        return "—"
+    text = f"{num:.2f}".rstrip("0").rstrip(".")
+    return text or "0"
+
+
 def _workbuddy_rate_limit() -> dict[str, Any]:
     """WorkBuddy(8787) 上游频率限制状态与滚动用量观测（只读，不发起任何探测请求）。
 
@@ -421,7 +439,7 @@ def check_workbuddy_status() -> dict[str, Any]:
                                 "isPaidUser": usage.get("is_paid_user", False),
                                 "packages": usage.get("packages", []),
                             },
-                            "note": f"账号「{usage.get('nickname', '—')}」· 积分 {remain:.0f}/{total:.0f} ({pct}%)",
+                            "note": f"账号「{usage.get('nickname', '—')}」· 积分 {_fmt_credits_exact(remain)}/{_fmt_credits_exact(total)} ({pct}%)",
                         })
                     else:
                         base["usageError"] = usage.get("error", "unknown")
@@ -777,11 +795,11 @@ def format_quota_markdown(data: dict) -> str:
         paid = "付费版" if usage.get("isPaidUser") else "免费版"
         packages = usage.get("packages", [])
         pkg_lines = "\n".join(
-            f"  - 包 `{p.get('code', '')[-8:]}`: `{p.get('remain', 0):.0f}`/`{p.get('total', 0):.0f}` {p.get('unit', 'credits')}"
+            f"  - 包 `{p.get('code', '')[-8:]}`: `{_fmt_credits_exact(p.get('remain', 0))}`/`{_fmt_credits_exact(p.get('total', 0))}` {p.get('unit', 'credits')}"
             for p in packages
         )
         lines.append(f"- **当前账号**：`{usage.get('nickname', '—')}` ({paid})")
-        lines.append(f"- **积分余量**：`{usage.get('remain', 0):.1f}` / `{usage.get('total', 0):.0f}` (`{pct}%`)")
+        lines.append(f"- **积分余量**：`{_fmt_credits_exact(usage.get('remain', 0))}` / `{_fmt_credits_exact(usage.get('total', 0))}` (`{pct}%`)")
         if pkg_lines:
             lines.append(f"- **积分包明细**：\n{pkg_lines}")
     elif wb.get("usageError"):

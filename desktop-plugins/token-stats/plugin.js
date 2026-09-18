@@ -122,12 +122,15 @@ function fmtCooldown(sec) {
   return `${s}s`
 }
 
-// 积分紧凑呈现 -> 「4.8k / 12k / 850」
-function fmtCredits(num) {
-  if (num == null) return '8787'
-  if (num >= 10000) return `${Math.round(num / 1000)}k`
-  if (num >= 1000) return `${(num / 1000).toFixed(1)}k`
-  return `${Math.round(num)}`
+// 积分的精确呈现 -> 「1833.33 / 1000 / 0.5」
+// 上游真值量化到 2 位小数，经 float64 会带二进制尾数（833.33000192 的真值即 833.33），
+// 故此处按 2 位小数量化后去尾零：保住精度，也不把浮点噪声当有效数字展示。
+function fmtExactCredits(num) {
+  if (num == null) return '—'
+  const v = Number(num)
+  if (!Number.isFinite(v)) return '—'
+  const text = v.toFixed(2).replace(/\.?0+$/, '')
+  return text === '' ? '0' : text
 }
 
 // WorkBuddy 频率限制行：只呈现真实观测值，不虚构阈值/百分比
@@ -459,7 +462,7 @@ function AntigravityQuotaChip({ ctx }) {
                         jsx('span', { className: 'text-[9px] text-cyan-400/80', children: '⚡' }),
                         jsx('span', {
                           className: 'text-[10px] font-bold tracking-tight',
-                          children: fmtCredits(quotaData.workbuddy.usage?.remain),
+                          children: fmtExactCredits(quotaData.workbuddy.usage?.remain),
                         }),
                       ],
                     })),
@@ -807,9 +810,9 @@ function AntigravityQuotaChip({ ctx }) {
                                 getTextColor(quotaData.workbuddy.usage.remainPercent)
                               ),
                               children: [
-                                Math.round(quotaData.workbuddy.usage.remain),
+                                fmtExactCredits(quotaData.workbuddy.usage.remain),
                                 ' / ',
-                                Math.round(quotaData.workbuddy.usage.total),
+                                fmtExactCredits(quotaData.workbuddy.usage.total),
                                 ' credits',
                               ],
                             }),
@@ -1401,9 +1404,9 @@ function QuotaPage({ ctx }) {
                     jsxs('span', {
                       className: cn('font-mono text-lg font-bold tracking-tight', getTextColor(data.workbuddy.usage.remainPercent)),
                       children: [
-                        data.workbuddy.usage.remain != null ? data.workbuddy.usage.remain.toFixed(1) : '—',
+                        fmtExactCredits(data.workbuddy.usage.remain),
                         jsx('span', { className: 'text-xs text-(--ui-text-tertiary) font-normal', children: ' / ' }),
-                        Math.round(data.workbuddy.usage.total || 0),
+                        fmtExactCredits(data.workbuddy.usage.total),
                         ' credits',
                       ],
                     }),
@@ -1435,9 +1438,9 @@ function QuotaPage({ ctx }) {
                                 getTextColor(p.total > 0 ? (p.remain / p.total) * 100 : 0)
                               ),
                               children: [
-                                (p.remain || 0).toFixed(0),
+                                fmtExactCredits(p.remain || 0),
                                 ' / ',
-                                (p.total || 0).toFixed(0),
+                                fmtExactCredits(p.total || 0),
                                 ` ${p.unit || 'credits'}`,
                               ],
                             }),
