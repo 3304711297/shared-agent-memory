@@ -240,6 +240,21 @@ and HTML extraction do not. Repainting is allowed; changed identity/geometry/hit
 targets are rejected. Verify the result, using DOM refs for revealed controls;
 inspect `effect_state=unknown` before retrying with a new capture.
 
+## 查 X/Twitter 内容的通道优先级
+
+bsk 之外的免登录直连通道（2026-09-08 实测，仅取主文；回复需登录态，bsk 借用已登录标签页才能拿）：
+
+| 通道 | 主文 | 回复 |
+|---|---|---|
+| `api.fxtwitter.com/<user>/status/<id>` | ✅ 含完整元数据（views/likes/replies/bookmarks） | ❌ |
+| `api.vxtwitter.com/...` | ✅ 精简 JSON | ❌ |
+| `zamantika.com/profile/<user>` 镜像 | ✅ 时间线含部分回复 | ⚠️ 部分 |
+| nitter 各实例 / xcancel | ❌ 全部挂掉或 anti-bot | ❌ |
+| `cdn.syndication.twimg.com` | ❌ 空 | ❌ |
+
+- 未登录态下 "See all the replies" 是 `<h2>` 元素，**合成 MouseEvent 与 CDP `Input.dispatchMouseEvent` 均被忽略** —— 要回复必须走 bsk 借用已登录标签页。
+- 抓取连撞 2 次防爬即停手问用户，**不得穷举镜像或擅起新浏览器**。
+
 ## Files and other tools
 
 ```sh

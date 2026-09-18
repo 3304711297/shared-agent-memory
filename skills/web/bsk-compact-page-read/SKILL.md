@@ -52,5 +52,6 @@ python table.py --session <id> --json --selectors
 ## 与其他技能的分工
 
 - **执行/登录态/标签页借用/人工协助** → 仍走 `browser-skill`（bsk），本技能只替换「读页面」这一步。
-- **CDP 直连抓取（登录墙、绕过 bsk）** → `edge-dev-cdp-scraping`。
+- **CDP 直连（绕过 bsk 的裸 ws 访问）** → 若 `bsk` 通道不可用需退到裸 CDP，先查 `cross-agent-collaboration` 技能的 `references/browser-boundary.md`（含 Edge 扩展被物理删除的高危坑）。
+- **X/Twitter 内容抓取通道** → 见 `browser-skill` 的「查 X/Twitter 内容的通道优先级」小节。
 - **`snapshot.js` 上游**：`browser-use/jev-ultrafast`（MIT）。`scripts/snapshot.js` 是 vendored 副本（commit 452c1ad），上游改动时同步。
