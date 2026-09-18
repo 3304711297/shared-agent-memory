@@ -4,6 +4,21 @@
 
 ---
 
+## 实战经验（2026-09-18 真实闭环，agent 改代码 / ChatGPT 审）
+
+- **判定规则验证成功后 ChatGPT 会给出 `CLOSED`**，用于收口；它会自行核对 GitHub CI run 的 SHA 与日志
+  （所以在报告里必须给出**提交 SHA + run ID + 各档结果**，只给"CI 绿了"会被要求补证据）。
+- **它指出的每一条都必须本地复现后再修**：本轮 3 条指控全部成立；同时复现过程又挖出它没提到的一条真实缺口
+  （上游真实措辞「请求频率过高」在无 429 状态码时判不出限流）。反向也要成立：复现失败就说明它是误报，照实回绝。
+- **修完要回填「变异验证」证据**：把修复逐条反转（复制源文件→改一处→跑测试→还原）证明新测试真能抓缺陷。
+  它会把"你们的本地变异验证"与"CI 正式测试集"分开看待，两者都要给。
+- **多轮往返会话会超时掉线**：`bsk` session 在长时间往返后可能 404（`requested resource does not exist`），
+  重新 `session start` 并 `navigate` 回对话 URL 即可继续（同一 URL 保留全部上下文）。
+- **侧边栏点击会因列表重排点错会话**：正确做法是用 `bsk evaluate` 抓 `nav a[href^="/c/"]` 的
+  `{title, href}` 列表定位 URL，再 `bsk navigate` 直达，不要靠 `click + aria-label` 猜。
+- **`bsk fill` 对 contenteditable 可能报「结果未能确认」但实际已填入**：先 `evaluate` 读
+  `#prompt-textarea` 的 `innerText.length` 核实，别盲目重试（重复 fill 会追加而非替换）。
+
 ## 适用场景
 - 用户在 Edge 浏览器中已有打开的 ChatGPT 会话（含登录态与历史上下文）；
 - 需要让外部模型（如 ChatGPT）作为 Reviewer 对当前仓库的改动进行独立对抗式审查；
