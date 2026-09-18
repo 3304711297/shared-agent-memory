@@ -46,14 +46,23 @@ metadata:
   - 注：`model.py` **硬编码** `https://api.typesafe.ai/v1/systemone`，Vercel AI Gateway 的 key 不能直接替换（需自建 shim）。
 - 官方 Flights / Wikipedia 演示未复现（付费调用）。
 
-## 六、可复用点
-- `TEXT_MODEL_BASE_URL` 可指向本机 **WorkBuddy2API**（`127.0.0.1:8787/v1`）→ 文本生成这一半可零成本本地跑。
-- 「编号元素表 + 一次决策」思路可借到现有 `bsk` 流程：对结构化表单/后台页面，比逐控件 CDP 调用省大量往返。
+## 六、① 方案（接文本模型到本机 8787）的最终结论：**不值得做**
+
+用户问「接文本模型岂不是固定模型端点，对频繁换模型的人不可用」——方向正确：
+
+- **决策那一半**（`model.py:119`）**硬编码** `https://api.typesafe.ai/v1/systemone`，只有 `TYPESAFE_MODEL`（模型名）可换；换端点必须改代码。TypeSafe 为单一厂商，无第二来源可路由。
+- **写字那一半**（`model.py:164`）由 `TEXT_MODEL_BASE_URL` / `TEXT_MODEL` 驱动，可指向本机 8787；但硬要求端点支持 `response_format: json_object` 且只返回 `{"text": "..."}`。
+- 该架构是「一个专用决策模型 + 一个文本补丁」的 demo，**不为多端点路由设计**。接 8787 只省 1.6% 的成本，破不了 TypeSafe 的 waitlist 门槛（98.4% 在决策侧）。
+- 完全绕开 TypeSafe 需自写 shim 让通用 LLM 假装决策模型，会慢一个数量级且准确率下降，等于抹掉核心卖点 —— **用户已选择做 ② 而非 ①**。
+
+## 七、可复用点
+- 「编号元素表 + 一次决策」思路已落地为独立技能 **`bsk-compact-page-read`**（详见 [[bsk-compact-page-read-and-jev-followup]]）。
 - `scripts/check_guards.py` 可作浏览器自动化的回归闸门（无模型调用、纯本地）。
 
-## 七、顺带修正的旧结论
-本机 `edge-dev-cdp-scraping` 技能原先记载「Edge Dev 默认 profile 的 CDP 端口起不来（已试四种方案全失败）」——**本次复查推翻**：`127.0.0.1:9222` 正常 LISTENING，ws 直连实测通过（`Edg/155`）。根因是 `Local State` 里 `devtools.remote_debugging.user-enabled = true`——在 `edge://inspect` 勾选过一次后，重开浏览器就会监听。已回写该技能。
+## 八、顺带修正的旧结论
+本机 `edge-dev-cdp-scraping` 技能原先记载「Edge Dev 默认 profile 的 CDP 端口起不来（已试四种方案全失败）」——**本次复查推翻**：`127.0.0.1:9222` 正常 LISTENING，ws 直连实测通过（`Edg/155`）。根因是 `Local State` 里 `devtools.remote_debugging.user-enabled = true`——在 `edge://inspect` 勾选过一次后，重开浏览器就会监听。
+该技能已按 09-17 的废弃决定**实际删除**（此前执行遗漏），两块独有知识已迁移：X/Twitter 抓取通道表 → `browser-skill`；Edge 扩展被物理删除的高危坑 → 本已在 `cross-agent-collaboration/references/browser-boundary.md`。
 
-**Why:** 用户要求评估 jev-ultrafast 接入本地浏览器链路的可行性；实测证明可行且零改动，同时推翻了本机一项过时的环境结论（Edge Dev 默认 profile CDP 不可用），两者都需跨会话留存以免重复排查。
+**Why:** 用户要求评估 jev-ultrafast 接入本地浏览器链路的可行性；实测证明可行且零改动，同时推翻本机一项过时的环境结论，两者都需跨会话留存以免重复排查。
 
-**How to apply:** 后续若要实跑该 Agent，按「不设 BU_CDP_WS + 两个 key（文本模型可指向 8787）」直接 `uv run --env-file .env python examples/run.py`；需要复用登录态时它天然共享 Edge Dev profile，但须先确认能接受临时多一个后台标签页。查 Edge Dev 默认 profile CDP 时不要再沿用「端口起不来」的旧结论。
+**How to apply:** 后续若要实跑该 Agent，按「不设 BU_CDP_WS + 两个 key（文本模型可指向 8787）」直接 `uv run --env-file .env python examples/run.py`；需要复用登录态时它天然共享 Edge Dev profile，但须先确认能接受临时多一个后台标签页。若再讨论接 jev 决策模型，先看本文第六节结论。查 Edge Dev 默认 profile CDP 时不要再沿用「端口起不来」的旧结论。
