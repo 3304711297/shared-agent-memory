@@ -125,29 +125,29 @@
     "created_by": null,
     "last_patched_at": null,
     "last_reused_patch_generation": 0,
-    "last_used_at": "2026-09-18T08:37:15.546549+00:00",
-    "last_viewed_at": "2026-09-18T08:37:15.544549+00:00",
+    "last_used_at": "2026-09-18T10:52:56.986954+00:00",
+    "last_viewed_at": "2026-09-18T10:52:56.984954+00:00",
     "patch_count": 0,
     "patch_generation": 0,
     "pinned": false,
     "state": "active",
-    "use_count": 7,
-    "view_count": 7
+    "use_count": 9,
+    "view_count": 9
   },
   "bsk-compact-page-read": {
     "archived_at": null,
     "created_at": "2026-09-18T08:59:33.995890+00:00",
     "created_by": "learn",
     "last_patched_at": "2026-09-18T09:08:46.720758+00:00",
-    "last_reused_patch_generation": 0,
-    "last_used_at": null,
-    "last_viewed_at": null,
+    "last_reused_patch_generation": 4,
+    "last_used_at": "2026-09-18T11:35:44.254146+00:00",
+    "last_viewed_at": "2026-09-18T11:35:44.252145+00:00",
     "patch_count": 4,
     "patch_generation": 4,
     "pinned": false,
     "state": "active",
-    "use_count": 0,
-    "view_count": 0
+    "use_count": 2,
+    "view_count": 2
   },
   "cangjie-distill": {
     "archived_at": null,
@@ -274,15 +274,15 @@
     "created_at": "2026-09-05T14:40:18.961927+00:00",
     "created_by": "agent",
     "last_patched_at": "2026-09-18T09:23:08.309239+00:00",
-    "last_reused_patch_generation": 23,
-    "last_used_at": "2026-09-18T09:22:41.096282+00:00",
-    "last_viewed_at": "2026-09-18T09:22:41.094282+00:00",
+    "last_reused_patch_generation": 24,
+    "last_used_at": "2026-09-18T11:35:50.788391+00:00",
+    "last_viewed_at": "2026-09-18T11:35:50.786390+00:00",
     "patch_count": 24,
     "patch_generation": 24,
     "pinned": false,
     "state": "active",
-    "use_count": 37,
-    "view_count": 37
+    "use_count": 41,
+    "view_count": 41
   },
   "devin-acp-provider-maintenance": {
     "archived_at": null,
@@ -785,14 +785,14 @@
     "created_by": null,
     "last_patched_at": "2026-09-12T16:17:05.960748+00:00",
     "last_reused_patch_generation": 4,
-    "last_used_at": "2026-09-17T12:35:29.465199+00:00",
-    "last_viewed_at": "2026-09-17T12:35:29.462690+00:00",
+    "last_used_at": "2026-09-18T10:15:42.371647+00:00",
+    "last_viewed_at": "2026-09-18T10:15:42.368646+00:00",
     "patch_count": 4,
     "patch_generation": 4,
     "pinned": false,
     "state": "active",
-    "use_count": 13,
-    "view_count": 13
+    "use_count": 15,
+    "view_count": 15
   },
   "repo-health-audit": {
     "archived_at": null,
