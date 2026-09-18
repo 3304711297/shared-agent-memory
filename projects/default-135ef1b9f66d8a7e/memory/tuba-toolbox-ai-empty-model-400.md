@@ -20,4 +20,22 @@ metadata:
 - baseUrl 填对只是第一步：**必须从反代 `/v1/models` 抄真实模型 id 填进客户端的模型列表并设为默认模型**，测试连接才会过。
 - 上游只认自家模型名：教程常见的 `deepseek-chat` / `claude-sonnet-4-5` / `gpt-3.5-turbo` 实测一律 400 `11102`；`gpt-4o` 能通是内置降级映射的个例，不可当范例。
 
-**处置**：客户端侧添加模型（如 `auto` 或 `deepseek-v4.1-flash`）并设为默认，重测即通；反代侧无需改动。
+**处置（两层）**：
+
+① **客户端侧**（即时可用，不必等反代更新）：添加模型（如 `auto` 或 `deepseek-v4.1-flash`）并设为默认，重测即通。
+
+② **反代侧已修（2026-09-18，commit 688e362，CI run 35351335054 绿）**——这轮回溯发现反代自身有四处健壮性缺陷，全部修掉并端到端验证：
+
+| # | 缺陷 | 旧行为 | 新行为 |
+|---|---|---|---|
+| P0 | 空模型名透传 | `body.setdefault("model","auto")` 只补缺键，`""`/`null`/空白照发上游 → 400 11102 | 新增 `_normalize_model_name()`，一律归 `auto`；实测旧进程 `""`→400，修复版 `""`→**200** |
+| P1 | 非流式 4xx 被重发 | `except HTTPException` 在 `attempt < max_attempts-1` 时吞异常续圈，实测一次请求打上游 **3 次**（同 rid 三个不同 requestId） | 只有 failover 真正切号成功才 continue，否则直接返回 |
+| P1 | 错误体形状错误 | `raise HTTPException(detail=…)` → FastAPI 包成 `{"detail":…}`，破坏 OpenAI/Anthropic 协议形状 | 新增 `_openai_error_body` / `_anthropic_error_body`，出 `{"error":{…}}` 与 `{"type":"error","error":{…}}`；中文 displayMsg 优先，原 msg 留在 `upstream_message` |
+| P2 | 限流误判 | `"429" in text` / `"6004" in text` 裸子串会命中 requestId 的 hex 片段（实测 `…4290-6004-abcd…`）→ 误切号 + 假冷却 | 抽出 `_is_rate_limit_signal()`：JSON 报文只认 `code==6004`；`_record_rate_limit` 与 `record_failure_and_failover` 共用同一判据 |
+
+同轮 UI：模型页模型 id 改为一键复制调用名（原先只能看不能取，手抄易错致 11102）；删除冗余副标题。
+
+**通用规则**：
+- 客户端「连接失败」≠ 网络/密钥问题，先确认**探测请求实际发出的 body**（模型名是否为空）。
+- baseUrl 填对只是第一步：模型列表仍要从反代 `/v1/models` 抄真实 id（或直点模型页 id 复制）。
+- 上游只认自家模型名：教程常见的 `deepseek-chat` / `claude-sonnet-4-5` / `gpt-3.5-turbo` 实测一律 400 `11102`；`gpt-4o` 能通是内置降级映射的个例，不可当范例。
