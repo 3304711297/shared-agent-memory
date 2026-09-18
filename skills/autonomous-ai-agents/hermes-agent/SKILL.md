@@ -281,6 +281,26 @@ gh run view <run-id> -R <owner/repo> --json status,conclusion,jobs \
 
 可复用的 `pre_tool_call` 改写插件模板见 `templates/pre_tool_call_rewrite_plugin.py`（返回值式 `{"action":"modify","args":{...}}`，含 fail-open 与 CLI 不可用时静默放行）。
 
+**cron 通知链依赖模型路由快照 —— 切模型就会静默失败（2026-09-18 实测）。**
+
+job 创建时会把当时的 `provider`/`model` 写进 `jobs.json`（创建后显示为 `provider_snapshot`/`model_snapshot`）。用户后续切默认模型，**旧 job 仍走旧路由**。若那个端点已停（本机实测：`curl 127.0.0.1:18080/v1/models` → Connection refused），job 每次运行都以 `RuntimeError: Connection error.` 失败。
+
+更隐蔽的第二层：**投递目标也可能无效**。工具创建的 job 抓不到 origin（`origin: null`），回退到 home channel —— 若本机唯一有 chat_id 的 platform 是 `enabled: false`（本机 qqbot 即如此），则 `delivery FAILED: platform 'qqbot' not configured/enabled`，**即使 agent 跑成功通知也送不到**。
+
+排查与修复：
+```bash
+hermes cron list                          # 看 last_status / last_error / last_delivery_error
+hermes cron runs <job_id>                  # 看历史
+hermes cron runs <job_id> --help           # 查看单次输出
+hermes cron edit <job_id> --model M --provider P   # 改模型路由（注意：工具 schema 无此参数，必须走 CLI）
+hermes cron edit <job_id> --deliver local  # 或换成真实可投递的目标
+```
+**关键取舍**：当通知的可靠性重要时，**不要用 cron + agent**，改用 GitHub Actions 工作流发 issue（见 `github` skill）—— CI 在云端跑，只依赖公开 API，与模型路由完全解耦。
+
+另一个坑：`cron status` 报「Gateway is not running」但**心跳仍在推进**时，那些错的是独立 gateway 服务；**桌面内调度器可独立存活**（实测 `.tick.lock` 每分钟更新）。但**定时触发确实依赖 gateway**（实测手建的一次性 job 未按时触发）；手工 `cron run` 则立刻执行。先看 `cron/jobs.json` 的 `last_run_at` 与 `cron/output/<job_id>/` 实际产物再下结论。
+
+**Monitor 模式会让 agent 完全不跑 —— 不要用它验证 LLM 链路。** `monitor` 脚本输出未变时整个 run 被抑制，状态记 `no_change (agent run suppressed)`，**模型连接问题根本不会暴露**。验证 LLM 层必须用不带 monitor 的临时 job。
+
 - The orange「已保存到记忆 N entries」badge is the **foreground `memory` tool call's title template** (desktop i18n `zh.ts` → `toolTitles.memory.done`), NOT a background review fork write. Background-fork writes surface via `display.memory_notifications` (`💾 Memory updated` system line) — a different UI element.
 - `config.yaml` changes need **no restart**: `background_review.enabled` is re-read at every spawn (file mtime+size signature cache invalidates on edit); nudge intervals are read when each message constructs its agent.
 - **Desktop Composer 焦点劫持与 Popover 自动关闭排查（2026-09-17）**：上游 `floating-target.ts` 监听全局 `pointermove` 跟踪跨分屏浮动输入框，但因缺少覆盖层保护和未判定 composer 宿主，导致只要光标在聊天区滑动就会强行执行 `editor.focus()` 抢焦点，使状态栏 Popover（如 token-stats）遭遇失焦并自动关闭。排查时需确保：① `BLOCKING_OVERLAY_SELECTOR`（包含 `[data-radix-popper-content-wrapper]` 等）检测到活动浮层时直接放弃焦点抢占；② `pointermove` 仅在光标直指 composer 宿主或浮动输入框跨分屏输入时才聚焦，绝不在光标滑过聊天内容或状态栏时窃取焦点。
