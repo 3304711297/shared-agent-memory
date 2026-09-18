@@ -36,6 +36,25 @@ Supporting assets: `scripts/gh-env.sh` + `scripts/git-credential-token.py`
 `references/ci-troubleshooting.md`, `references/conventional-commits.md`,
 `references/github-api-cheatsheet.md`, `references/review-output-template.md`.
 
+## 本机代理前提（Windows，必读）
+
+本机 git 走本地代理 `127.0.0.1:3067`，已固化为**全局 URL-scoped 配置**（任何 `git init` 的新仓库自动继承，不需逐仓加）：
+
+```bash
+git config --global 'http.https://github.com.proxy'  http://127.0.0.1:3067
+git config --global 'https.https://github.com.proxy' http://127.0.0.1:3067
+```
+
+**三个实测踩过的坑：**
+
+1. **Hermes 的 `terminal` 会剥掉 `ALL_PROXY`/`HTTP(S)_PROXY`** —— 环境变量里有代理不代表 git 能用它。只靠环境变量时直连 `ls-remote` 实测 45s 超时。所以必须写进 `git config`，而不是依赖 shell 环境。
+2. **URL-scoped 键会在 `url.insteadOf` 注入凭据后仍然匹配** —— 本机全局有 `url.https://<token>@github.com/.insteadof https://github.com/`，一度担心 URL 变成带 userinfo 后 scope 失配；实测 `--get-urlmatch` 对 `https://user:TOKEN@github.com/...` 仍返回代理值。因而不必改用通用 `http.proxy`。
+3. **URL-scoped 优先于仓库本地通用键** —— 同时存在时 URL-scoped 胜出（实测）。二者兼有是双保险，不冲突。
+
+**排障纪律**：复现网络问题必须在干净环境跑（`env -u ALL_PROXY -u HTTP_PROXY -u HTTPS_PROXY ...`），否则会在“看起来能用”的环境里得出错误结论。反之，**验证修复也要先确认问题真实存在**（先直连测出超时，再加代理测通）。
+
+排查单仓为何推不动时，先比对：`git -C <repo> config --local --get http.proxy`。
+
 ## Core discipline (applies to every workflow)
 
 - Load THIS skill before any push/PR/CI work — do not hand-roll `gh` loops from

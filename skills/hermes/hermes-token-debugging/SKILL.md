@@ -39,6 +39,12 @@ compression:
 ## 验证方法
 改后重算同口径四指标：单次中位/均值/P90、缓存命中率；prune 提交应呈"罕见大批次"节奏，间隔 <10min 说明触发线偏小。
 
+## ⚠️ request_dump 采样偏差（2026-09-18 实测，勿当全量账本）
+**`sessions/request_dump_*.json` 只记录【失败请求】**：本机 203 个 dump 的 `reason` 全部是 `max_retries_exhausted`(139) / `non_retryable_client_error`(64)，无一为成功请求。
+- ✅ **可用**：正文里的 `body.messages` 是当时完整上下文 → 工具调用分布、单次结果体积、命令构成等**结构性**统计真实。
+- ❌ **不可用**：①「重发次数」只代表"在多少次失败请求里被重发"，不是总重发次数；② chars×重发 的累计量≈失败样本口径，**不能当 token 账单**（曾算出 35M chars 险些误作全量）。
+- 要真账单：走网关 `usage.db`（见本文首节）或 `state.db`；dump 只做结构与命令层面的取证。
+
 ## 口径铁律（2026-09-08 实测纠正，勿再犯）
 1. **Gateway usage.db 的 `input_tokens` 已含 `cache_read_tokens`**（全量口径）。命中率 = `SUM(cache_read)/SUM(input)`，**不是** `cr/(input+cr)`——后者会算出 48.5% 的假值，真值 94.1%。
 2. **`total_tokens` ≈ `input+output`**，不含 cache 加算。

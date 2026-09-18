@@ -239,6 +239,48 @@ Pitfall: the picker shows the 快速 toggle whenever `model_supports_fast_mode()
 
 Writing `read_file(p)["content"]` and proceeding assumes stage 1. Stage 2 raises `KeyError: 'content'`; stage 3 silently yields no content. Both are the guard working correctly, not a tool failure. Rules: **(a)** treat the second read as authoritative "file unchanged — reuse the earlier result"; **(b)** before re-reading, gate on the shape (`if "content" in r`) or read the file with plain `open()` inside `execute_code` when you specifically need fresh bytes; **(c)** after 3 reads, the guard is telling you to stop — go back to the content already in context.
 
+**插件改写工具参数：`{"action":"modify","args":{...}}` 与「原地改 args」都生效，但机理不同（2026-09-18 查源码实证）。**
+
+`pre_tool_call` 的改写通道在 `hermes_cli/plugins.py::_get_pre_tool_call_directive_details`：逐回调取 `result.get("action")`，`action == "modify"` 时把 `result["args"]` 浅合并进 `modified_args`。调用方 `agent/tool_executor.py::_pre_tool_block` 收尾是 `ref.args if modified_args is None else modified_args`。于是两条路都能改：
+- **(a) 返回值式（官方、推荐）**：`return {"action": "modify", "args": {"command": new}}`。显式、不依赖实现细节。
+- **(b) 原地改（隐式生效）**：回调收到 `args` 后直接 `args["command"] = new` 并 `return None`。虽然 `plugins_dispatch.invoke_hook` 只收集非 None 结果（该结果被丢弃），但 `args` 从 `_get_pre_tool_call_directive_details` → `invoke_lifecycle_hook` → `plugins.invoke_hook` → `_invoke_hook_callback(cb, **payload)` 全程只经 `**kwargs` 解包、**不做拷贝**，`args` 始终是同一个 dict 对象，所以原地改会反映到调用方持有的 `ref.args` 上。rtk 的 Hermes 插件（`hooks/hermes/rtk-rewrite/__init__.py`）用的就是这条路。
+- **验证纪律**：装任何第三方 `pre_tool_call` 改写插件后，必须**实测一条命令**确认真的被改写（看工具回显的命令变了没有）；"插件已加载"不等于生效。若日后 dispatch 链引入 `copy.deepcopy(args)`，通道 (b) 会静默失效——这也是为什么新写插件优先用 (a)。
+- **安装路径坑**：Hermes 把插件目录固定解析为 `get_hermes_home()/plugins`（见 `plugins_cmd._plugins_dir`）。本机 `$HERMES_HOME=%LOCALAPPDATA%\hermes`，而 `~/.hermes` 只是迁移残留壳（其 config.yaml 仅一行 `mcp_servers: {}`）。第三方 installer 若在没设 `HERMES_HOME` 的 shell 里硬编码 `~/.hermes` 就会装进不被加载的目录（rtk 的 `HERMES_DIR` 常量即是此 fate，但它优先读 `$HERMES_HOME` 覆盖，所以带上环境变量跑才对）。
+
+**⚠️ Hermes 没有任何钩子能改写【工具输出】——只能改写【命令】（2026-09-18 全链路查证）。这是所有"输出压缩器"类需求的前提。**
+
+逐通道核实结果：
+
+| 通道 | 能力 | 源码依据 |
+|---|---|---|
+| `pre_tool_call` | ✅ 能改**命令**参数 | `plugins.py::_get_pre_tool_call_directive_details` 的 `action=="modify"` |
+| `post_tool_call` | ❌ 纯观察者，返回值被丢弃 | `model_tools.py::_emit_post_tool_call_hook` 调 `invoke_hook(...)` **不接收返回** |
+| `hooks:` shell hooks | ❌ 只能 `{"context": ...}` 注入 | `shell_hooks.py:431` `_RESPONSE_PARSERS` 只有 `pre_tool_call`/`pre_verify` |
+| middleware | ❌ 只有 `llm_request`/`tool_request` 两种 kind | 无结果改写 kind |
+
+⇒ 想减少超长工具输出，**只能在命令层让它少产出**，或在结果存储层配阈值（见下）。任何"事后过滤工具输出"的方案（rtk 那类）在 Hermes 里没有落点；rtk 之所以在别的 agent 能成立，正是因为它有 `pre_tool_call` 改命令这一条路。
+
+**超大工具结果的两个现成旋钮：**
+1. **spillover 阈值**（官方机制）：`tools/tool_result_storage.py` 把超过阈值的结果落盘到 `$HERMES_HOME/cache/spillover/{id}.txt`，上下文只留 1500 字符 preview + 路径。默认**单条 100K 字符**、单轮合计 200K（`tools/budget_config.py`）。
+2. **按工具设更低阈值**：`tool_output.tool_overrides`（如 `web_search: 20000`）—— **截至 2026-09-18 尚未并入 main**，由 PR #106399 提供（维护者 salvage，#94679 的替代）。该字段（`BudgetConfig.tool_overrides`）本身已在 main 的代码里存在且优先级最高（`pinned → tool_overrides → mcp_前缀 → registry → default`），只是缺配置读取入口。**在 #106399 合并前，`tool_output.tool_overrides` 写进 config 不会生效**——不要以为配了就完事，必须实测。
+
+**长输出命令的改写范式（零依赖、立刻可用）——以 CI 轮询为例：**
+
+`gh run watch` 每 3-10 秒刷一屏全量状态，实测单条最大 33.5K 字符且**全部卡在 100K 线下、一个都没落盘**，是典型的"明知超长却拿不到 spillover 保护"的输出。改写为一次问询：
+
+```bash
+# 旧（持续刷屏，全量进上下文）
+gh run watch <run-id> -R <owner/repo>
+
+# 新（只出终态，几十字符）
+gh run view <run-id> -R <owner/repo> --json status,conclusion,jobs \
+  --jq '{status,conclusion,jobs:[.jobs[]|{name,conclusion}]}'
+```
+
+更根本的做法：CI 轮询不该占用 terminal —— 用 cronjob 定时跑 `gh run view --json` 并把结果写文件，上下文零占用。
+
+可复用的 `pre_tool_call` 改写插件模板见 `templates/pre_tool_call_rewrite_plugin.py`（返回值式 `{"action":"modify","args":{...}}`，含 fail-open 与 CLI 不可用时静默放行）。
+
 - The orange「已保存到记忆 N entries」badge is the **foreground `memory` tool call's title template** (desktop i18n `zh.ts` → `toolTitles.memory.done`), NOT a background review fork write. Background-fork writes surface via `display.memory_notifications` (`💾 Memory updated` system line) — a different UI element.
 - `config.yaml` changes need **no restart**: `background_review.enabled` is re-read at every spawn (file mtime+size signature cache invalidates on edit); nudge intervals are read when each message constructs its agent.
 - **Desktop Composer 焦点劫持与 Popover 自动关闭排查（2026-09-17）**：上游 `floating-target.ts` 监听全局 `pointermove` 跟踪跨分屏浮动输入框，但因缺少覆盖层保护和未判定 composer 宿主，导致只要光标在聊天区滑动就会强行执行 `editor.focus()` 抢焦点，使状态栏 Popover（如 token-stats）遭遇失焦并自动关闭。排查时需确保：① `BLOCKING_OVERLAY_SELECTOR`（包含 `[data-radix-popper-content-wrapper]` 等）检测到活动浮层时直接放弃焦点抢占；② `pointermove` 仅在光标直指 composer 宿主或浮动输入框跨分屏输入时才聚焦，绝不在光标滑过聊天内容或状态栏时窃取焦点。

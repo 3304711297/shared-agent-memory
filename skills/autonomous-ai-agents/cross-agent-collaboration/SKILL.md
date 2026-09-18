@@ -35,6 +35,13 @@ Read a reference *only* when the task actually needs it.
 
 ## Always-on invariants (不需要读文件，直接适用)
 
+0. **新仓库 git 代理自动继承（2026-09-18 拍板）**：本机不靠逐仓配置，也不必我手动加 —— git 全局已设 URL-scoped 代理键，任何 `git init` 的新仓库/新项目自动继承：
+   ```bash
+   git config --global 'http.https://github.com.proxy'  http://127.0.0.1:3067
+   git config --global 'https.https://github.com.proxy' http://127.0.0.1:3067
+   ```
+   为什么必须是 `git config` 而非环境变量：**Hermes 的 `terminal` 会剥掉 `ALL_PROXY`/`HTTP(S)_PROXY`**，只靠环境变量的 git 在会话里必然被墙（实测直连 `ls-remote` 45s 超时）。URL-scoped 键同时满足两点：① `git init` 即继承；② 只作用于 github.com，其余主机（gitlab 等）不被误代理（已实测）。
+   排障时也要带上 `env -u ALL_PROXY ...`，否则会在干净环境里重现不出问题。防漂移由 `shared-agent-memory` 的 config-guard ④ 段每日核对（改坏会报红，已做变异测试验证）。
 1. **Fork-First 立体并发**：用户输入含 2 个及以上独立诉求时，第一动作必须 `delegate_task` 并行分派，且可将独立探路或代码审查并行分派至 Arena AI 协同推进，禁止主会话串行。
 2. **主会话零阻塞**：长跑命令一律 `terminal(background=True, notify=True)`，禁止前台 sleep 轮询。
 3. **Producer-Reviewer Separation**：一个 Agent 编辑时，另一个只做 review/test/CI 监控，禁止同时写同一工作树。
