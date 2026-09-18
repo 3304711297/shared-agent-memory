@@ -35,10 +35,11 @@ Read a reference *only* when the task actually needs it.
 
 ## Always-on invariants (不需要读文件，直接适用)
 
-1. **Fork-First**：用户输入含 2 个及以上独立诉求时，第一动作必须 `delegate_task` 并行分派，禁止主会话串行。
+1. **Fork-First 立体并发**：用户输入含 2 个及以上独立诉求时，第一动作必须 `delegate_task` 并行分派，且可将独立探路或代码审查并行分派至 Arena AI 协同推进，禁止主会话串行。
 2. **主会话零阻塞**：长跑命令一律 `terminal(background=True, notify=True)`，禁止前台 sleep 轮询。
 3. **Producer-Reviewer Separation**：一个 Agent 编辑时，另一个只做 review/test/CI 监控，禁止同时写同一工作树。
-4. **Delegation 模型**：`delegation.provider`/`model` 保持为空，子代理继承当前聊天模型，除非用户显式指定。
-5. **Shared Memory SSOT**：跨 Agent 事实与交接契约必须落 `shared-agent-memory` `main` 分支。
+4. **浏览器会话与标签页常驻复用**：任务执行周期内严禁频繁关闭/释放 `bsk` session 与标签页，全程维持热连接、会话上下文与 DOM 状态，仅在最终全局交付确认收口时统一释放。
+5. **Delegation 模型**：`delegation.provider`/`model` 保持为空，子代理继承当前聊天模型，除非用户显式指定。
+6. **Shared Memory SSOT**：跨 Agent 事实与交接契约必须落 `shared-agent-memory` `main` 分支。
 
 > ZCode client 已于 2026-09-09 退役，相关观察/握手协议已删除。
