@@ -11,14 +11,17 @@ description: "抓登录墙内容时必用。用已登录Edge走CDP。Use when sc
 - chrome-devtools MCP 默认连 **Chrome** 的 `DevToolsActivePort`；本机 Chrome 未运行 → "Could not connect to Chrome"。本机主力是 Edge Dev。
 - 组策略 `RemoteDebuggingAllowed` / `DevToolsRemoteDebuggingAllowed` 均为 1（允许），**排除策略封锁**。
 
-## 已知阻塞（未解决，勿重复试）
-- 给**已在运行**的 Edge 挂 `--remote-debugging-port` 无效：该参数只在冷启动生效，必须重启浏览器。
-- 冷启动带 `--remote-debugging-port=9222` **端口仍不监听**（netstat 无 LISTENING，`DevToolsActivePort` 也不更新）。已试且全部失败：
-  1. 清代理变量（HTTP_PROXY/HTTPS_PROXY/ALL_PROXY 置空）+ `--proxy-bypass-list=<-loopback>`
-  2. 显式 `--user-data-dir` 指向默认 profile
-  3. 加 `--remote-allow-origins=*`
-  4. 删除陈旧 `DevToolsActivePort` 后重启
-  → **结论：独立 profile（新建 user-data-dir）端口正常；用户默认 profile 端口起不来。** 需要登录态时此路不通，先问用户再动手。
+## 默认 profile 的 CDP 通道 —— 现已可用（2026-09-18 复查，推翻旧结论）
+- 旧结论「默认 profile 端口起不来」**已失效**：`netstat` 有 `127.0.0.1:9222 LISTENING`，ws 直连实测通过（`Edg/155`）。根因是 `Local State` 里 `devtools.remote_debugging.user-enabled=true` —— chrome://inspect 的勾选一旦生效，重开浏览器即监听。
+- `DevToolsActivePort` 内容 = `9222` + `/devtools/browser/<uuid>`。
+- 仍**别做**无效尝试：给已在运行的 Edge 挂 `--remote-debugging-port`（只在冷启动生效，必须重启）；清代理变量；显式 `--user-data-dir`；`--remote-allow-origins=*`；删陈旧 `DevToolsActivePort`。
+
+### 三个坑（实测）
+1. `http://127.0.0.1:9222/json/version` 返回 **404**（Chrome 147+ 默认 profile 关闭 HTTP 发现）。**别据此判定端口不通** —— 用 `DevToolsActivePort` 的 ws 路径，或裸 `ws://127.0.0.1:9222/devtools/browser`。
+2. uuid 路径偶发握手超时（瞬时抖动）；换裸 `/devtools/browser` 重试。
+3. **browser-harness**：设 `BU_CDP_WS`/`BU_CDP_URL` → `CDPClient`（10s 握手死线，抖动即 fail）；不设 → `_PatientCDPClient`（`open_timeout=None` 无限等）+ 自动发现 + 自带 404→ws 回退。**结论：别设 BU_CDP_WS，零配置自己发现最稳。**
+- 代理变量（`HTTP_PROXY`/`ALL_PROXY`=3067）**不阻挡** daemon→`127.0.0.1:9222` 的 ws 连接（带代理实测跑通）；只影响 `curl`/`urllib` 的 `/json/*` HTTP 请求（受 `no_proxy` 控制）。
+- 每次连接会在浏览器里**新建后台标签页**（`Target.createTarget` + `setFocusEmulationEnabled`），用完 `Target.closeTarget` 关闭；用户的既有标签不受影响。
 
 ## 生效的做法（无登录态可拿到的部分）
 1. `curl -X PUT "http://127.0.0.1:<port>/json/new?<url>"` 建标签页（GET 会 405）
