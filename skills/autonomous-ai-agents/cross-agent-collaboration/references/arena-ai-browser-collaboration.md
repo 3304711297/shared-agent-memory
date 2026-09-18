@@ -27,20 +27,33 @@
 
 ---
 
-## 三、模型选型策略与平台机制
+## 三、模型选型策略与受限白名单
 
-### 1. 开放直选池（133 款模型，确定性审查主力）
-无需盲测抽卡，在 Direct 与 Side by Side 模式下拉菜单中可手动直接指定当前最顶阶模型：
-- 🟣 **Anthropic 梯队**：`claude-sonnet-5-high`（目前直选池最强，代码与协议审查首选）、`claude-sonnet-4-6`、`claude-sonnet-4-5-thinking-32k`；
-- 🟢 **OpenAI 梯队**：`gpt-5.5-instant`（目前直选池最强 GPT）、`gpt-5.2-high`、`o3-2025-04-16`；
-- 🔵 **国产/开源旗舰**：`glm-5.2 (max)`、`deepseek-v4.1-flash-max`、`qwen3.7-max`、`qwen3-coder-480b-a35b-instruct`；
-- 🔴 **xAI / Google 梯队**：`grok-4.6-high`、`gemini-3.8-flash-high`；
-- ⚡ **智能上限路由**：`Max Router`（Arena 官方路由器，自动导向直选池最高性能上限）。
+### 1. Text 与 Code 类别模型铁律限制（用户拍板受限名单）
+在代码审查、架构方案对拍、Diff 审计与代码生成的 **Text 和 Code 类别**中，Hermes **严格受限且仅允许使用以下三款顶阶模型**（官方直选精确 ID 已核实验证）：
+- 🟣 **`claude-sonnet-5-high`**（Anthropic 旗舰，代码审美、生命周期契约与协议规范审查最深）
+- 🔴 **`grok-4.6-high`**（xAI 旗舰，长上下文逻辑推演与深度推理）
+- 🟡 **`gemini-3.8-flash-high`**（Google 旗舰，1M 超大上下文窗口，响应极速且兼备极高代码分）
 
-### 2. 榜首未发布模型（Battle 独占机制）
+> **对拍组合规范 (Side by Side)**：必须从上述三款受限白名单中两两配对（例如 `claude-sonnet-5-high` + `grok-4.6-high`，或 `claude-sonnet-5-high` + `gemini-3.8-flash-high`），严禁超出白名单范围引入未经核准的其他模型。
+
+### 2. 其他类别模型选型（基于 Arena Leaderboard 检索定案）
+在非纯文本/代码的专项任务中，经 2026-09-18 实时检索榜单前列与开放直选池，确定以下首选模型：
+- 🖼️ **Vision（视觉多模态 / UI 截图分析）**：
+  - 首选：**`gemini-3.8-flash-high`**（原生全模态、1M 上下文）与 **`claude-sonnet-5-high`**。
+- 📄 **Document（超长文档 / 论文 / 规范合规审计）**：
+  - 首选：**`gemini-3.8-flash-high`**（1M 窗口极致长文本）与 **`gpt-5.5-high`**（Document 榜单商用前列）。
+- 🔍 **Search（联网事实检索与外部证据 Grounding）**：
+  - 首选：**`gemini-3.1-pro-grounding`**（原生 Google Search 检索增强探针）与 **`gpt-5.5-search`**。
+- 🎨 **Image（文生图与图像编辑 Text-to-Image / Image Edit）**：
+  - 首选：**`gpt-image-2.5-sunburst`**（榜单第 1 名，Elo 1520）与 **`grok-imagine-image-2.0`**。
+- 🎬 **Video（文生视频与图生视频 Text/Image-to-Video）**：
+  - 首选：**`gemini-omni-1.1-flash`**（榜单第 1 名，Elo 1515）与 **`wan3.0`**（Elo 1494）。
+
+### 3. 榜首未发布模型（Battle 独占机制说明）
 - **现象说明**：Arena 排行榜（Leaderboard）榜首常年位居未公开的超新代模型（如 `Claude Fable 5.1 (Max)`、`GPT 6 Astra (Max)`、`Claude Opus 5`、`GPT 5.6 Sol`、`Kimi K3`）；
 - **机制真相**：这些属于实验室匿名盲测模型，**平台未开放直选入口**（直选池中不存在），仅在 `Battle Mode` 随机分配；
-- **决策建议**：工程审查严禁依赖 Battle 盲抽（因为可能抽中 8B 小模型导致审查质量崩溃）；**真正的顶阶保底是在 `Side by Side` 中手动锁定 `claude-sonnet-5-high` + `gpt-5.5-instant`**。
+- **决策建议**：工程审查严禁依赖 Battle 盲抽（因为可能抽中 8B 小模型导致审查质量崩溃）；通过上述受限白名单即可确保 100% 确定性的顶尖输出。
 
 ---
 
