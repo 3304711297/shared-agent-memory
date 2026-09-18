@@ -31,7 +31,15 @@ metadata:
 | P0 | 空模型名透传 | `body.setdefault("model","auto")` 只补缺键，`""`/`null`/空白照发上游 → 400 11102 | 新增 `_normalize_model_name()`，一律归 `auto`；实测旧进程 `""`→400，修复版 `""`→**200** |
 | P1 | 非流式 4xx 被重发 | `except HTTPException` 在 `attempt < max_attempts-1` 时吞异常续圈，实测一次请求打上游 **3 次**（同 rid 三个不同 requestId） | 只有 failover 真正切号成功才 continue，否则直接返回 |
 | P1 | 错误体形状错误 | `raise HTTPException(detail=…)` → FastAPI 包成 `{"detail":…}`，破坏 OpenAI/Anthropic 协议形状 | 新增 `_openai_error_body` / `_anthropic_error_body`，出 `{"error":{…}}` 与 `{"type":"error","error":{…}}`；中文 displayMsg 优先，原 msg 留在 `upstream_message` |
-| P2 | 限流误判 | `"429" in text` / `"6004" in text` 裸子串会命中 requestId 的 hex 片段（实测 `…4290-6004-abcd…`）→ 误切号 + 假冷却 | 抽出 `_is_rate_limit_signal()`：JSON 报文只认 `code==6004`；`_record_rate_limit` 与 `record_failure_and_failover` 共用同一判据 |
+| P2 | 限流误判 | `"429" in text` / `"6004" in text` 裸子串会命中 requestId 的 hex 片段（实测 `…4290-6004-abcd…`）→ 误切号 + 假冷却 | 抽出 `_is_rate_limit_signal()`：JSON 有 code 只认 `code==6004`；无 code 只看 `msg`/`message`；仅非 JSON 文本回退整串扫。`_record_rate_limit` 与 `record_failure_and_failover` 共用同一判据 |
+| P3 | Anthropic 错误 type 不分状态 | 非 400 一律 `api_error`，与官方协议不符，且与流式路径（429→`rate_limit_error`）自相矛盾 | 新增 `_anthropic_error_type()` 按官方映射（400/401/402/403/404/409/413/429/500/504/529） |
+| P4 | 语义门被正则绕过 | `_record_rate_limit` 让 `_RATE_LIMIT_RE` 先行，顶层 `code=11102` 但嵌套 `details.code=6004`+重置时间结构 → 绕过语义门写假冷却 | 判定顺序反转：先过 `_is_rate_limit_signal` 门，正则只负责提取 reset 时间 |
+
+**跨 Agent 交叉复核（本轮采用 ChatGPT 网页端协作，见 `cross-agent-collaboration` 技能的 chatgpt SOP）**：
+Hermes 先交 688e362 → ChatGPT 审出 P3/P4 两条并给出最小修法 → Hermes 独立复现、TDD 修（9b18744）→
+ChatGPT 再审出 P4 的变体（`_RATE_LIMIT_RE` 绕过语义门）→ 修（70456f3）→ ChatGPT 核 CI 后判 **CLOSED ✅**。
+**关键经验**：外部 Agent 的指控必须**先在本地复现再修**——本轮 3 条指控全部成立，但也因此发现了它没提到的一条真实缺口
+（`{"msg":"请求频率过高，请稍后再试"}` 在无 429 状态码时判不出限流）。累计变异验证 4/4 全被抓到。
 
 同轮 UI：模型页模型 id 改为一键复制调用名（原先只能看不能取，手抄易错致 11102）；删除冗余副标题。
 
