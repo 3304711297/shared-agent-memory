@@ -1,7 +1,7 @@
 {
   "generatedAt": "2026-09-15T00:00:00+08:00",
   "scope": "Hermes skills/ 目录",
-  "totalSkills": 85,
+  "totalSkills": 86,
   "sources": [
     {
       "source": "Hermes Web UI 官方目录（hub/webui 安装）",
@@ -116,7 +116,7 @@
     },
     {
       "source": "自研(无 author)",
-      "count": 7,
+      "count": 8,
       "checkType": null,
       "watchStatus": "自研/无上游-免监控",
       "skills": [
@@ -126,7 +126,8 @@
         "hermes/hermes-custom-provider-models",
         "media/bilibili-content",
         "productivity/telegram-channel-ops",
-        "software-development/repo-health-audit"
+        "software-development/repo-health-audit",
+        "web/bsk-compact-page-read"
       ]
     },
     {
