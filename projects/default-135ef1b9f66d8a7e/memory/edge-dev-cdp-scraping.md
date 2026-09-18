@@ -3,6 +3,11 @@
 > ⚠️ **方案升级与归档说明（2026-09-17）**：
 > 本文记录的「独立 Profile + 命令行 CDP 抓取」妥协方案及 `edge-dev-cdp-scraping` 技能已正式废弃归档。
 > 现已由 **Tencent/BrowserSkill**（基于 Edge 官方扩展 + 本地 bsk CLI/Daemon，免 CDP 远程调试弹窗，独立 Agent Window 隔离运行，原生复用日常 Profile 登录态）全面替代。
+>
+> **⚠️ 后续更正（2026-09-18）**：
+> ① 技能文件已于本日**实际删除**（此前 09-17 记为已删但执行遗漏）；两块独有知识已迁移——X/Twitter 抓取通道表 → `browser-skill` 技能；Edge 扩展被物理删除的高危坑 → `cross-agent-collaboration/references/browser-boundary.md`。
+> ② 本文「核心结论」整节**已失效**：Edge Dev 默认 Profile 的 9222 CDP 端口**现已可用**（实测 `Edg/155` ws 直连通过）。根因是 `Local State` 的 `devtools.remote_debugging.user-enabled=true` 已持久化——在 `edge://inspect` 勾选过一次后，重开浏览器即监听。2026-09-08 的失败结论不再成立，勿据此判断。
+> ③ 扩展基数为 **13**（非本文所记的 10），且计数需排除 Edge 自建的 `Temp` 空目录。
 
 ## 环境事实
 
@@ -10,11 +15,11 @@
 |---|---|
 | Edge Dev 可执行文件 | `C:\Program Files (x86)\Microsoft\Edge Dev\Application\msedge.exe` |
 | 默认 profile | `%LOCALAPPDATA%\Microsoft\Edge Dev\User Data` |
-| 扩展目录 | `Default\Extensions`（本机基线 **10** 个） |
+| 扩展目录 | `Default\Extensions`（本机基线 **13** 个；计数须排除 Edge 自建 `Temp` 目录） |
 | chrome-devtools MCP | 默认连 **Chrome** 的 `DevToolsActivePort`；本机 Chrome 未运行 → `Could not connect to Chrome`。主力是 Edge Dev |
 | 组策略 | `RemoteDebuggingAllowed` / `DevToolsRemoteDebuggingAllowed` 均为 `1`（允许）→ **排除策略封锁** |
 
-## 核心结论：默认 profile 挂不上调试端口
+## 核心结论：默认 profile 挂不上调试端口 —— **本节已失效，见顶部更正 ②**
 
 - 给**已运行**的 Edge 加 `--remote-debugging-port` 无效，该参数只在冷启动生效，必须重启浏览器。
 - 冷启动带 `--remote-debugging-port=9222` **端口仍不监听**：`netstat` 无 LISTENING，`DevToolsActivePort` 文件也不更新（残留旧 GUID）。
@@ -66,5 +71,5 @@ Get-CimInstance Win32_Process -Filter "name='msedge.exe'" |
 
 ## 关联
 
-- 本机技能：`edge-dev-cdp-scraping`（Hermes 侧）
-- 相关教训：抓取连撞 2 次防爬即停手问用户，不得穷举镜像或擅起新浏览器
+- ~~本机技能：`edge-dev-cdp-scraping`（Hermes 侧）~~ → **已于 2026-09-18 删除**。现行方案：`browser-skill`（bsk）；读页面加速：`bsk-compact-page-read`
+- 相关教训：抓取连撞 2 次防爬即停手问用户，不得穷举镜像或擅起新浏览器（X 通道表已迁入 `browser-skill`）
