@@ -242,3 +242,12 @@ Writing `read_file(p)["content"]` and proceeding assumes stage 1. Stage 2 raises
 - The orange「已保存到记忆 N entries」badge is the **foreground `memory` tool call's title template** (desktop i18n `zh.ts` → `toolTitles.memory.done`), NOT a background review fork write. Background-fork writes surface via `display.memory_notifications` (`💾 Memory updated` system line) — a different UI element.
 - `config.yaml` changes need **no restart**: `background_review.enabled` is re-read at every spawn (file mtime+size signature cache invalidates on edit); nudge intervals are read when each message constructs its agent.
 - **Desktop Composer 焦点劫持与 Popover 自动关闭排查（2026-09-17）**：上游 `floating-target.ts` 监听全局 `pointermove` 跟踪跨分屏浮动输入框，但因缺少覆盖层保护和未判定 composer 宿主，导致只要光标在聊天区滑动就会强行执行 `editor.focus()` 抢焦点，使状态栏 Popover（如 token-stats）遭遇失焦并自动关闭。排查时需确保：① `BLOCKING_OVERLAY_SELECTOR`（包含 `[data-radix-popper-content-wrapper]` 等）检测到活动浮层时直接放弃焦点抢占；② `pointermove` 仅在光标直指 composer 宿主或浮动输入框跨分屏输入时才聚焦，绝不在光标滑过聊天内容或状态栏时窃取焦点。
+
+**删除目录报 `Device or resource busy` / `WinError 32` —— 先查自己的 persistent shell 与 execute_code 内核（2026-09-18 实测）。**
+
+`terminal` 是**持久会话**，`cd` 进去过的目录会一直作为该 shell 进程的 CWD；`execute_code` 的 kernel 同理。Windows 不允许删除任何进程将其作为 CWD 的目录 ⇒ `rm -rf` / `Remove-Item` / `rd /s /q` 全部报「另一个程序正在使用此文件」。
+
+- **定位**：先 `cd` 到中性目录（如 `C:/`）再删，不要从目标目录内发起。仍失败则枚举各进程 CWD（读 PEB → `ProcessParameters.CurrentDirectory.DosPath`）找出持有者 —— 大概率就是自己的 shell/kernel 进程。
+- **ctypes 陷阱（本次连错两轮的真因）**：`OpenProcess` 必须 `PROCESS_QUERY_INFORMATION | PROCESS_VM_READ`（0x0400|0x0010）才能 `ReadProcessMemory`；只给 `PROCESS_QUERY_LIMITED_INFORMATION`(0x1000) 会**全部读取失败**，探针返回「无持有者」的**假阴性**。另：不声明 `restype` 时 ctypes 默认 32 位 int，**会截断 64 位 HANDLE**。用 `--selftest`（起一个已知 CWD 的子进程验证探针能认出）证伪，否则会在坏工具上反复得到错误结论。
+- **`EnumProcesses` 在 `psapi.dll`**，不在 kernel32。
+- **处置**：`execute_code(reset=True)` 换新内核可释放旧内核的 CWD；若旧内核进程仍持有，确认它已废弃后结束该 PID 再删。
