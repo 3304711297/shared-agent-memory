@@ -196,12 +196,30 @@ mmproj 投影器与投机解码草稿模型不是可服务的模型。判定靠�
 **降速幅度实测**（9B Q4 在 8GB 卡上）：全 GPU 约 43 tok/s，托管层默认配置（大窗口 +
 FFN 卸到 CPU）约 20 tok/s，差约 2.2 倍。这是硬件约束下的设计取舍，不是配置错误。
 
+### 4. 引擎更新（bump llama.cpp build）走面板按钮，别手工替换二进制
+
+面板“引擎有可用更新”的判定 = 启用中、有已装 tag、且**配置 tag 不在已装列表**里
+（`configured_tag not in have`）；配置 tag 来自 `config.yaml` 的 `local_runtime.tag`，未写时用发布 pin
+（`config_defaults.py` 的 `DEFAULT_CONFIG["local_runtime"]["tag"]`）。
+
+点“更新引擎”→ `POST /api/local-models/runtime/install`：解析资产 → 下载 → sha256（无 pin 时 TOFU
+记录）→ 解压 → `--version` 验证 build 号 → 写 manifest → **重启托管 server 到新构建** → prune 只留 N-1。
+
+- **下载走 Python `urllib`，读 `HTTPS_PROXY`/`HTTP_PROXY` 环境变量**——调试期先用
+  `curl -r 0-50 -L`（GET 带 range；HEAD 可能被拒）确认 GitHub release 链路可达。
+- 下载量：Win CUDA = runtime zip + cudart zip（b10964 实测约 143 MB + 373 MB）；
+  `downloads/` 里已存在的同名资产（cudart 文件名不含 tag）会跳过，失败重试只补缺的那个（.part 会被清）。
+- **手工替换二进制行不通**：托管层按 manifest 判定“已装”并整份重生成 presets，绕过只会让状态与磁盘失配。
+- **更新会重启托管 server**（这次点击即授权）——正在跑的本地模型会重载一次；独立自起的实例
+  （如嵌入服务）不归托管层管，不受影响。
+- N-1 保留：连跳两个 build 后更早的 tag 目录会被 `prune_old_tags` 删；从被删目录启动的**运行中**进程
+  在 Windows 上因文件锁让删除静默失败（`ignore_errors=True`），目录残留而非崩溃。
+
 ## Verification
 
 ```bash
 # 0) 评测脚本的自检：确认只断言 content，且 finish_reason 不是 length
 python -c "import json; r=json.load(open('result.json')); print('空答案数:', sum(1 for x in r if not x.get('content')))"
-
 # 1) 服务确实在跑（GET，非 POST）
 curl -fsS http://127.0.0.1:<port>/health
 

@@ -61,6 +61,128 @@ Then a short "最小修复" list — the 2–3 items that restore function — a
 
 **Never auto-apply.** For config changes: list candidates + the client's official default + the cost, and wait for the user to pick. This is a standing rule for this user.
 
+## 节点可用性筛查（判定某节点能否调用上游 AI 服务）
+
+场景：用户有多个订阅/节点，问“哪些节点能稳调 g​emini/某上游”。**核心难点是找到零配额判别器 + 排除网络假象。**
+
+### 第一原则：区域检查只在生成路径上
+
+实测（2026-09-20，Antigravity）——**这些端点不能用来判别**：
+
+| 端点/思路 | 对区域受限节点 | 为何不适用 |
+|---|---|---|
+| `loadCodeAssist` | 返回 **200** | 不经过区域检查 |
+| `countTokens` | 返回 **200** | 同上 |
+| 参数校验错误（空 contents / 非法 model / 非法 topK / 非法 role） | 400，但与可用节点**结果相同** | 校验**先于**区域检查 |
+| 域名级延迟测试（`delay?url=`） | 全部成功 | 只测 TCP+TLS，不触及区域门 |
+
+曾据此误判「53/63 可用」，实际只有 8 个能真调用——**探针没走到区域检查那一层，就只是连通测试。**
+
+**推论**：接到“帮我看哪些节点能用 XX 服务”时，先问一句「这个服务的区域/权限门到底卡在哪一层」——
+把门定位到具体路径后，才能设计出“能走到那道门但不产生实际消耗”的探针。
+
+### 零消耗判别器（首选）
+
+**必须打生成端点，且请求体要「校验通过但不产生输出」**：
+
+```json
+POST https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse
+Authorization: Bearer <antigravity access_token>
+User-Agent: antigravity/2.15.0 (windows/amd64)
+{"model":"gemini-3.8-flash-high","project":"<cloudaicompanionProject>",
+ "request":{"contents":[{"role":"user","parts":[{"text":""}]}],
+            "generationConfig":{"maxOutputTokens":1}}}
+```
+
+| 响应 | 含义 |
+|---|---|
+| `400 User location is not supported for the API use.` | 🔴 区域拒绝 |
+| `200` + `finishReason: MAX_TOKENS` + `promptTokenCount:1, totalTokenCount:1` | 🟢 通过（**仅 1 输入 token、零输出**） |
+| 连接异常/超时 | ⚪ 网络层问题，与区域判定无关，需单独归因 |
+
+要点：`parts:[{text:""}]` 是关键（校验通过但不生成）；必须带 `project`；model 建议带 `-high` 后缀。
+
+### 必须多轮采样——单次结论不可信
+
+同一节点在 PASS/REGION 间**大幅随机摆动**（实测同一批节点 10 轮内）：
+
+| 节点 | 10轮通过率 | 若只测 3 轮会得出 |
+|---|---|---|
+| 日本-aw / 美国-aw / 英国-aw / 德国-aw | **10/10** | 正确 |
+| 新加坡-aw | 9/10 | 正确 |
+| 新加坡-fdc | 7/10 | 误判“被拒” |
+| 日本-fdc | 5/10 | 误判“被拒” |
+| 台湾-aw | **4/10** | 误判“稳定可用” |
+| 香港-aw | **1/10** | 正确 |
+
+⇒ **至少 10 轮统计通过率**，阈值：**≥90% 稳定 / 50~90% 高抖动 / <50% 基本不可用**。
+⇒ 不要把一次成功写成“专用节点”——数分钟内状态可翻转。
+⇒ 多账号交叉：同一节点对不同账号结果可能不同。
+
+### 排除网络假象（否则会把活节点误判为“不通”）
+
+两个坑，都会导致**系统性假阴性**（把健康节点报成不可用）：
+
+1. **机场用动态 DNS 轮换 IP**：系统 DNS 与经代理的 DoH 返回**完全不同**的 IP 组。
+   实测：系统 DNS → `13.208.*` 全部超时；DoH → `13.196.*` 全部 80~124ms 可达。
+   而且**轮换很快**：几分钟前抓到的可达 IP 就会失效（实测 `15.168.173.70` 几分钟后全超时）。
+   ⇒ **必须经代理 DoH 解析，且逐个 TCP 试连**，只取当前真正可达的 IP。
+
+2. **别名节点共用同一 server 域名**：一个机场的多个节点常共用同一 hostname（仅端口不同）。
+   解析一次后给所有节点填同一个 IP 是对的（IP 轮换是按域名而非按节点），
+   但**若该 IP 失效，全部节点一起变“不通”**——看起来像“整个机场挂了”，其实是 IP 过期。
+
+### 沙盒可用（修掉 IP 问题后）——但也知道它的边界
+
+用 sing-box 重放节点配置做并行体测是**可行且已验证**的（见 `scripts/screen_nodes.py`）：
+同节点沙盒路径 vs Karing 真实链路对照实测 5/6 vs 6/6，结论一致。
+
+```
+python scripts/screen_nodes.py                   # 全量，每节点 10 轮
+python scripts/screen_nodes.py --filter anytls --rounds 5
+```
+
+脚本已内置：DoH 新鲜 IP + TCP 可达性预检、连通性预检（沙盒起后先验证能出网）、
+区域/网络两类失败分开计（网络不可达不计入“不可用”）、自动下载对齐内核版本的 sing-box、
+结束自动清理。
+
+⚠️ **Karing 的 clash API 不能切节点**（已实测）：`/proxies/GLOBAL` 返回 404
+（GLOBAL 是 `Fallback` 类型，非 Selector），PUT 任何 selector 报 `Must be a Selector`；
+且 3065/3066/3067 所有本地端口都受同一个 `route.final` 控制。
+**所以“逐个切换节点 + 探针”这条路走不通**，要批量测就必须自己起沙盒。
+
+### 延迟测试只能当连通性参考
+
+`delay?url=` 对所有节点都成功，**无法区分区域准入**。它适合快速排除“真死”的节点，
+但把“延迟正常”当成“能调模型”是错的。
+
+⚠️ 另一个易误读点：**延迟测试报“成功”，不代表能连上该服务的业务端点**——
+它只测 TCP+TLS 握手（`delay` 值本身就是握手耗时），不触发任何业务层校验。
+
+### 手写 Antigravity envelope（不走 CPA 时）
+
+```json
+{"model":"<模型名含后缀>","project":"<cloudaicompanionProject>",
+ "request":{"contents":[{"role":"user","parts":[{"text":"hi"}]}],
+            "generationConfig":{"maxOutputTokens":1},"sessionId":"-<16位数字>"}}
+```
+POST 到 `https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse`。
+project 值可从 `loadCodeAssist` 响应的 `cloudaicompanionProject` 字段取。
+**缺 `project` 或缺 `request` 包裹会 404；`model` 不带 `-high`（如 `gemini-3.8-flash`）也会 404。**
+
+## 上游内容过滤误伤（会话偶发「AI service declined」）
+
+症状：Hermes 弹卡片 `content_policy_blocked: Sorry, I can't respond to this question.`（只给「编辑消息」，不给「重试」）；`agent.log` 记 `finish_reason=content_filter`。**先排除误判：链路是通的，不是网络/节点/代理故障。**
+
+判别三步：
+1. 反代日志 `%LOCALAPPDATA%\workbuddy2api\converter.log` 搜 `content_filter`：辅助调用（`msgs=1 | stream=False`）留 `finish=content_filter | tokens=0`；**主对话流式被客户端中止时可能只有 ▶ REQUEST 而无 ◀ RESPONSE**——“没记录”不等于“没发生”。
+2. 与 `11140` 区分：`11140` 是 HTTP 400 的请求级预拦截（设计上明确不切号重试）；`content_filter` 是 HTTP 200 之后的生成级拒答。
+3. 随机性验证：把被拒的同一内容原样重放几次。抽样型误伤重试即过（实测同图 6/6）；若 3/3 稳定复现才是确定性内容命中，重试无意义。
+
+附带特性：辅助视觉被拒是**静默降级**——`computer_use` 的 `vision_analysis` 直接返回拒答文案而非报错，该文案会进入上下文。
+
+处置：手动重发即恢复（上下文不中毒，实测下次请求即正常）；根治候选=反代侧「空拒答自动重试」，属策略判断，须用户拍板后再动。
+
 ## Pitfalls
 
 - **The session shell exports `ALL_PROXY`/`HTTP_PROXY`/`HTTPS_PROXY` (= `http://127.0.0.1:3067`), so a bare `curl` is a *proxied* request.** Unset them for the true direct path: `env -u ALL_PROXY -u HTTP_PROXY -u HTTPS_PROXY curl …`. Labeling a proxied failure as "direct" inverts the entire diagnosis.
@@ -86,3 +208,5 @@ Then a short "最小修复" list — the 2–3 items that restore function — a
 ## References
 
 - `references/karing-windows.md` — Karing on Windows: config paths, port map, key setting fields, rule-order note.
+- `scripts/screen_nodes.py` — 节点可用性筛查（零配额）。DoH 新鲜 IP + sing-box 沙盒 + 零消耗判别器，
+  自动分区域/网络两类失败，自动清理。仅改运行时内存对象，不碰 Karing 配置。
