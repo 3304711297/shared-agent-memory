@@ -1,7 +1,7 @@
 {
   "generatedAt": "2026-09-15T00:00:00+08:00",
   "scope": "Hermes skills/ 目录",
-  "totalSkills": 86,
+  "totalSkills": 87,
   "sources": [
     {
       "source": "Hermes Web UI 官方目录（hub/webui 安装）",
@@ -50,11 +50,12 @@
     },
     {
       "source": "obra/superpowers",
-      "count": 14,
+      "count": 15,
       "checkType": "gh-release",
       "watchStatus": "已在看门(superpowers)",
       "skills": [
         "superpowers/brainstorming",
+        "superpowers/diagnosing-superpowers",
         "superpowers/dispatching-parallel-agents",
         "superpowers/executing-plans",
         "superpowers/finishing-a-development-branch",

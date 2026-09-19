@@ -40,13 +40,14 @@
       "installed": [
         {
           "where": "ZCode 插件 claude-plugins-official【组件已随 ZCode 拆除移除，2026-09-09】",
-          "version": "6.3.0",
-          "sha": "b36e0829c6d0140e93cfef2ca599b1b07d4a7797"
+          "version": "6.4.1",
+          "sha": "5bf4e78011075bcfc0dc295f0724994cd123ee71"
         },
         {
           "where": "Hermes 插件 upstream.json 记录",
-          "version": "6.3.0",
-          "sha": "b36e0829c6d0140e93cfef2ca599b1b07d4a7797"
+          "version": "6.4.1",
+          "sha": "5bf4e78011075bcfc0dc295f0724994cd123ee71",
+          "note": "2026-09-19 升级至 v6.4.1（commit 5bf4e78）：新增 diagnosing-superpowers 技能，executing-plans 重构为 Native inline execution 模式，保留本地中文强触发词与 Astra 路由化架构不变。"
         }
       ]
     },
