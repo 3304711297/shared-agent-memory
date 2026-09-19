@@ -1,9 +1,10 @@
 name: superpowers
-version: 6.3.0
+version: 6.4.1
 description: Core skills library for coding agents (TDD, debugging, planning, and review)
 author: obra
 skills:
   - ./skills/brainstorming
+  - ./skills/diagnosing-superpowers
   - ./skills/executing-plans
   - ./skills/writing-plans
   - ./skills/systematic-debugging

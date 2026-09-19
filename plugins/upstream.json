@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "last_check": "2026-09-03T22:30:00Z",
+  "last_check": "2026-09-19T06:30:00Z",
   "policy": {
     "auto_overwrite": false,
     "strategy": "issue_first_selective_patch",
@@ -10,8 +10,8 @@
     "superpowers": {
       "repo": "obra/superpowers",
       "branch": "main",
-      "last_synced_commit": "b36e082",
-      "last_synced_release": "v6.3.0",
+      "last_synced_commit": "5bf4e78",
+      "last_synced_release": "v6.4.1",
       "description": "Superpowers 代理开发纪律与工作流套件",
       "protected_files": [
         "plugin.yaml",
