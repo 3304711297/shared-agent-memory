@@ -30,7 +30,7 @@ IDLE_TIMEOUT_SECONDS = int(os.environ.get("OPENVIKING_IDLE_TIMEOUT", "120"))  # 
 CREATE_NO_WINDOW = 0x08000000
 
 LLAMA_SERVER_EXE = Path("D:/HermesRuntimes/llamacpp/b10679/cuda/llama-server.exe")
-BGE_M3_MODEL = Path("D:/HermesModels/bge-m3-Q8_0.gguf")
+EMBEDDING_MODEL = Path("D:/HermesModels/Octen-Embedding-0.6B-Q8_0.gguf")
 OPENVIKING_SERVER_EXE = Path.home() / ".openviking/venv/Scripts/openviking-server.exe"
 LOG_DIR = Path.home() / ".openviking/logs"
 
@@ -71,7 +71,7 @@ def wake_backends():
             emb_log = open(LOG_DIR / "embedding-server.log", "a", encoding="utf-8")
             cmd = [
                 str(LLAMA_SERVER_EXE),
-                "-m", str(BGE_M3_MODEL),
+                "-m", str(EMBEDDING_MODEL),
                 "--embedding",
                 "--port", str(EMBEDDING_PORT),
                 "--host", "127.0.0.1",

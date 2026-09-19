@@ -108,7 +108,7 @@ def stop():
                     pids.add(str(proc.info['pid']))
                 elif 'openviking-server.exe' in cmd:
                     pids.add(str(proc.info['pid']))
-                elif 'llama-server.exe' in cmd and 'bge-m3' in cmd:
+                elif 'llama-server.exe' in cmd and ('Octen-Embedding' in cmd or 'bge-m3' in cmd):
                     pids.add(str(proc.info['pid']))
             except (psutil.NoSuchProcess, psutil.AccessDenied):
                 pass
