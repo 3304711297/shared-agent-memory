@@ -125,14 +125,14 @@
     "created_by": null,
     "last_patched_at": null,
     "last_reused_patch_generation": 0,
-    "last_used_at": "2026-09-18T16:12:16.650876+00:00",
-    "last_viewed_at": "2026-09-18T16:12:16.648876+00:00",
+    "last_used_at": "2026-09-19T05:01:36.358279+00:00",
+    "last_viewed_at": "2026-09-19T05:01:36.355772+00:00",
     "patch_count": 0,
     "patch_generation": 0,
     "pinned": false,
     "state": "active",
-    "use_count": 10,
-    "view_count": 10
+    "use_count": 11,
+    "view_count": 11
   },
   "bsk-compact-page-read": {
     "archived_at": null,
@@ -275,14 +275,14 @@
     "created_by": "agent",
     "last_patched_at": "2026-09-18T15:46:11.486857+00:00",
     "last_reused_patch_generation": 26,
-    "last_used_at": "2026-09-18T16:11:52.529791+00:00",
-    "last_viewed_at": "2026-09-18T16:11:52.527791+00:00",
+    "last_used_at": "2026-09-19T05:01:45.327739+00:00",
+    "last_viewed_at": "2026-09-19T05:01:45.325235+00:00",
     "patch_count": 26,
     "patch_generation": 26,
     "pinned": false,
     "state": "active",
-    "use_count": 45,
-    "view_count": 45
+    "use_count": 49,
+    "view_count": 49
   },
   "devin-acp-provider-maintenance": {
     "archived_at": null,
@@ -845,14 +845,14 @@
     "created_by": null,
     "last_patched_at": "2026-09-18T09:10:47.007645+00:00",
     "last_reused_patch_generation": 13,
-    "last_used_at": "2026-09-18T13:14:24.846333+00:00",
-    "last_viewed_at": "2026-09-18T13:14:24.843331+00:00",
+    "last_used_at": "2026-09-19T05:06:05.205528+00:00",
+    "last_viewed_at": "2026-09-19T05:06:05.203000+00:00",
     "patch_count": 13,
     "patch_generation": 13,
     "pinned": false,
     "state": "active",
-    "use_count": 162,
-    "view_count": 162
+    "use_count": 163,
+    "view_count": 163
   },
   "simplify-code": {
     "archived_at": null,
