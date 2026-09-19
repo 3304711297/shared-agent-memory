@@ -6,6 +6,7 @@
 
 ## 实战经验（2026-09-18 真实闭环，agent 改代码 / ChatGPT 审）
 
+- **新会话必须显式开启「思考」模式（Reasoning）**：ChatGPT 新会话默认处于常规快速模型。在进行架构立项、代码审查与对抗式对拍等重逻辑任务前，**必须在发送首条提要前检查并显式点击输入框上方的「思考」按钮**（通过 evaluate 或 click 确认激活），严禁用无思考的轻量模式进行评审。
 - **判定规则验证成功后 ChatGPT 会给出 `CLOSED`**，用于收口；它会自行核对 GitHub CI run 的 SHA 与日志
   （所以在报告里必须给出**提交 SHA + run ID + 各档结果**，只给"CI 绿了"会被要求补证据）。
 - **它指出的每一条都必须本地复现后再修**：本轮 3 条指控全部成立；同时复现过程又挖出它没提到的一条真实缺口
@@ -47,9 +48,11 @@ env BSK_AUTO_START=0 bsk observe --session <id>
 若打开后处于新会话主页，可在 `observe` 输出的侧边栏历史列表中定位对应会话标题的 ref（如 `@e18 link "xxx"`）并通过 `bsk click @e18 --session <id>` 切换进入。
 
 ### 3. 输入报告与提交对拍
-1. **定位输入框**：
+1. **显式开启「思考」模式**：
+   在输入框上方或控制条中检查「思考」按钮（`button[aria-label*="思考"]` 或文案为 `思考`），确认其处于激活/开启状态；若未开启则显式点击开启，确保模型调用深度推理模型。
+2. **定位输入框**：
    在 `observe` 树中寻找目标输入框，形如 `@eXX textbox "与 ChatGPT 聊天"` 或 placeholder 为 `有问题，随便问`。
-2. **填充高密度审查提要**：
+3. **填充高密度审查提要**：
    ```bash
    env BSK_AUTO_START=0 bsk fill @eXX --value "..." --session <id>
    ```
@@ -58,7 +61,7 @@ env BSK_AUTO_START=0 bsk observe --session <id>
    - 针对上一轮问题的具体修复落点（代码文件、函数、机制变化）；
    - 契约测试与回归单测（测试名、测试覆盖场景）；
    - 本地全量测试与远端 GitHub Actions CI 真实 Run 结果。
-3. **回车提交**：
+4. **回车提交**：
    ```bash
    env BSK_AUTO_START=0 bsk press Enter --ref @eXX --session <id>
    ```
