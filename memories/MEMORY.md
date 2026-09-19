@@ -4,7 +4,7 @@ Windows: Karing proxy 127.0.0.1:3067 (UI 1666). 3067 listens only with an outbou
 §
 WorkBuddy2API (原 codebuddy2openai；仓库+工作区已改名) = 本地反代 127.0.0.1:8787/v1，OpenAI+Anthropic 双协议；Tauri v2 控制台（多账号/调度策略/积分），调度策略热读 settings.json 免重启。Ops -> OpenViking。
 §
-Hardware: RTX 4070 Laptop 8GB + 24GB; models/runtime junctioned to D:. D:\HermesModels: bge-m3=OV embedding(18082), MiniCPM5-2B + Qwen3.5-9B chat. OpenViking venv on-demand, sleeps 2min idle. MCP: chrome-devtools (--autoConnect, connect-only) + deepwiki.
+Hardware: RTX 4070 Laptop 8GB + 24GB; models/runtime junctioned to D:. D:\HermesModels: Octen-Embedding-0.6B=OV embedding(18082), MiniCPM5-2B (fast) + Qwen3.8-9B-Distill (quality) chat. Desktop-managed runtime: models auto-discovered by dir scan; spec-decode drafts/mmproj must live in models\assets\ and be prefixed `dspark-`/`mmproj`; presets.ini is auto-generated (never hand-edit); context window floor is 64K and overrides only grow. OpenViking venv on-demand, sleeps 2min idle. MCP: chrome-devtools (--autoConnect, connect-only) + deepwiki.
 §
 Memory: provider=openviking is ADDITIVE — built-in MEMORY.md/USER.md (4000/3000 chars) still inject in full every turn; low-freq -> viking_remember, built-in keeps high-frequency only. Near limit: SUBTRACT, never raise the cap. CJK costs 1.10x on Gemini's tokenizer vs 1.34x o200k (cap counts chars).
 §
