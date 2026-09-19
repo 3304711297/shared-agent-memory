@@ -32,6 +32,8 @@
 ### 1. 守护进程与会话启动
 Windows MSYS/Git-Bash 环境下执行 `bsk` 必须携带 `env BSK_AUTO_START=0`，避免无头自动拉起冲突：
 
+- **守护进程启动避坑（2026-09-19 实测）**：若 `bsk status` 提示 daemon 未启动，Windows 下直接前台执行 `bsk daemon start` 会因管道未脱钩导致挂起 180s 直至超时（exit 124）。必须通过 `cmd /c start /b bsk daemon start` 或后台任务拉起。
+
 ```bash
 # 启动会话并获取 session_id
 env BSK_AUTO_START=0 bsk session start --json

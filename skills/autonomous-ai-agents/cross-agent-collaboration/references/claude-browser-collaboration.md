@@ -53,6 +53,14 @@
 ### 1. 守护进程与会话启动
 MSYS/Git-Bash 环境下执行 `bsk` 必须携带 `env BSK_AUTO_START=0`，避免无头自动拉起冲突：
 
+- **守护进程启动避坑（2026-09-19 实测）**：若 `bsk status --json` 提示 daemon 未运行，在 Windows 下直接在 Hermes 前台执行 `bsk daemon start` 会因进程管道持有未脱钩，导致前台等待 180 秒直至打满超时被杀（**exit 124**，白等 3 分钟）。**必须使用后台命令启动**：
+  ```bash
+  # 方式一：Hermes 原生后台启动（推荐）
+  terminal(command="bsk daemon start", background=True)
+  # 方式二：Windows 命令提示符后台脱钩
+  cmd /c start /b bsk daemon start
+  ```
+- **启动会话**：
 ```bash
 # 启动会话并获取 session_id
 env BSK_AUTO_START=0 bsk session start --json
