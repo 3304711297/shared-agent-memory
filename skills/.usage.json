@@ -275,14 +275,14 @@
     "created_by": "agent",
     "last_patched_at": "2026-09-18T15:46:11.486857+00:00",
     "last_reused_patch_generation": 26,
-    "last_used_at": "2026-09-19T05:01:45.327739+00:00",
-    "last_viewed_at": "2026-09-19T05:01:45.325235+00:00",
+    "last_used_at": "2026-09-19T06:25:15.632351+00:00",
+    "last_viewed_at": "2026-09-19T06:25:15.629847+00:00",
     "patch_count": 26,
     "patch_generation": 26,
     "pinned": false,
     "state": "active",
-    "use_count": 49,
-    "view_count": 49
+    "use_count": 52,
+    "view_count": 52
   },
   "devin-acp-provider-maintenance": {
     "archived_at": null,
