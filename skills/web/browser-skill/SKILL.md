@@ -19,7 +19,9 @@ children after each shell call, including on Windows, complete these steps first
 1. Reuse the host daemon's existing `BSK_HOME` (or its default if unset). Set
    `BSK_AUTO_START=0` and run `bsk status --json`. Reuse a working daemon; an empty
    `browsers` list means the extension still needs connecting. Permission errors,
-   timeouts or invalid replies do not prove the daemon is absent.
+   timeouts or invalid replies do not prove the daemon is absent. A daemon that
+   stopped by itself is normal, not a crash: `~/.bsk/daemon.log.<date>` records
+   `daemon exceeded idle threshold; exiting` (`idle_secs`: 600) — restart per step 2.
 2. Only if the check reports a missing daemon and no host task is already starting
    it, run `bsk daemon start --foreground` with the same `BSK_HOME` in the host's
    approved persistent background task outside the per-command sandbox. Keep that

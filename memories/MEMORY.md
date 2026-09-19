@@ -6,7 +6,7 @@ WorkBuddy2API (原 codebuddy2openai；仓库+工作区已改名) = 本地反代 
 §
 Hardware: RTX 4070 Laptop 8GB + 24GB; models/runtime junctioned to D:. D:\HermesModels: bge-m3=OV embedding(18082), MiniCPM5-2B + Qwen3.5-9B chat. OpenViking venv on-demand, sleeps 2min idle. MCP: chrome-devtools (--autoConnect, connect-only) + deepwiki.
 §
-Memory: provider=openviking is ADDITIVE — built-in MEMORY.md/USER.md (3000/2000 chars) still inject in full every turn; low-freq -> viking_remember, built-in keeps high-frequency only. Near limit: SUBTRACT, never raise the cap. CJK costs 1.10x on Gemini's tokenizer vs 1.34x o200k (cap counts chars).
+Memory: provider=openviking is ADDITIVE — built-in MEMORY.md/USER.md (4000/3000 chars) still inject in full every turn; low-freq -> viking_remember, built-in keeps high-frequency only. Near limit: SUBTRACT, never raise the cap. CJK costs 1.10x on Gemini's tokenizer vs 1.34x o200k (cap counts chars).
 §
 PS scenarios -> pwsh -NoProfile (Store alias, version-independent) + [Console]::OutputEncoding=UTF8 for CJK;
 §
@@ -22,4 +22,4 @@ Hermes 工具三坑（本机复现）: ① search_files pattern 反斜杠被转�
 §
 workbuddy2api 构建由用户自己跑 `npm run tauri build`（PowerShell @ 仓库根）；我只说「可以构建了」，不自行琢磨隔离目录/替换脚本等绕行方案。
 §
-PR #106399 (tool_output.tool_overrides) review 已提交；cron `7284eb9483ae` 6h 盯合并（monitor=watch_pr_106399.py）。合并后经用户同意才配 terminal:8000。根因：terminal 输出被 max_bytes 50K 截断 < spillover 阈值 100K，永不落盘。
+Hermes 工具输出预算（源码级 09-19 实证）：层1 `tool_output.max_bytes`（默认50000/本机8000）只管 terminal，溢出 tee 到 `cache/terminal-output/`（153文件，完整可读）；层2 落盘 `cache/spillover/`（0文件，从未触发）。`read_file` 被 PINNED 为 inf（budget_config.py:9-10，防 persist→read→persist 死循环），单次注入~100K字符，两预算均够不着——**设计非bug**，修复须按路径豁免而非降阈值。#106399 tool_overrides 仍 OPEN 未入 main，写配置不生效须实测；#86401 已发实证评论（其 terminal 部分已过时）。

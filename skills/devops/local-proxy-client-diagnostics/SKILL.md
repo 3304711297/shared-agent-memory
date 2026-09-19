@@ -63,6 +63,9 @@ Then a short "最小修复" list — the 2–3 items that restore function — a
 
 ## Pitfalls
 
+- **The session shell exports `ALL_PROXY`/`HTTP_PROXY`/`HTTPS_PROXY` (= `http://127.0.0.1:3067`), so a bare `curl` is a *proxied* request.** Unset them for the true direct path: `env -u ALL_PROXY -u HTTP_PROXY -u HTTPS_PROXY curl …`. Labeling a proxied failure as "direct" inverts the entire diagnosis.
+- **`3065` force-direct failing against a CN-blocked target (google) is the port working correctly, not a fault.** Probe force-direct with a domestic URL (`baidu.com`), exactly as the split test above does — otherwise a correct result reads as a dead client.
+- **A vendor-wide, self-healing failure is a transient upstream, not a bad rule.** Signature: every subdomain of one vendor returns `000` through the rule port, with `curl: (35) schannel: failed to receive handshake` immediately after `CONNECT … 200 Connection established`, while unrelated domains — even on the same CDN — return 200. An upstream node/route blip presents exactly like a broken rule set. Retest 2–3 times over a few minutes before touching any config; in the observed case it healed on its own within minutes.
 - **Always pass `-4` and `--max-time N` to curl on Windows.** Resolution returns AAAA first; a dead upstream then makes curl sit for the full 60 s default, which reads as "the proxy is broken" when the node is simply unreachable.
 - **`CONNECT ... 200` followed by a hang is an upstream failure, not a routing one.** Don't start editing rule sets until you've seen this.
 - **Never write a running client's config file.** It auto-saves and overwrites your edit, or drops it silently. Recommend the GUI path and name the menu location instead.
