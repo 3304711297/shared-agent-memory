@@ -1,7 +1,7 @@
 {
   "generatedAt": "2026-09-15T00:00:00+08:00",
   "scope": "Hermes skills/ 目录",
-  "totalSkills": 87,
+  "totalSkills": 88,
   "sources": [
     {
       "source": "Hermes Web UI 官方目录（hub/webui 安装）",
@@ -117,10 +117,11 @@
     },
     {
       "source": "自研(无 author)",
-      "count": 8,
+      "count": 9,
       "checkType": null,
       "watchStatus": "自研/无上游-免监控",
       "skills": [
+        "devops/local-llm-ops",
         "devops/local-proxy-client-diagnostics",
         "devops/windows-crash-diagnostics",
         "hermes-auxiliary-models",
