@@ -1,6 +1,6 @@
 @echo off
 rem OpenViking disaster-recovery backup: data -> D:\openviking-backup\repo -> GitHub private repo
-rem vectordb/ and temp/ intentionally excluded: rebuildable via local bge-m3
+rem vectordb/ and temp/ intentionally excluded: rebuildable from the local embedding model
 rem Guard: aborts (exit 2) before mirroring when the source holds a large-shrink share of the
 rem backup (possible source loss). The backup is left untouched; a line is logged.
 rem Confirm intent, then override with: set OV_BACKUP_FORCE=1

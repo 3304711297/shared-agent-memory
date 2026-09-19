@@ -5,7 +5,7 @@ Usage:
   python openviking_service.py [start|stop|restart|status]
 
 - start: Launches openviking_lazy_gateway.py via pythonw (listens on 1933, auto-wakes 18082/1934 on demand, auto-sleeps on idle).
-- stop: Forcefully stops lazy gateway (1933), OpenViking backend (1934), and BGE-M3 embedding (18082), freeing all RAM and VRAM.
+- stop: Forcefully stops lazy gateway (1933), OpenViking backend (1934), and the embedding server (18082), freeing all RAM and VRAM.
 - restart: Stops all services and starts a fresh lazy gateway.
 - status: Displays the operational status of Gateway (1933), Backend (1934), and Embedding (18082).
 """
@@ -147,7 +147,7 @@ def status():
     print("\n--- OpenViking Status ---")
     print(f"  Lazy Gateway    (Port {LISTEN_PORT}): {'ONLINE ✓ (Listening)' if gw_online else 'OFFLINE ✗'}")
     print(f"  Backend Core    (Port {BACKEND_PORT}): {'ACTIVE  (Awake)' if bk_online else 'STANDBY / SLEEPING'}")
-    print(f"  BGE-M3 Embed    (Port {EMBEDDING_PORT}): {'ACTIVE  (VRAM in use)' if emb_online else 'STANDBY / SLEEPING'}")
+    print(f"  Embedding       (Port {EMBEDDING_PORT}): {'ACTIVE  (VRAM in use)' if emb_online else 'STANDBY / SLEEPING'}")
     if gw_online:
         print("  Auto-wake: Enabled (wakes 18082/1934 on first query, auto-sleeps after 120s idle)\n")
     else:
