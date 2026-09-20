@@ -153,3 +153,21 @@ plain test proves nothing. Build a spaced path with
 its arguments untruncated (this repo lives at `D:\ai coding\...`, so it is a
 real exposure, not a hypothetical).
 
+**Boolean parameters CANNOT be passed through `-File`.** Measured on both
+Windows PowerShell 5.1 and pwsh 7: `powershell -File script.ps1 -Flag true`
+fails binding against a `[bool]$Flag` parameter with "Cannot convert value
+\"System.String\" to type \"System.Boolean\"" (the value always arrives as a
+string from the command line), and the script dies immediately. Declare it
+`[string]$Flag` and convert inside (`$on = ($Flag -eq 'true')`). Any boolean
+you need to hand a script via `-File` has to travel as a string.
+
+**A health check that requires a port must know whether the service was
+supposed to start.** An updater that waits for `http://127.0.0.1:<port>/health`
+to answer will time out and (worse) *roll back a successful update* whenever
+the user has auto-start disabled — the new build is fine, the service simply
+wasn't asked to listen. Pass the user's auto-start setting into the script and
+branch the check: verify process liveness when auto-start is off, require the
+port only when the service should be running. Generalize: **any readiness
+signal must be gated on whether the thing you're waiting for was supposed to
+happen.**
+
