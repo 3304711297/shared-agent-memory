@@ -289,6 +289,67 @@ project 值可从 `loadCodeAssist` 响应的 `cloudaicompanionProject` 字段取
 **自相矛盾报文**（如 total=0 而 prompt=100）——此时「零 token」这个证据本身不可信，
 必须判否（不重试）。任何一项明细非零都不得重试，否则会把有实质产出的响应再发一次。
 
+## 配置层审计：全局开关会静默覆盖订阅声明
+
+**这一类问题的共同形状**：客户端全局设置不仅“补默认”，还会**覆盖订阅源已声明的值**，
+导致排查时“看订阅文件”与“看运行态”得出相反结论。**必须两个都读再 diff。**
+
+### 实例：TLS 跳过证书验证的全局覆盖（2026-09-20 实测）
+
+| 来源 | `insecure=true` | `insecure=false` |
+|---|---|---|
+| 订阅源自己声明（`karing_subscribe.json`） | 23 个节点 | **40 个节点** |
+| 运行态实际（`service_core.json`） | **63 个** | **0 个** |
+
+⇒ 全局 `tls.enable_insecure=true` 把 40 个“本应校验证书”的节点一起降级了。
+⇒ 排查命令：从 `service_core.json` 数 `outbounds[].tls.insecure`，与订阅里声明的逐项对比。
+
+**但这不一定是缺陷，取决于用户取舍**——本机用户是**故意**全局关闭的：
+
+> 用户明确表述：“我不在乎网络安全，要的只有可用性和延迟还有网速。”
+
+⇒ **在本用户的场景下，全局 insecure 是合理选择，不要反复劝其开启校验。**
+⇒ 但**仍要告知代价与范围**（本题：40 个额外节点被降级），让取舍是知情的。
+⇒ 判断能否关：先测证书链有效性（`ssl.create_default_context()` 直连节点 SNI）。
+   实测 27 个不同 SNI 里 24 个证书有效（另 3 个失败是 DNS 解析问题，非证书问题）。
+
+### 实例二：EDNS Client Subnet 的“预期收益”实测为零
+
+直觉认为 ECS（把用户网段告知 DNS，帮助 CDN 选址）能提升速度。**实测否定**：
+对手工构造的 DNS 报文开启/关闭 ECS，`www.baidu.com` / `www.taobao.com` /
+`cdn.jsdelivr.net` / `www.bilibili.com` 返回的都是**同一批 IP，仅顺序不同**（轮询）。
+⇒ 大网段广播/anycast 型 CDN 不依赖 ECS 选址；开着不提升速度，只多送隐私。
+⇒ 但**也不影响可用性/速度**，故按用户标准无需改动。
+
+（手工构造带 ECS 的 DNS 报文：OPT RR type=41 + OPTION-CODE 8，
+ RDATA = FAMILY(1=IPv4) + SOURCE-PREFIX + SCOPE-PREFIX + 截断 IP。
+ 常见错误：把 ECS option 字段写进 OPT 的 RDLEN 里当裸结构——会收到 FORMERR(rcode=1)。）
+
+### 实例三：明文 UDP DNS vs DoH 的实测代价
+
+| 方式 | 实测耗时 | 解析结果 | 谁能看到查询内容 |
+|---|---|---|---|
+| 明文 UDP:53（经代理） | **67 ms** | 103.235.46.102/115 | 本地 ISP 看不到；**节点运营方能看到** |
+| DoH（经代理） | **698 ms** | 同一批 IP | 仅能看到“连了 8.8.8.8” |
+
+⇒ DoH 走代理要额外建 HTTPS 连接，**慢 10 倍**，解析结果相同。
+⇒ 对“可用性/延迟/网速优先”的用户，**明文 UDP 是更优选择**，不是安全隐患。
+
+## 用户取舍原则（本机基线，别再劝）
+
+本用户对代理客户端的选择标准是**可用性 / 延迟 / 网速 优先**，不是安全：
+
+| 项 | 用户选择 | 用户理由 | 处置 |
+|---|---|---|---|
+| TLS 跳过证书验证 | **全局开** | 只要可用性/延迟/网速 | 不改。已告知范围（额外 40 节点降级）后尊重选择 |
+| 更新通道 | **beta** | 喜欢体验新东西 | 不改 |
+| EDNS Client Subnet | 开 | （默认） | 不改（实测零收益也零损害） |
+| DNS | 明文 UDP:53 | — | 不改（实测比 DoH 快 10 倍） |
+
+⇒ **不要把自己的安全偏好当默认建议反复上提**。告知代价 → 尊重决定 → 不再重复。
+⇒ 提建议时要把“安全风险”与“对本用户实际指标（可用/延迟/带宽）的影响”分开陈述——
+   后者才是他会采纳的依据。
+
 ## Pitfalls
 
 - **The session shell exports `ALL_PROXY`/`HTTP_PROXY`/`HTTPS_PROXY` (= `http://127.0.0.1:3067`), so a bare `curl` is a *proxied* request.** Unset them for the true direct path: `env -u ALL_PROXY -u HTTP_PROXY -u HTTPS_PROXY curl …`. Labeling a proxied failure as "direct" inverts the entire diagnosis.

@@ -83,6 +83,53 @@ powershell -NoProfile -Command "foreach (\$k in 'karing','clash','sing-box') { i
   `history.time` 才能对齐到用户的点击时刻。
 - `cache.db` **不是** SQLite（直连报 `file is not a database`），不要试图用 sqlite3 读。
 
+## 全量配置审计路径（本次实测总结）
+
+要“全面看一遍配置”，按下面顺序读，能覆盖全部可审计面：
+
+| 步骤 | 读什么 | 能发现什么 |
+|---|---|---|
+| 1 | `karing_setting.json`（UI 真值，~269 行全读） | 所有开关的**用户意图** |
+| 2 | `service_core.json`（运行态真值） | 开关**实际下发**成了什么；与 UI 的 diff 就是被覆盖/被忽略的项 |
+| 3 | `karing_subscribe.json` | 订阅源**自己声明的**节点参数（与运行态对比看到全局覆盖） |
+| 4 | `karing_subscribe_use.json` | 当前选中节点、favorites、recent、自定义分流组 |
+| 5 | 进程 + 监听端口 | 实际暴露面（`Get-NetTCPConnection`，看 `LocalAddress`） |
+
+### 易被忽略但值得查的字段
+
+| 字段 | 含义 | 本次实测值 | 判定 |
+|---|---|---|---|
+| `tls.enable_insecure` | 全局跳过证书验证 | `true` | ⚠️ 覆盖了订阅的 40 个 `false`；本用户故意开（取舍见 SKILL.md） |
+| `auto_update_channel` | 更新通道 | `beta` | 用户偏好尝新，不改 |
+| `dns.enable_client_subnet` | 带 ECS 查询 | `true` | 实测零收益零损害 |
+| `dns.outbound_addresses` | 出站 DNS 服务器 | `udp://8.8.8.8` | 明文但快 10 倍（实测对比见 SKILL.md） |
+| `dns.proxy_resolve_mode` | 代理解析模式 | `fakeip` | 仅 TUN 开启时才有意义，当前 TUN 关 |
+| `statistics.enable` | 本地统计 | `false` | 符合隐私偏好 |
+| `auto_select.interval` | 自动切换周期 | `28800`（8h） | 但 `urltest.interval=-1s` 使其**实际未生效** |
+| `auto_select.filter` | 自动切换时排除失效节点 | `false` | 仅在自动切换启用时才有意义 |
+| `proxy.auto_set_system_proxy` | 写系统代理 | `true` | ✓ |
+| `proxy.disconnect_when_quit` | 退出时断开 | `true` | ✓ 防止系统代理指向死端口 |
+| `proxy.auto_add_to_firewall` | 自动加防火墙规则 | `true` | ✓ |
+| `perapp.enable` | 分应用代理 | `true` | Windows 下需管理员身份启动才生效 |
+| `tun.enable` | TUN 模式 | `false` | ✓ 按需手动开（符合用户策略） |
+
+### 规则顺序的“假短路”陷阱（本次差点误报）
+
+`service_core.json` 的 `route.rules` 前几条形如：
+
+```json
+{"inbound": ["mixed_in_direct"], "outbound": "direct_out", "name": "direct[all]"}
+{"inbound": ["mixed_in_proxy"],  "outbound": "<node>",     "name": "proxy[all]"}
+```
+
+乍看像“无条件规则排在自定义规则之前 ⇒ 短路了后续所有分流”。**但它是 `inbound` 限定的**：
+那两个规则只作用于 3065/3066 两个强制端口，3067（规则端口）不受影响，
+会继续跑完全部自定义分流组。
+
+⇒ 判断规则是否全局短路，**必须先看有无 `inbound` / `source_ip_cidr` 等匹配条件**；
+   不能只看“有没有 rule_set/domain 字段”。
+⇒ 实测端口对应：`mixed_in_direct`=3065、`mixed_in_proxy`=3066、`mixed_in_rule`=3067。
+
 ## Paths
 
 - Config dir: `C:\Users\<user>\AppData\Roaming\karing\karing\`
@@ -97,7 +144,7 @@ powershell -NoProfile -Command "foreach (\$k in 'karing','clash','sing-box') { i
 
 `service_core.json` is ground truth for what is running; `karing_setting.json` is what the UI shows. Diff them when behavior disagrees with settings.
 
-## Port map (defaults)
+## 端口速查（含 UI 显示阈值）
 
 | Port | Role |
 |---|---|
@@ -106,8 +153,20 @@ powershell -NoProfile -Command "foreach (\$k in 'karing','clash','sing-box') { i
 | 3065 | mixed **force direct** |
 | 3057 | control (local API) |
 | 3050 | cluster |
-| 3072 | html board |
+| 3072 | html board（在线面板） |
 | 4067 / 4066 | net-share variants |
+
+**节点延迟的颜色阈值（在线面板 zashboard，非 sing-box 内核）：**
+
+| 显示 | 条件 | 位置 |
+|---|---|---|
+| 🟢 绿 | `< 200 ms` | `D:/Karing/data/flutter_assets/assets/zashboard/assets/index-*.js` 里的 `delay:i=200` |
+| 🟡 黄/橙 | `200 ~ 300 ms` | 同上 |
+| 🔺 红（警示三角，非「不可用」） | `≥ 300 ms` | `delay(300` —— **只是「慢」的标记** |
+
+⇒ 因此「恰好某几个节点红」多半就是它们越过了 300ms 线，而非故障。
+⇒ 面板是 Flutter 应用，`karing.exe` 本身仅 661KB，UI 逻辑在 `D:/Karing/data/`；
+   `cache.db` **不是** SQLite（直连报 `file is not a database`），不要用 sqlite3 读。
 
 Windows system proxy is set to `127.0.0.1:3067` via `HKCU\Software\Microsoft\Windows\CurrentVersion\Internet Settings` (`ProxyServer`, `ProxyOverride`, `ProxyEnable`).
 
