@@ -313,6 +313,9 @@ hermes cron edit <job_id> --deliver local  # 或换成真实可投递的目标
 
 **Monitor 模式会让 agent 完全不跑 —— 不要用它验证 LLM 链路。** `monitor` 脚本输出未变时整个 run 被抑制，状态记 `no_change (agent run suppressed)`，**模型连接问题根本不会暴露**。验证 LLM 层必须用不带 monitor 的临时 job。
 
+**Windows 杀后台进程残留子进程陷阱（2026-09-20 实测）。**
+在 Windows 环境下通过 `process_manage(action='kill')` 终止后台命令时，默认只杀掉外层 shell 进程，其派生的原生 Windows 子可执行程序（如 `uv.exe`、`git.exe`、`python.exe`）可能会脱离父进程成为孤儿进程继续在后台常驻并占满网络连接或端口。排查与彻底清理：终止后台任务后，需通过 PowerShell `Get-Process <name>` 显式复查，或调用 `taskkill /F /T /PID <pid>` 级联杀死整棵进程树。
+
 - The orange「已保存到记忆 N entries」badge is the **foreground `memory` tool call's title template** (desktop i18n `zh.ts` → `toolTitles.memory.done`), NOT a background review fork write. Background-fork writes surface via `display.memory_notifications` (`💾 Memory updated` system line) — a different UI element.
 - `config.yaml` changes need **no restart**: `background_review.enabled` is re-read at every spawn (file mtime+size signature cache invalidates on edit); nudge intervals are read when each message constructs its agent.
 - **Desktop Composer 焦点劫持与 Popover 自动关闭排查（2026-09-17）**：上游 `floating-target.ts` 监听全局 `pointermove` 跟踪跨分屏浮动输入框，但因缺少覆盖层保护和未判定 composer 宿主，导致只要光标在聊天区滑动就会强行执行 `editor.focus()` 抢焦点，使状态栏 Popover（如 token-stats）遭遇失焦并自动关闭。排查时需确保：① `BLOCKING_OVERLAY_SELECTOR`（包含 `[data-radix-popper-content-wrapper]` 等）检测到活动浮层时直接放弃焦点抢占；② `pointermove` 仅在光标直指 composer 宿主或浮动输入框跨分屏输入时才聚焦，绝不在光标滑过聊天内容或状态栏时窃取焦点。
