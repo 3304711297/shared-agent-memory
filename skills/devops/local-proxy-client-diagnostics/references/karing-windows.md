@@ -221,6 +221,72 @@ gstatic.com          TTL=1（被 fakeip 规则强制，quic 快速刷新）
    `dns.proxy_resolve_mode=fakeip` 只在 `tun.enable=true` 时有意义；
    `statistics.cache_*` 只在 `statistics.enable=true` 时生效。
 
+## 内置 DNS 清单与槽位选型（2026-09-20 全量实测）
+
+### 内置清单在哪里（要改 DNS 时先看这里）
+
+`lib/app/modules/setting_manager.dart` 的 `SettingConfigItemDNS` 常量表（约 700-760 行），
+**30+ 条**预设，按提供商分组，每家含 UDP / DoT(`tls://`) / DoH(`https://`) / QUIC 变体：
+Local、DHCP、AliDNS、DNSPod、Cloudflare、Google、TrafficRoute、OpenDNS、Yandex、Comodo、AdGuard。
+
+反查命令（不需要 clone 仓库）：
+
+```bash
+gh search code 'dns.alidns.com' --repo KaringX/karing --limit 20   # 反查定义点
+gh api "repos/KaringX/karing/contents/lib/app/modules/setting_manager.dart" \
+  --jq .content | base64 -d > sm.dart && grep -n "kDNSIsp" sm.dart  # 拿全表
+```
+
+### 槽③『直连流量』实测排名（23 选项 × 10 个国内域名）
+
+指标 = 解析出的首个 IP 的 **TCP:443 握手耗时**（直接对应浏览体验，比解析耗时重要）。
+
+| 服务器 | 成功率 | 解析中位 | TCP 中位 |
+|---|---|---|---|
+| DNSPod doh `1.12.12.12` | 10/10 | 278ms | **32ms** |
+| AliDNS udp `223.6.6.6` | 10/10 | **43ms** | **32ms** |
+| AliDNS udp `223.5.5.5` | 10/10 | **40ms** | 33ms |
+| AliDNS doh 域名 / DNSPod doh 域名 / AliDNS dot | 10/10 | 146~298ms | 33~34ms |
+| TrafficRoute `180.184.1.1` / `2.2` | 10/10 | 72~81ms | 36~39ms |
+| OpenDNS / **Local（路由器/系统）** | 10/10 | 110ms / 0ms* | 47ms / **49ms** |
+| Cloudflare dot `1.1.1.1` | 10/10 | 1391ms | 164ms |
+| Cloudflare udp `1.1.1.1` | **9/10** | 71ms | 183ms |
+| Comodo / Yandex | 10/10 · 9/10 | 232~300ms | 198~254ms |
+
+\* Local 的“0ms”是 Windows 本地缓存假象。真实差距在 TCP 那列：
+**`local`(49ms) 比 AliDNS(33ms) 慢 ~16ms**，12 个域名里 11 个变快。
+
+⇒ **槽③ 建议 `udp://223.5.5.5`**：解析快（40ms）+ TCP 快（33ms）+ 10/10 稳定。
+   不选 DNSPod DoH——TCP 虽同为 32ms，但**解析阶段多花 240ms**（278 vs 40）。
+⇒ 不能选的：Google/Cloudflare 的 DoT/DoH **直连不通**（槽③ 就是直连，填了直接失效）；
+   `dot.pub`(7/10) / `1.1.1.1 udp`(9/10) / `Yandex`(9/10) 不稳定。
+
+### 槽②『代理服务器』实测——所有可用选项无差别
+
+指标 = 解析出的 IP 连**节点端口**的耗时（决定能否连上）。
+
+| 服务器 | 成功率 | TCP 中位 |
+|---|---|---|
+| AliDNS udp / DNSPod doh / Google udp / Local | 8/8 | **90~93ms** |
+| Cloudflare dot / Yandex / Comodo / OpenDNS | 7~8/8 | 92~101ms |
+| Google dot `8.8.8.8` / Google doh / Cloudflare doh | **0/8** | 失败 |
+
+⇒ 全部可用项落在 **90~101ms**，差异属噪声 ⇒ **保持 `udp://8.8.8.8` 即可，不必改**。
+
+### 四槽选型结论（本机基线）
+
+| 槽 | 最优值 | 状态 |
+|---|---|---|
+| DNS服务器 | `local` | ✅ 不参与（四项全为 IP 字面量时） |
+| 代理服务器 | `udp://8.8.8.8` | ✅ 最优区（无差别，不改） |
+| 直连流量 | `udp://223.5.5.5` | ❌ 原为 `local`，**唯一值得改的一项** |
+| 代理流量 | `udp://8.8.8.8`（经节点） | ✅ 最优（明文 UDP 5~6ms vs DoH 267~279ms） |
+
+### 复用脚本
+
+`scripts/dns_slot_bench.py` — 一键对比内置清单在各槽的表现。
+改 `SLOT` 变量选槽位；含正确的 DNS 报文解析（CNAME + 压缩指针）与 DoT/DoH 客户端。
+
 ## DNS-服务器 页逐项语义（源码 + 官方文案定案）
 
 UI 四行 + 一开关 = `karing_setting.json` → `dns` 的四个数组 + `enable_static_ip_for_resolver`：
