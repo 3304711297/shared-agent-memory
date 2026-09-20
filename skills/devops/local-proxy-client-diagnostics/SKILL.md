@@ -51,7 +51,15 @@ Don't use for: passive recon of a remote domain (`domain-intel`), or exposing a 
 7. **Grep the client's service log** for `ERROR` (usually a `service_core.log` next to the config) and read the last ~30 lines — it names the failing outbound tag and the dial timeouts directly.
    *Criterion:* root cause is quoted from the log, not inferred.
 
-8. **Deliver a decision table and stop.** See below.
+8. **当字段语义只能猜时，去读客户端源码定案**（不要猜，也不要只信博客/文档）。
+   开源客户端（如 Karing）在 GitHub 上可直接检索：`gh search code '<字段名>' --repo <owner>/<repo>`
+   会直接指出定义点与全部调用点；再用 `gh api repos/<o>/<r>/contents/<path> --jq .content | base64 -d`
+   拉全文看上下文。
+   *判据：*你能引用具体文件与行为（如「`test_domain` 仅在 `testDNSConnectLatency` 中作为
+   `req.domain`，而该函数只被 3 个 screen 手动调用」），而不是「文档说它大概是…」。
+   ⇒ **这是终结猜测的唯一手段**：本次靠它纠正了两条错报（test_domain 用途、ttl 真实影响）。
+
+9. **Deliver a decision table and stop.** See below.
 
 ## Decision Table Deliverable (this user's format)
 
@@ -370,6 +378,16 @@ project 值可从 `loadCodeAssist` 响应的 `cloudaicompanionProject` 字段取
 
 ## Pitfalls
 
+- **不要按字段名猜语义——去读客户端源码定案（2026-09-20 两条错报的根因）。** 两次把配置字段说错：
+  ① `dns.test_domain` 从名字猜成“DNS 泄露检测”，实为 **DNS 延迟测试**的探测域名；
+  ② `dns.ttl` 从“12 小时”猜成“污染会被缓存半天、解释了 gstatic 反复”，实为**与该困扰无关**
+  （那困扰的真因是系统 DNS 拿到错 IP；`gstatic.com` 经客户端查本身正常），且用户
+  「每次开都更新订阅」会重启内核清空缓存，12h TTL 根本活不到。
+  ⇒ **规则：向用户陈述某字段的作用前，先定案。** 手段优先级：源码调用点（`gh search code`）>
+     官方文档原文 > 同名推断。只有字段名相似而没有调用链证据时，**标明“未验证”**而不是陈述。
+  ⇒ **反模式**：把自己推测的字段用途当成事实写进表格，用户会据此去改错的旋钮。
+  ⇒ 旁证：把两个独立现象强行关联也是同一类错误（TTL 与 gstatic 污染）。
+     陈述因果关系前，必须有把两者连起来的直接证据。
 - **The session shell exports `ALL_PROXY`/`HTTP_PROXY`/`HTTPS_PROXY` (= `http://127.0.0.1:3067`), so a bare `curl` is a *proxied* request.** Unset them for the true direct path: `env -u ALL_PROXY -u HTTP_PROXY -u HTTPS_PROXY curl …`. Labeling a proxied failure as "direct" inverts the entire diagnosis.
 - **`3065` force-direct failing against a CN-blocked target (google) is the port working correctly, not a fault.** Probe force-direct with a domestic URL (`baidu.com`), exactly as the split test above does — otherwise a correct result reads as a dead client.
 - **A vendor-wide, self-healing failure is a transient upstream, not a bad rule.** Signature: every subdomain of one vendor returns `000` through the rule port, with `curl: (35) schannel: failed to receive handshake` immediately after `CONNECT … 200 Connection established`, while unrelated domains — even on the same CDN — return 200. An upstream node/route blip presents exactly like a broken rule set. Retest 2–3 times over a few minutes before touching any config; in the observed case it healed on its own within minutes.

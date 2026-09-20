@@ -157,13 +157,60 @@ print(len(rows))  # → 176
 
 | 键 | 本次实测值 | 判读 |
 |---|---|---|
-| `dns.ttl` | `43200`（12 小时） | ⚠️ **偏长**：DNS 污染/错解析会被缓存半天，难以自愈。缩短可快速恢复 |
-| `dns.test_domain` | `'gstatic.com'` | “DNS 泄露检测”用的域名，与延迟检测 URL **不是同一个**。重复报泄露时先查它自己的解析 |
+| `dns.ttl` | `43200`（12 小时） | **本用户用法下无需改**（见下方专节）：它只影响 DNS 缓存生存时长，而「每次开客户端手动更新订阅」会重启内核并清空缓存 |
+| `dns.test_domain` | `'gstatic.com'` | “**DNS 延迟测试**”的探测域名（源码 `testDNSConnectLatency`），**不是**泄露检测，也**不在自动路径上**——只在你手点「自动设置服务器 / 服务器测延迟 / 网络检查」时才用。平时上网根本不读这个值 |
 | `webdav.*` + `auto_backup.*` | 全空/全关 | 无任何配置备份（本用户已表态无所谓，不再提醒） |
 | `rule_sets.disable_isp_diversion_group` | `true` | 关了运营商线路自适应（节点名里的 CTCU/CMCU/CUCM 就是这类标记） |
 | `auto_select.*` | interval=28800 但 urltest.interval=-1s | “配了但不生效”——`route.final` 指向具体节点时会绕过 urltest |
 | `ui.net_check_domain` | `daily-cloudcode-pa.googleapis.com` | 用户自定义的连通性检测域名（非默认） |
 | `statistics.cache_days` / `cache_size_limit_mb` | 7 / 1024 | 仅 statistics.enable 开启时才有意义 |
+
+### `dns.ttl` 与 `dns.test_domain`：两个曾被误判的项（源码定案）
+
+**先说结论：对本用户都不需要改。** 两条曾被错报，记录正确判读以免重犯。
+
+#### `dns.ttl` = `rewrite_ttl`，但「客户端每次开都更新订阅」会清空缓存
+
+链路上游：`karing_setting.json` 的 `dns.ttl` → 编译为 sing-box 的 **`rewrite_ttl`**
+（定义见 `setting_manager.dart:786` → `'ttl': ttl.inSeconds`），
+散落下发给每个 outbound 的 `domain_resolver` 与 DNS 规则动作。
+
+**sing-box 语义**：`rewrite_ttl` = **重写 DNS 回应中的 TTL**（不是“缓存存活时长”，但效果等同——
+TTL 就是缓存条的过期时间）。实测把上游 30~300s 的 TTL 统一改写为 43200s：
+
+```
+www.baidu.com        第1次 191ms TTL=43200 → 第2次 11ms（缓存命中）
+gstatic.com          TTL=1（被 fakeip 规则强制，quic 快速刷新）
+<出站节点域名>   第1次 5.5ms TTL=41535（= 43200 减去已存活时间，倒计时中）
+上游真实值（Google DoH，绕开 rewrite）：节点域名 TTL=30、google 系 300s
+```
+
+**为何不用改（决定性证据）**：用户习惯「每次打开客户端手动更新订阅」，
+而 `home_screen.dart:1227` 显示：只要任一订阅 `enable && reloadAfterProfileUpdate` 为真，
+就调 `setServerAndReload()` → `VPNService.reload()` ⇒ **内核重启、DNS 缓存清空**。
+本机三个订阅中「自定义」为 `true`，故每次更新订阅都会清缓存，12h TTL 活不到一半。
+
+⇒ **判据**：评估 TTL 类“缓存生存时长”参数前，**先查用户是否频繁重启内核/更新订阅**。
+   频繁重启 ⇒ 长 TTL 无害（只省查询）；长期不重启 ⇒ 才考虑改短（如 600s）。
+⇒ 唯一的真实代价：上游节点域名 TTL 仅 30s（机场可能快速切 IP），被放大到 12h 后
+   切 IP 时本地不能及时跟上——但用户遇到连不上本来就会去更新订阅，自动清除。
+
+#### `dns.test_domain` 不是泄露检测，也不在自动路径上
+
+源码 `server_manager.dart` → `testDNSConnectLatency(dnsUrl, detour, testDomain)`：
+`req.domain = testDomain ?? settingConfig.dns.testDomain`。
+
+它**只被三处手动调用**（无定时/自动任务）：
+
+| 调用点 | 触发时机 |
+|---|---|
+| `dns_auto_setup_screen.dart` | 手点「自动设置服务器」 |
+| `dns_settings_screen.dart` | 手点某 DNS 服务器测延迟 |
+| `net_check_screen.dart` | 手点「网络检查」 |
+
+⇒ 平时上网时这个值**根本不会被读取**，与 DNS 泄露检测无关（那个看的是系统私有 DNS 配置）。
+⇒ `gstatic.com` 作为探测目标合适（全球可解析、不敏感、结果无关紧要），无需替换。
+⇒ 仅当 DNS 延迟测试结果异常时才考虑换（如 `example.com`）。
 
 ### “配置了但不生效”的识别法
 
