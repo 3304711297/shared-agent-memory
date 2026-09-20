@@ -23,3 +23,5 @@ Hermes 工具三坑（本机复现）: ① search_files pattern 反斜杠被转�
 workbuddy2api 构建由用户自己跑 `npm run tauri build`（PowerShell @ 仓库根）；我只说「可以构建了」，不自行琢磨隔离目录/替换脚本等绕行方案。
 §
 Hermes 工具输出预算（源码级 09-19 实证）：层1 `tool_output.max_bytes`（默认50000/本机8000）只管 terminal，溢出 tee 到 `cache/terminal-output/`（153文件，完整可读）；层2 落盘 `cache/spillover/`（0文件，从未触发）。`read_file` 被 PINNED 为 inf（budget_config.py:9-10，防 persist→read→persist 死循环），单次注入~100K字符，两预算均够不着——**设计非bug**，修复须按路径豁免而非降阈值。#106399 tool_overrides 仍 OPEN 未入 main，写配置不生效须实测；#86401 已发实证评论（其 terminal 部分已过时）。
+§
+共享记忆真源（GitRepos/shared-agent-memory）必须常驻 main：checkout hermes 会让 projects/ 消失、memories/topics junction 断链，而 git status 仍干净（静默故障）。自检 `python scripts/check_memory_layout.py`（真源/home 各一份，须同源）。

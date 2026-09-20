@@ -46,6 +46,27 @@ export PYTHONPATH="$(pwd)"
 (POSIX-only tests need skip guards — see the cross-platform guard list in
 `references/contributor-guide.md`.)
 
+**Testing a DIFFERENT repo on this machine: bare `python` is NOT yours.**
+Inside the Hermes terminal, `python -m pytest` resolves to Hermes's own
+bundled interpreter (`%LOCALAPPDATA%/hermes/hermes-agent/venv/Scripts/python.exe`),
+which has no pytest and none of the project's dependencies — so it reports
+`No module named pytest` even though the target repo is perfectly healthy.
+That message reads like a broken checkout and is not one: always drive the
+target repo's own venv explicitly.
+
+```bash
+cd "<repo>" && ./.venv/Scripts/python.exe -m pytest -q      # ✓ project venv
+cd "<repo>" && python -m pytest -q                          # ✗ Hermes's python
+```
+
+This is the general shape of a **self-inflicted false failure** — the signal
+comes from your own tooling choice, not the code. Before believing any
+"No module named …" / "command not found" from a test run, confirm which
+interpreter or toolchain actually executed (`head -1` of the traceback
+names it). Distinguishing self-inflicted failures from real ones matters
+most right after a fix: reporting a phantom regression wastes a whole
+round of someone else's attention.
+
 ### Path / Filesystem
 
 **Line endings.** Git may warn `LF will be replaced by CRLF`. Cosmetic — the
