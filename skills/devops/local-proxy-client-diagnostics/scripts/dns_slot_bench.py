@@ -19,6 +19,7 @@ import base64
 import json
 import os
 import random
+import re
 import socket
 import ssl
 import statistics
@@ -27,8 +28,24 @@ import subprocess
 import time
 from concurrent.futures import ThreadPoolExecutor
 
-SLOT = "direct"          # "direct" = 直连流量槽（解析国内域名）；"outbound" = 代理服务器槽（解析节点域名）
-ROUNDS = 1
+SLOT = "direct"          # "direct" = 直连流量槽（解析国内域名）
+                         # "outbound" = 代理服务器槽（解析节点域名）
+                         # "throughput" = 网速实测（钉住各解析器给出的 IP 下载，含同IP对照组）
+ROUNDS = 2               # 每个测点重复次数（取中位，A/B 交错）
+
+# throughput 模式用：国内镜像站（大文件，同一路径便于公平比较）
+THROUGHPUT_TARGETS = [
+    ("mirrors.aliyun.com", "/ubuntu/ls-lR.gz"),
+    ("mirrors.cloud.tencent.com", "/ubuntu/ls-lR.gz"),
+    ("mirrors.huaweicloud.com", "/ubuntu/ls-lR.gz"),
+    ("mirrors.163.com", "/ubuntu/ls-lR.gz"),
+    ("mirror.nju.edu.cn", "/ubuntu/ls-lR.gz"),
+    ("mirrors.bfsu.edu.cn", "/ubuntu/ls-lR.gz"),
+    ("mirrors.zju.edu.cn", "/ubuntu/ls-lR.gz"),
+    ("mirrors.pku.edu.cn", "/ubuntu/ls-lR.gz"),
+]
+MAX_BYTES = 20_000_000   # 单次下载上限（省流量）
+MAX_TIME = 8             # 单次下载最长时间（秒）
 
 ENV = {k: v for k, v in os.environ.items()
        if k.upper() not in ("ALL_PROXY", "HTTP_PROXY", "HTTPS_PROXY")}
@@ -215,7 +232,119 @@ def node_domains():
     return list(seen.items())[:8]
 
 
+def download_speed(host, path, ip, tmpfile, max_time=MAX_TIME, max_bytes=MAX_BYTES):
+    """钉住 IP 实测下载。返回 (MB/s, 连接ms, 字节, http码)
+
+    注意：Windows/git-bash 下 `curl -o /dev/null` 会报 `(23) write error`，
+    必须写真实临时文件（本坑导致首版测速全部 0 MB/s）。
+    """
+    cmd = ["curl", "-sS", "-o", tmpfile, "--max-time", str(max_time),
+           "--range", f"0-{max_bytes}", "--resolve", f"{host}:443:{ip}",
+           "-w", "%{speed_download}|%{time_connect}|%{size_download}|%{http_code}",
+           f"https://{host}{path}"]
+    try:
+        r = subprocess.run(cmd, capture_output=True, timeout=max_time + 8, env=ENV)
+        spd, tc, size, code = r.stdout.decode("utf-8", "replace").strip().split("|")
+        return float(spd) / 1_000_000, float(tc) * 1000, int(float(size)), code
+    except Exception as e:
+        return None, None, 0, f"ERR:{type(e).__name__}"
+
+
+def detect_local_dns():
+    """自动探测本机系统 DNS（= 'local' 解析器实际使用的地址），避免把内网 IP 写进仓库。
+
+    Windows: 解析 `ipconfig /all` 的 DNS Servers 段；失败则回退到网关。
+    """
+    try:
+        r = subprocess.run(["ipconfig", "/all"], capture_output=True, timeout=20)
+        text = r.stdout.decode("gbk", "replace")
+        m = re.search(r"(?:DNS Servers|DNS 服务器)[^\d]*?:\s*([\d.]+)", text)
+        if m and m.group(1):
+            return m.group(1)
+    except Exception:
+        pass
+    try:
+        r = subprocess.run(["ipconfig"], capture_output=True, timeout=20)
+        text = r.stdout.decode("gbk", "replace")
+        m = re.search(r"(?:Default Gateway|默认网关)[^\d]*?:\s*([\d.]+)", text)
+        if m:
+            return m.group(1)
+    except Exception:
+        pass
+    return "223.5.5.5"          # 兜底：直接对比两个公共 DNS
+
+
+def main_throughput():
+    """网速对比：钉住各解析器给出的 IP 实际下载。
+
+    含**同 IP 对照组**（两解析器返回同一 IP 的目标）——用它量出噪声底线，
+    再判断“不同 IP”的差异是否可信。没有对照组就会把噪声当收益。
+    """
+    import tempfile
+    tmpfile = os.path.join(tempfile.gettempdir(), "hermes_slot_bench.bin")
+    local_dns = detect_local_dns()
+    rnames = [("local(系统DNS)", local_dns), ("AliDNS", "223.5.5.5")]
+    print(f"本机系统 DNS = {local_dns}\n")
+
+    print("网速实测（钉住 IP 下载同一文件；A/B 交错重复）\n")
+    same_group, diff_group = [], []
+
+    for host, path in THROUGHPUT_TARGETS:
+        ipmap = {}
+        for rname, rip in rnames:
+            ips = q_udp(rip, host)
+            ipmap[rname] = ips[0] if ips else None
+        avail = {k: v for k, v in ipmap.items() if v}
+        if len(avail) < 2:
+            continue
+
+        results = {r: [] for r, _ in rnames}
+        for _ in range(ROUNDS):
+            for rname, _ in rnames:
+                ip = ipmap.get(rname)
+                if not ip:
+                    continue
+                spd, tc, size, code = download_speed(host, path, ip, tmpfile)
+                if spd is not None and size > 100_000:
+                    results[rname].append(spd)
+
+        med = {r: (statistics.median(v) if v else None) for r, v in results.items()}
+        if len(set(avail.values())) == 1:
+            same_group.append((host, med))
+            print(f"  [同IP] {host:<32} "
+                  + "  ".join(f"{r}={med[r]:.2f}" if med[r] else f"{r}=X" for r, _ in rnames))
+        else:
+            diff_group.append((host, med))
+            print(f"  [异IP] {host:<32} "
+                  + "  ".join(f"{r}={med[r]:.2f}" if med[r] else f"{r}=X" for r, _ in rnames)
+                  + f"   ({ipmap[rnames[0][0]]} vs {ipmap['AliDNS']})")
+
+    print("\n  ── 噪声基线（同 IP 组：理论上应无差异，差异即噪声）──")
+    for host, med in same_group:
+        vals = [v for v in med.values() if v]
+        if len(vals) == 2:
+            d = abs(vals[0] - vals[1]) / max(vals) * 100
+            print(f"    {host:<32} 差异 {d:5.1f}%")
+
+    print("\n  ── 待验证（异 IP 组：只有超出上面的噪声才算真实收益）──")
+    for host, med in diff_group:
+        vals = [v for v in med.values() if v]
+        if len(vals) == 2:
+            d = abs(vals[0] - vals[1]) / max(vals) * 100
+            winner = "local" if vals[0] > vals[1] else "AliDNS"
+            print(f"    {host:<32} 差异 {d:5.1f}%  胜者 {winner}")
+
+    try:
+        os.remove(tmpfile)
+    except Exception:
+        pass
+
+
 def main():
+    if SLOT == "throughput":
+        main_throughput()
+        return
+
     if SLOT == "direct":
         items, label = CN_DOMAINS, "槽③『直连流量』：国内域名（TCP 连 443）"
         port_of = lambda d: 443  # noqa: E731
