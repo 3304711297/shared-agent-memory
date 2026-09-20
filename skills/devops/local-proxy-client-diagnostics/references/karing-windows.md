@@ -130,6 +130,50 @@ powershell -NoProfile -Command "foreach (\$k in 'karing','clash','sing-box') { i
    不能只看“有没有 rule_set/domain 字段”。
 ⇒ 实测端口对应：`mixed_in_direct`=3065、`mixed_in_proxy`=3066、`mixed_in_rule`=3067。
 
+## 完整枚举配置（避免遗漏）
+
+`karing_setting.json` 实测有 **176 个叶子键**。人工浏览极易遗漏，用递归列举：
+
+```python
+import json, pathlib, os
+s = json.loads((pathlib.Path(os.environ["APPDATA"])/"karing"/"karing"/"karing_setting.json").read_text(encoding="utf-8"))
+rows = []
+def walk(o, path=""):
+    if isinstance(o, dict):
+        if not o: rows.append((path, "{}", "空对象")); return
+        for k, v in o.items(): walk(v, f"{path}.{k}" if path else k)
+    elif isinstance(o, list):
+        rows.append((path, json.dumps(o, ensure_ascii=False)[:60], f"列表({len(o)})"))
+    else:
+        rows.append((path, repr(o), ""))
+walk(s)
+print(len(rows))  # → 176
+```
+
+汇报时按四类分组，**务必全列**：① 已讨论 ② 真缺口 ③ 隐私/元数据 ④ 界面与配置
+（第④类虽无害，但隐去会让用户无法判断审计是否真的完整）。
+
+### 易遗漏但仍值得看的项
+
+| 键 | 本次实测值 | 判读 |
+|---|---|---|
+| `dns.ttl` | `43200`（12 小时） | ⚠️ **偏长**：DNS 污染/错解析会被缓存半天，难以自愈。缩短可快速恢复 |
+| `dns.test_domain` | `'gstatic.com'` | “DNS 泄露检测”用的域名，与延迟检测 URL **不是同一个**。重复报泄露时先查它自己的解析 |
+| `webdav.*` + `auto_backup.*` | 全空/全关 | 无任何配置备份（本用户已表态无所谓，不再提醒） |
+| `rule_sets.disable_isp_diversion_group` | `true` | 关了运营商线路自适应（节点名里的 CTCU/CMCU/CUCM 就是这类标记） |
+| `auto_select.*` | interval=28800 但 urltest.interval=-1s | “配了但不生效”——`route.final` 指向具体节点时会绕过 urltest |
+| `ui.net_check_domain` | `daily-cloudcode-pa.googleapis.com` | 用户自定义的连通性检测域名（非默认） |
+| `statistics.cache_days` / `cache_size_limit_mb` | 7 / 1024 | 仅 statistics.enable 开启时才有意义 |
+
+### “配置了但不生效”的识别法
+
+一个开关写着非默认值，不代表它生效。必验三处：
+1. 设置文件里的值（用户意图）
+2. 运行态配置里是否真的下发了（`service_core.json`）
+3. **上游依赖开关是否开启**——例：`auto_select.interval` 只在出口指向 `urltest_out` 时才起作用；
+   `dns.proxy_resolve_mode=fakeip` 只在 `tun.enable=true` 时有意义；
+   `statistics.cache_*` 只在 `statistics.enable=true` 时生效。
+
 ## Paths
 
 - Config dir: `C:\Users\<user>\AppData\Roaming\karing\karing\`
