@@ -1,7 +1,7 @@
 {
   "generatedAt": "2026-09-15T00:00:00+08:00",
   "scope": "Hermes skills/ 目录",
-  "totalSkills": 88,
+  "totalSkills": 89,
   "sources": [
     {
       "source": "Hermes Web UI 官方目录（hub/webui 安装）",
@@ -15,7 +15,7 @@
     },
     {
       "source": "NousResearch/hermes-agent",
-      "count": 27,
+      "count": 28,
       "checkType": null,
       "watchStatus": "已退出看门台账（2026-09-16）-改由 check_skill_drift.py 技能级内容比对保护",
       "skills": [
@@ -24,6 +24,7 @@
         "autonomous-ai-agents/cross-agent-collaboration",
         "autonomous-ai-agents/hermes-agent",
         "autonomous-ai-agents/skill-evaluation-and-admission",
+        "creative/comfyui",
         "dogfood/adversarial-ux-test",
         "hermes/hermes-desktop-theme-authoring",
         "hermes/hermes-memory-tiering",
