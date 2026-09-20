@@ -221,6 +221,41 @@ gstatic.com          TTL=1（被 fakeip 规则强制，quic 快速刷新）
    `dns.proxy_resolve_mode=fakeip` 只在 `tun.enable=true` 时有意义；
    `statistics.cache_*` 只在 `statistics.enable=true` 时生效。
 
+## DNS-服务器 页逐项语义（源码 + 官方文案定案）
+
+UI 四行 + 一开关 = `karing_setting.json` → `dns` 的四个数组 + `enable_static_ip_for_resolver`：
+
+| UI 行 | 配置键 | 运行态批次 | 用途（官方文案/源码） |
+|---|---|---|---|
+| DNS服务器 | `resolver_addresses` | `dns_resolver_out` | 为“其它 DNS 服务器”解析域名（引导用）；填 IP 字面量时实际不参与 |
+| 代理服务器 | `outbound_addresses` | `dns_outbound_out` | 解析**节点（机场）域名** —— **必须不走代理**（鸡生蛋：连上节点前就得解析它） |
+| 直连流量 | `direct_addresses` | `dns_direct_out` | 直连流量的域名解析；国内域名→`local` 才对（才能拿就近 CDN） |
+| 代理流量 | `proxy_addresses` | `dns_proxy_out`（=`dns.final`） | 代理流量的域名解析；实测运行态为 `detour:udp://8.8.8.8`（经节点转发） |
+| 优先静态解析 | `enable_static_ip_for_resolver` | — | 官方提示「有效防止 DNS 服务器本身解析时被污染」；默认 true |
+
+- **为何“代理流量经节点转发”是对的**：实测直连明文 `8.8.8.8` 会被**选择性污染**
+  （`www.gstatic.com` → `120.253.x`，而 `gstatic.com` 却拿到真 IP），经节点转发才拿真结果。
+- **两个按钮不是设置，会改配置**：`自动设置服务器` → 进向导按延迟检测结果改写上述 4 项；
+  `重置服务器` → 源码 `setOutboundDns([])/setDirectDns([])/setProxyDns([])/setResolverDns([])`
+  一次清空 4 项（回默认）。
+- 页内 `直连流量`/`代理流量` 行的**可点性**受源码条件 `!tun.hijackDns && !novice` 控制
+  （两者都假时 `onPush=null`）；但**已写入的值照常生效**，与是否可点无关。
+- **易混淆**：`优先静态解析`（`enable_static_ip_for_resolver`）与主 DNS 页的
+  `静态IP`（`enable_static_ip`：自定义域名→IP 映射，类 hosts）是**两个不同开关**。
+- **页面归属**：`dns.ttl` 与 `dns.test_domain` 在**上一级“DNS 设置”页**，不在本页。
+- **直连解析节点域名时，“两方结果不一致”不等于污染**（2026-09-20 实测，易误报）。
+  把 37 个节点域名逐个对比“直连 8.8.8.8” vs “经代理 DoH 真值”：
+  **35/37 结果完全一致**；2 个 Cloudflare 域名（同一机场的 node domain）返回不同 IP，
+  但**两个 IP 的 TCP:443 都能连通**（实测 71ms / 256ms）⇒ 这是 **Cloudflare anycast/GeoDNS 按解析器位置返回不同就近节点**，**不是污染**。
+  ⇒ 判据：结果不同时，**先实测两边 IP 的连通性**。都通 = anycast 选路；不通/超时 = 才可能是污染。
+  ⇒ 同一域名在不同节点上延迟各异（实测 404ms vs 1201ms），说明**瓶颈在节点而非解析**。
+  ⇒ 走代理查到的 `104.21.*` 与直连查到的 `141.193.*` 均属 Cloudflare 段；无 PTR 可查（正常）。
+- **节点域名解析必须直连，这是设计而非疏漏**：鸡生蛋问题——连上节点前就得先解析它的域名。
+  故 `outbound_addresses` 不带 `detour` 是**唯一正确选择**，不要“为避污染”给它加代理。
+- 该页 4 项解析器的配置=生效映射（实测 `service_core.json`）：
+  `resolver_addresses`→`dns_resolver_out`、`outbound_addresses`→`dns_outbound_out`、
+  `direct_addresses`→`dns_direct_out`、`proxy_addresses`→`dns_proxy_out`（=`dns.final`）。
+
 ## Paths
 
 - Config dir: `C:\Users\<user>\AppData\Roaming\karing\karing\`
