@@ -19,6 +19,17 @@ description: "管理记忆库/存记忆时必用。shared-agent-memory真源读�
 
 **⚠️ hermes 分支有两个独立克隆（2026-09-15 实证）**：`%LOCALAPPDATA%\hermes`（Hermes 运行 home，日常备份提交源）与 `D:/ai coding/GitRepos/shared-agent-memory`（物理真源，常驻 main）。两者都 fetch/push 同一 origin/hermes。**严禁在 D 盘克隆里 `git checkout hermes`**——真源目录的 `projects/` 会被换成 hermes 分支版本，且 `memories/topics` junction 指向的 `projects/default-.../memory/` 会随之消失（因为该路径被 .gitignore 排除、hermes 上无此目录），共享库当场「断链」。需要改 hermes 分支时用 `git worktree add <临时目录> hermes`，改完 `git worktree remove`。
 
+**【断链已实际发生过一次，附完整处置（2026-09-20）】**：真源仓被切到 hermes 后，`memories/topics/MEMORY.md` 直接读到「No such file or directory」，而**六个技能提交全部进了 hermes 分支而非 main**（内容本身没丢，因为 hermes 分支也是被跟踪的分支，但落错了地方：这些技能沉淀本该在 main 上）。处置顺序：
+
+1. **先取证再动作**：`cd <真源> && git rev-parse --abbrev-ref HEAD`（若为 hermes 即命中）、`git reflog -12 --date=iso` 看是谁何时切的（本例 `8af461c ... checkout: moving from main to hermes`，能直接给出致因时间）、`git status --porcelain` 确认无脏文件（干净才可安全切换）。
+2. **切回 main 即自动修复断链**：`git checkout main` —— `projects/` 目录回来，junction 立即恢复（junction 本身永远是好的，是它的**目标**被分支切换弄没了；不要重建 junction，那是南辕北辙）。验证：`os.path.exists(<%LOCALAPPDATA%/hermes/memories/topics/MEMORY.md>)` 为 True，且 `git ls-tree -r main --name-only projects/<proj>/memory/` 的文件数 == 磁盘条目数。
+3. **判断落错分支的内容要不要搬**：`git branch -a --contains <sha>` + `git merge-base --is-ancestor <sha> main`。本例 6 个提交只在 hermes 上，内容本身合法（是技能文件而不是记忆文件），而 hermes 分支本就承载技能备份——**不是每个提交都需要搬**，先看它是「本该进 main 的记忆」还是「本就属于 hermes 的技能备份」。
+4. **home 仓 H 对齐**：`git fetch origin hermes` → 工作区若有与 origin/hermes **内容相同**的文件会挡住快进，用 `git diff --stat HEAD origin/hermes` 先看远端要碰哪些文件，只对**内容已一致**的文件 `git checkout HEAD -- <paths>` 腾位（零损失），untracked 的新文件先备份再移走，然后 `git merge --ff-only origin/hermes`。⚠️ 别用 `git checkout -f` 一把梭：会连工作区尚未提交的真新增一起清掉。
+5. **全仓 junction 巡检**（一次收口，防同类断链漏网）：递归扫重解析点，逐个断言目标存在 —— `os.lstat(p).st_file_attributes & 0x400` 判定 reparse，`os.path.realpath(p)` 取目标。本机实测有 13 个 junction（models/runtimes 指向 D 盘、lsp/bin 三个、hermes-agent/node_modules 下 8 个、memories/topics），**除正在修的那个外全为 ✅** —— 这类脚手架目录的 junction 也应在同一轮一并确认。
+6. **OpenViking 同步基准会被分支切换连带拖旧**：`last_synced_commit.txt` 追的是 **main**，不是 hermes。判别：`git log --oneline <synced_sha>..main` 有输出即滞后；补跑 `python %LOCALAPPDATA%/hermes/scripts/sync_shared_memory_openviking.py`，成功后该文件应等于 `git rev-parse main`。
+
+**写记忆前的 3 秒自检（防再踩）**：`cd <真源> && git rev-parse --abbrev-ref HEAD` 必须是 `main`；不是就先切回来再写。
+
 **推送代理回退（2026-09-15 实证）**：本机对 github.com 直连会 `Recv failure: Connection was reset`，`env -u ALL_PROXY -u HTTP_PROXY -u HTTPS_PROXY git ls-remote/push` 同样失败；必须显式走本地代理 `git -c http.proxy=http://127.0.0.1:3067 push origin <branch>`。`gh` CLI 走 keyring 不受影响（`gh run list/view` 可查 CI 结果）。
 - **Hermes 专属记忆（不放共享库）**：`memories\USER.md`（用户画像常驻）、根 `memories\MEMORY.md`（系统与环境常驻索引）→ 随 hermes 分支备份
 
@@ -152,6 +163,21 @@ metadata:
 1. **严禁仅在主聊天文本框手打纯文本 Markdown 列表**（`- [ ] 步骤一`）；
 2. **必须显式调用 Hermes 原生 `todo_list` 工具**初始化任务看板（`tasks: [{id, content, status}]`）；
 3. 每完成一个原子步骤，必须实时调用 `todo_list` 将对应步骤推进为 `completed` 并激活下一步为 `in_progress`，使阶段进度在桌面端原生控件中实时可视化。
+
+## 记忆库布局自检（写记忆前 3 秒、异常时一次收口）
+
+**已落地守卫脚本**：`scripts/check_memory_layout.py`（只读、不修复，违规即 exit 1）。真源与 home 仓各存一份，内容必须一致。
+
+```bash
+python scripts/check_memory_layout.py            # 常规自检
+python scripts/check_memory_layout.py --verbose  # 列出每个 junction 及其目标
+```
+
+它检查四项：① 真源当前分支是 `main`；② `memories/topics` 是指向真源的 junction 且目标可解析；③ 磁盘记忆文件数 == `main` 上跟踪数；④ home 下每个 junction 目标均存在。
+
+**junction 判定坑**：`os.path.islink()` 对 NTFS junction 返回 **False**，必须用 `os.lstat(p).st_file_attributes & 0x400`（`FILE_ATTRIBUTE_REPARSE_POINT`）。用错的写法会把 junction 误判为「真实目录」并报「存在第二份存储」——方向完全相反。
+
+**变异验证方法**：把真源 `git checkout hermes` → 脚本应 rc=1 并点名三处（分支错、topics 不可解析、broken junction）；再 `git checkout main` → rc=0。不跑这一步就不算验证过守卫（曾遇到断言恒绿的空壳守卫）。
 
 ## 本库清单与脚本的结构陷阱（改 `capability-inventory.json` 前必读）
 
