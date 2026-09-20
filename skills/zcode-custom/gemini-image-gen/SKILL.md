@@ -23,7 +23,7 @@ python "%LOCALAPPDATA%/hermes/skills/zcode-custom/gemini-image-gen/generate_imag
 - `--model`: Default is `imagen-3.0-generate-002`.
 
 ### When Executing
-1. Call the Bash tool with the python command.
-2. Read the JSON output from the script.
-3. If successful, present the saved image path as a clickable markdown image/link: `![image](path/to/image.png)`.
-4. If missing API key error is returned, politely ask the user to provide their Google Gemini (AI Studio) API Key or set `GEMINI_API_KEY`.
+1. Call the generation script via python command (supports `--aspect-ratio`, `--output-dir`, `--model gemini-3.1-flash-image`).
+2. The script automatically uses `HERMES_CUSTOM_CPA_API_KEY` to authenticate with the local CPA bridge (`http://127.0.0.1:18080`).
+3. If successful, present the saved image path using Hermes Desktop `MEDIA:/absolute/path/to/image.jpg` format (markdown `![]()` local images are blocked).
+4. If missing API key error is returned, check `HERMES_CUSTOM_CPA_API_KEY` or `~/.zcode/config/gemini.json`.

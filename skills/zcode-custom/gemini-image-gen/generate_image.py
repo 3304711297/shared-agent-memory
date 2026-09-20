@@ -18,10 +18,10 @@ LOCAL_BRIDGE_URL = "http://127.0.0.1:18080"
 LOCAL_BRIDGE_KEY = ""  # 默认留空（公开仓库脱敏）；运行时自动从桥接 config.yaml api-keys 读取
 
 def get_bridge_config():
-    # Check if local ZCode Antigravity config exists
+    # Check if local ZCodeAntigravity config exists
     antigravity_config = os.path.expanduser("~/AppData/Local/ZCodeAntigravity/config.yaml")
     base_url = LOCAL_BRIDGE_URL
-    api_key = LOCAL_BRIDGE_KEY
+    api_key = LOCAL_BRIDGE_KEY or os.environ.get("HERMES_CUSTOM_CPA_API_KEY", "")
 
     if os.path.exists(antigravity_config):
         try:
@@ -39,7 +39,7 @@ def get_bridge_config():
 
     return base_url, api_key
 
-def generate_via_antigravity(prompt, base_url, api_key, model="gemini-3.1-flash-image", timeout=60):
+def generate_via_antigravity(prompt, base_url, api_key, model="gemini-3.1-flash-image", timeout=180):
     url = f"{base_url}/v1/chat/completions"
     headers = {
         "Authorization": f"Bearer {api_key}",
@@ -101,8 +101,13 @@ def main():
     parser.add_argument("--output-name", "-n", default=None, help="Output file name")
     parser.add_argument("--base-url", default=None, help="Antigravity bridge base URL")
     parser.add_argument("--api-key", "-k", default=None, help="Antigravity bridge API key")
+    parser.add_argument("--aspect-ratio", default=None, help="Aspect ratio (e.g. 16:9, 1:1)")
     
     args = parser.parse_args()
+    
+    prompt = args.prompt
+    if args.aspect_ratio and args.aspect_ratio not in prompt:
+        prompt = f"{prompt}\nAspect ratio: {args.aspect_ratio}"
     
     base_url, api_key = get_bridge_config()
     if args.base_url:
@@ -115,7 +120,7 @@ def main():
     print(f"[*] Calling {args.model} via Antigravity Bridge ({base_url}) ...")
     
     try:
-        images = generate_via_antigravity(args.prompt, base_url, api_key, model=args.model)
+        images = generate_via_antigravity(prompt, base_url, api_key, model=args.model)
         
         saved_paths = []
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -134,7 +139,7 @@ def main():
         result = {
             "status": "success",
             "model": args.model,
-            "prompt": args.prompt,
+            "prompt": prompt,
             "images": saved_paths
         }
         print(json.dumps(result, ensure_ascii=False, indent=2))
