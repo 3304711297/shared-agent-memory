@@ -168,6 +168,35 @@ should fail for each realistic mutation:
 A mutation nothing catches marks the behavior as unprotected — or the
 test as tautological.
 
+## When You Must Grep Source Text (script/config contract tests)
+
+Some artifacts genuinely cannot be executed in the test environment — an
+interactive PowerShell updater, a bootstrap script that reboots a machine,
+a shell entrypoint that needs credentials. When the repo's established
+pattern is a **contract test** that asserts structure over source text,
+keep it, but know the two ways such a test silently stops testing anything:
+
+**1. Line-ending-blind slicing.** Finding a block with
+`text.indexOf('\n}')` fails on a CRLF file — the slice silently extends to
+end of file, and any assertion then holds over the *whole file*. The test
+stays green while the code it names could be deleted. Fix: split on
+`/\r?\n/` and walk lines, or normalize newlines first. Then print the slice
+length in a scratch run and confirm it is the size you expect — a 15-line
+function is not 900 lines.
+
+**2. The comment that contains the token.** Asserting
+`/Write-Host/.test(fn)` passes when the *only* occurrence is inside a
+comment that says "unlike Hermes, which calls Write-Host" — so deleting the
+real call is not caught. Fix: strip whole-line comments before asserting
+(`.filter(l => !l.trimStart().startsWith('#'))`).
+
+Both failure modes are invisible from a green run — they only surface when
+you **mutate the production code and watch**. That is not optional polish:
+it is the only way a grep-based contract test proves it is still attached
+to reality. Mutate each new assertion once (delete the line it names, flip
+the branch it names) and confirm the test goes red; if it stays green, the
+assertion is decorative.
+
 ## Quick Reference
 
 | When you... | Do |

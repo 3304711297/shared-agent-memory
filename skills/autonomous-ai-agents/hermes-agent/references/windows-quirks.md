@@ -82,3 +82,53 @@ runs clean. Don't blind-copy `//`-style flags from MSYS-era notes; test the
 single-slash form first. When output only needs filtering, let bash do it
 (`tasklist | grep -i foo`) and skip Windows flag syntax entirely.
 
+### Spawning a detached child that the USER can watch
+
+When your app hands off work to a long-running script (installer, updater,
+build) and the user is supposed to see progress, the spawn call is the whole
+game. Measured on this host (2026-09-20, four variants, PowerShell + pwsh,
+both via physical paths and Store aliases):
+
+| Creation flags | Script runs | Console window user can see |
+|---|---|---|
+| `DETACHED_PROCESS` (0x8) | ❌ not a single line | 0 |
+| `CREATE_NO_WINDOW` (0x08000000) | ✅ | **0** — runs fine, user sees nothing |
+| `CREATE_NEW_CONSOLE` (0x10) | ✅ | 1 |
+| `cmd /d /s /c start "" /min <pwsh> -File ...` | ✅ | **1, minimized** |
+
+`DETACHED_PROCESS` kills console-subsystem programs before they run any
+script (the classic "update flashed and vanished, no log, no state file"
+bug). `CREATE_NO_WINDOW` is the trap that follows: the script now works, so
+it looks solved — but the user has no feedback surface at all.
+
+The fix is Hermes's own: `wrapHandoffForDetachedConsole()` in
+`apps/desktop/electron/updater-process.ts` (≈L149-158) returns
+`{command:'cmd.exe', args:['/d','/s','/c','start','','/min', command, ...args]}`.
+Its comment: "`start` allocates the child its own (minimized) console and
+fully detaches it from cmd.exe, which exits immediately." From Rust:
+`Command::new("cmd.exe")` with those args and **no `creation_flags`** —
+setting any hides the console again.
+
+**Allocating the console is only half the fix.** If the script's log
+function writes only to a file (`Write-Host` count = 0), that minimized
+window stays blank and the user still sees no progress. Hermes's
+`Write-HandoffLog` also calls `Write-Host $line`. When a user reports "I
+can't see the progress", count `Write-Host` occurrences first — don't
+tunnel on spawn flags alone.
+
+**How to verify window visibility** (a child process cannot observe its own
+console windows): from the parent, enumerate with `EnumWindows` +
+`GetClassNameW == "ConsoleWindowClass"` and diff the PID set before/after
+spawning. `GetWindowLongW(hwnd, GWL_STYLE) & 0x20000000` = `WS_MINIMIZE`
+confirms it really is minimized. ⚠️ One sample right after spawn can read 0
+because the window is not up yet — sample at least twice (~2s apart) before
+concluding anything.
+
+**Paths with spaces must be exercised explicitly.** The quoting chain
+(Rust arg → `cmd /s` → `start` → child) has historical bugs at spaces, and
+the usual `pwsh` locations do NOT contain spaces (WindowsApps alias), so a
+plain test proves nothing. Build a spaced path with
+`mklink /J "<dir with space>" "<real dir>"` and assert the script received
+its arguments untruncated (this repo lives at `D:\ai coding\...`, so it is a
+real exposure, not a hypothetical).
+

@@ -262,6 +262,16 @@ Writing `read_file(p)["content"]` and proceeding assumes stage 1. Stage 2 raises
 
 ⇒ 想减少超长工具输出，**只能在命令层让它少产出**，或在结果存储层配阈值（见下）。任何"事后过滤工具输出"的方案（rtk 那类）在 Hermes 里没有落点；rtk 之所以在别的 agent 能成立，正是因为它有 `pre_tool_call` 改命令这一条路。
 
+**workbuddy2api 内核直接从检出目录加载 `converter.py`，改完只需重启内核、不必重建 exe（2026-09-20 实测）。**
+运行中的内核命令行是 `...python.exe "D:\ai coding\GitRepos\workbuddy2api\converter.py" --port 8787 ...`
+——脚本路径指向工作树而非打包资源。所以「改了内核代码要不要重新构建」的答案是：
+**不需要 `npm run tauri build`，但需重启内核进程；而重启会切断本机 Hermes 对话链路，时机由用户决定**。
+查当前内核实际加载的脚本路径（比猜快得多）：
+
+```bash
+powershell -NoProfile -Command "Get-CimInstance Win32_Process -Filter \"Name='python.exe'\" | Select-Object ProcessId,CommandLine | Format-List"
+```
+
 **超大工具结果的两个现成旋钮：**
 1. **spillover 阈值**（官方机制）：`tools/tool_result_storage.py` 把超过阈值的结果落盘到 `$HERMES_HOME/cache/spillover/{id}.txt`，上下文只留 1500 字符 preview + 路径。默认**单条 100K 字符**、单轮合计 200K（`tools/budget_config.py`）。
 2. **按工具设更低阈值**：`tool_output.tool_overrides`（如 `web_search: 20000`）—— **截至 2026-09-18 尚未并入 main**，由 PR #106399 提供（维护者 salvage，#94679 的替代）。该字段（`BudgetConfig.tool_overrides`）本身已在 main 的代码里存在且优先级最高（`pinned → tool_overrides → mcp_前缀 → registry → default`），只是缺配置读取入口。**在 #106399 合并前，`tool_output.tool_overrides` 写进 config 不会生效**——不要以为配了就完事，必须实测。
