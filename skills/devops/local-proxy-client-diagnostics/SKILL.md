@@ -83,6 +83,10 @@ Then a short "最小修复" list — the 2–3 items that restore function — a
 
 ### 零消耗判别器（首选）
 
+⚠️ **探针可能与真实生成请求结论不一致**（实测同轮：台湾 probe=REGION 但 real=OK；英国 probe=PASS 但 real=REGION）。
+说明「零消耗探针」与「真实生成」走到的区域检查路径不完全等价；**先用真实请求抽检一次**，
+若两者在同一节点上矛盾，以真实生成请求为准，不要只看探针。
+
 **必须打生成端点，且请求体要「校验通过但不产生输出」**：
 
 ```json
@@ -101,6 +105,89 @@ User-Agent: antigravity/2.15.0 (windows/amd64)
 | 连接异常/超时 | ⚪ 网络层问题，与区域判定无关，需单独归因 |
 
 要点：`parts:[{text:""}]` 是关键（校验通过但不生成）；必须带 `project`；model 建议带 `-high` 后缀。
+
+### ⚠️ 客户端延迟测试与「能否调用上游」是两个独立维度（实测反例）
+
+2026-09-20 实采：Karing 列表里 🇩🇪德国-anytls-aw 显示**红三角（测速失败）**，
+但同期实测该节点：零消耗探针 12/12 PASS、真实生成请求 12/12 OK。
+
+更反直觉的是**延迟与业务速度不成正比**：
+
+| 节点 | Karing 延迟测试 | 真实生成平均耗时 | 可用性 |
+|---|---|---|---|
+| 🇩🇪德国-anytls-aw | 324 ms（偏慢，曾显红三角） | **1.26 s** | 12/12 |
+| 🇯🇵日本-anytls-aw | 99 ms（最快） | 1.88 s | 12/12 |
+
+延迟最快的日本反而比德国慢 49%。典型原因：延迟测试只测 **TCP+TLS 握手**（网关可能就在入口附近），
+而真实请求走的是**出口到目标服务的全程路径**，二者拓扑可能完全不同。
+
+⇒ **不要用红三角/延迟值判定「这个节点能不能用」**，也不要据它切换节点。
+⇒ 红三角多为**瞬时失败**：实测英国/德国在几分钟后重测即 10/10 全通（319~324ms）。
+⇒ 判定可用性必须用**生成端点探针**（见上文）；判定速度要看**真实请求耗时**，不是握手延迟。
+⇒ 若用户问「X 节点是不是挂了」，先按本节实测三个维度（TCP 可达 / 握手延迟 / 真实生成），
+   不要把其中一个当成结论。
+
+#### 红三角的两个独立成因（都要查，别只归一个）
+
+**成因 A：阈值判定——「慢」被显示成「坏」**
+Karing 的在线面板（zashboard，打包在 `D:/Karing/data/flutter_assets/assets/zashboard/`）里的阈值是
+`delay:i=200` / `delay(300`：**≥300ms 显示警告色**。所以「恰好某几个节点红」通常就是它们越过了 300ms 线。
+实测反例：德国 320ms / 英国 320ms 显红，其余全部 ≤205ms 显绿；同一批节点
+真实生成请求 12/12 全 OK。**这是设计行为，不是故障，调什么设置都治不好**（除非线路变快）。
+
+**成因 B：DNS 污染——「可用」被显示成「坏」**
+官方博客明确列出这一故障：「节点可以用，但显示感叹号，连接超时」，根因是
+**本地 DNS 把 `www.gstatic.com` 解析成了错误 IP**（默认 url-test 地址就是它）。
+实测本机：系统 DNS → `120.253.253.98`（国内 IP，错）；Google DoH → `192.178.183.94`（真）。
+⇒ **修法：把延迟检测 URL 换成不同提供者**（官方建议「最好替换为与原地址不同的提供者」）。
+  已实测可用且延迟几乎相同（因为瓶颈是物理距离，不是目标服务器）：
+  `http://cp.cloudflare.com/generate_204`（改用此项后用户红三角消失）。
+  其他候选：`http://www.msftconnecttest.com/connecttest.txt`、`http://detectportal.firefox.com/success.txt`、
+  `http://captive.apple.com`。
+⇒ **超时建议 5s**（默认 2s 偏紧）：实测 100ms~2000ms 六档对稳定节点无影响，
+  但开「解析出口 IP」或遇偶发慢包时会误判。5s 不拖慢正常测速（成功仍几百 ms 返回）。
+
+#### `delay` vs `delay2`：UI 只显示前者，后者更接近真实体验
+
+`/proxies/{tag}/delay` 返回两个值：`delay` = 到入口网关的握手，`delay2` = 完整 TLS 握手。
+**Karing 只显示/存储 `delay`**（已有人提 issue #1535：`delay:95 / delay2:5682` 时 UI 只显 95ms，
+实际那次请求花了近 6 秒）。⇒ 看到「延迟很漂亮但用起来卡」时，用 delay API 把两个值都取出来对比。
+
+#### 「解析出口 IP」开关：默认关，不要开
+
+开启后会额外发一次出口 IP 查询（走境外服务，比打 generate_204 慢得多）。实测额外开销：
+德国 **+3.16s**、日本 **+8.83s**（后者单次查询就要 2.8s）。它还会放大超时误判 → **更多节点变红**。
+仅在想确认「节点是否虚标落户地区」时才开。
+
+### ⚠️ 主导变量是「时间」不是「规模」——通过率随时间窗大幅漂移
+
+**先前结论已推翻**（2026-09-20 自查）：曾以为「沙盒里放多少出口」会压低通过率，
+后续三个独立实验证明那是巧合——**真正的自变量是时间窗**。
+
+同一批 7 个 anytls 节点、**完全相同**的参数与账号，四次运行结果：
+
+| 运行时刻 | 香港-aw | 台湾-aw | 日本-aw | 美国-aw | 英国-aw | 新加坡-aw | 德国-aw |
+|---|---|---|---|---|---|---|---|
+| 11:47 筛选跑 ① | 0% | 80% | **100%** | 90% | **100%** | 100% | 100% |
+| 12:00 筛选跑 ② | 20% | 80% | **100%** | 100% | **100%** | 100% | 100% |
+| 约 13:0x 筛选跑 ③ | 0% | **30%** | **90%** | **0%** | **10%** | **70%** | 100% |
+| 全量 63 节点跑 | 0% | 0% | 0~20% | 0~10% | 0~60% | 10~50% | 100% |
+
+**推翻「规模混淆」的证据**：
+- 在**同一份 63 出口配置**里只单独测日本-aw 15 轮 → **53%**（若规模是自变量，应仍为 0%）。
+- 用**仅 2 出口**的配置对日本-aw 连测 40 轮 → **50%**（与 63 出口配置下的 53% 一致）。
+- ⇒ 出口数量与通过率**无关**；先前看到的相关性来自「全量跑开始得早、筛选跑开始得晚」。
+
+**速率限制假设也已被否证**：单节点连续 40 轮（无间隔）序列
+`RPRRRRRPRRPRPPRPRPRPRRRPPPPRRPPPPPPRPRRP` 前 20 轮 40% / 后 20 轮 60%，
+趋势 FLAT（无衰减）⇒ **不是「打得多了被封」，而是每请求独立随机 + 长周期基线漂移**。
+
+⇒ **正确用法：结论必须带时间戳，且不可跨时间窗复用**。
+   要判断「某节点能不能用」，就在**当下**跑一次 10 轮；
+   两次跑结果矛盾时不需解释——那就是上游的随机门在漂。
+⇒ **唯一在本轮所有运行中都稳定 100% 的节点是 🇩🇪 德国-aw**
+   （跨 4 次运行 + 单独 40 连轮全 PASS）；其余节点均曾出现过 0%。
+⇒ 长时间跨度（数小时）的「稳定性」需要**多次重测取交集**，不能拿一次 10 轮的 100% 盖章。
 
 ### 必须多轮采样——单次结论不可信
 
@@ -181,7 +268,26 @@ project 值可从 `loadCodeAssist` 响应的 `cloudaicompanionProject` 字段取
 
 附带特性：辅助视觉被拒是**静默降级**——`computer_use` 的 `vision_analysis` 直接返回拒答文案而非报错，该文案会进入上下文。
 
-处置：手动重发即恢复（上下文不中毒，实测下次请求即正常）；根治候选=反代侧「空拒答自动重试」，属策略判断，须用户拍板后再动。
+处置：手动重发即恢复（上下文不中毒，实测下次请求即正常）；根治=**反代侧「空拒答同账号重试」**（已于 2026-09-20 在 workbuddy2api 交付：
+`converter.py` 的 `_is_blank_refusal()` + 三端点 + `_safe_stream_upstream` 共四条路径）。
+
+### 两个必须记住的实测事实（否则修复会静默失效）
+
+1. **拒答文案确实在 `content` 里**（实测 `Sorry, I can't respond to this question.`），
+   所以判据绝不能用「`not content`」——它永远不成立。要用「正文长度上限」（拒答实测 38 字符）。
+   证据：`%LOCALAPPDATA%\workbuddy2api\usage\snapshots.jsonl` 的 `resp` 字段原文。
+2. **上游下发的是下划线 `content_filter`**，而历史代码只比对连字符 `content-filter`
+   → 真实命中从未被识别。同时旧的字节扫描（在 payload 里搜「敏感」「审核」字样）
+   会把**模型正文**里的这些字样当命中——实测 8 次该标签**全是假阳性**（均为成功的
+   tool_calls 响应，tokens 从 1.9 万到 32 万不等）。
+   ⇒ 判据必须：归一化拼写（去空白+小写+连字符转下划线）+ **只按结构化字段判定**，
+   不要复用字节扫描。
+
+### 判据要 Fail-Closed，别信"零 token"字面值
+
+`total_tokens == 0` 但 `prompt_tokens`/`completion_tokens`/`reasoning_tokens` 非零是
+**自相矛盾报文**（如 total=0 而 prompt=100）——此时「零 token」这个证据本身不可信，
+必须判否（不重试）。任何一项明细非零都不得重试，否则会把有实质产出的响应再发一次。
 
 ## Pitfalls
 
@@ -196,6 +302,8 @@ project 值可从 `loadCodeAssist` 响应的 `cloudaicompanionProject` 字段取
 - **A free/public subscription with zero healthy nodes is noise, not a backup:** it slows list load and auto-switch. Recommend disabling rather than keeping "just in case".
 - **Custom rule groups are usually evaluated before the built-in region fallback** (geosite:cn / geoip:cn / private-IP). Fine until someone adds a domestic domain to a proxy group — then the cn fallback can't catch it. Flag the ordering; don't silently reorder.
 - **A health-check timeout of 2 s misjudges healthy overseas nodes from inside CN** and floods the list with false timeouts. Raise to 5–8 s.
+- **Triage a node's red triangle in this order, not by switching nodes.** ① clash API `history` — empty means the UI never测成功 (suspect DNS/config); a value means it did succeed and just crossed the display threshold. ② Take both `delay` and `delay2` from the delay API. ③ Compare system DNS vs proxied DoH for the `url_test` hostname. ④ Only then suspect the node. Two independent causes produce the same red triangle — a **threshold** (zashboard warns at ≥300 ms) and **DNS poisoning** of the test URL — and only the second is fixable by config.
+- **A settings change the user reports as "fixed it" still needs the mechanism named.** 实测：用户改 URL+超时后红三角消失，真因是绕开了被污染的 `www.gstatic.com`（系统 DNS 返回国内 IP），不是超时变宽——同一批实测中 100 ms~2000 ms 六档对稳定节点结果一致。把功劳归给错的那个参数，下次复发时会去调错的旋钮。
 - **A local AI client wired to a loopback reverse proxy (127.0.0.1:8787) that shows 「连接失败」 may simply be sending an empty model name.** Its "test connection" button POSTs `/v1/chat/completions` with no model; the proxy forwards that upstream, which answers HTTP 400 `11102 model [] service info not found`. Looks like auth/network, is actually a config gap — the client's provider entry has `models: []` and `defaultModel: ""`. Fix = add the upstream's real model id in the client (e.g. `auto`, `deepseek-v4.1-flash`). Public generic ids (`deepseek-chat`, `gpt-4o`, `claude-...`) also 400: such proxies only accept their own upstream's model names, so tutorial-default names are the wrong thing to paste.
 - **Triage client 400s from the proxy side first, not from the client.** Match the failed request's message count in the proxy's structured log (`%LOCALAPPDATA%/workbuddy2api/converter.log`): a 2-message request whose model column is empty is the test button, not a real chat turn; the same rid repeating = proxy-internal retries, not repeated user clicks. Client-side config lives at `%LOCALAPPDATA%/TubaWinUi3/ai_providers.json` (图吧工具箱 AI 服务 / custom providers) — read it before touching VPN/proxy/keys.
 
