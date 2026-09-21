@@ -26,7 +26,7 @@ Read a reference *only* when the task actually needs it.
 | 浏览器 Arena AI (arena.ai) 对话接管与跨 Agent 协作 SOP（首选） | `references/arena-ai-browser-collaboration.md` |
 | 浏览器 ChatGPT 对话接管与跨 Agent 交叉复核 SOP（备选） | `references/chatgpt-browser-collaboration.md` |
 | 浏览器 Claude AI (claude.ai) 对话接管与架构复核/沙箱打样 SOP | `references/claude-browser-collaboration.md` |
-| Windows MCP 进程树 / 孤儿进程清理 / OpenViking 懒启动 | `references/windows-process-invariants.md` |
+| Windows MCP 进程树 / 孤儿进程清理 | `references/windows-process-invariants.md` |
 | chrome-devtools MCP / Edge 配置保护 | `references/browser-boundary.md` |
 | 多 profile / bot 编排 | `references/profile-orchestration.md` |
 | 工具调用效率（read_file / patch / search_files 优先） | `references/native-tool-prioritization.md` |

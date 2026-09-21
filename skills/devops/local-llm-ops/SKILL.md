@@ -144,7 +144,7 @@ curl -fsS http://127.0.0.1:<port>/v1/embeddings \
 ```
 服务端 `--pooling last` 是多数 LLM-based 嵌入模型的正确池化方式（Qwen/Octen 系）。
 
-### 注册表校验（OpenViking 类系统）
+### 注册表校验（RAG/向量库系统）
 
 这类系统把嵌入元数据（provider/model/dimension）写进向量集合的描述里，启动时比对；
 **模型名不一致会直接拒绝启动**（`EmbeddingRebuildRequiredError`）。两条路：

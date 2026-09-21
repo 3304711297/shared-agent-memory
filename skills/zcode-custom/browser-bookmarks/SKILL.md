@@ -25,13 +25,15 @@ python %LOCALAPPDATA%/hermes/scripts/search_bookmarks.py "<关键词>" -f "AI" -
 python %LOCALAPPDATA%/hermes/scripts/search_bookmarks.py --folders
 ```
 
-### 2. 意图/自然语言语义检索 (OpenViking)
-当用户表述较为宽泛或使用概念性描述（如「帮我找找我存过的免版权图标站或耳机校准工具」）时，使用 OpenViking 进行语义召回：
+### 2. 宽泛意图检索（关键字 + 模糊匹配）
+当用户表述较为宽泛或使用概念性描述（如「帮我找找我存过的免版权图标站或耳机校准工具」）时，先用关键字检索书签库，再用 `search_files` 在结果上做二次模糊过滤：
 
-```python
-# 语义搜索浏览器书签资源库
-viking_search(query="免版权图标或UI设计素材", scope="viking://resources/browser-bookmarks/", limit=5)
+```bash
+# 按关键字检索（位置参数，非 --query）
+python %LOCALAPPDATA%/hermes/scripts/search_bookmarks.py "图标" -n 10
+python %LOCALAPPDATA%/hermes/scripts/search_bookmarks.py "校准" -f "工具"
 ```
+（OpenViking 语义召回已于 2026-09-21 随该服务退役；现以关键字检索 + ripgrep 模糊匹配替代。）
 
 ## 隐私与安全规范
 1. 原始书签包含用户全量本地浏览习惯，绝对保存在本地机器上（`%LOCALAPPDATA%\Microsoft\Edge Dev\User Data\Default\Bookmarks`）；

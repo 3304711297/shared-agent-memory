@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Agent Exit Lifecycle Guard (Auto-Cleanup Supervisor for Windows 11).
 
-Runs silently in the background via pythonw (independent virtualenv: ~/.openviking/venv).
+Runs silently in the background via pythonw (Hermes venv).
 Monitors the lifecycle of Hermes Desktop (Hermes.exe) and ZCode GUI (ZCode.exe).
 
 Lifecycle Behavior:
@@ -11,7 +11,6 @@ Lifecycle Behavior:
    - Verifies all Agent GUIs are genuinely closed.
    - Automatically executes full tree-kill on orphaned MCP servers (Node.js, Serena).
    - Reaps hanging backend Python workers.
-   - Automatically stops OpenViking gateway, releasing all GPU VRAM and RAM.
 3. Consumes ~6MB memory and 0% CPU. Single-instance enforced.
 """
 
@@ -31,8 +30,16 @@ if str(SCRIPT_DIR) not in sys.path:
 import psutil
 from cleanup_agent_orphans import cleanup_orphans, is_agent_gui_running, log
 
-PID_FILE = Path.home() / "AppData/Local/hermes/cache/agent_guard.pid"
-PYTHONW_EXE = Path.home() / ".openviking/venv/Scripts/pythonw.exe"
+PID_FILE = Path(__file__).resolve().parent.parent / "cache/agent_guard.pid"
+
+# Interpreter isolation (iron law): NEVER run a long-lived guard daemon from
+# `hermes-agent/venv` — holding that venv's pythonw.exe open makes `hermes update`
+# report "close other processes to update Hermes" (`_scan_venv_blockers` -> blocked: true).
+# Use the dedicated guard venv instead; fall back to plain uv python only if it is missing.
+GUARD_VENV_PYTHONW = Path(__file__).resolve().parent.parent / "tools/guard-venv/Scripts/pythonw.exe"
+PYTHONW_EXE = GUARD_VENV_PYTHONW
+if not PYTHONW_EXE.exists():
+    PYTHONW_EXE = Path.home() / "AppData/Roaming/uv/python/cpython-3.11-windows-x86_64-none/pythonw.exe"
 SCRIPT_PATH = SCRIPT_DIR / "agent_guard.py"
 CREATE_NO_WINDOW = 0x08000000
 
@@ -83,7 +90,7 @@ def run_guard_loop():
                     time.sleep(2.5)
                     if not is_agent_gui_running():
                         log("[Agent Guard] Confirmed all Agent GUIs closed. Executing full automated cleanup...")
-                        cleanup_orphans(force_all=False, stop_openviking=True)
+                        cleanup_orphans(force_all=False)
                         was_active = False
                         log("[Agent Guard] Cleanup complete. Waiting for next Agent launch.")
                     else:
@@ -117,14 +124,33 @@ def start_daemon():
         print("[Agent Guard] Started.")
 
 
+def _ancestor_pids() -> set[int]:
+    """PIDs of this process and all its ancestors (never kill these)."""
+    pids = set()
+    try:
+        p = psutil.Process(os.getpid())
+        while p is not None:
+            pids.add(p.pid)
+            try:
+                p = p.parent()
+            except Exception:
+                break
+    except Exception:
+        pids.add(os.getpid())
+    return pids
+
+
 def stop_daemon():
     """Stop guard daemon if running."""
     killed = 0
-    my_pid = os.getpid()
+    protected = _ancestor_pids()
     for proc in psutil.process_iter(['pid', 'name', 'cmdline']):
         try:
             pid = proc.info['pid']
-            if pid == my_pid:
+            if pid in protected:
+                continue
+            name = (proc.info['name'] or '').lower()
+            if name not in ('python.exe', 'pythonw.exe'):
                 continue
             cmd = ' '.join(proc.info['cmdline'] or []).lower()
             if "agent_guard.py" in cmd:
@@ -149,7 +175,7 @@ def status():
     print("\n--- Agent Guard Status ---")
     print(f"  Daemon State : {'RUNNING ✓ (PID ' + str(pid) + ')' if pid else 'STOPPED ✗'}")
     print(f"  Agent GUIs   : {'ACTIVE (Hermes/ZCode open)' if gui_active else 'CLOSED (None open)'}")
-    print(f"  Actions      : Automatically cleans Node MCP, Serena, Python, and OpenViking upon GUI exit.\n")
+    print(f"  Actions      : Automatically cleans Node MCP, Serena and Python orphans upon GUI exit.\n")
 
 
 def main():

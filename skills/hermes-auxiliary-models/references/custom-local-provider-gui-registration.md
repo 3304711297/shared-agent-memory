@@ -209,46 +209,39 @@ When using Hermes Desktop's integrated **Local Models** (`本地模型`) feature
   - The supervised process (`llama-server.exe`) runs as a multi-model chat router (`--models-autoload`, `--jinja`, `--models-dir`) listening on a loopback port (typically `18434`), recorded in `%LOCALAPPDATA%\hermes\runtimes\llamacpp\server.json` alongside an ephemeral `api_key`.
   - Chat completions (`/v1/chat/completions`) work natively with full thinking/reasoning streaming (`reasoning_content`).
   - **The Router Embedding 501 Pitfall & Context Batch Tuning**:
-  - The router instance is started without the `--embedding` flag. Sending requests to `/v1/embeddings` against the managed router returns `HTTP 501: Not Implemented`. To serve vector models like `bge-m3` for RAG/OpenViking, spawn a dedicated background `llama-server.exe` instance with `-m <model.gguf> --embedding --port <port>`.
+  - The router instance is started without the `--embedding` flag. Sending requests to `/v1/embeddings` against the managed router returns `HTTP 501: Not Implemented`. To serve embedding models (e.g. `bge-m3`) for RAG pipelines, spawn a dedicated background `llama-server.exe` instance with `-m <model.gguf> --embedding --port <port>`.
   - **The Context/Physical Batch Size Trap**: By default, `llama-server.exe` in embedding mode sets `-c 512 -b 512`. Passing text or markdown chunks >512 tokens fails with `HTTP 500: input (X tokens) is too large to process. increase the physical batch size`. Always launch embedding instances with explicit extended batch and context bounds:
     ```cmd
     llama-server.exe -m <model.gguf> --embedding --port 18082 --host 127.0.0.1 -c 8192 -b 8192 --ubatch-size 8192 -ngl 99
     ```
 - **Background Daemon Session Decoupling on Windows**:
-  - Spawning background daemons (`openviking-server`, `llama-server`) via `terminal(background=true)` binds the process to the specific Hermes chat session (`session_id`). This leaves visible terminal tabs in the desktop GUI and risks process termination during session deletion/cleanup.
+  - Spawning background daemons (`llama-server`, `ComfyUI`, and similar) via `terminal(background=true)` binds the process to the specific Hermes chat session (`session_id`). This leaves visible terminal tabs in the desktop GUI and risks process termination during session deletion/cleanup.
   - **The Decoupled Supervisor Invariant**: Long-lived background servers must be spawned as detached system-level background processes via an independent supervisor script using `creationflags=CREATE_NO_WINDOW` (0x08000000). Use `close_terminal(process_id)` to drop the UI tab while keeping the underlying process active, ensuring services survive session deletion, client restarts, and window switching.
 - **Laptop GPU VRAM Sizing Invariant (8GB Class)**:
   - Dense models >9B (e.g. 14B, 27B, 35B) overflow 8GB VRAM and spill into system RAM across PCIe, throttling throughput down to ~4–8 tokens/s with high thermal load.
   - Sub-9B Q4/Q5 models (e.g. `Qwen3.5-9B-Q4_K_M` at ~5.3GB, `DeepSeek-R1-Distill-Qwen-7B-Q4_K_M` at ~4.4GB) fit 100% in 8GB VRAM with ~2.5GB reserved for KV cache, yielding full CUDA acceleration (~20–60 tokens/s).
   - High-parameter MoE models (e.g. `Qwen3-Coder-30B-A3B`) with low active parameter count (Active 3B) remain viable in hybrid memory configurations (~18–28 tokens/s) because memory bandwidth pressure per token is bounded by the active expert slice.
 
-## 18. OpenViking Context Database & Local Model Dual-Drive Memory Architecture
-When integrating OpenViking (`volcengine/OpenViking`) as an external memory provider for Hermes Agent (`hermes memory setup openviking`):
-- **Dual-Drive Synchronization Invariant (Git SSOT)**: Git `main` is the Single Source of Truth (SSOT); OpenViking's vector index and L0/L1 summaries are strictly rebuildable derived caches. To prevent index drift across clones, rebases, or direct file edits, employ dual-drive synchronization:
-  1. **Instant Trigger**: `.git/hooks/post-commit` and `post-merge` trigger incremental `ov add-resource` or reindex calls.
-  2. **Reconciliation Fallback**: Hermes startup and turn probes compare the local/remote HEAD commit SHA against the last indexed SHA and reindex upon drift.
-  3. **Strict One-Way Flow**: Content flows exclusively `Markdown/Git -> OpenViking`. OpenViking data must NEVER write back directly to shared Markdown without explicit human/agent review.
-- **Namespace Isolation**: Map shared repository knowledge exclusively to `viking://resources/shared-memory`. Keep user-private profile facts, preferences, and agent states strictly isolated within `viking://user/...` namespaces.
-- **Zero-Cost Fully Local RAG Pipeline**:
-  - **Embedding**: Use Hermes Desktop's managed `llama.cpp` runtime with GPU CUDA acceleration (e.g. RTX 4070 Laptop) to serve lightweight GGUF embeddings (e.g. `bge-small-zh` or `bge-m3`) via `/v1/embeddings`, eliminating cloud API dependency and preventing privacy leaks.
-  - **L0/L1 Extraction**: Route OpenViking's VLM/LLM configuration to existing local OpenAI gateways (e.g. WorkBuddy `127.0.0.1:8787/v1` with `glm-5.3-flash`), achieving 100% free local execution.
-- **Prompt Contamination Defense & Resource Recall Activation**: Hermes prefetch automatically injects recalled context into upcoming user turns. To prevent answer drift in reasoning models (Gemini 3.8 Flash), enforce conservative settings:
-  ```env
-  OPENVIKING_RECALL_LIMIT=3
-  OPENVIKING_RECALL_SCORE_THRESHOLD=0.35
-  OPENVIKING_RECALL_PREFER_ABSTRACT=true
-  OPENVIKING_RECALL_RESOURCES=true
-  OPENVIKING_RECALL_TIMEOUT_SECONDS=15.0
-  ```
-  **The `recall_resources` Invariant**: In `plugins/memory/openviking`, `recall_resources` defaults to `False`. When shared repository topics are staged under `viking://resources/shared-memory/`, Hermes automatic prefetch will completely ignore repository topics unless `recall_resources: true` is explicitly configured in `config.yaml` or `.env`.
-- **Serverless On-Demand Auto-Wake & Idle Auto-Sleep Gateway Pattern (Zero-Touch Invariant)**:
-  - **User Workflow Preference**: Users strongly dislike having to manually start/stop daemon scripts or having permanent background processes consuming GPU VRAM when not in use. The memory infrastructure must be completely self-governing: zero GPU/CPU consumption during idle periods, automatic transparent wake-up when memory is accessed, and automatic shutdown after inactivity.
-  - **Socket-Activation Architecture (`openviking_lazy_gateway.py`)**:
-    - A lightweight stdlib HTTP gateway listens on the expected port `127.0.0.1:1933` (consuming ~15MB RAM, 0% CPU, 0 MB GPU VRAM).
-    - **On-Demand Auto-Wake**: When Hermes initiates a prefetch query, browse, or tool call against 1933, the gateway checks if backends are sleeping. If sleeping, it silently spawns both `llama-server.exe` (port 18082, CUDA BGE-M3) and `openviking-server.exe` (internal port 1934) with `CREATE_NO_WINDOW`, waits for health readiness (~4–6s), and transparently proxies the HTTP request.
-    - **Idle Auto-Sleep & VRAM Reclamation**: A background monitor thread tracks request timestamps. When no requests are received for `OPENVIKING_IDLE_TIMEOUT` (calibrated to **120s / 2 minutes** per user resource conservation requirements; previously 15 minutes was too sluggish), the gateway automatically kills the backend processes on ports 18082 and 1934, **100% freeing the 800MB GPU VRAM** and returning the GPU to idle.
-    - **Timeout Calibration**: Extend `OPENVIKING_RECALL_TIMEOUT_SECONDS=15.0` in Hermes `.env` / `config.yaml` so the initial cold-start wake-up does not hit the default 4.0s recall timeout.
-    - **Session-Independent Boot Persistence on Windows**: Launching the gateway via `pythonw.exe` from `shell:startup` (`OpenVikingGateway.vbs` with `WshShell.Run ..., 0, False`) guarantees it starts silently on Windows login with no console windows, remaining 100% resilient to chat session deletions, profile resets, or GUI restarts.
+## 18. External Memory Provider: Retired (OpenViking) — Single-Source Architecture
+
+**Status (2026-09-21, user decision): no external memory provider.** OpenViking (`volcengine/OpenViking`) was fully uninstalled — venv, data dir, backup repo and its local embedding GGUF deleted; `memory.provider` cleared back to built-in.
+
+**Why it was removed — the decisive constraint was VRAM, not features:**
+- The local embedding server (`llama-server` serving a 0.6B GGUF with `-ngl 99`) held **~6.57 GB of VRAM resident**. On an **8 GB** laptop GPU this left under 2 GB — enough to block ComfyUI image generation and local chat models entirely.
+- Maintaining two memory stores (built-in `MEMORY.md`/`USER.md` + a vector index) required dual-write sync, a nightly backup task, Git hooks and a lazy gateway: high process overhead for a benefit that keyword search already delivered.
+- Lesson generalized: **any auxiliary service that parks several GB of VRAM permanently is a bad trade on an 8 GB card.** Weigh the opportunity cost (what the GPU could be doing) before adopting it, and always check `nvidia-smi` for resident consumers.
+
+**Current architecture — one source of truth, zero GPU cost:**
+| Need | Where it lives | How it's read |
+|---|---|---|
+| High-frequency facts (identity, paths, standing rules, active projects) | Built-in `memories/MEMORY.md` + `memories/USER.md` | Injected in full into the system prompt every turn |
+| Long-form knowledge (runbooks, post-mortems, component history) | Git shared lib `shared-agent-memory` (`topics/*.md`) | `search_files` (ripgrep) keyword/regex lookup, zero GPU |
+
+**Design rules that survive the retirement:**
+- Content flows one way: **Markdown/Git is the SSOT**; never let a derived index become a second source that can drift.
+- Do not introduce a second memory store alongside the built-in one — dual stores fork and force sync work.
+- If semantic recall is ever wanted again, run embeddings on **CPU** (or accept an explicit VRAM budget), and prefer on-demand socket-activation over a permanently resident service.
+
 - **Hermes Desktop Supervised Local Runtime (`local_runtime`) RAM Footprint & Termination Decoupling**:
   - When a user installs or tests local models via the Hermes Desktop UI (`本地模型` -> `安装运行时` / `✓ 使用`), Hermes spawns a supervised `llama-server.exe` router on port 18434 (listening with `--models-autoload`, `--models-dir`). This supervised process loads multi-billion parameter models resident in RAM/VRAM, consuming **~2.9 GB to 5+ GB of physical RAM**.
   - **The Supervisor Separation Invariant**: Terminating the OpenViking memory service or sleeping the background embedding server DOES NOT kill Hermes's supervised local chat runtime — they are managed by separate supervisors.

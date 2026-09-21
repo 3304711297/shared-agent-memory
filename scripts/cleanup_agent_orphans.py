@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Cleanup Agent Orphan Processes (Node.js MCP, Serena, Zombie Python, OpenViking).
+"""Cleanup Agent Orphan Processes (Node.js MCP, Serena, Zombie Python).
 
 Safely and specifically reaps orphaned processes spawned by Hermes and ZCode MCP servers.
 Does NOT touch unrelated user node/python processes (e.g. web dev, scripts).
@@ -76,7 +76,7 @@ def is_agent_gui_running() -> bool:
     return False
 
 
-def cleanup_orphans(force_all: bool = False, stop_openviking: bool = True) -> dict[str, int]:
+def cleanup_orphans(force_all: bool = False) -> dict[str, int]:
     """Reap orphaned MCP, worker, and helper processes.
     
     If force_all is False and an Agent GUI is currently open, it will protect
@@ -121,25 +121,15 @@ def cleanup_orphans(force_all: bool = False, stop_openviking: bool = True) -> di
         except (psutil.NoSuchProcess, psutil.AccessDenied):
             pass
 
-    # 4. Stop OpenViking stack if requested and GUI is closed
-    if stop_openviking and (not gui_active or force_all):
-        try:
-            sys.path.insert(0, str(Path.home() / "AppData/Local/hermes/scripts"))
-            import openviking_service
-            openviking_service.stop()
-            killed_counts["other"] += 1
-        except Exception as e:
-            log(f"Error stopping OpenViking: {e}")
-
-    log(f"Cleanup finished. Terminated: Node={killed_counts['node']}, Serena={killed_counts['serena']}, Python={killed_counts['python']}, OpenViking={killed_counts['other']}")
+    # 4. Cleanup summary
+    log(f"Cleanup finished. Terminated: Node={killed_counts['node']}, Serena={killed_counts['serena']}, Python={killed_counts['python']}")
     return killed_counts
 
 
 def main():
     force = "--force" in sys.argv
-    no_ov = "--no-openviking" in sys.argv
     log(f"Manual cleanup invoked (GUI active: {is_agent_gui_running()}, force: {force})")
-    cleanup_orphans(force_all=force, stop_openviking=not no_ov)
+    cleanup_orphans(force_all=force)
 
 
 if __name__ == "__main__":

@@ -26,8 +26,6 @@ description: "管理记忆库/存记忆时必用。shared-agent-memory真源读�
 3. **判断落错分支的内容要不要搬**：`git branch -a --contains <sha>` + `git merge-base --is-ancestor <sha> main`。本例 6 个提交只在 hermes 上，内容本身合法（是技能文件而不是记忆文件），而 hermes 分支本就承载技能备份——**不是每个提交都需要搬**，先看它是「本该进 main 的记忆」还是「本就属于 hermes 的技能备份」。
 4. **home 仓 H 对齐**：`git fetch origin hermes` → 工作区若有与 origin/hermes **内容相同**的文件会挡住快进，用 `git diff --stat HEAD origin/hermes` 先看远端要碰哪些文件，只对**内容已一致**的文件 `git checkout HEAD -- <paths>` 腾位（零损失），untracked 的新文件先备份再移走，然后 `git merge --ff-only origin/hermes`。⚠️ 别用 `git checkout -f` 一把梭：会连工作区尚未提交的真新增一起清掉。
 5. **全仓 junction 巡检**（一次收口，防同类断链漏网）：递归扫重解析点，逐个断言目标存在 —— `os.lstat(p).st_file_attributes & 0x400` 判定 reparse，`os.path.realpath(p)` 取目标。本机实测有 13 个 junction（models/runtimes 指向 D 盘、lsp/bin 三个、hermes-agent/node_modules 下 8 个、memories/topics），**除正在修的那个外全为 ✅** —— 这类脚手架目录的 junction 也应在同一轮一并确认。
-6. **OpenViking 同步基准会被分支切换连带拖旧**：`last_synced_commit.txt` 追的是 **main**，不是 hermes。判别：`git log --oneline <synced_sha>..main` 有输出即滞后；补跑 `python %LOCALAPPDATA%/hermes/scripts/sync_shared_memory_openviking.py`，成功后该文件应等于 `git rev-parse main`。
-
 **写记忆前的 3 秒自检（防再踩）**：`cd <真源> && git rev-parse --abbrev-ref HEAD` 必须是 `main`；不是就先切回来再写。
 
 **推送代理回退（2026-09-15 实证）**：本机对 github.com 直连会 `Recv failure: Connection was reset`，`env -u ALL_PROXY -u HTTP_PROXY -u HTTPS_PROXY git ls-remote/push` 同样失败；必须显式走本地代理 `git -c http.proxy=http://127.0.0.1:3067 push origin <branch>`。`gh` CLI 走 keyring 不受影响（`gh run list/view` 可查 CI 结果）。
@@ -80,16 +78,6 @@ metadata:
    - **【公开仓 hygiene 门禁】**：`hermes` 与 `main` 分支各自带 `.github/workflows/ci.yml`，推送即触发 `python scripts/check_hygiene.py`（exit 1 = 违规阻断）。它扫**所有被跟踪文件**的密钥与通用机器路径（`<盘符>:/\Users\<名字>`），文档占位符与检测器自身已白名单。提交前可本地先跑一次同名脚本（两分支各有一份，接口/返回码一致）避免推上去才红。
    - **【推送后自检】**：`gh run list --repo 3304711297/shared-agent-memory --limit 5` 确认 CI 绿灯；`git ls-remote origin <branch>` 确认远端 hash 已变。
 
-5. **【铁律】OpenViking 写后即时灾备**——本轮只要调用过任何 OpenViking 写入（`viking_remember`、`viking_add_resource`、记忆/资源挂载等），**无论当前任务主题是否与备份相关**，都必须在本轮结束前静默执行：
-   ```bash
-   cmd /c "D:\\openviking-backup\\sync.cmd"
-   ```
-   - 调用方式注意：git-bash 下用 `cd "D:/openviking-backup" && MSYS_NO_PATHCONV=1 cmd /c "sync.cmd"`；直接 `cmd //c` 会落进交互式提示符不执行。
-   - 脚本把 `~/.openviking/data/viking/default/{user,resources}` robocopy 镜像到 `D:\openviking-backup\repo` 再推送私有仓 `3304711297/openviking-backup`；无变更秒退，幂等可重复调用。
-   - **大删守卫（2026-09-11 加固）**：源文件数 < 备份文件数的 70%（且备份 ≥100 文件）时中止并返回 exit 2，备份保持不动，中止记录写入 `D:\openviking-backup\abort.log`。确认是真实删减而非源数据丢失后，才用 `OV_BACKUP_FORCE=1` 覆盖重跑。
-   - **【时序竞态】备份必须等抽取落盘，两者是异步的（2026-09-19 实测）**：`viking_remember` 返回成功只是「源已提交」，不代表记忆已写入——服务端随后才做抽取与合并（本次 19:13:57 建会话 → 19:14:34 才写入实体文件，中间约 37 秒）。若紧接着跑 `sync.cmd`，会把**合并前的旧版**推上去（本次备份仓副本仍是旧的 626B，实时文件已是 2465B）。**正确做法**：① 提交后先等一轮再备份，或 ② 备份后核对目标文件是否含新内容，发现是旧版就立即重跑一次 sync。判据：对比备份仓副本与实时文件（`~/.openviking/data/viking/default/user/default/memories/entities/...`）的大小与关键词，**不要只看 sync 返回的 `[OV-BACKUP] OK`**——它只证明推送成功，不证明内容是最新的。
-   - 与每日计划任务 `OpenVikingDailyBackup`（09:30）互补：即时同步压缩暴露窗口，计划任务兜底 AI 无感知的异步写入。失败不重试不阻塞。
-
 **技能清单 token 成本实测（2026-09-19）**：
 
 - 系统提示整体 **33,109 字符 ≈ 11,167 token**（按 Gemini 分词器 1.10x CJK 口径）；`<available_skills>` 段 **8,986 字符 ≈ 3,479 token**，占系统提示 27.1% 字符 / **31.2% token**。其中技能条目（90 个）7,602 字符，分类描述（9 类）1,381 字符。
@@ -98,7 +86,7 @@ metadata:
 - **「有 N 个技能从未使用」不构成删除理由**：按需能力技能（`xlsx`/`arxiv`/`gemini-image-gen` 等）删掉省的 token 远小于「需要时能力消失」的代价。判断某技能该不该留，看它是“按需能力”还是“重复能力”，不看 `last_used_at`。
 - **与 `jev-skill-gate` 的对比不可比**：其宣称 217 技能从 12,750 削到 3,185 token（≈75%），但① 属 Claude Code 专属（`skillOverrides` 动态隐藏机制，Hermes 无）；② 需每轮调外部付费 Jev 打分，为省 token 引入 API 调用在延迟/可靠性上净亏。其思路（按任务动态裁剪清单）在 Hermes 无现成实现。
 
-**规则放置原则（2026-09-11 教训）**：跨会话必须自动执行的约束，**不能只放在语义召回层**（OpenViking 资源 / 共享库文档）——它们仅在话题命中时才进入上下文。凡属「无条件触发」的规则（如写后同步），必须同时写入：(a) 内置 `MEMORY.md`（每轮注入，永远可见）；(b) 对应技能正文（任务命中时加载）。本次就是因规则只存在于召回层，导致修插件 bug 时执行了 `viking_remember` 却整轮无人提醒同步，直到用户手动贴出仓库 URL 才补跑。
+**规则放置原则（2026-09-11 教训）**：跨会话必须自动执行的约束，**不能只放在共享库文档里**——它们仅在话题命中时才进入上下文。凡属「无条件触发」的规则（如写后同步），必须同时写入：(a) 内置 `MEMORY.md`（每轮注入，永远可见）；(b) 对应技能正文（任务命中时加载）。
 
 **改技能前先查在役状态（2026-09-18 用户拍板铁律）**：发现某技能内容有误时，**不得直接 patch** —— 必须先用 `skill_view(name)` 确认它存在且未归档，并查 `capability-inventory.json` 的 `components` / `notWatched` 与 `skills-provenance.json` 的 `watchStatus`，确认该技能在役再动。
 
@@ -133,29 +121,6 @@ metadata:
 **How to apply**：动手前先花一次 `web_search`（或读官方文档/参考实现源码）；若检索确有结果，优先复用其思路与参数，只写业务差异部分；若检索无结果，**写明「已检索 X/Y/Z 未找到现成方案」再手搓**，让「为什么自研」有据可查。
 
 **注意**：`memories/topics` 已在 home 仓库 .gitignore 中排除，严禁再往 hermes 分支提交共享 topics 镜像；旧镜像历史存档于 hermes 分支 `957241a`。
-
-## 智能语义检索与层级加载层 (OpenViking)
-
-为了避免全局 Grep 造成的长文本 Token 暴击与关键词错失，架构挂载了 OpenViking 作为**二级派生检索索引**（Git `main` 仍为唯一物理真源）：
-
-- **服务拓扑**：
-  - **OpenViking 核心服务**：`http://127.0.0.1:1933`（独立虚拟环境 `%USERPROFILE%\.openviking\venv`，无黑框后台运行）
-  - **本地向量 Embedding**：`http://127.0.0.1:18082/v1`（llama-server 纯本地驱动 `D:\HermesModels\bge-m3-Q8_0.gguf`，CUDA RTX 4070 硬件加速，1024 维）
-  - **提炼模型 (VLM)**：`http://127.0.0.1:18080/v1`（gemini-3.8-flash，用于秒级提炼 L0 摘要与 L1 大纲）
-  - **共享记忆挂载点**：`viking://resources/shared-memory/`（客观知识库命名空间，严格与 Agent/User 私有偏好隔离）
-- **双驱动自动同步**：
-  1. **Git Hook 即时驱动**：真源仓库 `D:/ai coding/GitRepos/shared-agent-memory/.git/hooks/post-commit` 与 `post-merge` 挂接 `sync_shared_memory_openviking.py`，本地 commit 产生时秒级增量触发 OpenViking 重新扫描；
-     - **2026-09-09 修复记录**：仓库迁移到 D 盘时 hooks 目录被重置，双钩子丢失导致 OpenViking 同步静默滞后（事发时 last_synced_commit 落后 5 笔提交）。已重建两钩子（bash 后台触发，已 chmod +x）。若发现同步滞后，手动补跑：`python %LOCALAPPDATA%/hermes/scripts/sync_shared_memory_openviking.py`，滞后判据：`%USERPROFILE%/.openviking/last_synced_commit.txt` 中的 SHA ≠ 真源仓库 HEAD；
-  2. **兜底探活**：`sync_shared_memory_openviking.py` 记录 `last_synced_commit.txt`，对比 Git HEAD SHA 自动防漂移。
-- **Hermes 召回约束（防 Prompt 污染与注意力稀释）**：
-  - `OPENVIKING_RECALL_LIMIT=3`
-  - `OPENVIKING_RECALL_SCORE_THRESHOLD=0.35`
-  - `OPENVIKING_RECALL_PREFER_ABSTRACT=true`（优先拉取 L0 一句话摘要，按需用 `viking_read` 钻取 L2 全文）
-  - `OPENVIKING_RECALL_RESOURCES=true`
-  - **Serverless 懒加载与按需唤醒**：网关 `openviking_lazy_gateway.py` 监听 1933 端口，提问时秒级按需唤醒 18082 与 1934，**连续 2 分钟无请求自动休眠释放 800MB 显存**；依用户偏好已移除开机自启，由桌面快捷方式或运维脚本按需启停。
-- **后台服务守护与运维**：
-  - 查看状态：`python %LOCALAPPDATA%/hermes/scripts/openviking_service.py status`
-  - 启停服务：`python %LOCALAPPDATA%/hermes/scripts/openviking_service.py [start|stop|restart]`
 
 ## 多步复杂工程与任务看板（Todo-First 规范）
 

@@ -1,12 +1,12 @@
-Model: gemini-3.8-flash via EasyCLIProxyAPI (18080, provider=cpa-gui) -> Antigravity (2 accts, priority 10 round-robin + 1h sticky). auxiliary.* stays `auto` — never change.
+Model: gemini-3.8-flash via EasyCLIProxyAPI (18080, provider=cpa) -> Antigravity (2 accts, priority 10 round-robin + 1h sticky). auxiliary.* stays `auto` — never change. Current chat may be switched mid-session (workbuddy2api 8787); read runtime metadata, never assume.
 §
-Windows: Karing proxy 127.0.0.1:3067 (UI 1666). 3067 listens only with an outbound node up — no listener = no route; check node first when push hangs. Bare push: `env -u ALL_PROXY -u HTTP_PROXY -u HTTPS_PROXY`. gh acct 3304711297. Edge Dev + chrome-devtools MCP; NO_PROXY/CDP quirks -> OpenViking.
+gh acct 3304711297. Edge Dev + chrome-devtools MCP (connect-only) + deepwiki MCP.
 §
-WorkBuddy2API (原 codebuddy2openai；仓库+工作区已改名) = 本地反代 127.0.0.1:8787/v1，OpenAI+Anthropic 双协议；Tauri v2 控制台（多账号/调度策略/积分），调度策略热读 settings.json 免重启。Ops -> OpenViking。
+WorkBuddy2API (原 codebuddy2openai；仓库+工作区已改名) = 本地反代 127.0.0.1:8787/v1，OpenAI+Anthropic 双协议；Tauri v2 控制台（多账号/调度策略/积分），调度策略热读 settings.json 免重启。
 §
-Hardware: RTX 4070 Laptop 8GB + 24GB; models/runtime junctioned to D:. D:\HermesModels: Octen-Embedding-0.6B=OV embedding(18082), MiniCPM5-2B (fast) + Qwen3.8-9B-Distill (quality) chat. Desktop-managed runtime: models auto-discovered by dir scan; spec-decode drafts/mmproj must live in models\assets\ and be prefixed `dspark-`/`mmproj`; presets.ini is auto-generated (never hand-edit); context window floor is 64K and overrides only grow. OpenViking venv on-demand, sleeps 2min idle. MCP: chrome-devtools (--autoConnect, connect-only) + deepwiki.
+Hardware: RTX 4070 Laptop 8GB + 24GB; models/runtime junctioned to D:. D:\HermesModels: MiniCPM5-2B (fast) + Qwen3.8-9B-Distill (quality) chat. Desktop-managed runtime: models auto-discovered by dir scan; spec-decode drafts/mmproj must live in models\assets\ and be prefixed `dspark-`/`mmproj`; presets.ini is auto-generated (never hand-edit); context window floor is 64K and overrides only grow. 8GB VRAM is the scarce resource — keep background GPU consumers off (OpenViking retired 09-21 for this reason).
 §
-Memory: provider=openviking is ADDITIVE — built-in MEMORY.md/USER.md (4000/3000 chars) still inject in full every turn; low-freq -> viking_remember, built-in keeps high-frequency only. Near limit: SUBTRACT, never raise the cap. CJK costs 1.10x on Gemini's tokenizer vs 1.34x o200k (cap counts chars).
+Memory (single source of truth): built-in MEMORY.md/USER.md inject in full every turn; the Git shared lib `shared-agent-memory` (memories/topics junction) holds long-form facts and gets grepped via search_files. NO second memory store — OpenViking retired 2026-09-21 (VRAM cost + dual-store overhead). Near the char cap: SUBTRACT, never raise the cap. CJK costs 1.10x on Gemini's tokenizer vs 1.34x o200k (cap counts chars).
 §
 PS scenarios -> pwsh -NoProfile (Store alias, version-independent) + [Console]::OutputEncoding=UTF8 for CJK;
 §
@@ -15,8 +15,6 @@ Style: ext-AI cross-review -> P0/P1/P2 spec; fixed scope, no opportunistic refac
 Pitfalls: Desktop "session won't run" freeze = model switch injecting a user-role system msg + truncated retry rejected by gateway (upstream #94486); restart won't self-heal — SOP in shared lib topics/hermes-desktop-rewind-deadlock.md.
 §
 ZCode 退役 09-09；仅存 zcode-api proxy 促销 token 关系。
-§
-OpenViking writes (viking_remember/add_resource/etc) -> SAME-TURN run D:\openviking-backup\sync.cmd (private repo 3304711297/openviking-backup), regardless of topic. Large-shrink guard aborts exit 2 leaving backup untouched; rerun with OV_BACKUP_FORCE=1 only if the shrink is intentional.
 §
 Hermes 工具三坑（本机复现）: ① search_files pattern 反斜杠被转成 /（\( → /( 、\d → /d）→静默 0 命中，改用字符类 [(] / [0-9]；上游已报 #92260，修复 PR #92267（唯一能打在 main 上的）；② read_file 重复读同一文件返回 {status:unchanged}/{error,already_read} 无 content 键，循环取值必须 .get('content')；③ execute_code 的 Python 是原生 Windows，subprocess 调 grep/rg 必 FileNotFoundError，用 terminal 工具或纯 pathlib。
 §
