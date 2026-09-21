@@ -1,7 +1,7 @@
 {
   "version": 2,
   "description": "本地能力组件清单（skill/mcp/plugin/工具核心的已装版本与上游源）。由 capability-upstream-watch 工作流每日比对远端源；本地源组件用 watch-capability.cmd 或任意 Agent 会话跑脚本比对。【维护铁律】升级或新装任何组件后，必须同步更新本清单并随共享库推 main，看门自动收口对应 Issue。",
-  "updatedAt": "2026-09-21T05:40:00+08:00",
+  "updatedAt": "2026-09-21T06:15:00+08:00",
   "components": [
     {
       "id": "chrome-devtools-mcp",
@@ -253,24 +253,6 @@
       ]
     },
     {
-      "id": "openviking",
-      "display": "OpenViking 上下文记忆与语义检索数据库",
-      "checks": [
-        {
-          "type": "gh-release",
-          "repo": "volcengine/OpenViking",
-          "tag_strip": "^v"
-        }
-      ],
-      "installed": [
-        {
-          "where": "本地专属环境 %USERPROFILE%/.openviking/venv",
-          "version": "0.4.21",
-          "note": "2026-09-21 升级至 v0.4.21。加固存储、文件系统锁与 QueueFS 稳定性，新增独立 Hermes OpenViking memory provider，增强 MCP 参数校验；升级后实测惰性网关唤醒与语义检索一切正常。"
-        }
-      ]
-    },
-    {
       "id": "cli-bsk",
       "display": "系统 CLI：BrowserSkill (bsk)",
       "checks": [
@@ -309,6 +291,7 @@
     }
   ],
   "notWatched": [
+    "【组件已物理卸载与退役 2026-09-21 用户拍板】openviking：本地向量检索数据库与专属虚拟环境已彻底物理移除。理由：本地 Embedding 模型（Octen-0.6B）占用 6.57GB 显存，与 RTX 4070 8GB 笔记本显存严重冲突（导致 ComfyUI 等生图与大模型无法施展）；且维护 Hermes 内置 memory + OpenViking 双记忆库存在严重心智负担与双重同步成本；用户拍板回归「Hermes + Git 共享记忆库（shared-agent-memory）」单一真源极简架构，彻底归还 6.6GB 显存。Octen 向量模型已删，Windows 计划任务与相关脚本已清理，不再纳入看门。",
     "【自研技能 2026-09-21】hf-model-download：面向国内镜像源直连、禁用 XetHub CAS 401 拦截与 HTTP 206 Range 绝对断点续传的轻量原生下载技能，用于弱网与热点 Wi-Fi 下下载大模型权重，属于用户自研工具体系，无公开上游，不纳入单独看门，已列入 protectedSkills 白名单。",
     "【架构解耦·看门移交 2026-09-17 用户拍板】19 个反代生态借鉴雷达组件（wb2api-upstream-* 与 c2api-upstream-*）已彻底从 shared-agent-memory 剥离，整体移交至 workbuddy2api 仓库内专属独立看门（tools/upstream-sources.json + tools/check-upstream.py + .github/workflows/upstream-watch.yml）。理由：业务项目借鉴雷达与全局能力基础设施分离，避免全局看门充斥业务 Diff 导致跨仓处置成本过高，且防止项目退役后遗留僵尸配置；各项目有更新直接在各自仓库开 Issue 闭环。",
     "【技能已删除·状态收口 2026-09-18】edge-dev-cdp-scraping：**技能文件已实际删除**（此前 09-17 记为「已物理删除」但执行遗漏、文件一直存在，本次补齐；`.usage.json` 记录同步清除）。其方案本身已被 Tencent/BrowserSkill（cli-bsk）完全取代；且其核心前提「Edge Dev 默认 Profile 无法开启 9222 CDP 端口」已被 09-18 实测推翻（根因 Local State 的 devtools.remote_debugging.user-enabled=true 已持久化）。两块独有知识的去向：① X/Twitter 免登录抓取通道优先级表 → 并入 browser-skill；② Edge 扩展被物理删除的高危坑 → 本已在 cross-agent-collaboration/references/browser-boundary.md 覆盖。删除前已核对：provenance 无条目、check_skill_drift.py 不覆盖 web 类、inventory 无引用，无副作用。",
