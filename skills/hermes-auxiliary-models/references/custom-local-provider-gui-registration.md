@@ -244,7 +244,7 @@ When using Hermes Desktop's integrated **Local Models** (`本地模型`) feature
 
 - **Hermes Desktop Supervised Local Runtime (`local_runtime`) RAM Footprint & Termination Decoupling**:
   - When a user installs or tests local models via the Hermes Desktop UI (`本地模型` -> `安装运行时` / `✓ 使用`), Hermes spawns a supervised `llama-server.exe` router on port 18434 (listening with `--models-autoload`, `--models-dir`). This supervised process loads multi-billion parameter models resident in RAM/VRAM, consuming **~2.9 GB to 5+ GB of physical RAM**.
-  - **The Supervisor Separation Invariant**: Terminating the OpenViking memory service or sleeping the background embedding server DOES NOT kill Hermes's supervised local chat runtime — they are managed by separate supervisors.
+  - **The Supervisor Separation Invariant**: Sleeping or stopping a background auxiliary service (e.g. an embedding server) DOES NOT kill Hermes's supervised local chat runtime — they are managed by separate supervisors.
   - **The Dynamic Model Switching Invariant (No Fixed Main Model)**: The user frequently and dynamically switches dialogue models across cloud and local providers at will. **NEVER hardcode, enforce, or assume a fixed default or main dialogue model** in user profiles, system prompts, memory topics, or skill instructions. Always treat dialogue model selection as dynamic and user-directed.
   - **Complete RAM Reclamation Protocol**: When local chat models are not actively in use, keep the supervised runtime disabled to avoid consuming ~3GB memory:
     1. Send a POST request to Hermes Desktop internal endpoint `/api/local-models/server` with body `{"action": "stop"}` (authenticated via `X-Hermes-Session-Token`), or execute `hermes config set local_runtime.enabled false`.
