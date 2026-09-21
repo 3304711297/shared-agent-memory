@@ -102,3 +102,4 @@ metadata:
 - 驱动钉在 **3.6.0.1427（2026-06-11）**：这是支持 380411AD 的最新版；station-drivers 上更新的包（3.6.0.1434、3.6.2.1427/1438）INF 支持列表已删该 SUBSYS，装不上不用试
 - 手机 5G 移动数据热点 SSID 即 `jojo`（不是路由器）；2026-09-13 一次"开 Karing 节点后热点断连"报障，经查是网卡驱动主动断开（WLAN-AutoConfig 8003，原因"网络被驱动程序断开连接"），Karing 当时 TUN 关闭、节点健康，已洗清——下次同类报障先看事件查看器断开原因码再定责
 - 网卡高级设置（单 5GHz 手机热点、稳定优先，2026-09-13 定案）：漫游主动性=已禁用、省电=已禁用（最高性能）、发射功率=最高、首选频带=首选 5GHz（与热点频段一致）、U-APSD=禁用、唤醒类全禁、AMSDU Rx/Tx=启用、频段带宽全 Auto；802.11ax 保持，断连复现再降 802.11ac 保底
+- 蓝牙服务 **MTKBTSVC**（`C:\Windows\System32\mtkbtsvc.exe`，MediaTek Bluetooth Service Application）：本机已实测设为 `Disabled`（已禁用/未运行）；Windows 自带 `bthserv` 完全接管常规蓝牙外设（如 MCHOSE G9 PRO 等），连接与功能均正常。该服务日常无用且有社区已知的句柄泄露拖卡系统 Bug，保持禁用即可，切勿开启。
