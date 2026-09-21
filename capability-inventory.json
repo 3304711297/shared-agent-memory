@@ -1,7 +1,7 @@
 {
   "version": 2,
   "description": "本地能力组件清单（skill/mcp/plugin/工具核心的已装版本与上游源）。由 capability-upstream-watch 工作流每日比对远端源；本地源组件用 watch-capability.cmd 或任意 Agent 会话跑脚本比对。【维护铁律】升级或新装任何组件后，必须同步更新本清单并随共享库推 main，看门自动收口对应 Issue。",
-  "updatedAt": "2026-09-18T23:50:00+08:00",
+  "updatedAt": "2026-09-21T04:20:00+08:00",
   "components": [
     {
       "id": "chrome-devtools-mcp",
@@ -309,6 +309,7 @@
     }
   ],
   "notWatched": [
+    "【自研技能 2026-09-21】hf-model-download：面向国内镜像源直连、禁用 XetHub CAS 401 拦截与 HTTP 206 Range 绝对断点续传的轻量原生下载技能，用于弱网与热点 Wi-Fi 下下载大模型权重，属于用户自研工具体系，无公开上游，不纳入单独看门，已列入 protectedSkills 白名单。",
     "【架构解耦·看门移交 2026-09-17 用户拍板】19 个反代生态借鉴雷达组件（wb2api-upstream-* 与 c2api-upstream-*）已彻底从 shared-agent-memory 剥离，整体移交至 workbuddy2api 仓库内专属独立看门（tools/upstream-sources.json + tools/check-upstream.py + .github/workflows/upstream-watch.yml）。理由：业务项目借鉴雷达与全局能力基础设施分离，避免全局看门充斥业务 Diff 导致跨仓处置成本过高，且防止项目退役后遗留僵尸配置；各项目有更新直接在各自仓库开 Issue 闭环。",
     "【技能已删除·状态收口 2026-09-18】edge-dev-cdp-scraping：**技能文件已实际删除**（此前 09-17 记为「已物理删除」但执行遗漏、文件一直存在，本次补齐；`.usage.json` 记录同步清除）。其方案本身已被 Tencent/BrowserSkill（cli-bsk）完全取代；且其核心前提「Edge Dev 默认 Profile 无法开启 9222 CDP 端口」已被 09-18 实测推翻（根因 Local State 的 devtools.remote_debugging.user-enabled=true 已持久化）。两块独有知识的去向：① X/Twitter 免登录抓取通道优先级表 → 并入 browser-skill；② Edge 扩展被物理删除的高危坑 → 本已在 cross-agent-collaboration/references/browser-boundary.md 覆盖。删除前已核对：provenance 无条目、check_skill_drift.py 不覆盖 web 类、inventory 无引用，无副作用。",
     "【组件已物理移除 2026-09-17】cli-devin / hermes-devin-acp：用户决定暂缓 Devin ACP 研究，Devin CLI 经官方卸载（devin uninstall --clean --force）与残留清理已彻底卸载，hermes-devin-acp 插件与 Hermes config.yaml providers 配置已移除，不再纳入看门",
