@@ -67,6 +67,49 @@ names it). Distinguishing self-inflicted failures from real ones matters
 most right after a fix: reporting a phantom regression wastes a whole
 round of someone else's attention.
 
+### Long-lived daemons must NOT borrow Hermes's own venv interpreter
+
+Any always-on helper you install (exit-cleanup reaper, quota server, file
+watcher) must run from its **own** interpreter. A resident process holding
+`hermes-agent/venv/Scripts/pythonw.exe` open makes the updater refuse the
+hand-off, and the user sees 「关闭其他进程以更新 Hermes」 with only a
+cancel button — an update that silently never proceeds.
+
+Diagnose with the updater's own probe (it is the arbiter, not your guess):
+
+```bash
+python -m hermes_cli._scan_venv_blockers      # -> {"ok":true,"blocked":...,"processes":[...]}
+```
+
+`blocked: true` lists every process holding the venv. Fix by pointing the
+launcher (`.cmd` / `.vbs` / Startup entry / `PYTHONW_EXE` constant) at an
+independent venv — on this host `%LOCALAPPDATA%/hermes/tools/guard-venv`
+(create with `python -m venv`, then `pip install psutil`; keep it under a
+git-ignored path). Re-run the probe to confirm. Note the probe also flags
+*your own* transient `execute_code` runners — those disappear at end of turn
+and are not a real blocker; judge by whether the daemon's interpreter path
+still points into `hermes-agent/venv`.
+
+Generalize: **hot-updatable software must not be held open by anything it
+ships.** Long-lived companions belong in their own runtime, outside the
+update surface.
+
+### Killing by command-line substring: your own shell matches
+
+A daemon's `stop` routine that scans `psutil` for its script name will also
+match the shell that invoked it (`bash -c ... agent_guard.py stop`), and
+`proc.kill()` then kills the caller: the command dies with rc=15, no output.
+Guard with **both** the full ancestor chain and a process-name allowlist:
+
+```python
+protected = {p.pid for p in psutil.Process(os.getpid()).parents()} | {os.getpid()}
+if proc.info['name'] not in ('python.exe', 'pythonw.exe') or pid in protected:
+    continue
+```
+
+Protecting only `os.getpid()` is not enough — the *parent* shell is the one
+that dies.
+
 ### Path / Filesystem
 
 **Line endings.** Git may warn `LF will be replaced by CRLF`. Cosmetic — the
