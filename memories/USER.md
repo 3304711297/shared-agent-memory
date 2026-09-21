@@ -21,3 +21,7 @@ CI & notifications: on all-green completion, DELETE /notifications/threads/{id} 
 构建/部署 gui 应用（workbuddy2api 等 Tauri 桌面端）：**用户自己构建**，用 `npm run tauri build`（在仓库根的 PowerShell 里跑）。我不得自行琢磨"如何在不影响会话的情况下构建"，也不要搬文件到隔离目录或写替换脚本——会把会话链路搞断或产出空壳。**改完代码只需告知一声"可以构建了"，用户自己来。**
 §
 踩坑沉淀：遇到工具报错/平台拦截/参数暗坑，严禁以内存紧张为由推脱不记；区分全局记忆与技能，主动归位并 patch 沉淀到对应 skill（平台工具规则进 hermes-agent），禁等用户催促。
+§
+tweakbyjie 上游吸收闭环铁律：凡是对标或融入新开源项目的调优项，必须在同轮收尾时自动将该项目录入 tools/upstream-sources.json 看门雷达与 README.md 上游采纳表格，无需用户再次提醒。
+§
+新项目接入 OpenViking 铁律（2026-09-21 用户拍板）：凡有新工程/文档项目接入知识库，严禁整父目录一把梭；必须按仓库精确挂载独立命名空间（viking://resources/<name>，过滤构建杂质）；并在其 .git/hooks 部署 post-commit/post-merge 钩子联动轻量同步脚本，实现「改动提交即增量同步、零手动上传、零后台空转」；同轮必做 viking_search 实测与 D:\openviking-backup\sync.cmd 灾备。
