@@ -52,11 +52,13 @@ python %LOCALAPPDATA%/hermes/scripts/search_bookmarks.py "<检索词>" -n 20
 python %LOCALAPPDATA%/hermes/scripts/search_bookmarks.py "<检索词>" -f "AI" -n 10
 ```
 
-### 2. 自然语言概念检索（OpenViking 意图召回）
-面对模糊或泛化需求时，调用 OpenViking：
-```python
-viking_search(query="免版权音频或耳机校准", scope="viking://resources/browser-bookmarks/", limit=5)
+### 2. 宽泛需求的二次过滤（原 OpenViking 意图召回，已退役 2026-09-21）
+面对模糊或泛化需求时，先用多个近义关键词各跑一次上面的检索，再用 `search_files` 在结果上做模糊过滤。示例：找「免版权音频或耳机校准」→ 分别以 `音频`、`免版权`、`校准`、`EQ` 检索后合并去重。
+```bash
+python %LOCALAPPDATA%/hermes/scripts/search_bookmarks.py "校准" -n 20
+python %LOCALAPPDATA%/hermes/scripts/search_bookmarks.py "音频素材" -n 20
 ```
+（`viking_search` 工具已随 OpenViking 退役，勿再调用。）
 
 **Why:** 建立安全、实时且具备语义理解的个人资源检索体系，大幅提升 Agent 对用户个性化工具链的认知深度。
 **How to apply:** 只要涉及推荐工具、寻找特定网站、回溯历史收藏时，优先检索本地书签库，避免盲目推荐外部未知站点。

@@ -77,7 +77,7 @@ metadata:
 
 6. **后台自我改进学习循环 (Background Review)**：
    - 三重禁用：`memory.nudge_interval: 0`、`skills.creation_nudge_interval: 0`、`auxiliary.background_review.enabled: false`（双保险防 fail-open 复活）。
-   - **核心考量**：每 10 轮/15 次工具调用自动 fork 重放会话烧 ~30K token，且擅自写记忆/建技能，违反用户拍板制与看门同步铁律；禁用后 memory 工具、OpenViking、/refine 手动审查均不受影响。
+   - **核心考量**：每 10 轮/15 次工具调用自动 fork 重放会话烧 ~30K token，且擅自写记忆/建技能，违反用户拍板制与看门同步铁律；禁用后 memory 工具与 /refine 手动审查均不受影响。
    - serena 与 cliproxyapi 已于同日退出 capability-inventory.json 看门（插件已删/用户手动更新）。
 
 ---
@@ -116,7 +116,8 @@ security:
   protected_instruction_files: false    # 指令文件写入门禁已关闭（2026-09-11 拍板，详见独立记忆卡 hermes-approval-two-tier-gates）
 
 memory:
-  provider: openviking                  # 内置字符限额 3000/2000 + OpenViking 召回
+  # provider: 未设置 —— 外部 provider（OpenViking）已退役 2026-09-21，回归内置记忆
+  memory_char_limit: 4000               # 内置字符限额
 
 plugins:
   enabled: [superpowers, token-stats, config-guard]

@@ -7,6 +7,8 @@ metadata:
 
 # OpenViking 提炼模型动态跟随（2026-09-06 落地）
 
+> ⛔ **已退役（2026-09-21）**：OpenViking 已卸载，本文的 `ov.conf` / `/ovlm` 端点机制已不存在。保留仅作历史记录。见 [OpenViking Retired](openviking-retired.md)。
+
 ## 背景
 `ov.conf` 的 `vlm` 段原钉死 `gemini-3.8-flash@18080`（EasyCLIProxyAPI）。用户把聊天切到 WorkBuddy/glm 后，记忆提炼链路仍烧 Gemini 额度（附：2026-09-06 当天 09:58-13:14 的 gemini-3.8-flash 会话产生 879 次调用/144M 输入 token，为额度大头）。
 

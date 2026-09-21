@@ -7,6 +7,8 @@ metadata:
 
 # OpenViking 语义层级检索与本地模型工作台落地全貌
 
+> ⛔ **已退役（2026-09-21）**：本文描述的 OpenViking 懒网关 / 本地 BGE-M3 向量服务已全部物理卸载。保留此文仅作历史参考（含「常驻嵌入服务吞掉数 GB 显存」的经验教训）。现行架构见 [OpenViking Retired](openviking-retired.md)。
+
 本文档详细记录 2026-09-06 在 Windows 11 本机上，为 Hermes Agent 和 ZCode 双端共享记忆库接入 OpenViking 智能语义检索层、本地 llama.cpp CUDA 硬件加速引擎及 Serverless 按需唤醒/休眠静默网关的技术全貌与运维规范。
 
 ## 一、架构拓扑与分层原则

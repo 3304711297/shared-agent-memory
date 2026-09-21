@@ -42,12 +42,12 @@ NousResearch hermes-agent v0.21.0 于 2026-09-02 23 时重装完成并验证（d
   - 根因：更新安装器需要覆盖更新 `hermes-agent\venv` 下的依赖与执行模块，但后台常驻的配额服务或辅助脚本（如 `fetch_quota.py`）仍在运行并独占句柄，触发 Windows 进程文件锁，导致更新器出于安全策略暂停并弹出拦截。
   - 处理：任务管理器或命令行 `taskkill /F /PID <pid>` 结束占用进程，再执行更新即可；当手动 `hermes update` 已经执行完成并显示最新（`f1ccf436a2`）后，该弹窗仅为历史残留阻断提示，直接点击「暂不」或「×」关闭即可。
 - **Hermes 桌面更新拦截「关闭其他进程以更新 Hermes」根治与常驻进程隔离铁律（2026-09-06 彻底闭环）**：
-  - 现象：点击桌面更新无反应，或弹窗提示「关闭其他进程以更新 Hermes」，详情显示 `pythonw.exe (PID 4336) ... openviking_lazy_gateway.py` 且界面仅有「暂不」按钮（点击即取消）。
-  - 根因：更新前置探针 `python -m hermes_cli._scan_venv_blockers` 扫描到开机启动项 `OpenVikingGateway.vbs` 与历史脚本借用了 Hermes 自身的解释器（`hermes-agent\venv\Scripts\pythonw.exe`），Windows 底层文件锁导致更新器判定 `blocked: true`。
+  - 现象：点击桌面更新无反应，或弹窗提示「关闭其他进程以更新 Hermes」，详情显示某个 `pythonw.exe (PID ...) <常驻守护脚本>`，且界面仅有「暂不」按钮（点击即取消）。
+  - 根因：更新前置探针 `python -m hermes_cli._scan_venv_blockers` 扫描到开机启动项与常驻守护脚本借用了 Hermes 自身的解释器（`hermes-agent\venv\Scripts\pythonw.exe`），Windows 底层文件锁导致更新器判定 `blocked: true`。
   - 根治措施：
-    1. 进程环境彻底隔离：将开机自启脚本 `Startup\OpenVikingGateway.vbs` 和 `quota_service.cmd` 内的解释器全部改为独立虚拟环境 `%USERPROFILE%\.openviking\venv\Scripts\pythonw.exe`，终止旧进程并重启网关；
+    1. 进程环境彻底隔离：把开机自启脚本与本机常驻守护脚本（`Startup\*.vbs`、`quota_service.cmd`、`agent_guard.py` 等）的解释器全部改为 Hermes venv **之外**的独立解释器/虚拟环境，终止旧进程后重启；
     2. 探针验证：`python -m hermes_cli._scan_venv_blockers` 返回 `{"ok": true, "blocked": false, "processes": []}`，阻断彻底归零；
-    3. 【架构铁律】：Windows 下任何开机自启、常驻后台守护或辅助微服务，严禁借用 `hermes-agent\venv` 解释器，必须严格使用独立 Venv，确保 Hermes 自身 Venv 零占用。
+    3. 【架构铁律】：Windows 下任何开机自启、常驻后台守护或辅助微服务，严禁借用 `hermes-agent\venv` 解释器，必须严格使用独立 Venv，确保 Hermes 自身 Venv 零占用以支持热更新。
 
 - **Hermes 桌面更新误报「The updated Desktop executable is missing」(exit 8) 根因与排查（2026-09-08）**：
   - 现象：Hermes Desktop 后台自动更新完成后（更新日志显示 code updated to `520e63661c` v0.21.1、deps checked、cua-driver 0.24.0、gateway cold-start 重启成功、`hermes update exit code: 0`），随后抛出 `verify! RuntimeError: The updated Desktop executable is missing`，退出码 8 并弹出「Failed to update」窗口；后台 PowerShell 进程（PID 7048 等）仍挂起运行。

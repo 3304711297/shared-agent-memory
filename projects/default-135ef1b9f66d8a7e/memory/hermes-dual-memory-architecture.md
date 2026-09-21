@@ -6,6 +6,8 @@ metadata:
   type: project
 ---
 
+> ⛔ **已失效（2026-09-21）**：OpenViking 已物理退役，双库架构不再存在。现行单一真源 = 内置 `MEMORY.md`/`USER.md`（高频）+ Git 共享库（低频长文，`search_files` 检索）。本文档仅作历史记录保留，**不要据此配置 `memory.provider`**。见 [OpenViking Retired](openviking-retired.md)。
+
 **Hermes 双记忆库并行架构**（2026-09-07 源码考证 + 用户拍板方案 B）：
 
 - **根因考证**（hermes-agent 源码 `agent/agent_init.py` + `tools/memory_tool.py`）：`memory.provider: openviking` 只是**叠加**外部 provider（源码注释原话 "one at a time, **alongside built-in**"），内置 MEMORY.md/USER.md 始终并行存在且作为**每会话冻结快照全量注入系统提示词**。所以「记忆库满」永远指内置库，与 OpenViking 无关。

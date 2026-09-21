@@ -186,20 +186,10 @@ voice:
 memory:
   memory_enabled: true
   user_profile_enabled: true
-  memory_char_limit: 3000
-  user_char_limit: 2000
+  memory_char_limit: 4000
+  user_char_limit: 3000
   nudge_interval: 0
-  provider: openviking
-  openviking:
-    endpoint: http://127.0.0.1:1933
-    account: default
-    user: default
-    agent: hermes
-    recall_limit: 3
-    recall_score_threshold: 0.35
-    recall_prefer_abstract: true
-    recall_resources: true
-    recall_timeout_seconds: 15
+  # provider: (unset) — 外部记忆 provider 已退役 2026-09-21，回归内置记忆
 delegation:
   max_iterations: 250
 moa:
