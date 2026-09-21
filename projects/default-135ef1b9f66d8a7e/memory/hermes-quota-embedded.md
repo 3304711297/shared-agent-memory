@@ -22,7 +22,7 @@ metadata:
   1. **多账号重置倒计时直显与待机聚焦**：Popover 凭据池明细与全景看板卡片均直接内联展示各个待机轮询账号独立的 5h 滚动与周总额度刷新倒计时（支持 compact 紧凑与相对/绝对格式切换）；点击任意待机账号卡片可将下方核心指标大卡无缝切换为该账号的待机聚焦预览（附「待机预览」与「切回活跃」按钮）。
   2. **状态栏视觉净化与 Tooltip 降噪**：彻底移除了状态栏上的无用电池 `🔋` 图标；去除了鼠标悬停在状态栏时的全局 Tooltip 气泡（去掉了 `Tip` 组件与按钮 title），杜绝视觉遮挡。
   3. **左侧导航入口默认隐藏与按需启闭**：为了避免让人误以为配额入口是 Hermes 官方原生自带菜单，左侧导航栏的「配额」按钮（Pulse 图标）默认设置为**关闭/隐藏**；并在状态栏 Popover 底部与 `/quota` 全景看板顶部新增了即时开关，支持 `ctx.storage` 本地持久化与运行时动态热启闭（无感生效）。
-  4. **OpenViking 记忆提炼联动映射修复**：修复了 `plugin_api.py` 中因写死 `custom:` 前缀而导致 `billing_provider == "custom"` 时误报“非 custom 类型 provider，无本地凭据可映射”及“模型不在目录”的逻辑反转 Bug；现采用支持当前模型名称反查 custom_providers 目录与默认 provider 的多级健壮映射。
+  4. **记忆提炼联动映射修复（历史，OVLM 已随 OpenViking 退役）**：修复了 `plugin_api.py` 中因写死 `custom:` 前缀而导致 `billing_provider == "custom"` 时误报“非 custom 类型 provider，无本地凭据可映射”及“模型不在目录”的逻辑反转 Bug；现采用支持当前模型名称反查 custom_providers 目录与默认 provider 的多级健壮映射。
 
 ## 积分精确显示（2026-09-18 用户要求，铁律）
 **积分一律精确显示，禁止约数/截断。** 原实现三类失真已被清除：① 状态栏 chip 的 `fmtCredits` 把 1833.33 压成 `1.8k`（且 null 时回退成端口号 `8787`）；② 看板/Popover 用 `toFixed(1)`/`Math.round` 截断；③ 后端 markdown 用 `:.0f`/`:.1f`。

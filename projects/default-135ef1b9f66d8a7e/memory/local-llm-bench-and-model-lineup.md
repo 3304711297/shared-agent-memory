@@ -29,10 +29,10 @@ metadata:
 ## 模型库定案(已执行)
 
 - **DeepSeek-R1-7B 已删**(09-09 用户确认):同题两轮不稳(数列 56→42)、幻觉题答案对但推理事实错、思考 token 拖速度、输出被 LaTeX 污染;preset.ini 段落同步清除
-- `D:\HermesModels` 现存:bge-m3-Q8_0(OpenViking 嵌入专用)+ MiniCPM5-2B + Qwen3.5-9B(聊天)
+- 现状（2026-09-21 更新）：`D:\HermesModels` 仅存 MiniCPM5-2B 与 Qwen3.8-9B-Distill（聊天）。bge-m3/Octen 等嵌入模型已随 OpenViking 退役删除；下文涉及 bge-m3/18082/openviking_lazy_gateway 的段落均为历史记录。
 
 ## 嵌入模型备选备忘(搁置,重建索引时启用)
 
-- **bge-m3 只服务 OpenViking**,与聊天模型无关;`openviking_lazy_gateway.py` 起它于 18082(嵌入),`ov.conf` dimension=1024
+- 【历史】bge-m3 只服务 OpenViking，与聊天模型无关；`openviking_lazy_gateway.py` 起它于 18082（嵌入），`ov.conf` dimension=1024
 - **jina-embeddings-v5-text-nano**(2026-02 发布):239M,蒸馏自 Qwen3-Embedding-4B,MTEB 多语 65.5 超 bge-m3 约 6 分,Q8 仅 222MB。**不迁移的三个理由**:768 维≠1024 维(换=全库重嵌入)、任务分家(4 个独立 GGUF 需各自任务前缀,OpenAI 兼容裸调用吃不到)、CC-BY-NC 禁商用
 - 未来重建索引时与 **Qwen3-Embedding-0.6B**(1024 维免改配置,MTEB 64.33)一并实测;当前召回无痛点不动

@@ -1,6 +1,6 @@
 ---
 name: openviking-vlm-dynamic-follow
-description: OpenViking 记忆提炼模型动态跟随当前聊天模型的机制、实现位置与避坑（token-stats 插件 /ovlm）
+description: [已退役 2026-09-21，仅存史] OpenViking 记忆提炼模型动态跟随机制（token-stats /ovlm）
 metadata:
   type: project
 ---

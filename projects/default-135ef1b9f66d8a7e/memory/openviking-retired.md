@@ -21,13 +21,16 @@ metadata:
 |---|---|
 | OpenViking 虚拟环境 `%USERPROFILE%/.openviking/` | 物理删除（含 venv、data、ov.conf） |
 | 向量模型 `D:\HermesModels\Octen-Embedding-0.6B-Q8_0.gguf` | 物理删除（释放 0.60GB） |
-| 灾备仓 `D:\openviking-backup` + 私有仓 3304711297/openviking-backup | 目录物理删除（远端私有仓保留作历史归档） |
+| 灾备仓 `D:\openviking-backup` + 私有仓 3304711297/openviking-backup | **本地目录与远端私有仓均已物理删除**（删除前已逐条审计 6031 个文件，确认无本地缺失的独有内容） |
 | Windows 计划任务 `OpenVikingDailyBackup` | Unregister |
 | Git hooks（shared-agent-memory / youshouldknow 的 post-commit、post-merge） | 删除 |
 | 守护脚本 lazy_gateway / openviking_service / sync_shared_memory_openviking / sync_ysk_openviking / ov_shim 系列 / backup_sync.cmd / start|stop_openviking.vbs | 删除 |
 | Hermes `config.yaml` 的 `memory.provider: openviking` 与 `memory.openviking` 段 | `hermes config unset` 移除 |
 | token-stats 插件的 OVLM 联动（后端 375 行 + 前端 OvlmCard 卡片 + `/ovlm` 路由） | 删除 |
-| `agent_guard.py` / `cleanup_agent_orphans.py` 的 OpenViking 停机逻辑及对 OV venv pythonw 的依赖 | 拆除，改指向 Hermes venv |
+| `agent_guard.py` / `cleanup_agent_orphans.py` 的 OpenViking 停机逻辑及对 OV venv pythonw 的依赖 | 拆除；守护进程改跑**独立** `tools/guard-venv`（严禁借用 `hermes-agent\venv`，否则阻断 Hermes 热更新） |
+| 用户环境变量 PATH 中的 `.openviking\shim-bin` 与 `.openviking\venv\Scripts` 两条死路径 | 从 `HKCU\Environment` 移除（备份见 `cache/user-path-backup-before-ov-purge.txt`） |
+| `.env` 中的 `OPENVIKING_RECALL_TIMEOUT_SECONDS` | 删除（备份见 `cache/env-backup-before-ov-purge.txt`） |
+| 技能与记忆卡中把 OpenViking 描述为「仍活跃」的叙述 | 逐处改写为退役标注（含 `viking_search`/`sync.cmd` 等已失效调用） |
 
 ## 迁移回共享库的知识
 

@@ -1,6 +1,6 @@
 ---
 name: hermes-dual-memory-architecture
-description: Hermes 双记忆库并行架构定案：provider=openviking 是叠加层而非替换；内置库限额顶格时做减法迁移 OpenViking，不调限额
+description: [已失效 2026-09-21] 历史定案：provider=openviking 为叠加层；现行单一真源=内置库+Git 共享库
 metadata:
   node_type: memory
   type: project
@@ -20,5 +20,5 @@ metadata:
 - **首轮迁移实绩（09-07）**：7 条低频事实迁 OpenViking（WorkBuddy 细节/浏览器治理/token-stats/TG 频道/ZCode 跨端规范/token 双口径/架构杂项），抽验 4 条全部高分召回（TG 0.747、浏览器治理 0.74）；内置库 MEMORY.md 99%→49%、USER.md 99%→77%；hermes 分支备份 commit `27dffeb`。
 - **防复发**：内置库已写入「记忆架构」条目——低频细节默认走 viking_remember，双库顶格时优先做减法，不调限额。
 
-**Why:** 内置库内容每轮随系统提示词发送，盲目扩容等于为冷门事实支付全量 token 成本；OpenViking 检索层无此限额且专为召回设计，分层才是正确形态。
-**How to apply:** 日常新增事实默认先进 OpenViking；只有「每个会话开头就该知道」的才进内置库；顶格时按本准则迁移而非申请扩容。相关：[[hermes-shared-memory]] [[capability-upstream-watch]]
+**Why:** 内置库内容每轮随系统提示词发送，盲目扩容等于为冷门事实支付全量 token 成本；分层（高频留内置、低频外置）才是正确形态。
+**How to apply（2026-09-21 修订）：** 日常新增事实默认写入 Git 共享库 `projects/<id>/memory/` 独立卡片（低频、可 ripgrep）；只有「每个会话开头就该知道」的才进内置 `MEMORY.md`/`USER.md`；顶格时按本准则迁移而非申请扩容。相关：[[hermes-shared-memory]] [[capability-upstream-watch]] [[openviking-retired]]

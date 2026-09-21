@@ -34,7 +34,7 @@ metadata:
   - **第五轮（Issue #11，2026-09-09 收口；6 项全清并沉淀三条升级坑位）**：
     - **先看门结论必须本地复核，不可照抄 Actions 云端报告**：本轮 6 项「落后」中 `hermes-hub-skills` 实为**假阳性**——本地 5 个文件 SHA-256 与上游 `abd83ab5` 全等，内容早已同步，仅基线 sha 未回写。该提交把 `rss-feeds`/`reddit-reading` 迁入 `optional-skills/`，对 `skills/` 路径仅改 2 处文档描述。**规则：技能库类组件先做本地文件哈希比对再决定是否同步，哈希一致则只需回写基线 sha。**
     - **坑位一：`hermes config set` 重写 YAML 会截断尾部注释并改行尾**（config.yaml 受安全写保护，patch/直接写文件均被拒，只能走该命令）。实测它被截断 38 行（409→371 行），并把 CRLF 全转 LF，导致整份文件 diff 全红。**正确做法：先 `cp` 备份 → 用备份为基准只替换目标版本字符串 → 写回后统一 CRLF → 用 diff 确认与备份仅差目标行。** 简言之：能用文件级最小替换就别用 CLI 命令重写。
-    - **坑位二：OpenViking 服务状态检测失真**——`openviking_service.py status` 显示全 OFFLINE，实际却有 4 个进程在跑（`openviking-server` + python + 2×pythonw），导致 pip 卸载报 WinError 32 文件占用。**规则：升级前一律先跑 `stop` 再复核进程列表，不能信 status 单方面输出。** 另注：`agent_guard.py` 借用同一 venv 常驻运行（pythonw），**严禁随 openviking 进程一并杀掉**，升级后须确认其 PID 仍存活。
+    - **坑位二：OpenViking 服务状态检测失真**——`openviking_service.py status` 显示全 OFFLINE，实际却有 4 个进程在跑（`openviking-server` + python + 2×pythonw），导致 pip 卸载报 WinError 32 文件占用。**规则：升级前一律先跑 `stop` 再复核进程列表，不能信 status 单方面输出。** 另注（已过时 2026-09-21）：当时 `agent_guard.py` 与 ov 共用同一 venv，故严禁一并杀掉。现两者已解耦——guard 跑在独立 `tools/guard-venv`，ov 已卸载，本条仅存史。
     - **坑位三：uv 创建的 venv 不含 pip**（`No module named pip`），需先 `python -m ensurepip --default-pip` 补装再升级；卸载中断会留下 `~penviking*` 等 `~` 前缀残留目录，需手动清理，否则 pip 持续告警「Ignoring invalid distribution」。
     - **本轮处置**：openviking 0.4.18→0.4.19（服务三端 ONLINE + 实发语义检索验证）、PowerShell 7.6.5→7.6.6（winget）、chrome-devtools-mcp 1.8.0→1.9.0（Hermes config.yaml + ZCode cli/config.json 双端钉版，`npx @1.9.0 --version` 实测通过）。**1.9.0 行为变更留观**：CLI 默认开启 `--allow-unrestricted-paths`、默认过滤 Chrome webui targets，若影响 Edge Dev 抓取流程需回滚钉版。
   - **【重大语义变更 2026-09-09 用户拍板】技能看门从「发现新技能」改为「已装技能漂移检查」**：

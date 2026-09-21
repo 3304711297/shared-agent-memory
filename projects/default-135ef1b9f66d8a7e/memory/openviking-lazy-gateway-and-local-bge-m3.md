@@ -1,6 +1,6 @@
 ---
 name: openviking-lazy-gateway-and-local-bge-m3
-description: OpenViking 语义层级检索架构、本地 CUDA BGE-M3 向量加速与 Serverless 按需唤醒休眠静默网关落地全貌
+description: [已退役 2026-09-21，仅存史] OpenViking 语义检索架构、本地 BGE-M3 加速与懒网关落地全貌
 metadata:
   type: reference
 ---
@@ -68,7 +68,7 @@ OpenViking 摄入长 Markdown 文档时输入常超过 2000 tokens。llama-serve
    - 部署 PATH shim（`%USERPROFILE%\.openviking\shim-bin\openviking-server.bat`）；当 Hermes 需检索记忆时自动静默唤醒懒网关栈（1933 + 1934 + 18082 BGE-M3）；
    - 闲置 2 分钟网关自动休眠退显存；关闭 Agent 后 `agent_guard` 自动清理全栈与孤儿进程；
    - 早期过渡用的桌面快捷方式（启动/停止/清理）已全部移除，达成桌面零残留。
-4. **运行环境严格隔离**：必须使用 OpenViking 独立虚拟环境 `%USERPROFILE%\.openviking\venv\Scripts\pythonw.exe` 驱动，严禁借用 `hermes-agent\venv`，规避 Windows 文件锁拦截 Hermes 桌面更新。
+4. **运行环境严格隔离（规律仍适用，路径已变）**：常驻守护严禁借用 `hermes-agent\venv`，否则 Windows 文件锁会拦截 Hermes 桌面更新（`_scan_venv_blockers` → `blocked: true`）。**2026-09-21 起专用解释器改为 `%LOCALAPPDATA%/hermes/tools/guard-venv/Scripts/pythonw.exe`**（原 `.openviking\venv` 已删）。
 - 平时状态：0% GPU、0 MB 显存、0% CPU；
 - 收到提问时：自动在后台 5~6 秒内静默拉起 18082 与 1934，无任何黑框终端弹出；
 - 连续 2 分钟无请求：自动 taskkill 终止推理进程，100% 归还 800MB 显存。

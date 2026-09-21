@@ -18,7 +18,7 @@ metadata:
 3. **方法论吸收**：security-review 六类安全红旗清单（混淆代码/凭据收割/typosquatting/供应链/curl-pipe-bash/挖矿/越权）+ PASS/WARN/REJECT 三级判定（WARN 不得进自动安装/更新路径）并入 skill-evaluation-and-admission 技能 Step 1.1 节（hermes 分支 `c73912a`）。
 
 ## 明确排除（评估过本体，非凭标题）
-RAG 管线与检索分层策略（托管问答站形态，OpenViking+本地 bge-m3 为上位实现）、GitHub Actions bot 定时重建（与 gen-matrix.py/看门雷达同构）、community-pulse 30 天脉搏（blogwatcher+RSS 覆盖）、repos/ 星数快照（易过期）、research/38/42/43/44/29 攻略（未拍板，留按需）。
+RAG 管线与检索分层策略（托管问答站形态；当时的 OpenViking+本地 bge-m3 上位实现已随服务退役，仅作参考）、GitHub Actions bot 定时重建（与 gen-matrix.py/看门雷达同构）、community-pulse 30 天脉搏（blogwatcher+RSS 覆盖）、repos/ 星数快照（易过期）、research/38/42/43/44/29 攻略（未拍板，留按需）。
 
 **Why:** 该仓库是 Hermes 生态唯一的项目级地图与安全审查源，`research/` 每周持续追加 release digest，长期价值在按需单篇拉取而非一次性摄入。
 **How to apply:** 找 Hermes 生态成熟工具或做新技能安全评估 → 查索引库第 19 号源；需要周报细节时 `web_extract` 对应 research/ 单篇；不整装、不实装、零维护成本。

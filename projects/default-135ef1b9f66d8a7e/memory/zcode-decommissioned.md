@@ -8,7 +8,7 @@ metadata:
 
 # ZCode 拆除终态（2026-09-09）
 
-**Why:** 用户明确不再使用 ZCode 客户端（Hermes 为唯一主力 Agent），ZCode 客户端、全部配置、会话数据、注册表残留均已通过 HiBit Uninstaller 清除；所有有价值数据已先行抢救上云。唯一保留的关联：未来智谱在 ZCode 客户端发活动赠额时，经社区反代（TriDefender/zcode-api, start-plan 模式）转 OpenAI 兼容端点供 Hermes 消费（SOP 见 OpenViking zcode_api 卡）。
+**Why:** 用户明确不再使用 ZCode 客户端（Hermes 为唯一主力 Agent），ZCode 客户端、全部配置、会话数据、注册表残留均已通过 HiBit Uninstaller 清除；所有有价值数据已先行抢救上云。唯一保留的关联：未来智谱在 ZCode 客户端发活动赠额时，经社区反代（TriDefender/zcode-api, start-plan 模式）转 OpenAI 兼容端点供 Hermes 消费（SOP 见 zcode_api 记忆卡）。
 
 **How to apply:**
 - 一切「双端 / Hermes×ZCode / 跨端」历史文档仍可读，但其中 ZCode 侧操作步骤已过时——执行前对照本卡判定；不确定时先查真源。

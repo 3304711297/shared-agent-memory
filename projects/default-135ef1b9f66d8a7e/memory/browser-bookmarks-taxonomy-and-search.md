@@ -1,6 +1,6 @@
 ---
 name: browser-bookmarks-taxonomy-and-search
-description: 用户 Edge Dev 浏览器 9000+ 书签分类地图、本地极速检索工具与 OpenViking 语义知识库集成规范
+description: 用户 Edge Dev 浏览器 9000+ 书签分类地图与本地极速检索工具规范（原 OpenViking 语义层已于 2026-09-21 退役）
 metadata:
   type: project
 ---
@@ -13,7 +13,7 @@ metadata:
 
 1. **隐私与安全铁律**：`shared-agent-memory` 为公开 GitHub 仓库，严禁将包含个人私密参数、内部直链的 7.3MB 原始 JSON 直接推送到公网；
 2. **本地实时极速检索（首选）**：通过专用工具直接直读本地真实书签文件，零同步开销，耗时 < 20ms，100% 实时同步用户最新收藏；
-3. **本地 OpenViking 语义知识库**：清洗脱敏后挂载至本地私有向量库（`viking://resources/browser-bookmarks/`），支持自然语言意图级召回；
+3. ~~**本地 OpenViking 语义知识库**~~（**已退役 2026-09-21**）：原挂载于 `viking://resources/browser-bookmarks/` 的向量库已随服务卸载；宽泛需求改用「多关键字检索 + `search_files` 二次过滤」；
 4. **记忆库沉淀分类地图**：共享记忆库仅收录脱敏的顶层领域结构，指导 Agent 在面对特定任务时主动调取书签资源。
 
 ---

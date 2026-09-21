@@ -33,7 +33,7 @@ metadata:
 
 1. **信息获取分流原则**：
    - **公开网页/文章提取**：坚决走 Exa 独享（`web_search` / `web_extract`），耗时秒级且完全免除浏览器开销。
-   - **个人书签与历史**：走本地 `search_bookmarks.py`（10ms）与 OpenViking 向量检索，不走浏览器界面。
+   - **个人书签与历史**：走本地 `search_bookmarks.py`（<20ms，9075 条已索引），不走浏览器界面。（OpenViking 向量检索已于 2026-09-21 退役）
    - **真实登录态/复杂后台操作**：唤起 Edge Dev（`chrome-devtools` MCP 直连），或在需要复杂交互时引入 `dev-browser` Skill。
 2. **浏览器自动化防 Token 浪费铁律（PTC 思维）**：
    - 严禁“截屏一次→大模型推理一步→再点击一次”的漫长往返。

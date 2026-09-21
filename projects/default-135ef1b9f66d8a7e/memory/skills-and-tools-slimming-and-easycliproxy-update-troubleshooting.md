@@ -43,7 +43,7 @@ metadata:
 | 类别 | 清理技能 | 清理原因与更优替代 |
 | :--- | :--- | :--- |
 | **网络抓取类** | `smart-web-crawler`<br>`scrapling` | 依赖本地 requests/Playwright，在复杂代理环境下极易被 Cloudflare / 验证码风控阻断；**更优替代**：配置已全量接管为 Exa 独享（`web_search` / `web_extract`），云端清洗免密，速度与成功率高数倍。 |
-| **本地重型/大显存 MLOps 类** | `llama-cpp`<br>`comfyui`<br>`audiocraft-audio-generation`<br>`nemo-curator`<br>`huggingface-tokenizers`<br>`huggingface-hub`<br>`segment-anything-model`<br>`dspy`<br>`qdrant` | 用户配置明确 `local_runtime.enabled: false`，本机 8GB 显存无法支撑重型本地大模型运行，长期 0 触发；向量检索由 OpenViking 智能感知与 2 分钟闲置休眠全权接管。 |
+| **本地重型/大显存 MLOps 类** | `llama-cpp`<br>`comfyui`<br>`audiocraft-audio-generation`<br>`nemo-curator`<br>`huggingface-tokenizers`<br>`huggingface-hub`<br>`segment-anything-model`<br>`dspy`<br>`qdrant` | 用户配置明确 `local_runtime.enabled: false`，本机 8GB 显存无法支撑重型本地大模型运行，长期 0 触发。（当时向量检索由 OpenViking 接管；该服务已 2026-09-21 退役，现由 `search_files` ripgrep 关键字检索替代。） |
 | **无本地凭据 SaaS 工具类** | `airtable`<br>`box`<br>`notion`<br>`google-workspace`<br>`teams-meeting-pipeline`<br>`himalaya`<br>`1password` | 本机未配置对应 CLI / OAuth 授权，保留会导致模型误以为具有调用能力而产生试探报错。 |
 | **冗余外部 Agent CLI 类** | `claude-code`<br>`codex`<br>`opencode` | 本机无对应后台 CLI 服务；多任务严格优先原生 `delegate_task` 并发子代理与双端跨 Agent 握手。 |
 
@@ -55,7 +55,7 @@ metadata:
 2. **强触发词改造（57 字符与口语别名）**：核心技能（TDD、systematic-debugging、writing-plans、simplify-code、ponytail 系列）的 description 前 57 字符增加中文高频口语化别名（如“写代码”、“修bug”、“帮我看下代码”、“代码瘦身”等）；
 3. **第二轮技能池二八分层物理裁撤（用户拍板：重叠类仅保留更优者）**：
    - 裁撤 44 项：包括低频玩具娱乐（ascii/comic/draw-your-font/p5js/pixel-art 等 18 项）、重型训练微调框架（unsloth/vllm/evaluating-llms 等 4 项）、社工情报（osint/sherlock 等 6 项）、低频个人工具（maps/memento/product-price/weekly 等 10 项）、平台不适用或重叠劣质项（sdlc-review/setup-wizard/watchers/qmd/powerpoint/docx 等 6 项）；
-   - 优选保留同类真强项：保留暗黑极客 SVG 真神 `architecture-diagram`（裁撤 excalidraw/sketch）、保留 Tailwind/React 前端真神 `frontend-design`、保留数据处理核心 `pdf` 与 `xlsx`、保留 `OpenViking` 本地知识检索与自建 CI 看门；
+   - 优选保留同类真强项：保留暗黑极客 SVG 真神 `architecture-diagram`（裁撤 excalidraw/sketch）、保留 Tailwind/React 前端真神 `frontend-design`、保留数据处理核心 `pdf` 与 `xlsx`、保留本地检索与自建 CI 看门；
    - 技能总数从 123 降至 79 项，Prompt 信噪比提升 2 倍以上，双端已完成物理删除与对齐。
 5. **第三轮治理：Superpowers 研发纪律套件 14 项技能中文高频动作前置重构（2026-09-07 激活沉睡技能）**：
    - **痛点与根因排查**：Superpowers 是公认最强的工程纪律套件，但日常对话中模型极少主动触发。根因在于 Hermes 系统 Prompt 在生成 `<available_skills>` 列表时，将 `description` 强制截断至前 57 字符加 `...`；原版长英文前缀导致中文口语别名被物理切除，模型无法识别中文意图。

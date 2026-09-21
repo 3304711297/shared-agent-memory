@@ -48,7 +48,7 @@ Authorization: Bearer <antigravity access_token>
 
 ## 关键陷阱：限额按字符，成本按 token
 
-Hermes 内置库限额是 `memory.memory_char_limit` / `user_char_limit`（默认 3000/2000 **字符**）。同样 3000 字符预算：全中文 ≈ 2490 token，全英文 ≈ 615 token。**英文版表达同样信息需要约 2.5 倍字符**，所以直接翻译会撑爆限额——必须先把内容压掉约 60%（低频条目迁 OpenViking）再译。
+Hermes 内置库限额是 `memory.memory_char_limit` / `user_char_limit`（默认 3000/2000 **字符**）。同样 3000 字符预算：全中文 ≈ 2490 token，全英文 ≈ 615 token。**英文版表达同样信息需要约 2.5 倍字符**，所以直接翻译会撑爆限额——必须先把内容压掉约 60%（低频条目迁 Git 共享库 `projects/<id>/memory/`）再译。
 
 ## 落地结果（2026-09-09）
 
