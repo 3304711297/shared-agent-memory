@@ -830,6 +830,41 @@ python scripts/fetch_logs.py --tail-queue --host https://cloud.comfy.org
     These community GGUFs may also carry zero KV metadata (`nkv=0`), so the loader resolves the
     architecture purely from tensor naming.
 
+23. **The ResolutionSelector's displayed resolution is NOT what lands on disk — the latent must
+    survive a 2× rounding, so only multiples of 32 are honest.** The selector computes
+    `round(ratio*scale/multiple)*multiple` (verified by executing `ResolutionSelector.execute`
+    directly: `('16:9 (Widescreen)', 2.0, 8) -> (1928, 1088)`), but `EmptyLatentImage` creates
+    `width//8` latents and `comfy/sample.py` then rescales them by
+    `downscale_ratio_spacial(8) / latent_format.spacial_downscale_ratio`, which is **16** for
+    Qwen-Image-2.1 (`comfy/latent_formats.py` -> `class QwenImage21`). So `1928 // 8 = 241` ->
+    `round(241 / 2) = 120` (banker's rounding) -> `120 * 16 = 1920`: a 1928 request silently
+    becomes a 1920 output. With `multiple=32` the arithmetic is exact (`1920 // 8 = 240` ->
+    `120` -> `1920`) and display equals output. **Always set the selector's `multiple` to 32** and
+    verify the real size from the written PNG's IHDR (bytes 16-24: two big-endian uint32), never
+    from the node's grey preview line — that line reads only the sibling widgets and knows nothing
+    about the latent rounding.
+
+24. **Editing a workflow JSON: mirror every change into `widgets_values_named` as well.** The UI
+    format carries each node's widgets twice — a positional `widgets_values` array and a
+    `widgets_values_named` object — plus **a third copy inside `definitions.subgraphs[].nodes[]`**
+    for anything inside a subgraph (a Qwen-Image-2.1 template's `steps` lives on both the outer
+    subgraph-instance node and the inner `KSampler`). Changing only one copy leaves the graph
+    self-inconsistent. Safe procedure: read the file as text, `json.loads`, mutate, then dump with
+    `json.dumps(data, indent=1, ensure_ascii=False)` and `newline="\n"` — this round-trips
+    byte-identically for these templates (verify with an equality assert before writing), which
+    means you can edit structurally instead of doing fragile raw-text surgery. Give a copy a fresh
+    top-level `id` (a new uuid4) so the frontend does not collide it with the original; the
+    frontend's own duplicate path does exactly this (`n.id = aa()`), and `revision: 0` is fine for
+    a new file.
+
+25. **Verify a workflow edit by running it, not by reading the JSON back.** Push the edited API
+    graph to `POST /prompt` and then assert on the written file: poll `/history/{prompt_id}` for
+    `status.completed`, then read the returned PNG's IHDR for the true pixel size. A real run is
+    the only way to catch the latent-rounding class of bug in pitfall #23, since the node-level
+    numbers look correct either way. Note `/history` prunes old entries — if an earlier run's
+    record is gone, recover its exact parameters from the PNG itself: ComfyUI embeds the API graph
+    and the UI workflow in `tEXt` chunks named `prompt` and `workflow`.
+
 ## Verification Checklist
 
 Use `python scripts/health_check.py` to run the whole list at once. Manual:
