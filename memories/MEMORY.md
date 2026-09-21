@@ -25,3 +25,5 @@ Hermes 工具输出预算（源码级 09-19 实证）：层1 `tool_output.max_by
 共享记忆真源（GitRepos/shared-agent-memory）必须常驻 main：checkout hermes 会让 projects/ 消失、memories/topics junction 断链，而 git status 仍干净（静默故障）。自检 `python scripts/check_memory_layout.py`（真源/home 各一份，须同源）。
 §
 自研项目本地工作区在 D:\ai coding\GitRepos\<name>（如 tweakbyjie），分析/改码前先查本地工作区，勿直接克隆 GitHub。
+§
+ComfyUI portable 在 D:\ai coding\ComfyUI（双击 run_nvidia_gpu.bat，服务 127.0.0.1:8188）。Qwen-Image-2.1 用本地合并的 bf16 单文件（transformer 14.2G + TE 17.5G 由 HF 分片字节级合并，VAE 走官方 repack），8GB 显存靠 offload 跑 2.8s/it。启动/模板本地化/示例图补齐流程见 comfyui v5.2 技能。

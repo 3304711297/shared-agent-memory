@@ -4,6 +4,30 @@
 
 ---
 
+## 坑位 0：先分清「链路被掐」还是「镜像配置不对」（决定用哪套方案）
+
+这是最容易浪费时间的地方：两类故障的**表象都是下载失败**，但方案完全不同。先跑一次无副作用探测：
+
+```bash
+curl -sS --noproxy "*" --max-time 20 -o /dev/null -w "code=%{http_code}\n" \
+  "https://huggingface.co/api/models/<org>/<name>"
+```
+
+| 症状 | 含义 | 方案 |
+|---|---|---|
+| `[SSL: UNEXPECTED_EOF_WHILE_READING]` / `RuntimeError: Cannot send a request, as the client has been closed` | TLS 链路被掐，`urlopen`/`hf download`/`curl` 都会中招 | 本技能四件套（镜像 + 禁 Xet + 清代理 + 放宽超时） |
+| `curl` 报 `schannel: failed to receive handshake` | 同上，确认是链路层而非凭据层 | 同上 |
+| `401` on large files | 镜像未代理 XetHub CAS | `HF_HUB_DISABLE_XET=1`（坑位 3） |
+| `308` 重定向回 huggingface.co | 走了海外节点 | 清空所有 proxy 变量（坑位 2） |
+
+**关键区分（极易误判）**：**PyPI 通道正常 不代表 HF 通道正常**——二者是不同的 CDN。
+实测：`pip install` 全程稳定 150–400 KB/s 的同时，HF 与 hf-mirror 都是握手即断。
+拿 pip 的成功当 HF 的判据，会让人误以为网络没问题而反复重试。
+
+两者都挂时 → 切 ModelScope（见 SKILL.md §0.1），它的 Range 行为有自己的坑。
+
+---
+
 ## 坑位 1：`hf download` 默认 10s 超时在弱网必崩，且删除临时文件致进度清零
 
 * **根因与机制**：
@@ -56,3 +80,44 @@
   ```powershell
   Get-ChildItem -Path "D:\..." -Filter "*.lock" -Recurse | Remove-Item -Force
   ```
+
+---
+
+## 坑位 5：ModelScope 的两套 Range 行为与「不存在的文件返回 200」
+
+切换 ModelScope 作备选源时（2026-09-21 实测），有三个反直觉点：
+
+**（a）LFS 大文件与普通小文件的 Range 行为不同。**
+
+| 文件类型 | 路径 | Range 行为 |
+|---|---|---|
+| LFS 大文件（模型权重） | `302` → `cdn-lfs-cn-1.modelscope.cn` 直链 | ✅ 真 `206 Partial Content` + `Accept-Ranges: bytes`，续传正常 |
+| 普通小文件（README / config） | 网关直接返回 | ⚠️ 回 `200`（非 206）但带 `Content-Range`；对开放式尾部 Range `bytes=N-` 会声明错误的 `Content-Length`（实测声明 200 却发 627 字节）→ `IncompleteRead` |
+
+实测对比（同一仓库）：
+```text
+# 权重（LFS）：正常
+HTTP/1.1 302 Found
+Location: https://cdn-lfs-cn-1.modelscope.cn/prod/lfs-objects/bb/21/<sha256>?...
+HTTP/1.1 206 Partial Content
+Accept-Ranges: bytes
+Content-Range: bytes 0-1023/675509688
+
+# README.md（非 LFS）：不规范
+HTTP/1.1 200 OK
+Accept-Ranges: bytes
+Content-Range: bytes 0-199/827      ← 有 Content-Range 但状态码是 200
+```
+
+**教训**：验证“某源是否支持续传”必须用**该源上真实的大文件**去测，用 README/小文件测会得出相反结论（我先前就因此错误断言“完全支持续传”）。
+
+**（b）请求不存在的文件返回 `200` + JSON 错误体，而不是 404。**
+```json
+{"Code":10990101007,"Message":"获取模型文件失败，文件内容为空","RequestId":"...","Success":false}
+```
+若把它当数据写入，会得到一个看似成功的垃圾文件（实测踩到：把 145 字节的错误体当作断点续传的 `.part`）。
+**动手前先用 `repo/files` 列表接口核对文件名确实存在。**
+
+**（c）脚本必须有不依赖 `total_size` 的重试上限。**
+若 `total_size` 未知（列表接口失败、或服务端不给 Content-Range），重试循环会无上限地追一个永不完成的 Range，表现为**静默挂起**（实测挂了 180s 以上直至超时）。
+`resilient_hf_download.py` 已加 `MAX_RETRIES = 10` 与“200 + 已有断点则保守丢弃断点重下”的双保护。

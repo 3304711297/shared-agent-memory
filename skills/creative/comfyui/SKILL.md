@@ -1,7 +1,7 @@
 ---
 name: comfyui
-description: "本地生图/跑工作流时必用。调度ComfyUI生成图像与视频。Generate images, video, and audio via diffusion workflows."
-version: 5.1.0
+description: "本地生图/跑工作流/教用户启动ComfyUI时必用。调度ComfyUI生成图像与视频。Generate images, video, and audio via diffusion workflows."
+version: 5.2.0
 author: [kshitijk4poor, alt-glitch, purzbeats]
 license: MIT
 platforms: [macos, linux, windows]
@@ -56,6 +56,8 @@ for workflow execution.
 | `comfyui_setup.sh` | Hardware check + comfy-cli + ComfyUI install + launch + verify |
 | `extract_schema.py` | Read a workflow → list controllable params + model deps |
 | `check_deps.py` | Check workflow against running server → list missing nodes/models |
+| `merge_safetensors.py` | Merge HF sharded safetensors into one file ComfyUI can load (plan.json driven) |
+| `localize_template.py` | Rewrite an official template to local filenames + fetch its example input images |
 | `auto_fix_deps.py` | Run check_deps then `comfy node install` / `comfy model download` |
 | `run_workflow.py` | Inject params, submit, monitor, download outputs (HTTP or WS) |
 | `run_batch.py` | Submit a workflow N times with sweeps, parallel up to your tier |
@@ -477,6 +479,107 @@ python scripts/run_workflow.py \
   --output-dir ./test-outputs
 ```
 
+## Portable Windows: Everyday Use for a Non-CLI User
+
+The portable package needs no CLI at all. Teach the user this and stop there —
+do not reach for `comfy-cli`, the REST API, or a python script.
+
+1. Open the folder (here `D:\ai coding\ComfyUI`).
+2. Double-click **`run_nvidia_gpu.bat`**. A black console window opens — the
+   window *is* the server. It must stay open. Wait for
+   `[INFO] To see the GUI go to: http://127.0.0.1:8188`.
+3. Browse to `http://127.0.0.1:8188`.
+
+Verify from the outside with `curl -s http://127.0.0.1:8188/system_stats`.
+**Stopping** = close the console window or `Ctrl+C` in it; closing the browser
+tab does NOT stop the server (it keeps the VRAM). Do not tell a user to
+"restart ComfyUI" by killing a python PID — they should use the window.
+
+### Ship UI-format workflows, NOT API format
+
+This is the single most common way a hand-off goes wrong. Both formats load in
+the frontend, but **API format carries no layout data**, so every node
+overlaps at the origin and the user sees an unusable pile. The official docs
+state it plainly: API format "can be loaded in UI — yes, but without layout."
+
+| | Save format | API format |
+|---|---|---|
+| Detect | top-level `nodes` + `links` + `version` | numeric keys, each with `class_type` |
+| Use for | handing a workflow to a human in the UI | `POST /prompt` |
+
+So: for a human, start from the official template (already save format) and
+rewrite only the widget values. For a script, use API format. Exporting a
+save-format workflow as API is `File → Export Workflow (API)` in the frontend.
+
+### Rewriting a template to local filenames
+
+Official templates reference the *repackaged* checkpoint name, which is often
+not what is on disk (e.g. the Qwen-Image-2.1 templates ship pointing at
+`..._int8_convrot.safetensors` while the user has the bf16 merge).
+`scripts/localize_template.py` does this end to end — read it before doing it by
+hand. The rule that matters:
+
+Do a plain **string replace over the raw JSON text**, not a walk of `widgets_values`:
+the filename also appears inside `properties.models[].url`, `widgets_values_named`,
+and the MarkdownNote documentation, and leaving those stale makes the workflow
+inconsistent (the note tells the user to download a file the graph no longer uses).
+
+```python
+raw = z.read(member).decode("utf-8")
+for old, new in RENAME:
+    raw = raw.replace(old, new)
+wf = json.loads(raw)  # must still parse
+```
+
+Then assert: no old name survives, the new names are present, and
+`nodes`/`links`/`version` all exist. **Also assert each OLD name actually
+matched** — a rename that hits nothing (typo, or the template never referenced
+it) means the workflow still points at a missing file, and reporting success
+there silently hands over a broken graph.
+
+### Templates reference example input images that are NOT bundled
+
+A template with a `LoadImage` node ships the *filename* but not the file. The
+UI then shows an error badge on that node. The images live in the
+`Comfy-Org/workflow_templates` repo under `input/`, and the URLs are embedded
+in the template's MarkdownNote — grep them out rather than guessing:
+
+```python
+re.findall(r'https://raw\.githubusercontent\.com/[^"\')\s]+\.(?:png|jpg|jpeg|webp)', raw)
+```
+
+Download into `<portable>\ComfyUI\input\` and check the PNG magic
+(`\x89PNG\r\n\x1a\n`) — a failed fetch otherwise leaves an HTML error page
+that still "exists" and still errors in the UI. See the pitfall about jsdelivr
+below: raw.githubusercontent.com is frequently unreachable.
+
+### Confirming a workflow works before handing it over
+
+Loading without errors is not proof. Run it in the real UI at least once:
+
+- The desktop preview pane can drive the live frontend: open
+  `http://127.0.0.1:8188`, then `drive_preview` → `elements` to inventory the
+  page, `click` a workflow in the sidebar, and `click` the run button
+  (`[data-testid="queue-button"]`). The run button belongs to whatever is on the
+  canvas — **check the page title / `elements` first**: ComfyUI opens a default
+  workflow on load, so clicking run blindly executes *that*, not yours.
+- Then verify from the server, not the UI:
+  `GET /history?max_items=2` → `status.status_str == "success"` and
+  `completed == true`, and `GET /api/userdata?dir=workflows&recurse=true&split=false`
+  to prove the file is visible to the frontend.
+- For RGBA output assert on the pixels, not the appearance: an alpha histogram
+  (`getchannel("A").histogram()` — a real cutout has a large `hist[0]` bucket)
+  plus corner-pixel alpha. Pasting the image on a checkerboard and viewing it
+  only shows that alpha *exists*; it cannot prove the background is what got
+  cut, so pair it with a before/after pixel sample at known coordinates.
+
+**8 GB VRAM reality check (measured, RTX 4070 Laptop, bf16 Qwen-Image-2.1):**
+~32 GB of weights via dynamic offload still runs — 1024x1024 at 25 steps landed
+at 2.76 s/it, ~73 s, plus ~8 s one-time model staging on the first run of a
+workflow. Do not tell the user it "won't fit" and do not promise a fast run;
+give the measured number instead. Re-runs on the same workflow skip the
+staging cost.
+
 ## Image Upload (img2img / Inpainting)
 
 The simplest way is to use `--input-image` with `run_workflow.py`:
@@ -549,10 +652,18 @@ python scripts/fetch_logs.py --tail-queue --host https://cloud.comfy.org
 
 ## Pitfalls
 
-1. **API format required** — every script and the `/api/prompt` endpoint expect
-   API-format workflow JSON. The scripts detect editor format (top-level
-   `nodes` and `links` arrays) and tell you to re-export via
-   "Workflow → Export (API)" (newer UI) or "Save (API Format)" (older UI).
+1. **API format is required for the scripts and `/prompt` — NOT for handing a
+   workflow to a human.** These are two different consumers, and conflating them
+   is a common mistake:
+
+   | Consumer | Format | Why |
+   |---|---|---|
+   | `run_workflow.py`, `POST /prompt`, `check_deps.py` | **API format** (numeric keys + `class_type`) | that is what the executor consumes |
+   | a person opening it in the Web UI | **Save/UI format** (top-level `nodes`+`links`+`version`) | API format loads but has **no layout**, so every node piles up at the origin |
+
+   See *Portable Windows → Ship UI-format workflows, NOT API format* for the
+   hand-off procedure. The scripts detect editor format and tell you to re-export
+   via "Workflow → Export (API)" (newer UI) or "Save (API Format)" (older UI).
 
 2. **Server must be running** — all execution requires a live server.
    `comfy launch --background` starts one. Verify with
@@ -596,6 +707,128 @@ python scripts/fetch_logs.py --tail-queue --host https://cloud.comfy.org
 11. **`tracking` prompt** — first run of `comfy` may prompt for analytics.
     Use `comfy --skip-prompt tracking disable` to skip non-interactively.
     `comfyui_setup.sh` does this for you.
+
+12. **Portable package updates: the 4 pinned packages are the whole story.**
+    The startup WARNING block (`comfyui-frontend-package` /
+    `comfyui-workflow-templates` / `comfyui-embedded-docs` / `comfy-kitchen`
+    "lower than recommended") is fixed by exactly the command it prints:
+    `<portable>/python_embeded/python.exe -s -m pip install -r <portable>/ComfyUI/requirements.txt`.
+    That installs ~180 MB across 11 packages (the templates meta-package pulls
+    `-core`, `-json`, and several `media-*` bundles of 90-100 MB each), so on a
+    throttled link expect 15-30 min — it is not hung. Run it in the background
+    and verify afterwards with `/system_stats`, whose
+    `installed_templates_version` must equal `required_templates_version`.
+    A new model's templates appear only after this; e.g. Qwen-Image-2.1's three
+    templates live in `comfyui-workflow-templates-json` and were absent below it.
+
+13. **A missing model template is a templates-package version gap, not a
+    frontend/cache problem.** Probe it without the GUI: after updating, list
+    `iter_templates()` from `comfyui_workflow_templates` for the expected
+    template_id, and confirm `FrontendManager.template_asset_map()` resolves its
+    assets. Both are importable from the portable python.
+
+14. **Diffusers-layout model folders are NOT directly loadable, and
+    `DiffusersLoader` will not save you.** `comfy/diffusers_load.py` only looks
+    for `unet/` + `text_encoder/model.safetensors` (its `first_file` list omits
+    the HF sharded names), and ComfyUI has no `*.safetensors.index.json` /
+    `weight_map` handling anywhere in the codebase. A HF repo laid out as
+    `transformer/diffusion_pytorch_model-0000N-of-0000M.safetensors` +
+    `text_encoder/model-0000N-of-0000M.safetensors` therefore fails both the
+    single-file loaders and `DiffusersLoader`. Merging the shards yourself is
+    cheap and avoids re-downloading tens of GB — see `scripts/merge_safetensors.py`.
+
+15. **Check whether the weights actually need redownloading before downloading.**
+    ComfyUI's detectors accept more layouts than the shipped checkpoint uses:
+    `model_detection.py` sets `fused_mlp = gate_up is not None` so both the fused
+    (`img_mlp.gate_up`) and unfused (`img_mlp.gate_layer` + `.proj`) mlp layouts
+    load, and `comfy/sd.py` prefix-replaces `model.language_model.` -> `model.`
+    for the Qwen3-VL text encoder itself. Compare the local tensor header
+    against the official single-file header (keys + dtypes) before concluding
+    you must re-download; only a genuine architecture/naming mismatch justifies it.
+    The VAE is the usual exception: the diffusers naming
+    (`decoder.conv_in` / `mid_block.attentions`) can be misdetected as a
+    HunyuanVideo VAE by the generic `decoder.conv_in.weight` branch, while the
+    official repack uses the Wan-2.2 layout
+    (`decoder.middle.0.residual.0.gamma`, 5D `decoder.head.2.weight` with
+    `shape[2] == 1`) — that one genuinely must come from the official repack.
+
+16. **When HF downloads keep dying with SSL errors, load the `hf-model-download` skill FIRST.**
+    Do not hand-roll a downloader: that skill already ships
+    `scripts/resilient_hf_download.py` (native HTTP `Range` -> `.part`, so a drop
+    resumes instead of restarting) plus the four settings that actually matter —
+    `HF_ENDPOINT=https://hf-mirror.com` with proxies cleared (an overseas node
+    gets 308-redirected back to huggingface.co), `HF_HUB_DISABLE_XET=1` (domestic
+    mirrors do not proxy the CAS endpoint and return 401),
+    `HF_HUB_DOWNLOAD_TIMEOUT=60` (the 10 s default dies on flaky Wi-Fi), and
+    `*.lock` cleanup. Reach for ModelScope only if that still fails.
+
+    Diagnosis, if you are already stuck: `URLError: [SSL:
+    UNEXPECTED_EOF_WHILE_READING]` and `Cannot send a request, as the client has
+    been closed` from both `urlopen` and `hf download` on a large HF blob are
+    link-level, not credential-level; `curl` against the same URL failing with
+    `schannel: failed to receive handshake` confirms it. A working PyPI channel
+    does NOT imply HF works — different CDNs (observed: pip steady at 150-400 KB/s
+    while HF and hf-mirror both died at the TLS handshake).
+
+    If HF *and* hf-mirror are both down, the same script has a ModelScope source:
+    `--provider modelscope --repo <org>/<name>`. Verified behaviour there, so you
+    do not have to re-derive it: LFS weight files (all the big ones) 302 to
+    `cdn-lfs-cn-1.modelscope.cn` and return a real `206 Partial Content`, so
+    resume works; plain small files (README/config) are served by the gateway as
+    `200` with an inconsistent `Content-Length` on open-ended `bytes=N-`, so they
+    cannot be resumed. A request for a filename that does not exist returns
+    `200` plus a JSON error body rather than 404 — check the `repo/files` listing
+    before downloading, or you will save a 145-byte error blob as a model file.
+
+17. **A 16 GB-plus model can still run on an 8 GB card via offload — measure, don't assume.**
+    bf16 Qwen-Image-2.1 totals ~32 GB of weights (14.2 GB transformer +
+    17.5 GB text encoder + 0.7 GB VAE) against 8 GB VRAM and 25 GB RAM, yet it
+    runs: 1024x1024 at 25 steps landed at ~2.8 s/it (~73 s per image). Set
+    expectations from a real timed run rather than a VRAM rule of thumb.
+
+18. **`raw.githubusercontent.com` is often unreachable from CN links — use jsdelivr.**
+    Fetching a template's example input image from
+    `raw.githubusercontent.com/Comfy-Org/...` failed with
+    `schannel: failed to receive handshake` both directly and through the local
+    proxy (same link-level TLS failure as the HF case in #16; a different CDN).
+    The jsdelivr mirror worked immediately and serves identical bytes:
+    `https://cdn.jsdelivr.net/gh/<org>/<repo>@<branch>/<path>`
+    (e.g. `.../gh/Comfy-Org/workflow_templates@main/input/angry_broccoli.png`).
+    Always confirm the downloaded file's magic bytes — a blocked fetch can leave
+    a 0-byte or HTML file that still "exists" and still breaks the UI node.
+
+19. **Loading a workflow without errors is not evidence it runs.**
+    A template can render perfectly and still fail on execution because a
+    referenced input image or model filename is absent. Before telling a user a
+    workflow is ready, execute it once and read `status.status_str` /
+    `completed` from `GET /history`. Two failure modes this catches that the UI
+    will not warn you about: (a) `LoadImage` nodes pointing at example images
+    that ship with the template's docs but not on disk, (b) widget values naming
+    the repackaged checkpoint while only the merged bf16 file exists.
+
+20. **"Uncensored" GGUF repos of a base model are the base model — verify, don't assume a finetune.**
+    `abenzerps/Qwen-Image-2.1-Uncensored-GGUF` is a pure quantization of `Qwen/Qwen-Image-2.1`
+    at the same revision; its tensor names/shapes match the upstream merge exactly and its VAE
+    is byte-identical (sha256) to Comfy-Org's. "Uncensored" there only means "no safety checker",
+    which is already true of any local ComfyUI pipeline. Before treating a community repo as a
+    different model, compare tensor headers (names + dtypes + shapes) and file hashes instead of
+    trusting the card: fetch the remote header with an HTTP `Range` request for
+    `bytes=0-(7+header_len)` (the first 8 bytes little-endian give the header length) — a handful
+    of KB answers the whole question without downloading tens of GB.
+
+21. **K-quant GGUF keeps 1D tensors in BF16; the legacy plain quants do not — that is the real
+    breakage.** In `qwen-image-2.1-Q4_K_M/Q5_K_M/Q6_K.gguf` all 65 1D tensors (RMSNorm scales) are
+    BF16, while `Q8_0` and `Q4_0` quantize their 64 1D tensors too, which is exactly why Q8_0 fails
+    at sampling with a `[136] vs [128]` shape mismatch (documented in that repo's README). Check
+    per-tensor GGML types from the header before blaming the loader.
+
+22. **GGUF needs a custom node that is NOT part of core ComfyUI.** A fresh portable install has
+    nothing under `custom_nodes/` (only the two official example files), so a GGUF workflow fails
+    until `git clone https://github.com/leejet/ComfyUI-GGUF`; the older `city96` fork raises
+    `Unknown model architecture!` for Qwen-Image 2.1. GGUF models go in
+    `models/diffusion_models/` and the loader node is `Unet Loader (GGUF)` in place of `UNETLoader`.
+    These community GGUFs may also carry zero KV metadata (`nkv=0`), so the loader resolves the
+    architecture purely from tensor naming.
 
 ## Verification Checklist
 

@@ -1,7 +1,7 @@
 ---
 name: local-llm-ops
 description: "本地跑模型/GGUF/显存不够时必用。本地模型选型与 llama.cpp 运维。Use when selecting, benchmarking, or serving local GGUF models."
-version: 1.0.0
+version: 1.1.0
 author: Hermes Agent
 license: MIT
 platforms: [windows, linux, macos]
@@ -41,14 +41,21 @@ metadata:
 - GGUF 模型文件
 - `curl`（查 HF API）、Python 3（跑横评脚本）
 
+**网络前提（国内链路必读）**：查上游元数据要用镜像域 `hf-mirror.com/api/...`，
+`huggingface.co` 直连常超时（实测 `code=000`）。同时清空 proxy 变量，否则会被镜像 308 踢回官网。
+需要**实际下载**权重时不要用 curl — 转 `hf-model-download` 技能（带断点续传与 sha256 校验）。
+
 ## 升级决策三筛（顺序执行，任一不过即不换）
 
 1. **上游真的变了吗？** 查 HF API 的文件字节数与 `lastCommit`，不要只看 `lastModified`：
    ```bash
+   # 注意：huggingface.co 直连在国内链路常被掐（实测 curl 超时 code=000），
+   # 而 hf-mirror.com 的 /api/ 端点可用（实测 200）。优先用镜像域。
    curl -fsS -A 'Mozilla/5.0' \
-     'https://huggingface.co/api/models/<owner>/<repo>?blobs=true' \
+     'https://hf-mirror.com/api/models/<owner>/<repo>?blobs=true' \
      | python -c "import json,sys; [print(s['rfilename'], s.get('size')) for s in json.load(sys.stdin)['siblings'] if s.get('size')]"
    ```
+   代理开着时走海外节点会被镜像 308 踢回官网，所以查 API 前先清空 proxy 变量（或加 `--noproxy '*'`）。
    与 `read_file` 得到的本机文件字节数逐一比对。**字节数相同 = 权重未变，不必重下。**
 
 2. **新候选强过现有基线吗？** 用独立榜单（Artificial Analysis 等）+ 同口径实测。同尺寸档位的

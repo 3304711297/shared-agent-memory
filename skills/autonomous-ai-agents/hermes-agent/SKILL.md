@@ -231,6 +231,10 @@ Pitfall: the picker shows the 快速 toggle whenever `model_supports_fast_mode()
 
 **后台进程的 notify pattern 禁用泛词 —— `failed`/`error` 会命中良性告警行并误报（2026-09-19 实测）。** `terminal(background=true, notify=["failed"])` 是**子串**匹配任意输出行：llama-server 启动期的自述良性告警 `E llama_init_from_model: failed to initialize the context: dflash requires ctx_other to be set (this warning is normal during memory fitting)` 照样触发通知，而进程其实已正常加载并在服务（日志后续为 `model loaded` / `listening on http://...`）。处置顺序：先拉 `process_manage(action='log')` 看全量日志再下结论，别被通知措辞带走。写 pattern 前先裸跑一次、抄二进制**实际**打印的就绪行（llama-server 是 `listening on http://` 与 `model loaded`，不是臆想的 "server is listening"）；pattern 仅用于永不退出的常驻进程，有明确终点的任务一律 `notify=true`（退出即通知），避免 pattern 误报成为噪音。
 
+同类第二个实例（2026-09-21 实测，ComfyUI 常驻服务）：pattern `"Error"` 命中 `[INFO] Found comfy_kitchen backend triton: {'available': False, ..., 'unavailable_reason': "ImportError: No module named 'triton'"}` —— 行首是 `[INFO]`，只是因为字符串里含 `ImportError`。**泛词 pattern 的大小写不敏感子串匹配会吃掉「良性报告里提到的异常类名」**。跨项目通用做法：pattern 至少写成 `[ERROR]` / `ERROR:` 这类带分隔符或级别的形式，或是抄一条下游公认的报错前缀，**永远不要用裸 `Error` / `failed`**；收到命中后固定动作是 `process_manage(action='log', offset=0, limit=<total_lines>)` 拉全量再判断，只看尾部容易把「曾经出现过又恢复」当成「正在报错」。
+
+另一个易误判点：常驻服务的 INFO 行往往是**有效信息而非噪音**。例如同一行里 `comfy_kitchen backend cuda: available=True` 带着 47 项能力列表（`int8_linear` / `dequantize_int8_convrot_weight` / `rms_rope` 等），而 `triton` 后端缺失只是可选冗余、不影响 CUDA 路径 —— 判断「这行要不要管」要先看同组相邻行的 available 状态，别只看 unavailable_reason。
+
 **`read_file` dedup guard changes its RETURN SHAPE — never index `["content"]` blindly.** Repeat reads of the same path+region inside one conversation (or one `execute_code` kernel) trip a three-stage guard that protects against re-injecting the same bytes:
 
 | Occurrence | Returned shape |

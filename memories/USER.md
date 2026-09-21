@@ -23,3 +23,5 @@ CI & notifications: on all-green completion, DELETE /notifications/threads/{id} 
 踩坑沉淀：遇到工具报错/平台拦截/参数暗坑，严禁以内存紧张为由推脱不记；区分全局记忆与技能，主动归位并 patch 沉淀到对应 skill（平台工具规则进 hermes-agent），禁等用户催促。
 §
 tweakbyjie 上游吸收闭环铁律：凡是对标或融入新开源项目的调优项，必须在同轮收尾时自动将该项目录入 tools/upstream-sources.json 看门雷达与 README.md 上游采纳表格，无需用户再次提醒。
+§
+本地生图/Qwen-Image-2.1：画质优先于速度，已用 bf16 全精度三件套（与官方模板默认一致，无损上限），不换量化。勿再提议 GGUF/int8_convrot 换速度。
