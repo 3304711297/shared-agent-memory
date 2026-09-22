@@ -25,3 +25,5 @@ CI & notifications: on all-green completion, DELETE /notifications/threads/{id} 
 tweakbyjie 上游吸收闭环铁律：凡是对标或融入新开源项目的调优项，必须在同轮收尾时自动将该项目录入 tools/upstream-sources.json 看门雷达与 README.md 上游采纳表格，无需用户再次提醒。
 §
 本地生图/Qwen-Image-2.1：画质优先于速度，已用 bf16 全精度三件套（与官方模板默认一致，无损上限），不换量化。勿再提议 GGUF/int8_convrot 换速度。
+§
+会话收尾/删除双推送铁律：用户说「删除/结束会话」或任务全绿收尾时，必先归档会话转录至私有仓 shared-agent-sessions（先反查 session_id 显式传参跑 tools/upload_session.py 并 check 复读），再推 shared-agent-memory（main）与 hermes 分支。严禁只推记忆库漏归档转录。
