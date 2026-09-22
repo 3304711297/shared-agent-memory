@@ -227,6 +227,18 @@ Pitfall: the picker shows the 快速 toggle whenever `model_supports_fast_mode()
 
 **`search_files` pattern vs glob distinction (`target='content'` vs `target='files'`):** In content mode, `pattern` is evaluated strictly as a ripgrep regular expression, NOT a shell glob. Passing glob wildcards like `*keyword*` triggers `rg: regex parse error: repetition operator missing expression` (`*` at the start has no operand). Use plain literal substrings (e.g. `keyword`) or valid regex (`.*keyword.*`). Reserve glob patterns like `*.py` exclusively for `target='files'` or the `file_glob` filter.
 
+**`search_files` 0 命中时结果形状会变，且近似命中藏在 `warning` 里（2026-09-21 本机实测，可复现）。** 除上面的 regex-vs-glob 坑外，还有两个会让「有结果」被读成「无结果」的形状变化：
+
+| 调用形态 | 返回键 | 读 `matches` 的后果 |
+|---|---|---|
+| 内容模式**有命中** | `matches_text` / `matches_format` / `total_count` | `matches` 不存在 → 误判为 0 |
+| 内容模式**命中 0** | 只有 `total_count`（**连 `matches_text` 都没有**） | 静默 0，看不出是「真没有」还是「没搜到」 |
+| 目录级 `output_mode='files_only'` 命中 0 | `total_count` + `warning` | 误判为「仓库里没有」 |
+
+最后一行是最危险的：`warning` 会写明**近似命中**「0 exact matches, but 20 case-insensitive match(es) in 4 file(s): …」，即 0 命中只是大小写/字面不符，文件其实存在。本机实测：目录搜 `BACKEND` 得 `total_count=0` + warning（大小写不符），而同一模式指定具体文件得 `total_count=11`。
+
+**纪律**：① 判定「仓库里有没有这个符号」时，**别把 `total_count==0` 当结论**——先看 `warning`，必要时改用精确匹配字符串或指定具体文件；② 取值走 `matches_text`，或统一用 `(r.get("matches_text") or r.get("matches") or "")`；③ 该工具在 `execute_code` 里经 `hermes_tools` 调用同样适用这些形状；④ 连续多次 0 命中时，换 `pathlib` 直接 `read_text()` + `str.count()` 做**交叉验证**——本机就是靠它才确认「工具返回 0 而字符串明明存在 1 次」。
+
 **HARD RULE — never claim terminal runs in parallel.** The kernel whitelist `_PARALLEL_SAFE_TOOLS` (`agent/tool_dispatch_helpers.py`) is read-only-only: read_file, search_files, web_search, web_extract, skill_view, skills_list, session_search, vision_analyze. `terminal`, `patch`, `write_file`, `memory`, `delegate_task` are **sequential barriers** — even when batched in one turn they execute strictly one-at-a-time. In thinking, reports, and summaries NEVER write「并行执行命令」/"executed in parallel" for terminal batches — the correct phrase is 「逐条串行」. A false parallelism claim is a fake-execution report and is treated as seriously as fabricating tool output. Terminal commands appearing one-by-one in the UI is intentional safety design (shared persistent shell session: cwd/env persist across calls), never a bug to debug.
 
 **后台进程的 notify pattern 禁用泛词 —— `failed`/`error` 会命中良性告警行并误报（2026-09-19 实测）。** `terminal(background=true, notify=["failed"])` 是**子串**匹配任意输出行：llama-server 启动期的自述良性告警 `E llama_init_from_model: failed to initialize the context: dflash requires ctx_other to be set (this warning is normal during memory fitting)` 照样触发通知，而进程其实已正常加载并在服务（日志后续为 `model loaded` / `listening on http://...`）。处置顺序：先拉 `process_manage(action='log')` 看全量日志再下结论，别被通知措辞带走。写 pattern 前先裸跑一次、抄二进制**实际**打印的就绪行（llama-server 是 `listening on http://` 与 `model loaded`，不是臆想的 "server is listening"）；pattern 仅用于永不退出的常驻进程，有明确终点的任务一律 `notify=true`（退出即通知），避免 pattern 误报成为噪音。

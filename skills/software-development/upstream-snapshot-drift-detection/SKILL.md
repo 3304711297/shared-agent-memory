@@ -118,6 +118,33 @@ node -e "const c=require('fs'),h=require('crypto');for(const p of ['sources/a.js
 `.gitattributes` 的 eol 规则可能让两者不一致。验证可移植性:在全新 `git clone` 里再算一次,
 哈希相同才说明记下的值不是本机特有。
 
+## 反查上游基线时：必须用**检查器自己的查询口径**取 latest
+
+推进 `last_synced_commit` 这类基线时，最省事的做法是用 `gh api repos/<repo>/commits?per_page=1`
+取上游 HEAD。**但检查器用的往往不是这个口径**——本仓的 `tools/check-upstream.py` 用的是
+`commits?path=.&per_page=5`（先查「改动代码树」的提交，失败才回退全仓最新）。
+
+两者在有合并提交的仓库上会给出**不同的 SHA**：
+
+| 仓库形态 | `commits?per_page=1` | `commits?path=.` |
+|---|---|---|
+| 合并提交在 HEAD（PR merge / branch merge） | 合并提交 SHA | **被合并进来的末次内容提交** |
+| 普通提交 | 同左 | 同左 |
+
+实测：某上游以 `Merge pull request #21` 为 HEAD，而 `path=.` 口径给出的是合并前的
+`fix: ...`；另一上游 HEAD 是 `feature: ...`，`path=.` 给出的是带 CodeBuddy 业务前缀的提交串。
+
+**后果**：若用错口径写基线，基线会永远对不上检查器的判定 → 巡检每次都报「有新提交」→
+自动收口分支永远走不到 → **Issue 永远关不掉**，而每一次推送都看起来「已完成」。
+
+**纪律**：
+1. 推进基线**前**先读检查器的查询语句，用它的口径取 latest（本仓：`commits?path=.&per_page=1`）。
+2. 写完基线**后**按检查器口径复算一遍全部条目，断言 `canonical.startswith(baseline)`；
+   别只校验自己刚写进去的字段自洽（short/full SHA 一致是必要条件，不是充分条件）。
+3. 报告正文里的「上游最新」是**生成时刻的快照**，可能已过时；以实时查询为准，
+   并留意「查询后上游又前进」导致的新增待评估项（本仓实测：报告 9 项 → 核实后 4 项已过期 →
+   推进后又有 3 项新出现）。
+
 ## 验证清单
 
 - [ ] 正常态退出码与改动前**完全一致**(通常 0),且 state 无 churn(git status 干净)
