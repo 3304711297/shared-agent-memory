@@ -61,7 +61,8 @@ env BSK_AUTO_START=0 bsk observe --session <id>
    在输入框上方或控制条中检查「思考」按钮（`button[aria-label*="思考"]` 或文案为 `思考`），确认其处于激活/开启状态；若未开启则显式点击开启，确保模型调用深度推理模型。
 2. **定位输入框**：
    在 `observe` 树中寻找目标输入框，形如 `@eXX textbox "与 ChatGPT 聊天"` 或 placeholder 为 `有问题，随便问`。
-3. **填充高密度审查提要**：
+3. **填充高密度审查提要（长 Prompt 强制落盘中转）**：
+   - **长文本落盘防微修剪（2026-09-22 拍板）**：严禁在 `execute_code` 或命令行中直接内联长文本（>300 字符）。Hermes 历史上下文修剪器在参数超过 500 字符时会截断插入 `⟪HERMES-CONTEXT-COMPRESSION...⟫` 破坏历史保真度。**必须先用 `write_file` 写入临时文件（如 `$LOCALAPPDATA/Temp/chatgpt_prompt.txt`）**，再在脚本中读取注入剪贴板（ClipboardEvent）发送。
    ```bash
    env BSK_AUTO_START=0 bsk fill @eXX --value "..." --session <id>
    ```
