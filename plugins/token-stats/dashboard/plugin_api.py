@@ -773,10 +773,21 @@ def format_quota_markdown(data: dict) -> str:
         ]
         if limited_others:
             lines.append(f"- ⚠️ **其他冷却中模型**：{', '.join(limited_others)}")
+        nw = rl.get("nightWindow") or {}
+        nf_models = nw.get("nightFreeModels") or ["hy4-preview"]
+        cur_model = rl.get("model") or ""
+        is_cur_nf = cur_model in nf_models or any(m in cur_model for m in ["hy4"])
         if rl.get("nightFree"):
-            lines.append("- 🌙 **夜间限免**：`限免中 (23:00–08:00)` · 调用不扣积分")
+            if is_cur_nf and cur_model:
+                lines.append(f"- 🌙 **夜间限免**：当前模型 `{cur_model}` `限免中 (23:00–08:00)` · 调用不扣积分")
+            else:
+                nf_names = ", ".join(f"`{m}`" for m in nf_models[:3])
+                lines.append(f"- 🌙 **夜间限免**：`指定模型限免中 (23:00–08:00)` · 仅 {nf_names} 等免积分，其他模型正常计费")
         elif rl.get("nightWindow"):
-            lines.append("- ☀️ **时段计费**：`白天按量计费` (夜间 23:00–08:00 免积分)")
+            if is_cur_nf and cur_model:
+                lines.append(f"- ☀️ **时段计费**：当前模型 `{cur_model}` `白天按量计费` (夜间 23:00–08:00 免积分)")
+            else:
+                lines.append("- ☀️ **时段计费**：`白天按量计费` (夜间 23:00–08:00 指定模型免积分)")
         srv = rl.get("server") or {}
         if srv.get("protocols"):
             proto_str = "/".join(p.capitalize() for p in srv["protocols"])

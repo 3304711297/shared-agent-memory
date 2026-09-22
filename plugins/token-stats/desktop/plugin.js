@@ -248,8 +248,8 @@ function RateLimitRow({ rl, compact }) {
           rl.nightFree
             ? jsx('span', {
                 className: 'text-emerald-400/90 font-semibold',
-                title: '夜间免费窗口 (23:00–08:00)',
-                children: '🌙 免积分',
+                title: '夜间窗口 (23:00–08:00)，仅限指定模型（如 hy4-preview 等）免积分',
+                children: '🌙 指定模型限免',
               })
             : null,
         ],
@@ -1712,7 +1712,7 @@ function QuotaPage({ ctx }) {
                         data.workbuddy.rateLimit.nightFree
                           ? jsx('span', {
                               className: 'text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-400 border border-emerald-500/30',
-                              children: '🌙 夜间限免中 (23:00–08:00)',
+                              children: '🌙 指定模型夜间限免中 (23:00–08:00)',
                             })
                           : null,
                       ],

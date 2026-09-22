@@ -125,14 +125,14 @@
     "created_by": null,
     "last_patched_at": "2026-09-19T10:43:27.390177+00:00",
     "last_reused_patch_generation": 1,
-    "last_used_at": "2026-09-22T03:49:46.717875+00:00",
-    "last_viewed_at": "2026-09-22T03:49:46.715853+00:00",
+    "last_used_at": "2026-09-22T14:01:56.928126+00:00",
+    "last_viewed_at": "2026-09-22T14:01:56.915226+00:00",
     "patch_count": 1,
     "patch_generation": 1,
     "pinned": false,
     "state": "active",
-    "use_count": 15,
-    "view_count": 15
+    "use_count": 17,
+    "view_count": 17
   },
   "bsk-compact-page-read": {
     "archived_at": null,
@@ -291,14 +291,14 @@
     "created_by": "agent",
     "last_patched_at": "2026-09-18T15:46:11.486857+00:00",
     "last_reused_patch_generation": 26,
-    "last_used_at": "2026-09-22T03:48:28.369838+00:00",
-    "last_viewed_at": "2026-09-22T03:48:28.367838+00:00",
+    "last_used_at": "2026-09-22T14:01:56.937126+00:00",
+    "last_viewed_at": "2026-09-22T14:01:56.934126+00:00",
     "patch_count": 26,
     "patch_generation": 26,
     "pinned": false,
     "state": "active",
-    "use_count": 64,
-    "view_count": 64
+    "use_count": 69,
+    "view_count": 69
   },
   "devin-acp-provider-maintenance": {
     "archived_at": null,
@@ -607,14 +607,14 @@
     "created_by": null,
     "last_patched_at": "2026-09-18T14:32:03.266204+00:00",
     "last_reused_patch_generation": 5,
-    "last_used_at": "2026-09-22T07:43:29.816615+00:00",
-    "last_viewed_at": "2026-09-22T07:43:29.813615+00:00",
+    "last_used_at": "2026-09-22T14:01:57.930073+00:00",
+    "last_viewed_at": "2026-09-22T14:01:57.928073+00:00",
     "patch_count": 5,
     "patch_generation": 5,
     "pinned": false,
     "state": "active",
-    "use_count": 42,
-    "view_count": 41
+    "use_count": 44,
+    "view_count": 43
   },
   "hermes-reasoning-display-internals": {
     "archived_at": null,
@@ -1028,14 +1028,14 @@
     "created_by": null,
     "last_patched_at": "2026-09-21T16:29:43.764752+00:00",
     "last_reused_patch_generation": 4,
-    "last_used_at": "2026-09-22T03:49:43.681916+00:00",
-    "last_viewed_at": "2026-09-22T03:49:43.679915+00:00",
+    "last_used_at": "2026-09-22T14:01:57.946073+00:00",
+    "last_viewed_at": "2026-09-22T14:01:57.944073+00:00",
     "patch_count": 4,
     "patch_generation": 4,
     "pinned": false,
     "state": "active",
-    "use_count": 43,
-    "view_count": 43
+    "use_count": 45,
+    "view_count": 45
   },
   "upstream-snapshot-drift-detection": {
     "archived_at": null,

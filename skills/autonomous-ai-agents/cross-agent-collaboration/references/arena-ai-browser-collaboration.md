@@ -4,30 +4,32 @@
 
 ---
 
-## 一、定位与优先级决策
+## 一、定位与模式唯一铁律
 
-- **首选协同平台 (Primary)**：**Arena AI (`https://arena.ai/`)**
-  - **核心优势**：完全免费开放业界顶级前沿大模型全家桶（Anthropic Claude Sonnet 4.6 / Claude Sonnet 5 High、OpenAI GPT-5.2 High / o3、Google Gemini 3.8 Flash High、DeepSeek V4.1 Max、xAI Grok 4.6、Qwen 3.7 Max 等）；
-  - **多维协同能力**：原生支持 `Agent Mode`（挂载 GitHub 仓库在非主分支独立探路与打样开发）、`Side by Side`（双模型并行对拍审查）与 `Direct Mode`（单模型精准对话），无需消耗任何个人 API 配额。
-- **备选协同平台 (Fallback / Secondary)**：**ChatGPT (`https://chatgpt.com/`)**
-  - 保留作为特定历史会话复用或 Arena 遇临时网络波动时的兜底审计通道。
+- **平台唯一允许模式：Agent Mode（云端 Agent 副产线）**
+  - **铁律（用户拍板 2026-09-22）**：**禁止使用 Arena 的其他任何模式（严禁 Direct Mode、Side by Side、Battle Mode）**！**只能使用 Agent Mode**。
+  - **为什么禁用 Direct / 对话模式**：Arena 的 Direct/Side by Side 只是普通网页聊天，缺乏本地/联网上下文；而主流旗舰模型（如 Claude Sonnet 系列）在 Claude AI 官方平台不仅是同款，还能联网、深度挂载项目文件与具备完整工作流。若只需单模型对话或审查，应直接走 Claude AI 或本地子代理。
+  - **Agent Mode 的核心独占价值**：原生支持 `Agent Mode`，可挂载 GitHub 仓库在非主分支独立探路与打样开发。具备完整 Workspace 沙箱、文件树与终端预览，自主通读全仓开发新功能原型与重型探路。
+- **审查与对话协同分流**：
+  - 代码复核/方案审查/长文档：路由至 **Claude AI (`https://claude.ai/`)** 或本地子代理；
+  - 云端独立副产线/全仓沙箱开发：路由至 **Arena AI (`https://arena.ai/`) 的 Agent Mode**。
 
 ---
 
-## 二、四大工作模式与职责角色分工
+## 二、模式铁律与 Agent Mode 规范
 
-在跨 Agent 协作中，必须严格区分 **Reviewer（审查者）** 与 **Producer（生产者）** 角色：
+### 1. 模式门禁（Mode Gatekeeper）
 
-| 模式名称 | 页面入口指示 | 协作角色 | 核心用途与工作特性 |
-| :--- | :--- | :---: | :--- |
-| **Agent Mode** | Combobox 选 `Agent Mode` + 挂载 GitHub 仓库 | **Producer (生产)** | **协同开发第一优先模式（云端副产线）**。天然在非主分支（隔离分支/临时 PR/独立工作区）中运行，完全不影响 `main` 主干和本地工作树。具备完整 Workspace 沙箱、文件树与终端预览，自主通读全仓开发新功能原型与重型探路。 |
-| **Side by Side** | Combobox 选 `Side by Side` + 选 Model 1 & 2 | **Reviewer (审查)** | **方案对拍与多模型交叉审查主力**。单轮同时获取两家顶尖模型独立出具的审查报告。推荐在白名单三款中两两对拍。 |
-| **Direct Mode** | Combobox 选 `Direct` + 选目标模型 | **Reviewer (审查)** | **特定问题多轮深度追问**。定向绑定特定模型（首选 `claude-sonnet-5-high`），进行连续上下文推演。 |
-| **Battle Mode** | Combobox 选 `Battle` | **探索性抽卡** | **匿名竞技场盲测**。后台全池随机分配两款模型（有机会撞上未公开发布的超新代模型如 Fable 5.1 / GPT 6 Astra / Opus 5，但下限可能抽到 7B/8B 小模型，无保底且缺乏审查连续性）。 |
+| 模式名称 | 状态 | 准入判定 |
+| :--- | :---: | :--- |
+| **Agent Mode** |  **唯一合法模式** | **必须使用**。Combobox 选 `Agent Mode`，挂载目标仓库/隔离分支，在独立沙箱与终端中自主运行。 |
+| **Direct Mode** | ❌ **严格禁止** | **禁止使用**。普通单模型对话严禁使用 Arena，同款模型直接在 Claude AI 中使用。 |
+| **Side by Side** | ❌ **严格禁止** | **禁止使用**。多模型盲测或并排对比不得在 Arena 中执行。 |
+| **Battle Mode** | ❌ **严格禁止** | **禁止使用**。匿名竞技场抽卡不可控，禁止使用。 |
 
 ### 5. 本地子代理 + Arena 云端多产线并发编排（Fork-First 扩展）
-遵循 **Fork-First 强约束门禁**：当遇到多模块并行任务、批量重构或大跨度技术探索时，主控 Hermes 不仅向本地分派 3~6 个 `delegate_task` 并行子代理（负责本地编译、单测、语法校验、多仓排查），**同时将独立的云端探索/重型模块生成分派给 Arena Agent Mode（挂载隔离分支自主开发），或将改动直接并行推给 Arena Side by Side 交叉审查**。
-- **并行拓扑**：`[本地 Subagent 1..N 并发]` 与 `[云端 Arena Agent / Reviewer 并发]` 同步推进；
+遵循 **Fork-First 强约束门禁**：当遇到多模块并行任务、批量重构或大跨度技术探索时，主控 Hermes 不仅向本地分派 3~6 个 `delegate_task` 并行子代理（负责本地编译、单测、语法校验、多仓排查），**同时将独立的云端探索/重型模块生成分派给 Arena Agent Mode（挂载隔离分支自主开发），或将改动并行推给 Claude AI 交叉审查**。
+- **并行拓扑**：`[本地 Subagent 1..N 并发]` 与 `[云端 Arena Agent / Claude AI 审查并发]` 同步推进；
 - **效率倍增**：主会话免于单线程等待，多方产物就地聚合集成，最大化发挥全网算力吞吐。
 
 ---
@@ -99,13 +101,15 @@ env BSK_AUTO_START=0 bsk session start --json
   ```
 - **接续已有历史会话**：若需要继续特定主题对话，可在侧边栏（`Today` / `Previous 7 days`）中查找对应的标题 ref（形如 `@e7 link "..."`），或直接导航至会话永久链接 `https://arena.ai/c/<uuid>`。
 
-### 3. 模式与模型精准配置
-1. **切换模式**：
-   在 `observe` 树中寻找模式下拉框（形如 `@e14 combobox "... [has-submenu]"`），点击后在弹出的选项列表中点击对应模式（如 `@e27 button "Direct Chat with 1 model at a time"` 或 `@e25 button "Side by Side Compare 2 models of your choice"`）。
-2. **选择目标模型 (Direct / Side by Side)**：
-   - 点击当前模型胶囊按钮（形如 `@e15 button "Max [has-submenu]"`）；
-   - 在弹出的搜索浮层中，通过搜索输入框过滤或直接在列表中点击目标模型按钮（例如优先选 `claude-sonnet-4-6`、`gpt-5.2-high`、`deepseek-v4.1-flash-max` 等）；
-   - Side by Side 模式下依次配置 Model 1 与 Model 2。
+### 3. 模式与目标仓库精准配置（强制 Agent Mode）
+1. **切换模式为 Agent Mode（铁律：严禁切至 Direct / Side by Side）**：
+   在 `observe` 树中寻找模式下拉框（形如 `@e14 combobox "... [has-submenu]"`），点击后在弹出的选项列表中**必须且只能**点击 `Agent Mode`（形如 `@eXX button "Agent Mode"`）。
+   - **拦截规则**：若误点或当前处于 `Direct` 或其他模式，必须立即切回 `Agent Mode`；
+2. **挂载 GitHub 仓库与隔离分支**：
+   - 在 Agent Mode 界面中输入/选择目标 GitHub 仓库与非主干开发分支（或独立探路工作区）；
+   - 确认工作区沙箱与终端就绪。
+3. **选择 Agent Mode 底座模型**：
+   - 在支持的模型列表中选择受限白名单顶阶模型（首选 `claude-sonnet-5-high` 或同系列最新版本）。
 
 ### 4. 输入提要与提交对拍
 1. **定位输入框**：

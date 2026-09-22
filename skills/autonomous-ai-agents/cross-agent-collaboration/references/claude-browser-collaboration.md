@@ -10,7 +10,7 @@
 
 | 平台 | 访问端点 | 定位角色 | 核心优势与适用场景 |
 | :--- | :--- | :---: | :--- |
-| **Arena AI** | `https://arena.ai/` | **首选主力（Reviewer / Producer）** | 多厂商旗舰直选对拍（Sonnet 5 High / Grok 4.6 High / Gemini 3.8 Flash High），支持挂载仓库分支的云端副产线（Agent Mode）。 |
+| **Arena AI** | `https://arena.ai/` | **云端独立副产线（Producer）** | 仅允许使用 **Agent Mode** 挂载仓库分支独立探路与打样开发；严禁 Direct / 对话模式。 |
 | **ChatGPT** | `https://chatgpt.com/` | **备选主力（Reviewer）** | 显式开启深度推理「思考」模式，擅长对抗式漏洞挖掘、测试覆盖缺口核查，以严格判定 `CLOSED` 作为收口依据。 |
 | **Claude AI** | `https://claude.ai/` | **架构复核与沙箱打样（Reviewer / Producer）** | 审美与架构拆分最深、契约规范最严；**网页端原生支持云端沙箱打样与 Patch 交付，为免费（Free）账户提供零 API 成本的云端开发能力**。 |
 
