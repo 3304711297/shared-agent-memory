@@ -51,6 +51,7 @@ profiles/
 
 # token-stats 插件运行时状态（含账号信息，2026-09-10 起严禁再上传公开分支）
 desktop-plugins/token-stats/direct-quota.json
+desktop-plugins/**/.hermes-package.json
 
 # skills 运行时台账（含本机绝对路径，2026-09-10 起移出跟踪，仅存本地）
 skills/.curator_ledger.jsonl
