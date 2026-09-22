@@ -137,6 +137,7 @@ env BSK_AUTO_START=0 bsk session start --json
   ```bash
   sleep 60 && env BSK_AUTO_START=0 bsk evaluate --session <id> "(() => ({ isGenerating: !!document.querySelector('[data-testid=\"stop-button\"], button[aria-label*=\"停止\"], button[aria-label*=\"Stop\"]') }))()"
   ```
+- **末期孤立等待异步转场与先做要事铁律（2026-09-22 拍板）**：在整个研发闭环已在本地全绿、CI 已过、且 ChatGPT 审查等前置环节均已闭环，**全局只剩等待 Arena 这件事尚未结束的情况下**，主会话**绝对禁止原地干等或急催它完成**。此时应**将轮询等待窗口进一步拉长（如 sleep 2~3 分钟或放后台非阻塞守护）**，前台立即利用这段空隙去完成更高价值的收尾要事——包括：系统性提炼沉淀本轮避坑经验、改写与充实对应 Skill 规范、整理领域 ADR 与架构说明、梳理测试用例台账等，彻底杜绝主会话算力空转。
 - **左侧会话历史列表追踪机制**：若会话页面发生重载或切回，**必须直接在左侧会话历史列表（Sidebar 的 `Today` / 历史会话项）中点击对应卡片切入**，严禁新建空会话或覆盖历史上下文；
 - **会话完整性与进程守护铁律**：严禁在 Arena Agent 仍在运行（`isGenerating: true`）或未读完全部产出时擅自关闭 Arena 标签页，必须耐心等完进程并回读完整输出。
 - **判定完成标准**：页面停止按钮消失（`isGenerating: false`），输入框恢复可用，工作区出现 `Create PR` / `Diff` 或最终总结文本。
