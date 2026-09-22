@@ -45,6 +45,8 @@ description: "查配额/额度监控时必用。token-stats内置化架构与排
 - 前端 runtime 插件只许 import `@hermes/plugin-sdk` 和 react（lint 栅栏）；`ctx.rest` 需在 `register(ctx)` 时捕获 context。
 - 改 `config.yaml` 用 python yaml 读写（patch/write_file 工具拒写该文件）；改后必须抽查关键字段完整性。
 - 30s 内存缓存 + 磁盘缓存 `desktop-plugins/token-stats/direct-quota.json`；`?force=1` 穿透。
+- **Windows 下 fs.watch 文件/目录死循环事件风暴（2026-09-22 踩坑排障实证）**：
+  Hermes Desktop 的 `watchPreviewFile` 与 `watchDirectory`（Electron 主进程）在 Windows 上调用 Node.js 原生 `fs.watch(dir)` 时，若监控目录或其子文件发生高频文件系统变动（或与子项发生句柄竞争），会导致主线程每 2 秒接收到超 36 万次文件系统变动事件（`eventType: rename`），引发内核态 I/O 等待自旋，使得单个 CPU 核心（通常是 Core #2）被固定打满 100%（其中 75%+ 处于 Kernel/Privileged 模式，用户态仅占 ~18%）。遇到桌面端单核 100% 满载且 JS 无长任务卡顿特征时，应直接通过 V8 Inspector 检查 `process._getActiveHandles()` 中的 `FSWatcher` 句柄，关闭高频或失效的 watcher 即可瞬间自愈。
 
 ## 旧方案残留
 - 计划任务 `Hermes_Quota_Service`（18088 端口 fetch_quota.py）已退役：登录触发器 Enabled=False，任务保留可手动运行作后备。
