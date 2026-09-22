@@ -131,13 +131,15 @@ env BSK_AUTO_START=0 bsk session start --json
    env BSK_AUTO_START=0 bsk press Enter --ref @eXX --session <id>
    ```
 
-### 5. 轮询等待与结果回读
-- 模型生成中页面会出现 `Stop generation` 按钮（或 `Generating...` 状态）；
-- 采用递进等待轮询：
+### 5. 轮询等待与结果回读（单次 sleep 60s 节律铁律，2026-09-22 拍板）
+- **Arena Agent Mode 进展缓慢与长程周期特征**：云端 Agent 模式在容器沙箱中执行文件分析、环境探测、执行 bash、跑测试套件与长推理，单次运行通常持续数分钟至十几分钟。**严禁使用 10s / 15s / 20s 等超短延时频繁轮询打断**（极度消耗 turn 且会导致大量冗余截断输出）；
+- **标准轮询等待周期：每次固定等待 1 分钟（`sleep 60`）**：
   ```bash
-  sleep 15 && env BSK_AUTO_START=0 bsk observe --session <id>
+  sleep 60 && env BSK_AUTO_START=0 bsk evaluate --session <id> "(() => ({ isGenerating: !!document.querySelector('[data-testid=\"stop-button\"], button[aria-label*=\"停止\"], button[aria-label*=\"Stop\"]') }))()"
   ```
-- **判定完成标准**：输入框恢复为 enabled/empty，页面不再出现 `Stop generation`。
+- **左侧会话历史列表追踪机制**：若会话页面发生重载或切回，**必须直接在左侧会话历史列表（Sidebar 的 `Today` / 历史会话项）中点击对应卡片切入**，严禁新建空会话或覆盖历史上下文；
+- **会话完整性与进程守护铁律**：严禁在 Arena Agent 仍在运行（`isGenerating: true`）或未读完全部产出时擅自关闭 Arena 标签页，必须耐心等完进程并回读完整输出。
+- **判定完成标准**：页面停止按钮消失（`isGenerating: false`），输入框恢复可用，工作区出现 `Create PR` / `Diff` 或最终总结文本。
 
 ### 6. 特别注意：评测分支处理（跳过机制）
 在 Arena AI 中进行多轮对话时，由于其研究评估机制，系统偶发会在第 2 轮或后续轮次生成 A/B 两个候选回复，并提示：
