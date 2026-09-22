@@ -20,6 +20,7 @@
 
 ### 1. 免费账户（Free Tier）零成本沙箱闭环
 - **权限边界事实**：桌面端 `Claude Code` CLI 强制要求 Pro / Max / Team / Enterprise 套餐或 Console API 商业额度，免费 Claude.ai 账户无法直连 CLI。
+- **免费额度限制与耗尽熔断（2026-09-22 拍板）**：Claude 免费账户在网页端有严格的每几小时消息上限（例如 `You are out of free messages until XX:XX`）或单日文档/上下文长度限制。一旦检测到触发限制，**严禁原地等待，必须立即切换至 ChatGPT 或其他可用通道接续工作**。
 - **免付费沙箱协同工作流**：
   1. Claude.ai 具备网页端沙箱环境（具备读取公开仓库、克隆、建分支、修改代码、运行单测能力）；
   2. Hermes 向 Claude 发起重构/修复/单测补齐诉求；

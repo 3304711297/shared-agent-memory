@@ -49,5 +49,8 @@ Read a reference *only* when the task actually needs it.
 4. **浏览器会话与标签页常驻复用**：任务执行周期内严禁频繁关闭/释放 `bsk` session 与标签页，全程维持热连接、会话上下文与 DOM 状态，仅在最终全局交付确认收口时统一释放。
 5. **Delegation 模型**：`delegation.provider`/`model` 保持为空，子代理继承当前聊天模型，除非用户显式指定。
 6. **Shared Memory SSOT**：跨 Agent 事实与交接契约必须落 `shared-agent-memory` `main` 分支。
+7. **Arena Agent 异步接力铁律（2026-09-22 拍板）**：Arena Agent Mode 启动与沙箱推进较慢。向 Arena 发送提示词并确认进入运行态（in-flight）后，**主会话严禁原地干等**，必须立即在本地推进代码，并无缝切至 ChatGPT 或 Claude 接力对拍；
+   - **选型路由**：用户当前指令中指定了哪个就用哪个（例如提到 ChatGPT 就用 ChatGPT，提到 Claude 就用 Claude）。
+8. **跨平台免费额度耗尽熔断与即时切换铁律（2026-09-22 拍板）**：Arena、ChatGPT、Claude 均存在免费层额度/速率限制（触发 `You've reached your limit`、无法联网/分析文件、降级为弱模型或 429 报错）。一旦任一平台额度耗尽，**必须立即无缝切换到其他可用平台继续工作**，禁止停滞等待。
 
 > ZCode client 已于 2026-09-09 退役，相关观察/握手协议已删除。

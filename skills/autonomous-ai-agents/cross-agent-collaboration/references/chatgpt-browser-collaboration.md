@@ -19,6 +19,7 @@
   `{title, href}` 列表定位 URL，再 `bsk navigate` 直达，不要靠 `click + aria-label` 猜。
 - **`bsk fill` 对 contenteditable 可能报「结果未能确认」但实际已填入**：先 `evaluate` 读
   `#prompt-textarea` 的 `innerText.length` 核实，别盲目重试（重复 fill 会追加而非替换）。
+- **免费额度限制与耗尽熔断（2026-09-22 拍板）**：ChatGPT 免费账户对高阶推理/思考模式（如 GPT-4o / Thinking）存在每日或固定窗口用量上限。触发上限时会提示 `You've reached your limit`、输入框锁定或强制降级为无思考 mini 模型、无法使用代码环境或联网检索。一旦识别此状态，**严禁原地等待，必须立即切换至 Claude AI 或其他可用通道接续审查**。
 
 ## 适用场景
 - 用户在 Edge 浏览器中已有打开的 ChatGPT 会话（含登录态与历史上下文）；
