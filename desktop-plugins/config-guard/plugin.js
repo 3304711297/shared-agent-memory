@@ -1,5 +1,5 @@
 /**
- * Hermes Desktop Plugin: config-guard-chip
+ * Hermes Desktop Plugin: config-guard
  * 本地配置守卫状态指示器：轮询 /api/plugins/config-guard/result
  * （后端读 gateway:startup hook 写入的检查结果），一切正常时状态栏仅显示
  * 静默绿点，发现配置漂移 / stash 残留 / 技能被误标时显示 🔴 告警 chip，
@@ -13,7 +13,7 @@ import { Badge, Popover, PopoverContent, PopoverTrigger } from '@hermes/plugin-s
 import { useEffect, useState } from 'react'
 import { jsx, jsxs } from 'react/jsx-runtime'
 
-const ID = 'config-guard-chip'
+const ID = 'config-guard'
 const POLL_MS = 15_000 // 15s 轮询后端结果
 
 let pluginCtx = null
@@ -25,7 +25,7 @@ function toneOf(result) {
   return { tone: 'bad', label: `守卫告警 ×${(result.problems || []).length}`, icon: 'error' }
 }
 
-function GuardChip() {
+function GuardChip({ ctx }) {
   const [result, setResult] = useState(null)
   const [loaded, setLoaded] = useState(false)
 
@@ -33,7 +33,7 @@ function GuardChip() {
     let alive = true
     const load = async () => {
       try {
-        const rest = (pluginCtx && pluginCtx.rest) || null
+        const rest = (ctx && ctx.rest) || (pluginCtx && pluginCtx.rest) || null
         if (!rest) return
         const data = await rest('/result')
         if (alive) {
@@ -50,14 +50,17 @@ function GuardChip() {
       alive = false
       clearInterval(timer)
     }
-  }, [])
+  }, [ctx])
 
   const { tone, label } = toneOf(result)
   const color =
-    tone === 'ok' ? '#3fb950'
-    : tone === 'bad' ? '#f85149'
-    : tone === 'warn' ? '#d29922'
-    : '#8b949e'
+    tone === 'ok'
+      ? '#3fb950'
+      : tone === 'bad'
+        ? '#f85149'
+        : tone === 'warn'
+          ? '#d29922'
+          : '#8b949e'
 
   // 一切正常（ok）时静默：只渲染占位，不占状态栏视觉
   if (loaded && tone === 'idle') return jsx('span', { style: { display: 'none' } })
@@ -67,14 +70,17 @@ function GuardChip() {
       jsx(PopoverTrigger, {
         asChild: true,
         children: jsx('button', {
-          className: 'inline-flex h-full items-center gap-1 rounded-none px-1.5 text-[0.6875rem] text-(--ui-text-tertiary) transition-colors hover:bg-(--chrome-action-hover) hover:text-foreground',
+          className:
+            'inline-flex h-full items-center gap-1 rounded-none px-1.5 text-[0.6875rem] text-(--ui-text-tertiary) transition-colors hover:bg-(--chrome-action-hover) hover:text-foreground',
           title: `本地配置守卫：${label}（${result?.checked_at || '未检查'}）`,
           children: jsxs('span', {
             className: 'inline-flex items-center gap-1',
             children: [
               jsx('span', {
                 style: {
-                  width: 7, height: 7, borderRadius: 9999,
+                  width: 7,
+                  height: 7,
+                  borderRadius: 9999,
                   background: color,
                   boxShadow: tone === 'bad' ? `0 0 6px ${color}` : 'none',
                   display: 'inline-block',
@@ -103,18 +109,20 @@ function GuardChip() {
               children: 'Hermes 更新后网关启动时自动检查：拍板配置键 / git stash 残留 / 核心技能 created_by 标记。',
             }),
             jsx('pre', {
-              className: 'max-h-72 overflow-auto whitespace-pre-wrap rounded-md bg-(--chrome-action-hover) p-2 leading-relaxed',
+              className:
+                'max-h-72 overflow-auto whitespace-pre-wrap rounded-md bg-(--chrome-action-hover) p-2 leading-relaxed font-mono text-[11px]',
               children: result
-                ? (result.error
-                    ? `⚠ 检查异常：${result.error}`
-                    : (result.detail || []).join('\n'))
+                ? result.error
+                  ? `⚠ 检查异常：${result.error}`
+                  : (result.detail || []).join('\n')
                 : '尚无检查结果（网关启动后 hook 会自动写入）',
             }),
             jsx('div', {
               className: 'text-(--ui-text-tertiary)',
-              children: result?.ok === false
-                ? '处理完成后重启网关（或下次更新）即自动复检；也可手动跑 watch-capability.cmd。'
-                : '配置守卫随每次网关启动自动执行，无需手动操作。',
+              children:
+                result?.ok === false
+                  ? '处理完成后重启网关（或下次更新）即自动复检；也可手动跑 watch-capability.cmd。'
+                  : '配置守卫随每次网关启动自动执行，无需手动操作。',
             }),
           ],
         }),
@@ -125,7 +133,7 @@ function GuardChip() {
 
 export default {
   id: ID,
-  name: 'Config Guard Chip',
+  name: 'Config Guard',
   register(ctx) {
     pluginCtx = ctx
     ctx.register({

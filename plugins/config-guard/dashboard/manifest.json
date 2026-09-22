@@ -1,7 +1,7 @@
 {
   "name": "config-guard",
   "label": "Config Guard",
-  "description": "本地配置守卫数据服务 — 为桌面状态栏 config-guard-chip 插件提供 /api/plugins/config-guard/result",
+  "description": "本地配置守卫数据服务 — 提供 /api/plugins/config-guard/result",
   "icon": "ShieldCheck",
   "version": "1.0.0",
   "tab": {

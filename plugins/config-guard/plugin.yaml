@@ -1,4 +1,5 @@
 name: config-guard
 version: 1.0.0
-description: 本地配置守卫后端 — 为桌面状态栏 config-guard-chip 插件提供 /api/plugins/config-guard/result 数据服务（读取 gateway:startup hook 的检查结果）
+description: 本地配置守卫（自动检查拍板配置键、stash 残留与核心自研技能，并在状态栏提供实时状态与告警 Popover）
 author: 3304711297
+has_desktop_half: true
