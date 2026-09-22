@@ -52,5 +52,6 @@ Read a reference *only* when the task actually needs it.
 7. **Arena Agent 异步接力铁律（2026-09-22 拍板）**：Arena Agent Mode 启动与沙箱推进较慢。向 Arena 发送提示词并确认进入运行态（in-flight）后，**主会话严禁原地干等**，必须立即在本地推进代码，并无缝切至 ChatGPT 或 Claude 接力对拍；
    - **选型路由**：用户当前指令中指定了哪个就用哪个（例如提到 ChatGPT 就用 ChatGPT，提到 Claude 就用 Claude）。
 8. **跨平台免费额度耗尽熔断与即时切换铁律（2026-09-22 拍板）**：Arena、ChatGPT、Claude 均存在免费层额度/速率限制（触发 `You've reached your limit`、无法联网/分析文件、降级为弱模型或 429 报错）。一旦任一平台额度耗尽，**必须立即无缝切换到其他可用平台继续工作**，禁止停滞等待。
+9. **CI 后台异步守护与主会话零阻塞铁律（2026-09-22 拍板）**：代码 push 后，盯 CI 任务必须置于后台（`terminal(background=True, notify=True)`），**严禁在主会话前台同步阻塞等待 CI 跑完**。在后台盯 CI 期间，主会话必须立即无缝切至与其他 AI（ChatGPT / Claude）沟通进展或提请交叉代码复核，最大化管线吞吐。
 
 > ZCode client 已于 2026-09-09 退役，相关观察/握手协议已删除。
