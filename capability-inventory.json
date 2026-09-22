@@ -284,8 +284,8 @@
       "installed": [
         {
           "where": "%LOCALAPPDATA%/hermes/desktop-plugins/minimalist-themes/plugin.js",
-          "version": "HEAD@6bc74f9",
-          "sha": "6bc74f9fae7a7d2b0bdb3eb9e0a38af07a86fd58"
+          "version": "HEAD@410fc98",
+          "sha": "410fc980451623f385be67cec88528a9e29ee3e2"
         }
       ]
     }
