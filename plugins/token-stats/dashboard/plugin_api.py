@@ -725,6 +725,13 @@ def format_quota_markdown(data: dict) -> str:
 
     rl = wb.get("rateLimit") or {}
     if rl:
+        fb = rl.get("fallback")
+        if fb:
+            reason_str = f" · {fb.get('reason')}" if fb.get("reason") else ""
+            lines.append(
+                f"- ⚠️ **模型降级中**：请求 `{fb.get('requested')}` 上游未授权，"
+                f"实际运行 `{fb.get('actual')}` *(已降级 {fb.get('count', 1)} 次{reason_str})*"
+            )
         st = rl.get("state", "unknown")
         icon = {"limited": "🔴", "ok": "🟢", "expired": "🟡", "offline": "⚪"}.get(st, "⚪")
         obs = rl.get("observed") or {}

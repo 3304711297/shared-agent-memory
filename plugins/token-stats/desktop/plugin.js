@@ -58,12 +58,13 @@ function syncSidebarNav(show) {
 function formatResetTime(isoString, formatMode = 'relative', compact = false) {
   if (!isoString) return '--'
   try {
-    const target = new Date(isoString).getTime()
+    const dt = new Date(isoString)
+    const target = dt.getTime()
+    if (Number.isNaN(target)) return String(isoString)
     const now = Date.now()
     const diff = target - now
     if (diff <= 0) return '即将刷新'
 
-    const dt = new Date(isoString)
     const m = String(dt.getMonth() + 1).padStart(2, '0')
     const d = String(dt.getDate()).padStart(2, '0')
     const hm = dt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
@@ -92,17 +93,19 @@ function formatResetTime(isoString, formatMode = 'relative', compact = false) {
     }
     return `${minutes}分钟后 (${hm})`
   } catch {
-    return isoString
+    return String(isoString)
   }
 }
 
 function getProgressColor(pct) {
+  if (pct == null) return 'bg-zinc-600'
   if (pct >= 40) return 'bg-emerald-500'
   if (pct >= 15) return 'bg-amber-500'
   return 'bg-rose-500'
 }
 
 function getTextColor(pct) {
+  if (pct == null) return 'text-(--ui-text-tertiary)'
   if (pct >= 40) return 'text-emerald-400'
   if (pct >= 15) return 'text-amber-400'
   return 'text-rose-400'
@@ -113,10 +116,12 @@ function getTextColor(pct) {
 // 剩余秒数 -> 「3h12m / 25m / 42s」
 function fmtCooldown(sec) {
   if (sec == null) return '--'
-  if (sec <= 0) return '已恢复'
-  const h = Math.floor(sec / 3600)
-  const m = Math.floor((sec % 3600) / 60)
-  const s = sec % 60
+  const v = Number(sec)
+  if (!Number.isFinite(v)) return '--'
+  if (v <= 0) return '已恢复'
+  const h = Math.floor(v / 3600)
+  const m = Math.floor((v % 3600) / 60)
+  const s = Math.floor(v % 60)
   if (h > 0) return `${h}h${String(m).padStart(2, '0')}m`
   if (m > 0) return `${m}m${String(s).padStart(2, '0')}s`
   return `${s}s`
@@ -681,12 +686,12 @@ function AntigravityQuotaChip({ ctx }) {
                               }),
                               acc.isActive &&
                                 jsx('span', {
-                                  className: 'text-[9px] px-1 py-0.2 rounded bg-emerald-500/20 text-emerald-300 shrink-0',
+                                  className: 'text-[9px] px-1 py-0.5 rounded bg-emerald-500/20 text-emerald-300 shrink-0',
                                   children: '活跃',
                                 }),
                               isSelected && !acc.isActive &&
                                 jsx('span', {
-                                  className: 'text-[9px] px-1 py-0.2 rounded bg-amber-500/20 text-amber-300 shrink-0',
+                                  className: 'text-[9px] px-1 py-0.5 rounded bg-amber-500/20 text-amber-300 shrink-0',
                                   children: '查看',
                                 }),
                             ],
@@ -742,7 +747,7 @@ function AntigravityQuotaChip({ ctx }) {
                           }),
                           !viewingAccount.isActive &&
                             jsx('span', {
-                              className: 'text-[9px] px-1 py-0.2 rounded bg-amber-500/20 text-amber-300 font-mono',
+                              className: 'text-[9px] px-1 py-0.5 rounded bg-amber-500/20 text-amber-300 font-mono',
                               children: '待机预览',
                             }),
                         ],
@@ -760,7 +765,7 @@ function AntigravityQuotaChip({ ctx }) {
                         'h-full rounded-full transition-all duration-500',
                         getProgressColor(viewingAccount.quota5h != null ? viewingAccount.quota5h : quotaData.quota5h)
                       ),
-                      style: { width: `${Math.min(100, Math.max(0, viewingAccount.quota5h != null ? viewingAccount.quota5h : (quotaData.quota5h || 100)))}%` },
+                      style: { width: `${Math.min(100, Math.max(0, viewingAccount.quota5h != null ? viewingAccount.quota5h : (quotaData.quota5h != null ? quotaData.quota5h : 100)))}%` },
                     }),
                   }),
                   jsxs('div', {
@@ -797,7 +802,7 @@ function AntigravityQuotaChip({ ctx }) {
                           }),
                           !viewingAccount.isActive &&
                             jsx('span', {
-                              className: 'text-[9px] px-1 py-0.2 rounded bg-amber-500/20 text-amber-300 font-mono',
+                              className: 'text-[9px] px-1 py-0.5 rounded bg-amber-500/20 text-amber-300 font-mono',
                               children: '待机预览',
                             }),
                         ],
@@ -815,7 +820,7 @@ function AntigravityQuotaChip({ ctx }) {
                         'h-full rounded-full transition-all duration-500',
                         getProgressColor(viewingAccount.quotaWeekly != null ? viewingAccount.quotaWeekly : quotaData.quotaWeekly)
                       ),
-                      style: { width: `${Math.min(100, Math.max(0, viewingAccount.quotaWeekly != null ? viewingAccount.quotaWeekly : (quotaData.quotaWeekly || 100)))}%` },
+                      style: { width: `${Math.min(100, Math.max(0, viewingAccount.quotaWeekly != null ? viewingAccount.quotaWeekly : (quotaData.quotaWeekly != null ? quotaData.quotaWeekly : 100)))}%` },
                     }),
                   }),
                   jsxs('div', {
@@ -1428,7 +1433,7 @@ function QuotaPage({ ctx }) {
                           jsx('span', { className: 'text-xs text-(--ui-text-secondary) font-medium', children: 'Gemini 5h 滚动额度' }),
                           !viewingAccount.isActive &&
                             jsx('span', {
-                              className: 'text-[10px] font-mono px-1.5 py-0.2 rounded bg-amber-500/15 text-amber-300',
+                              className: 'text-[10px] font-mono px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-300',
                               children: '待机预览',
                             }),
                         ],
@@ -1443,7 +1448,7 @@ function QuotaPage({ ctx }) {
                     className: 'h-2 w-full rounded-full bg-white/10 overflow-hidden',
                     children: jsx('div', {
                       className: cn('h-full rounded-full transition-all duration-500', getProgressColor(viewingAccount.quota5h != null ? viewingAccount.quota5h : data.quota5h)),
-                      style: { width: `${Math.min(100, Math.max(0, viewingAccount.quota5h != null ? viewingAccount.quota5h : (data.quota5h || 100)))}%` },
+                      style: { width: `${Math.min(100, Math.max(0, viewingAccount.quota5h != null ? viewingAccount.quota5h : (data.quota5h != null ? data.quota5h : 100)))}%` },
                     }),
                   }),
                   jsxs('div', {
@@ -1475,7 +1480,7 @@ function QuotaPage({ ctx }) {
                           jsx('span', { className: 'text-xs text-(--ui-text-secondary) font-medium', children: 'Gemini 每周总配额' }),
                           !viewingAccount.isActive &&
                             jsx('span', {
-                              className: 'text-[10px] font-mono px-1.5 py-0.2 rounded bg-amber-500/15 text-amber-300',
+                              className: 'text-[10px] font-mono px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-300',
                               children: '待机预览',
                             }),
                         ],
@@ -1490,7 +1495,7 @@ function QuotaPage({ ctx }) {
                     className: 'h-2 w-full rounded-full bg-white/10 overflow-hidden',
                     children: jsx('div', {
                       className: cn('h-full rounded-full transition-all duration-500', getProgressColor(viewingAccount.quotaWeekly != null ? viewingAccount.quotaWeekly : data.quotaWeekly)),
-                      style: { width: `${Math.min(100, Math.max(0, viewingAccount.quotaWeekly != null ? viewingAccount.quotaWeekly : (data.quotaWeekly || 100)))}%` },
+                      style: { width: `${Math.min(100, Math.max(0, viewingAccount.quotaWeekly != null ? viewingAccount.quotaWeekly : (data.quotaWeekly != null ? data.quotaWeekly : 100)))}%` },
                     }),
                   }),
                   jsxs('div', {
