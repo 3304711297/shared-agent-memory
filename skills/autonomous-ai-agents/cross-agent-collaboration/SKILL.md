@@ -53,5 +53,7 @@ Read a reference *only* when the task actually needs it.
    - **选型路由**：用户当前指令中指定了哪个就用哪个（例如提到 ChatGPT 就用 ChatGPT，提到 Claude 就用 Claude）。
 8. **跨平台免费额度耗尽熔断与即时切换铁律（2026-09-22 拍板）**：Arena、ChatGPT、Claude 均存在免费层额度/速率限制（触发 `You've reached your limit`、无法联网/分析文件、降级为弱模型或 429 报错）。一旦任一平台额度耗尽，**必须立即无缝切换到其他可用平台继续工作**，禁止停滞等待。
 9. **CI 后台异步守护与主会话零阻塞铁律（2026-09-22 拍板）**：代码 push 后，盯 CI 任务必须置于后台（`terminal(background=True, notify=True)`），**严禁在主会话前台同步阻塞等待 CI 跑完**。在后台盯 CI 期间，主会话必须立即无缝切至与其他 AI（ChatGPT / Claude）沟通进展或提请交叉代码复核，最大化管线吞吐。
+10. **多标签页独立常驻与单页覆写禁令（2026-09-22 拍板）**：各协同平台（ChatGPT、Claude、Arena、GitHub 等）在 Edge 浏览器中必须拥有**独立的标签页**（通过 `bsk tab create --url ...` 创建，`bsk tab select` 切换）；**严禁在同一个标签页内反复改写/跳转 URL 覆盖已有会话**。在单标签页内跨域反复跳转不仅丢失已有会话 DOM 与登录态，还会大概率触发 Cloudflare 人机风控。
+11. **Cloudflare 真人验证拦截标准处置 SOP（2026-09-22 拍板）**：当遇到 Cloudflare Turnstile / 盾 / “请验证您是真人” 拦截时，**严禁盲目在 DOM / iframe 里摸索与反复试探**（自动化脚本无法伪造通过 Cloudflare 轨迹）。标准处置流程：① 检查是否可以通过 `bsk tab create` 新建独立标签页直连避开脏会话；② 若仍需人机点击，立即通过 `bsk request-help` 提示人工快速点过；③ 或立即执行多平台熔断，秒级切至 Claude AI 继续推进，杜绝原地卡死。
 
 > ZCode client 已于 2026-09-09 退役，相关观察/握手协议已删除。

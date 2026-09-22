@@ -20,6 +20,11 @@
 - **`bsk fill` 对 contenteditable 可能报「结果未能确认」但实际已填入**：先 `evaluate` 读
   `#prompt-textarea` 的 `innerText.length` 核实，别盲目重试（重复 fill 会追加而非替换）。
 - **免费额度限制与耗尽熔断（2026-09-22 拍板）**：ChatGPT 免费账户对高阶推理/思考模式（如 GPT-4o / Thinking）存在每日或固定窗口用量上限。触发上限时会提示 `You've reached your limit`、输入框锁定或强制降级为无思考 mini 模型、无法使用代码环境或联网检索。一旦识别此状态，**严禁原地等待，必须立即切换至 Claude AI 或其他可用通道接续审查**。
+- **多开独立标签页，严禁单标签页内覆写跳转（2026-09-22 拍板）**：与 ChatGPT 协同必须使用独立标签页（`bsk tab create --url https://chatgpt.com/`），**绝对禁止在同一个标签页内反复修改 URL 往返跳转其他平台（如 Claude、Arena）**。频繁跨域重定向是诱发 Cloudflare 人机风控的核心诱因，且会导致会话状态丢失。
+- **Cloudflare Turnstile / 真人验证 SOP（2026-09-22 拍板）**：若页面被 Cloudflare 人机挑战（“请验证您是真人”）拦截，**严禁在自动化脚本里使用 DOM/坐标盲目摸索尝试点击**（无感盾依赖原生输入指纹，自动化点击会直接失效甚至加剧风控）。正确处置：
+  1. 先用 `bsk tab create` 开一个干净的新标签页直连对话 URL，看既有 Cookie 是否可免盾直通；
+  2. 若仍需人工点盾，立即调用 `bsk request-help --session <id> --prompt "请在浏览器中勾选 Cloudflare 真人验证"` 让用户一秒点过；
+  3. 若暂无人工响应，立即根据熔断规则无缝切至 Claude AI（`bsk tab select` 切换至 Claude 标签页）接续审查，严禁原地死等。
 
 ## 适用场景
 - 用户在 Edge 浏览器中已有打开的 ChatGPT 会话（含登录态与历史上下文）；
