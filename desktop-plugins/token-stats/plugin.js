@@ -389,6 +389,11 @@ function AntigravityQuotaChip({ ctx }) {
           type: 'button',
           onClick: () => haptic?.('tap'),
           children: [
+            quotaData.degraded &&
+              jsx('span', {
+                className: 'w-1.5 h-1.5 rounded-full bg-amber-400 shadow-sm shadow-amber-400/50 animate-pulse shrink-0',
+                title: '⚠️ 降级模式：Google 配额不可用（当前为缓存快照）',
+              }),
             jsxs('span', {
               className: 'inline-flex items-baseline gap-0.5',
               children: [
