@@ -1,4 +1,4 @@
 name: token-stats
 version: 1.0.0
-description: Google/Antigravity 官方配额监控后端 — 为桌面状态栏 token-stats 插件提供 /api/plugins/token-stats/quota 数据服务
+description: Google/Antigravity 官方配额与 WorkBuddy 本地网关监控（状态栏 Chip、Popover 及全景看板）
 author: 3304711297

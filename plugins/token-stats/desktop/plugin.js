@@ -1,0 +1,1897 @@
+/**
+ * Hermes Desktop Plugin: token-stats (Antigravity & Gateway Quota Monitor)
+ * 现代化极简奢华 UI 看板：实时监控 Google / Antigravity 官方配额及本地 WorkBuddy 网关状态。
+ * 支持右下角状态栏 Chip、点击 Popover、左侧导航栏 Pulse 入口及 /quota 独立全景看板页面。
+ * 基于 ctx.storage 实现偏好持久化（相对倒计时 / 绝对时刻）。
+ */
+
+import {
+  cn,
+  haptic,
+  host,
+  PALETTE_AREA,
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+  ROUTES_AREA,
+  Separator,
+  SIDEBAR_NAV_AREA,
+  useValue,
+} from '@hermes/plugin-sdk'
+import { useEffect, useState } from 'react'
+import { jsx, jsxs } from 'react/jsx-runtime'
+
+const ID = 'token-stats'
+const STORAGE_KEY_FORMAT = 'quota_reset_format' // 'relative' | 'absolute'
+const STORAGE_KEY_SHOW_NAV = 'quota_show_sidebar_nav' // boolean
+
+let pluginCtx = null
+
+function getStoredShowNav(ctx) {
+  try {
+    const val = (ctx && ctx.storage && ctx.storage.get(STORAGE_KEY_SHOW_NAV))
+    if (val === undefined || val === null) {
+      return false // 默认关闭，避免误以为是 Hermes 原生自带功能
+    }
+    return Boolean(val)
+  } catch {
+    return false
+  }
+}
+
+function syncSidebarNav(show) {
+  const c = pluginCtx
+  if (!c || !c.register) return
+  c.register({
+    id: 'nav',
+    area: SIDEBAR_NAV_AREA,
+    order: 80,
+    enabled: Boolean(show),
+    data: {
+      path: '/quota',
+      label: '配额',
+      codicon: 'pulse',
+    },
+  })
+}
+
+function formatResetTime(isoString, formatMode = 'relative', compact = false) {
+  if (!isoString) return '--'
+  try {
+    const target = new Date(isoString).getTime()
+    const now = Date.now()
+    const diff = target - now
+    if (diff <= 0) return '即将刷新'
+
+    const dt = new Date(isoString)
+    const m = String(dt.getMonth() + 1).padStart(2, '0')
+    const d = String(dt.getDate()).padStart(2, '0')
+    const hm = dt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+
+    if (formatMode === 'absolute') {
+      return `${m}/${d} ${hm}`
+    }
+
+    const totalMinutes = Math.floor(diff / (1000 * 60))
+    const hours = Math.floor(totalMinutes / 60)
+    const minutes = totalMinutes % 60
+    const days = Math.floor(hours / 24)
+    const remainHours = hours % 24
+
+    if (compact) {
+      if (days > 0) return `${days}天${remainHours}h后`
+      if (hours > 0) return `${hours}h${minutes}m后`
+      return `${minutes}m后`
+    }
+
+    if (days > 0) {
+      return `${days}天 ${remainHours}小时后 (${m}/${d} ${hm})`
+    }
+    if (hours > 0) {
+      return `${hours}小时 ${minutes}分钟后 (${hm})`
+    }
+    return `${minutes}分钟后 (${hm})`
+  } catch {
+    return isoString
+  }
+}
+
+function getProgressColor(pct) {
+  if (pct >= 40) return 'bg-emerald-500'
+  if (pct >= 15) return 'bg-amber-500'
+  return 'bg-rose-500'
+}
+
+function getTextColor(pct) {
+  if (pct >= 40) return 'text-emerald-400'
+  if (pct >= 15) return 'text-amber-400'
+  return 'text-rose-400'
+}
+
+// ==================== 频率限制（code 6004）呈现 ====================
+
+// 剩余秒数 -> 「3h12m / 25m / 42s」
+function fmtCooldown(sec) {
+  if (sec == null) return '--'
+  if (sec <= 0) return '已恢复'
+  const h = Math.floor(sec / 3600)
+  const m = Math.floor((sec % 3600) / 60)
+  const s = sec % 60
+  if (h > 0) return `${h}h${String(m).padStart(2, '0')}m`
+  if (m > 0) return `${m}m${String(s).padStart(2, '0')}s`
+  return `${s}s`
+}
+
+// 积分的精确呈现 -> 「1833.33 / 1000 / 0.5」
+// 上游真值量化到 2 位小数，经 float64 会带二进制尾数（833.33000192 的真值即 833.33），
+// 故此处按 2 位小数量化后去尾零：保住精度，也不把浮点噪声当有效数字展示。
+function fmtExactCredits(num) {
+  if (num == null) return '—'
+  const v = Number(num)
+  if (!Number.isFinite(v)) return '—'
+  const text = v.toFixed(2).replace(/\.?0+$/, '')
+  return text === '' ? '0' : text
+}
+
+// WorkBuddy 频率限制行：只呈现真实观测值，不虚构阈值/百分比
+function RateLimitRow({ rl, compact }) {
+  if (!rl) return null
+  const st = rl.state || 'unknown'
+  const obs = rl.observed || {}
+  const limited = st === 'limited'
+  // 反代 a404e80 起三态：limited=冷却中 / expired=曾限过已恢复 / ok=从未被限
+  const expired = st === 'expired'
+  const isSelfLimited = Boolean(limited && rl.isActiveAccountLimited !== false)
+  const isFailoverCooling = Boolean(limited && rl.isActiveAccountLimited === false)
+  const dot =
+    isSelfLimited
+      ? 'bg-rose-400 shadow-rose-400/50'
+      : isFailoverCooling
+        ? 'bg-amber-400 shadow-amber-400/50'
+        : expired
+          ? 'bg-amber-400 shadow-amber-400/50'
+          : st === 'ok'
+            ? 'bg-emerald-400 shadow-emerald-400/50'
+            : 'bg-zinc-500'
+  const textCls = isSelfLimited
+    ? 'text-rose-300'
+    : isFailoverCooling
+      ? 'text-amber-300/90'
+      : expired
+        ? 'text-amber-300/90'
+        : st === 'ok'
+          ? 'text-emerald-300/90'
+          : 'text-(--ui-text-tertiary)'
+
+  // 实时倒计时：每 30s 自减一次，基于绝对值 resetAt 计算（不依赖后端快照的 remainingSec）
+  const [, setTick] = useState(0)
+  useEffect(() => {
+    if (!limited) return
+    const t = setInterval(() => setTick((v) => v + 1), 30000)
+    return () => clearInterval(t)
+  }, [limited])
+
+  let left = null
+  if (limited) {
+    const abs = rl.resetAt ? new Date(rl.resetAt).getTime() : null
+    if (abs) {
+      left = Math.max(0, Math.round((abs - Date.now()) / 1000))
+    } else if (rl.remainingSec != null) {
+      left = Math.max(0, rl.remainingSec)
+    }
+  }
+
+  return jsxs('div', {
+    className: cn(
+      'flex items-center justify-between gap-2',
+      compact ? 'text-[10px]' : 'text-[0.6875rem]'
+    ),
+    title: isFailoverCooling
+      ? `备用账号 (${rl.limitedNickname || rl.limitedUid || '备用号'}) 触发 6004 频率限制，已避让至当前账号正常运行`
+      : (rl.message || rl.source || '上游频率限制（腾讯 code 6004）'),
+    children: [
+      jsxs('div', {
+        className: 'flex items-center gap-1.5 min-w-0',
+        children: [
+          jsx('span', {
+            className: cn('w-1.5 h-1.5 rounded-full shrink-0', isSelfLimited && 'animate-pulse', dot),
+          }),
+          jsx('span', {
+            className: 'text-(--ui-text-tertiary) shrink-0',
+            children: '频率限制',
+          }),
+          jsx('span', {
+            className: cn('font-mono truncate', textCls),
+            children: isSelfLimited
+              ? '已触发 · 冷却中'
+              : isFailoverCooling
+                ? `已避让 (${rl.limitedNickname || '备用号'}冷却)`
+                : expired
+                  ? '已恢复'
+                  : st === 'ok'
+                    ? '正常'
+                    : st === 'offline'
+                      ? '网关离线'
+                      : '正常',
+          }),
+        ],
+      }),
+      jsxs('div', {
+        className: 'flex items-center gap-1.5 font-mono shrink-0',
+        children: [
+          limited && left != null
+            ? jsxs('span', {
+                className: 'text-rose-300 font-semibold',
+                children: ['⏳ ', fmtCooldown(left)],
+              })
+            : null,
+          limited && rl.resetLocal
+            ? jsx('span', { className: 'text-(--ui-text-tertiary)', children: `@${rl.resetLocal}` })
+            : null,
+          expired && rl.resetLocal
+            ? jsx('span', {
+                className: 'text-(--ui-text-tertiary)',
+                children: `@${rl.resetLocal} 冷却结束`,
+              })
+            : null,
+          !limited && (obs.reqsToday != null || obs.reqs5h != null)
+            ? jsxs('span', {
+                className: 'text-(--ui-text-tertiary)',
+                children: [obs.reqsToday != null ? '今日 ' : '5h ', obs.reqsToday ?? obs.reqs5h, '次'],
+              })
+            : null,
+          rl.nightFree
+            ? jsx('span', {
+                className: 'text-emerald-400/90 font-semibold',
+                title: '夜间免费窗口 (23:00–08:00)',
+                children: '🌙 免积分',
+              })
+            : null,
+        ],
+      }),
+    ],
+  })
+}
+
+// ==================== 状态栏 Chip 组件 ====================
+
+function AntigravityQuotaChip({ ctx }) {
+  const busy = useValue(host.state.busy)
+  const [open, setOpen] = useState(false)
+  const [refreshing, setRefreshing] = useState(false)
+  const [justUpdated, setJustUpdated] = useState(false)
+  const [lastSyncTime, setLastSyncTime] = useState('')
+  const [formatMode, setFormatMode] = useState(() => {
+    try {
+      return (ctx && ctx.storage && ctx.storage.get(STORAGE_KEY_FORMAT)) || 'relative'
+    } catch {
+      return 'relative'
+    }
+  })
+  const [selectedEmail, setSelectedEmail] = useState(null)
+  const [showSidebarNav, setShowSidebarNav] = useState(() => getStoredShowNav(ctx || pluginCtx))
+
+  const toggleSidebarNav = (e) => {
+    if (e) e.stopPropagation()
+    const next = !showSidebarNav
+    setShowSidebarNav(next)
+    try {
+      const storage = (ctx && ctx.storage) || (pluginCtx && pluginCtx.storage)
+      if (storage) storage.set(STORAGE_KEY_SHOW_NAV, next)
+    } catch {}
+    syncSidebarNav(next)
+    haptic?.('tap')
+    host.notify?.({
+      kind: 'info',
+      message: next ? '已开启左侧导航配额入口' : '已关闭左侧导航配额入口（默认状态）',
+    })
+  }
+
+  const [quotaData, setQuotaData] = useState({
+    quota5h: 100,
+    quotaWeekly: 100,
+    reset5h: null,
+    resetWeekly: null,
+    source: 'Google 官方直连',
+    plan: 'Google AI Pro',
+    account: '...',
+    claude5h: 100,
+    claudeWeekly: 100,
+    workbuddy: { status: 'offline', statusLabel: '未启动', rateLimit: null },
+  })
+
+  const toggleFormat = (e) => {
+    if (e) e.stopPropagation()
+    const next = formatMode === 'relative' ? 'absolute' : 'relative'
+    setFormatMode(next)
+    try {
+      if (ctx && ctx.storage) ctx.storage.set(STORAGE_KEY_FORMAT, next)
+    } catch {}
+    haptic?.('tap')
+  }
+
+  const fetchLiveQuota = async (isManual = false) => {
+    try {
+      setRefreshing(true)
+      const path = isManual ? '/quota?force=1' : '/quota'
+      const rest = (ctx && ctx.rest) || (pluginCtx && pluginCtx.rest)
+      if (!rest) throw new Error('plugin context unavailable')
+      const data = await rest.call(ctx || pluginCtx, path)
+      if (data && (data.status === 'ok' || data.status === 'degraded')) {
+        setQuotaData({
+          quota5h: data.quota5h != null ? Math.round(data.quota5h * 10) / 10 : 100,
+          quotaWeekly: data.quotaWeekly != null ? Math.round(data.quotaWeekly * 10) / 10 : 100,
+          reset5h: data.reset5h,
+          resetWeekly: data.resetWeekly,
+          source: data.source || 'Google 官方直连 (EasyCLIProxyAPI)',
+          plan: data.plan || 'Google AI Pro',
+          account: data.account || '...',
+          accounts: data.accounts || [],
+          activeAccount: data.activeAccount || data.account,
+          claude5h: data.claudeQuota5h != null ? Math.round(data.claudeQuota5h) : 100,
+          claudeWeekly: data.claudeQuotaWeekly != null ? Math.round(data.claudeQuotaWeekly) : 100,
+          workbuddy: data.workbuddy || { status: 'offline', statusLabel: '未启动', rateLimit: null },
+          degraded: !!data.degraded,
+          degradedReason: data.degradedReason || '',
+        })
+        const syncTime =
+          data.updatedAtLocal ||
+          new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+        setLastSyncTime(syncTime)
+
+        if (isManual) {
+          setJustUpdated(true)
+          haptic?.('success') || haptic?.('tap')
+          host.notify({
+            kind: data.degraded ? 'warning' : 'info',
+            message: data.degraded
+              ? `⚠️ 已刷新（降级模式：Google 配额不可用，WorkBuddy 为实时值）(${syncTime})`
+              : `✅ 配额与网关状态已同步 (${syncTime})`,
+          })
+          setTimeout(() => setJustUpdated(false), 2400)
+        }
+      }
+    } catch {
+      if (isManual) {
+        host.notify({
+          kind: 'error',
+          message: '刷新配额失败：Hermes 内置配额服务未响应',
+        })
+      }
+    } finally {
+      setTimeout(() => setRefreshing(false), 500)
+    }
+  }
+
+  useEffect(() => {
+    fetchLiveQuota()
+    const timer = setInterval(() => fetchLiveQuota(false), 10000)
+    return () => clearInterval(timer)
+  }, [])
+
+  const accountsList = quotaData.accounts || []
+  const activeAccountObj = accountsList.find((a) => a.isActive) || accountsList[0] || quotaData
+  const viewingAccount = (selectedEmail && accountsList.find((a) => a.account === selectedEmail)) || activeAccountObj
+
+  return jsxs(Popover, {
+    open,
+    onOpenChange: setOpen,
+    children: [
+      jsx(PopoverTrigger, {
+        asChild: true,
+        children: jsxs('button', {
+          className: cn(
+            'inline-flex h-full items-center gap-1.5 px-2 text-[0.6875rem] font-mono transition-colors select-none cursor-pointer',
+            'text-(--ui-text-secondary) hover:bg-(--chrome-action-hover) hover:text-(--foreground)',
+            busy && 'text-(--ui-accent) animate-pulse',
+            open && 'bg-(--chrome-action-hover) text-(--foreground)'
+          ),
+          type: 'button',
+          onClick: () => haptic?.('tap'),
+          children: [
+            jsxs('span', {
+              className: 'inline-flex items-baseline gap-0.5',
+              children: [
+                jsx('span', {
+                  className: 'text-[10px] font-sans font-medium text-(--ui-text-secondary)',
+                  children: '5h',
+                }),
+                jsx('span', {
+                  className: 'text-[10px] text-(--ui-text-quaternary) font-mono',
+                  children: ':',
+                }),
+                jsxs('span', {
+                  className: cn('font-mono font-bold tracking-tight', getTextColor(quotaData.quota5h)),
+                  children: [quotaData.quota5h, '%'],
+                }),
+              ],
+            }),
+              jsx('span', {
+                className: 'text-[10px] text-white/15 select-none font-mono mx-0.5',
+                children: '·',
+              }),
+              jsxs('span', {
+                className: 'inline-flex items-baseline gap-0.5',
+                children: [
+                  jsx('span', {
+                    className: 'text-[10px] font-sans font-medium text-(--ui-text-secondary)',
+                    children: '周',
+                  }),
+                  jsx('span', {
+                    className: 'text-[10px] text-(--ui-text-quaternary) font-mono',
+                    children: ':',
+                  }),
+                  jsxs('span', {
+                    className: cn('font-mono font-bold tracking-tight', getTextColor(quotaData.quotaWeekly)),
+                    children: [quotaData.quotaWeekly, '%'],
+                  }),
+                ],
+              }),
+              // WorkBuddy 本地反代感知微胶囊（仅当在线时紧凑展示，降级/限频优先预警）
+              quotaData.workbuddy?.status === 'online' &&
+                jsx('span', {
+                  className: 'text-[10px] text-white/15 select-none font-mono mx-0.5',
+                  children: '·',
+                }),
+              quotaData.workbuddy?.status === 'online' &&
+                (quotaData.workbuddy.rateLimit?.fallback
+                  ? jsxs('span', {
+                      className: 'inline-flex items-baseline gap-0.5 text-rose-400 font-mono font-bold',
+                      title: `WorkBuddy 模型降级中: ${quotaData.workbuddy.rateLimit.fallback.requested} → ${quotaData.workbuddy.rateLimit.fallback.actual}`,
+                      children: [
+                        jsx('span', { className: 'text-[9px]', children: '⚠️' }),
+                        jsx('span', { className: 'text-[10px]', children: '降级' }),
+                      ],
+                    })
+                  : (quotaData.workbuddy.rateLimit?.state === 'limited' && quotaData.workbuddy.rateLimit?.isActiveAccountLimited !== false)
+                  ? jsxs('span', {
+                      className: 'inline-flex items-baseline gap-0.5 text-amber-400 font-mono font-bold',
+                      title: `WorkBuddy 限频冷却中: ${fmtCooldown(quotaData.workbuddy.rateLimit.remainingSec)}`,
+                      children: [
+                        jsx('span', { className: 'text-[9px]', children: '⏳' }),
+                        jsx('span', {
+                          className: 'text-[10px]',
+                          children: fmtCooldown(quotaData.workbuddy.rateLimit.remainingSec),
+                        }),
+                      ],
+                    })
+                  : jsxs('span', {
+                      className: 'inline-flex items-baseline gap-0.5 text-cyan-400/90 font-mono',
+                      title: quotaData.workbuddy.note || 'WorkBuddy 反代在线 (8787)',
+                      children: [
+                        jsx('span', { className: 'text-[9px] text-cyan-400/80', children: '⚡' }),
+                        jsx('span', {
+                          className: 'text-[10px] font-bold tracking-tight',
+                          children: fmtExactCredits(quotaData.workbuddy.usage?.remain),
+                        }),
+                      ],
+                    })),
+            ],
+          }),
+        }),
+
+      jsxs(PopoverContent, {
+        align: 'end',
+        side: 'top',
+        sideOffset: 8,
+        onOpenAutoFocus: (e) => e.preventDefault(),
+        onCloseAutoFocus: (e) => e.preventDefault(),
+        onFocusOutside: (e) => e.preventDefault(),
+        className: cn(
+          'w-88 p-4 rounded-xl border border-(--ui-stroke-secondary) bg-(--ui-bg-elevated) shadow-2xl backdrop-blur-xl',
+          'text-(--foreground) font-sans select-none flex flex-col gap-3.5 z-50',
+          'shadow-[0_20px_50px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.08)]'
+        ),
+        children: [
+          // 降级模式横幅：Google 配额不可用（token 过期/网关未运行），Google 数字为缓存快照
+          quotaData.degraded &&
+            jsxs('div', {
+              className:
+                'flex items-start gap-2 px-2.5 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/25 text-amber-300',
+              children: [
+                jsx('span', { className: 'text-xs leading-4', children: '⚠️' }),
+                jsx('span', {
+                  className: 'text-[0.6875rem] leading-4',
+                  children: '降级模式：Google 配额接口不可用，额度为缓存快照；WorkBuddy 积分为实时值',
+                }),
+              ],
+            }),
+          // 标题行
+          jsxs('div', {
+            className: 'flex items-center justify-between',
+            children: [
+              jsxs('div', {
+                className: 'flex items-center gap-2',
+                children: [
+                  jsx('div', {
+                    className: cn(
+                      'w-2 h-2 rounded-full shadow-sm animate-pulse',
+                      quotaData.degraded
+                        ? 'bg-amber-400 shadow-amber-400/50'
+                        : 'bg-emerald-500 shadow-emerald-500/50'
+                    ),
+                  }),
+                  jsx('span', {
+                    className: 'text-xs font-semibold tracking-wide text-(--ui-text-primary)',
+                    children: '模型配额与网关监控',
+                  }),
+                ],
+              }),
+              jsxs('div', {
+                className: 'flex items-center gap-1.5',
+                children: [
+                  jsx('span', {
+                    className: cn(
+                      'px-1.5 py-0.5 text-[0.625rem] font-medium rounded-md border',
+                      quotaData.plan === 'Google AI Pro'
+                        ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                        : 'bg-white/10 text-zinc-300 border-white/10'
+                    ),
+                    children: quotaData.plan === 'Google AI Pro' ? 'Pro 订阅' : '标准方案',
+                  }),
+                  justUpdated
+                    ? jsxs('span', {
+                        className:
+                          'px-1.5 py-0.5 text-[0.625rem] font-medium rounded-md bg-emerald-500/20 text-emerald-300 flex items-center gap-1 transition-all',
+                        children: [
+                          jsx('svg', {
+                            className: 'w-2.5 h-2.5',
+                            fill: 'none',
+                            viewBox: '0 0 24 24',
+                            stroke: 'currentColor',
+                            strokeWidth: 3,
+                            children: jsx('path', {
+                              strokeLinecap: 'round',
+                              strokeLinejoin: 'round',
+                              d: 'M5 13l4 4L19 7',
+                            }),
+                          }),
+                          '已刷新',
+                        ],
+                      })
+                    : jsx('button', {
+                        type: 'button',
+                        disabled: refreshing,
+                        onClick: (e) => {
+                          e.stopPropagation()
+                          haptic?.('tap')
+                          fetchLiveQuota(true)
+                        },
+                        title: '点击强制向官方拉取最新配额',
+                        className: cn(
+                          'p-1.5 text-(--ui-text-tertiary) hover:text-(--foreground) rounded-md transition-all',
+                          'hover:bg-(--chrome-action-hover) active:scale-90 cursor-pointer flex items-center justify-center',
+                          refreshing && 'opacity-75 cursor-wait'
+                        ),
+                        children: jsx('svg', {
+                          className: cn(
+                            'w-3.5 h-3.5 transition-transform duration-300',
+                            refreshing && 'animate-spin text-emerald-400'
+                          ),
+                          fill: 'none',
+                          viewBox: '0 0 24 24',
+                          stroke: 'currentColor',
+                          strokeWidth: 2,
+                          children: jsx('path', {
+                            strokeLinecap: 'round',
+                            strokeLinejoin: 'round',
+                            d: 'M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15',
+                          }),
+                        }),
+                      }),
+                ],
+              }),
+            ],
+          }),
+
+          // 账号与直连状态卡
+          jsxs('div', {
+            className:
+              'px-2.5 py-1.5 rounded-lg bg-black/20 border border-white/5 flex items-center justify-between text-[0.6875rem]',
+            children: [
+              jsxs('div', {
+                className: 'flex items-center gap-1.5 truncate max-w-44',
+                children: [
+                  jsx('span', {
+                    className: cn(
+                      'w-1.5 h-1.5 rounded-full shrink-0',
+                      viewingAccount.isActive ? 'bg-emerald-400 shadow-sm shadow-emerald-400/50' : 'bg-amber-400'
+                    ),
+                  }),
+                  jsx('span', {
+                    className: 'text-(--ui-text-tertiary) truncate font-mono text-[11px]',
+                    title: viewingAccount.account,
+                    children: viewingAccount.account,
+                  }),
+                ],
+              }),
+              jsxs('div', {
+                className: 'flex items-center gap-1.5 text-[0.625rem]',
+                children: [
+                  viewingAccount.isActive
+                    ? jsx('span', {
+                        className: 'text-emerald-400/90 font-mono',
+                        children: '● 当前活跃路由',
+                      })
+                    : jsxs('button', {
+                        type: 'button',
+                        onClick: () => {
+                          setSelectedEmail(activeAccountObj.account)
+                          haptic?.('tap')
+                        },
+                        title: '点击切回当前活跃路由账户',
+                        className: 'text-amber-300 hover:text-amber-200 font-mono underline cursor-pointer transition-colors',
+                        children: ['待机预览 (切回活跃)'],
+                      }),
+                  lastSyncTime &&
+                    jsxs('span', {
+                      className: 'text-(--ui-text-quaternary) font-mono',
+                      children: ['(', lastSyncTime, ')'],
+                    }),
+                ],
+              }),
+            ],
+          }),
+
+          // 多账号凭据池明细卡（多账号时展示）
+          quotaData.accounts && quotaData.accounts.length > 1 &&
+            jsxs('div', {
+              className: 'flex flex-col gap-1 p-2 rounded-lg bg-black/30 border border-white/5 text-[10px] font-mono',
+              children: [
+                jsxs('div', {
+                  className: 'flex items-center justify-between text-(--ui-text-quaternary) pb-0.5 border-b border-white/5',
+                  children: [
+                    jsx('span', { children: `凭据池 (${quotaData.accounts.length} 账号 · 点击切换)` }),
+                    jsx('span', { className: 'text-emerald-400/90 font-sans', children: '轮询负载中' }),
+                  ],
+                }),
+                quotaData.accounts.map((acc) => {
+                  const isSelected = acc.account === viewingAccount.account
+                  return jsxs('button', {
+                    type: 'button',
+                    key: acc.account,
+                    onClick: () => {
+                      setSelectedEmail(acc.account)
+                      haptic?.('tap')
+                    },
+                    className: cn(
+                      'w-full text-left flex flex-col gap-0.5 py-1 px-1.5 rounded transition-all cursor-pointer',
+                      isSelected
+                        ? 'bg-emerald-500/15 ring-1 ring-emerald-500/30 text-(--foreground)'
+                        : 'hover:bg-white/5 text-(--ui-text-tertiary)'
+                    ),
+                    children: [
+                      jsxs('div', {
+                        className: 'flex items-center justify-between w-full',
+                        children: [
+                          jsxs('div', {
+                            className: 'flex items-center gap-1.5 truncate max-w-[150px]',
+                            children: [
+                              acc.isActive
+                                ? jsx('span', { className: 'w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0 shadow-sm shadow-emerald-400/50' })
+                                : jsx('span', { className: 'w-1.5 h-1.5 rounded-full bg-zinc-600 shrink-0' }),
+                              jsx('span', {
+                                className: cn('truncate text-[10px]', isSelected ? 'font-semibold text-white' : 'text-zinc-300'),
+                                children: acc.account,
+                              }),
+                              acc.isActive &&
+                                jsx('span', {
+                                  className: 'text-[9px] px-1 py-0.2 rounded bg-emerald-500/20 text-emerald-300 shrink-0',
+                                  children: '活跃',
+                                }),
+                              isSelected && !acc.isActive &&
+                                jsx('span', {
+                                  className: 'text-[9px] px-1 py-0.2 rounded bg-amber-500/20 text-amber-300 shrink-0',
+                                  children: '查看',
+                                }),
+                            ],
+                          }),
+                          jsxs('div', {
+                            className: 'flex items-center gap-1 shrink-0 text-[9px]',
+                            children: [
+                              jsxs('span', { className: getTextColor(acc.quota5h), children: ['5h: ', acc.quota5h, '%'] }),
+                              jsx('span', { className: 'text-white/20', children: '|' }),
+                              jsxs('span', { className: getTextColor(acc.quotaWeekly), children: ['周: ', acc.quotaWeekly, '%'] }),
+                            ],
+                          }),
+                        ],
+                      }),
+                      jsxs('div', {
+                        className: 'flex items-center justify-between text-[8.5px] text-(--ui-text-quaternary) pt-0.5 border-t border-white/5',
+                        children: [
+                          jsxs('span', {
+                            className: 'truncate max-w-[145px]',
+                            title: `5h 滚动重置: ${acc.reset5h || '--'}`,
+                            children: ['⏳5h: ', formatResetTime(acc.reset5h, formatMode, true)],
+                          }),
+                          jsxs('span', {
+                            className: 'truncate max-w-[145px] text-right',
+                            title: `周额度重置: ${acc.resetWeekly || '--'}`,
+                            children: ['⏳周: ', formatResetTime(acc.resetWeekly, formatMode, true)],
+                          }),
+                        ],
+                      }),
+                    ],
+                  })
+                }),
+              ],
+            }),
+
+          // 配额核心指标区
+          jsxs('div', {
+            className: 'flex flex-col gap-3 py-1',
+            children: [
+              // 5 小时额度条
+              jsxs('div', {
+                className: 'flex flex-col gap-1.5',
+                children: [
+                  jsxs('div', {
+                    className: 'flex items-center justify-between text-xs',
+                    children: [
+                      jsxs('div', {
+                        className: 'flex items-center gap-1.5',
+                        children: [
+                          jsx('span', {
+                            className: 'text-(--ui-text-secondary) font-medium',
+                            children: 'Gemini 5h 滚动额度',
+                          }),
+                          !viewingAccount.isActive &&
+                            jsx('span', {
+                              className: 'text-[9px] px-1 py-0.2 rounded bg-amber-500/20 text-amber-300 font-mono',
+                              children: '待机预览',
+                            }),
+                        ],
+                      }),
+                      jsxs('span', {
+                        className: cn('font-mono font-semibold', getTextColor(viewingAccount.quota5h != null ? viewingAccount.quota5h : quotaData.quota5h)),
+                        children: [viewingAccount.quota5h != null ? viewingAccount.quota5h : quotaData.quota5h, '%'],
+                      }),
+                    ],
+                  }),
+                  jsx('div', {
+                    className: 'h-1.5 w-full rounded-full bg-white/10 overflow-hidden',
+                    children: jsx('div', {
+                      className: cn(
+                        'h-full rounded-full transition-all duration-500',
+                        getProgressColor(viewingAccount.quota5h != null ? viewingAccount.quota5h : quotaData.quota5h)
+                      ),
+                      style: { width: `${Math.min(100, Math.max(0, viewingAccount.quota5h != null ? viewingAccount.quota5h : (quotaData.quota5h || 100)))}%` },
+                    }),
+                  }),
+                  jsxs('div', {
+                    className: 'flex items-center justify-between text-[0.6875rem] text-(--ui-text-tertiary)',
+                    children: [
+                      jsx('span', { children: '⏳ 重置倒计时' }),
+                      jsx('button', {
+                        type: 'button',
+                        onClick: toggleFormat,
+                        title: '点击切换 相对/绝对 显示格式',
+                        className: 'font-mono text-zinc-300 hover:text-white cursor-pointer transition-colors',
+                        children: formatResetTime(viewingAccount.reset5h || quotaData.reset5h, formatMode),
+                      }),
+                    ],
+                  }),
+                ],
+              }),
+
+              jsx(Separator, { className: 'bg-white/5 my-0.5' }),
+
+              // 周额度条
+              jsxs('div', {
+                className: 'flex flex-col gap-1.5',
+                children: [
+                  jsxs('div', {
+                    className: 'flex items-center justify-between text-xs',
+                    children: [
+                      jsxs('div', {
+                        className: 'flex items-center gap-1.5',
+                        children: [
+                          jsx('span', {
+                            className: 'text-(--ui-text-secondary) font-medium',
+                            children: 'Gemini 本周总配额',
+                          }),
+                          !viewingAccount.isActive &&
+                            jsx('span', {
+                              className: 'text-[9px] px-1 py-0.2 rounded bg-amber-500/20 text-amber-300 font-mono',
+                              children: '待机预览',
+                            }),
+                        ],
+                      }),
+                      jsxs('span', {
+                        className: cn('font-mono font-semibold', getTextColor(viewingAccount.quotaWeekly != null ? viewingAccount.quotaWeekly : quotaData.quotaWeekly)),
+                        children: [viewingAccount.quotaWeekly != null ? viewingAccount.quotaWeekly : quotaData.quotaWeekly, '%'],
+                      }),
+                    ],
+                  }),
+                  jsx('div', {
+                    className: 'h-1.5 w-full rounded-full bg-white/10 overflow-hidden',
+                    children: jsx('div', {
+                      className: cn(
+                        'h-full rounded-full transition-all duration-500',
+                        getProgressColor(viewingAccount.quotaWeekly != null ? viewingAccount.quotaWeekly : quotaData.quotaWeekly)
+                      ),
+                      style: { width: `${Math.min(100, Math.max(0, viewingAccount.quotaWeekly != null ? viewingAccount.quotaWeekly : (quotaData.quotaWeekly || 100)))}%` },
+                    }),
+                  }),
+                  jsxs('div', {
+                    className: 'flex items-center justify-between text-[0.6875rem] text-(--ui-text-tertiary)',
+                    children: [
+                      jsx('span', { children: '⏳ 完全刷新' }),
+                      jsx('button', {
+                        type: 'button',
+                        onClick: toggleFormat,
+                        title: '点击切换 相对/绝对 显示格式',
+                        className: 'font-mono text-zinc-300 hover:text-white cursor-pointer transition-colors',
+                        children: formatResetTime(viewingAccount.resetWeekly || quotaData.resetWeekly, formatMode),
+                      }),
+                    ],
+                  }),
+                ],
+              }),
+
+              // 3P 协同池 (Claude / GPT)
+              (viewingAccount.claudeQuota5h != null || quotaData.claude5h != null) &&
+                jsxs('div', {
+                  className:
+                    'mt-0.5 p-2 rounded-lg bg-white/5 border border-white/5 flex items-center justify-between text-[0.6875rem]',
+                  children: [
+                    jsx('span', {
+                      className: 'text-(--ui-text-secondary)',
+                      children: '3P (Claude/GPT) 协同池',
+                    }),
+                    jsxs('div', {
+                      className: 'flex items-center gap-2 font-mono',
+                      children: [
+                        jsxs('span', {
+                          className: 'text-emerald-400',
+                          children: ['5h: ', viewingAccount.claudeQuota5h != null ? viewingAccount.claudeQuota5h : quotaData.claude5h, '%'],
+                        }),
+                        jsx('span', { className: 'text-white/20', children: '|' }),
+                        jsxs('span', {
+                          className: 'text-emerald-400',
+                          children: ['周: ', viewingAccount.claudeQuotaWeekly != null ? viewingAccount.claudeQuotaWeekly : quotaData.claudeWeekly, '%'],
+                        }),
+                      ],
+                    }),
+                  ],
+                }),
+
+              // WorkBuddy 网关探测简卡（含账号与积分）
+              jsxs('div', {
+                className: 'p-2.5 rounded-lg bg-black/25 border border-white/5 flex flex-col gap-1.5 text-[0.6875rem]',
+                children: [
+                  // 第一行：状态与名称
+                  jsxs('div', {
+                    className: 'flex items-center justify-between',
+                    children: [
+                      jsxs('div', {
+                        className: 'flex items-center gap-1.5',
+                        children: [
+                          jsx('span', {
+                            className: cn(
+                              'w-1.5 h-1.5 rounded-full',
+                              quotaData.workbuddy.status === 'online' ? 'bg-emerald-400' : 'bg-zinc-500'
+                            ),
+                          }),
+                          jsx('span', {
+                            className: 'text-(--ui-text-secondary)',
+                            children: 'WorkBuddy (8787)',
+                          }),
+                        ],
+                      }),
+                      jsx('span', {
+                        className: cn(
+                          'font-mono text-[10px] px-1.5 py-0.5 rounded',
+                          quotaData.workbuddy.status === 'online'
+                            ? 'bg-emerald-500/15 text-emerald-300'
+                            : 'bg-zinc-800 text-zinc-400'
+                        ),
+                        children: quotaData.workbuddy.statusLabel || '待机中',
+                      }),
+                    ],
+                  }),
+
+                  // 第二行：账号与积分（在线且有数据时显示）
+                  quotaData.workbuddy.status === 'online' &&
+                    quotaData.workbuddy.usage &&
+                    jsxs('div', {
+                      className: 'flex flex-col gap-1 pt-0.5',
+                      children: [
+                        // 账号昵称 + 积分余量
+                        jsxs('div', {
+                          className: 'flex items-center justify-between',
+                          children: [
+                            jsxs('span', {
+                              className: 'text-(--ui-text-tertiary)',
+                              children: [
+                                '👤 ',
+                                quotaData.workbuddy.usage.nickname || '—',
+                                quotaData.workbuddy.usage.isPaidUser ? '' : ' (免费版)',
+                                quotaData.workbuddy.rateLimit?.rotation?.soonest_expire_day
+                                  ? ` · 临期${quotaData.workbuddy.rateLimit.rotation.soonest_expire_day.slice(5)}`
+                                  : '',
+                              ],
+                            }),
+                            jsxs('span', {
+                              className: cn(
+                                'font-mono font-bold tracking-tight',
+                                getTextColor(quotaData.workbuddy.usage.remainPercent)
+                              ),
+                              children: [
+                                fmtExactCredits(quotaData.workbuddy.usage.remain),
+                                ' / ',
+                                fmtExactCredits(quotaData.workbuddy.usage.total),
+                                ' credits',
+                              ],
+                            }),
+                          ],
+                        }),
+
+                        // 积分进度条
+                        jsx('div', {
+                          className: 'h-1 w-full rounded-full bg-white/10 overflow-hidden',
+                          children: jsx('div', {
+                            className: cn(
+                              'h-full rounded-full transition-all duration-500',
+                              getProgressColor(quotaData.workbuddy.usage.remainPercent)
+                            ),
+                            style: {
+                              width: `${Math.min(100, Math.max(0, quotaData.workbuddy.usage.remainPercent))}%`,
+                            },
+                          }),
+                        }),
+                      ],
+                    }),
+
+                  // 积分查询失败提示
+                  quotaData.workbuddy.status === 'online' &&
+                    quotaData.workbuddy.usageError &&
+                    jsx('div', {
+                      className: 'text-[0.625rem] text-amber-400/80 pt-0.5',
+                      children: `⚠️ ${quotaData.workbuddy.usageError}`,
+                    }),
+
+                  // 上游频率限制（code 6004）状态行
+                  quotaData.workbuddy.rateLimit &&
+                    jsx('div', { className: 'pt-0.5', children: jsx(RateLimitRow, { rl: quotaData.workbuddy.rateLimit, compact: true }) }),
+
+                  // 降级感知 compact 行：当前会话模型被静默降级
+                  quotaData.workbuddy.rateLimit?.fallback &&
+                    jsx('div', {
+                      className: 'text-[0.625rem] font-mono text-rose-300 bg-rose-500/10 px-1.5 py-0.5 rounded border border-rose-500/25 mt-0.5',
+                      title: `请求 ${quotaData.workbuddy.rateLimit.fallback.requested} 上游未授权 (${quotaData.workbuddy.rateLimit.fallback.reason})，实际运行 ${quotaData.workbuddy.rateLimit.fallback.actual}`,
+                      children: `⚠️ 降级中: ${quotaData.workbuddy.rateLimit.fallback.requested} → 实际 ${quotaData.workbuddy.rateLimit.fallback.actual}`,
+                    }),
+                ],
+              }),
+            ],
+          }),
+
+          jsx(Separator, { className: 'bg-white/5' }),
+
+          // 底部控制与导航直达按钮
+          jsxs('div', {
+            className: 'flex items-center justify-between pt-0.5 text-[0.625rem]',
+            children: [
+              jsxs('div', {
+                className: 'flex items-center gap-1.5',
+                children: [
+                  jsx('button', {
+                    type: 'button',
+                    onClick: toggleFormat,
+                    title: '点击切换时间格式：相对倒计时 / 绝对具体时刻',
+                    className: 'text-(--ui-text-tertiary) hover:text-(--foreground) transition-colors cursor-pointer',
+                    children: formatMode === 'relative' ? '⏱ 倒计时' : '📅 时刻',
+                  }),
+                  jsx('span', { className: 'text-white/10 select-none', children: '|' }),
+                  jsx('button', {
+                    type: 'button',
+                    onClick: toggleSidebarNav,
+                    title: '切换左侧导航列表是否显示配额入口（默认关闭，避免误认为 Hermes 原生自带功能）',
+                    className: cn(
+                      'transition-colors cursor-pointer',
+                      showSidebarNav
+                        ? 'text-emerald-400 hover:text-emerald-300 font-medium'
+                        : 'text-(--ui-text-tertiary) hover:text-zinc-300'
+                    ),
+                    children: showSidebarNav ? '侧栏: 显示' : '侧栏: 隐藏',
+                  }),
+                ],
+              }),
+              jsxs('button', {
+                type: 'button',
+                onClick: () => {
+                  setOpen(false)
+                  haptic?.('tap')
+                  host.navigate('/quota')
+                },
+                className:
+                  'inline-flex items-center gap-1 text-[0.6875rem] font-medium text-emerald-400 hover:text-emerald-300 transition-colors cursor-pointer',
+                children: [
+                  '全景看板',
+                  jsx('span', { className: 'text-[0.75rem]', children: '➔' }),
+                ],
+              }),
+            ],
+          }),
+        ],
+      }),
+    ],
+  })
+}
+
+// ==================== 侧边栏独立全景看板页面 ====================
+
+function QuotaPage({ ctx }) {
+  const [refreshing, setRefreshing] = useState(false)
+  const [lastSyncTime, setLastSyncTime] = useState('')
+  const [formatMode, setFormatMode] = useState(() => {
+    try {
+      return (ctx && ctx.storage && ctx.storage.get(STORAGE_KEY_FORMAT)) || 'relative'
+    } catch {
+      return 'relative'
+    }
+  })
+  const [selectedEmail, setSelectedEmail] = useState(null)
+  const [showSidebarNav, setShowSidebarNav] = useState(() => getStoredShowNav(ctx || pluginCtx))
+
+  const toggleSidebarNav = () => {
+    const next = !showSidebarNav
+    setShowSidebarNav(next)
+    try {
+      const storage = (ctx && ctx.storage) || (pluginCtx && pluginCtx.storage)
+      if (storage) storage.set(STORAGE_KEY_SHOW_NAV, next)
+    } catch {}
+    syncSidebarNav(next)
+    haptic?.('tap')
+    host.notify?.({
+      kind: 'info',
+      message: next ? '已开启左侧导航配额入口' : '已关闭左侧导航配额入口（默认状态）',
+    })
+  }
+
+  const [data, setData] = useState({
+    quota5h: 100,
+    quotaWeekly: 100,
+    reset5h: null,
+    resetWeekly: null,
+    source: 'Google 官方直连 (EasyCLIProxyAPI)',
+    plan: 'Google AI Pro',
+    account: '...',
+    claude5h: 100,
+    claudeWeekly: 100,
+    workbuddy: { status: 'offline', statusLabel: '未启动', note: '本地反代服务待机中 (端口 8787)', rateLimit: null },
+  })
+
+  const toggleFormat = () => {
+    const next = formatMode === 'relative' ? 'absolute' : 'relative'
+    setFormatMode(next)
+    try {
+      if (ctx && ctx.storage) ctx.storage.set(STORAGE_KEY_FORMAT, next)
+    } catch {}
+    haptic?.('tap')
+  }
+
+  const loadData = async (isManual = false) => {
+    try {
+      setRefreshing(true)
+      const path = isManual ? '/quota?force=1' : '/quota'
+      const rest = (ctx && ctx.rest) || (pluginCtx && pluginCtx.rest)
+      if (!rest) return
+      const res = await rest.call(ctx || pluginCtx, path)
+      if (res && (res.status === 'ok' || res.status === 'degraded')) {
+        setData({
+          quota5h: res.quota5h != null ? Math.round(res.quota5h * 10) / 10 : 100,
+          quotaWeekly: res.quotaWeekly != null ? Math.round(res.quotaWeekly * 10) / 10 : 100,
+          reset5h: res.reset5h,
+          resetWeekly: res.resetWeekly,
+          source: res.source || 'Google 官方直连 (EasyCLIProxyAPI)',
+          plan: res.plan || 'Google AI Pro',
+          account: res.account || '...',
+          accounts: res.accounts || [],
+          activeAccount: res.activeAccount || res.account,
+          claude5h: res.claudeQuota5h != null ? Math.round(res.claudeQuota5h) : 100,
+          claudeWeekly: res.claudeQuotaWeekly != null ? Math.round(res.claudeQuotaWeekly) : 100,
+          workbuddy: res.workbuddy || { status: 'offline', statusLabel: '未启动', note: '本地反代服务待机中', rateLimit: null },
+          degraded: !!res.degraded,
+          degradedReason: res.degradedReason || '',
+        })
+        const sync =
+          res.updatedAtLocal ||
+          new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+        setLastSyncTime(sync)
+        if (isManual) {
+          haptic?.(res.degraded ? 'tap' : 'success') || haptic?.('tap')
+          host.notify({
+            kind: res.degraded ? 'warning' : 'info',
+            message: res.degraded
+              ? `⚠️ 已刷新（降级模式：Google 配额不可用，WorkBuddy 为实时值）(${sync})`
+              : `✅ 模型配额已强制同步 (${sync})`,
+          })
+        }
+      }
+    } catch {
+      if (isManual) {
+        host.notify({ kind: 'error', message: '获取配额失败，请确认 Hermes 后端服务正常' })
+      }
+    } finally {
+      setTimeout(() => setRefreshing(false), 500)
+    }
+  }
+
+  useEffect(() => {
+    loadData()
+    const timer = setInterval(() => loadData(false), 15000)
+    return () => clearInterval(timer)
+  }, [])
+
+  const accountsList = data.accounts || []
+  const activeAccountObj = accountsList.find((a) => a.isActive) || accountsList[0] || data
+  const viewingAccount = (selectedEmail && accountsList.find((a) => a.account === selectedEmail)) || activeAccountObj
+
+  return jsxs('div', {
+    className: 'h-full overflow-y-auto p-6 md:p-8 flex flex-col gap-6 max-w-5xl mx-auto text-(--foreground) font-sans select-none',
+    children: [
+      // 头部
+      jsxs('div', {
+        className: 'flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/5 pb-5',
+        children: [
+          jsxs('div', {
+            className: 'flex flex-col gap-1',
+            children: [
+              jsxs('div', {
+                className: 'flex items-center gap-2.5',
+                children: [
+                  jsx('span', { className: 'text-2xl', children: '⚡' }),
+                  jsx('h1', {
+                    className: 'text-xl font-bold tracking-tight text-(--foreground)',
+                    children: '模型配额与网关监控',
+                  }),
+                  jsx('span', {
+                    className: 'px-2 py-0.5 text-xs font-mono rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20',
+                    children: 'Live Quota',
+                  }),
+                  data.degraded &&
+                    jsx('span', {
+                      className: 'px-2 py-0.5 text-xs font-mono rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/25',
+                      children: '⚠ 降级模式',
+                    }),
+                ],
+              }),
+              jsx('p', {
+                className: 'text-xs text-(--ui-text-secondary)',
+                children: '实时监控 Google / Antigravity 官方高阶额度池与本地 WorkBuddy 推理网关状态',
+              }),
+              data.degraded &&
+                jsxs('div', {
+                  className:
+                    'flex items-start gap-2 px-3 py-2 rounded-lg bg-amber-500/10 border border-amber-500/25 text-amber-300',
+                  children: [
+                    jsx('span', { className: 'text-sm leading-5', children: '⚠️' }),
+                    jsx('span', {
+                      className: 'text-xs leading-5',
+                      children: data.degradedReason ||
+                        'Google 配额接口不可用（token 过期或 EasyCLIProxyAPI 网关未运行），额度为缓存快照；WorkBuddy 积分为实时值',
+                    }),
+                  ],
+                }),
+            ],
+          }),
+
+          // 右侧操作
+          jsxs('div', {
+            className: 'flex items-center gap-3',
+            children: [
+              lastSyncTime &&
+                jsxs('span', {
+                  className: 'text-xs font-mono text-(--ui-text-tertiary)',
+                  children: ['同步时间: ', lastSyncTime],
+                }),
+              jsxs('button', {
+                type: 'button',
+                onClick: toggleSidebarNav,
+                title: '切换左侧导航列表是否显示配额入口（默认关闭，避免误以为是 Hermes 原生功能）',
+                className: cn(
+                  'px-3 py-1.5 rounded-lg border text-xs font-medium transition-all cursor-pointer shadow-sm',
+                  showSidebarNav
+                    ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/25 hover:bg-emerald-500/15'
+                    : 'bg-(--ui-bg-elevated) text-(--ui-text-tertiary) border-(--ui-stroke-secondary) hover:text-(--foreground) hover:bg-(--chrome-action-hover)'
+                ),
+                children: [
+                  showSidebarNav ? '侧栏: 显示中' : '侧栏: 已隐藏',
+                ],
+              }),
+              jsxs('button', {
+                type: 'button',
+                disabled: refreshing,
+                onClick: () => loadData(true),
+                className: cn(
+                  'px-3.5 py-1.5 rounded-lg bg-(--ui-bg-elevated) hover:bg-(--chrome-action-hover) border border-(--ui-stroke-secondary)',
+                  'text-xs font-medium text-(--foreground) transition-all flex items-center gap-2 cursor-pointer active:scale-95 shadow-sm',
+                  refreshing && 'opacity-60 cursor-wait'
+                ),
+                children: [
+                  jsx('svg', {
+                    className: cn('w-3.5 h-3.5 text-emerald-400', refreshing && 'animate-spin'),
+                    fill: 'none',
+                    viewBox: '0 0 24 24',
+                    stroke: 'currentColor',
+                    strokeWidth: 2,
+                    children: jsx('path', {
+                      strokeLinecap: 'round',
+                      strokeLinejoin: 'round',
+                      d: 'M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15',
+                    }),
+                  }),
+                  '立即刷新',
+                ],
+              }),
+            ],
+          }),
+        ],
+      }),
+
+      // 主卡片 1：Google AI Pro (Antigravity 官方凭据通道)
+      jsxs('div', {
+        className: 'rounded-2xl border border-(--ui-stroke-secondary) bg-(--ui-bg-elevated) p-6 shadow-xl flex flex-col gap-5',
+        children: [
+          // 卡片头
+          jsxs('div', {
+            className: 'flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/5 pb-4',
+            children: [
+              jsxs('div', {
+                className: 'flex items-center gap-3',
+                children: [
+                  jsx('div', {
+                    className: 'w-8 h-8 rounded-xl bg-gradient-to-br from-blue-500/20 to-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-base',
+                    children: '✨',
+                  }),
+                  jsxs('div', {
+                    children: [
+                      jsxs('div', {
+                        className: 'flex items-center gap-2',
+                        children: [
+                          jsx('h2', {
+                            className: 'text-sm font-semibold text-(--foreground)',
+                            children: 'Google AI (Antigravity 官方直连)',
+                          }),
+                          jsx('span', {
+                            className: 'px-2 py-0.5 text-[10px] font-mono font-medium rounded bg-emerald-500/15 text-emerald-400 border border-emerald-500/20',
+                            children: viewingAccount.plan || data.plan,
+                          }),
+                          !viewingAccount.isActive &&
+                            jsxs('button', {
+                              type: 'button',
+                              onClick: () => {
+                                setSelectedEmail(activeAccountObj.account)
+                                haptic?.('tap')
+                              },
+                              title: '点击切回当前活跃路由账户',
+                              className: 'px-2 py-0.5 text-[10px] font-mono rounded bg-amber-500/15 text-amber-300 border border-amber-500/25 hover:bg-amber-500/25 transition-colors cursor-pointer',
+                              children: ['待机预览 · 点击切回活跃'],
+                            }),
+                        ],
+                      }),
+                      jsx('p', {
+                        className: 'text-xs font-mono text-(--ui-text-tertiary)',
+                        children: viewingAccount.account,
+                      }),
+                    ],
+                  }),
+                ],
+              }),
+              jsxs('div', {
+                className: 'flex items-center gap-2 text-xs font-mono text-(--ui-text-secondary)',
+                children: [
+                  jsx('span', { className: 'w-2 h-2 rounded-full bg-emerald-400 animate-pulse' }),
+                  'EasyCLIProxyAPI 官方核心 (18080)',
+                ],
+              }),
+            ],
+          }),
+
+          // 多账号池卡（多账号时展示）
+          data.accounts && data.accounts.length > 1 &&
+            jsxs('div', {
+              className: 'p-4 rounded-xl bg-black/20 border border-white/5 flex flex-col gap-2.5',
+              children: [
+                jsxs('div', {
+                  className: 'flex items-center justify-between text-xs font-medium',
+                  children: [
+                    jsxs('span', {
+                      className: 'text-(--ui-text-secondary)',
+                      children: [`Antigravity 凭据池 (${data.accounts.length}个账号 · 点击卡片切换下方指标)`],
+                    }),
+                    jsx('span', {
+                      className: 'text-xs font-mono text-emerald-400/90',
+                      children: '● 轮询调度 · 会话粘性',
+                    }),
+                  ],
+                }),
+                jsxs('div', {
+                  className: 'grid grid-cols-1 sm:grid-cols-2 gap-2.5',
+                  children: data.accounts.map((acc) => {
+                    const isSelected = acc.account === viewingAccount.account
+                    return jsxs('div', {
+                      key: acc.account,
+                      onClick: () => {
+                        setSelectedEmail(acc.account)
+                        haptic?.('tap')
+                      },
+                      className: cn(
+                        'p-3 rounded-lg border text-xs flex flex-col gap-2 transition-all font-mono cursor-pointer',
+                        isSelected
+                          ? 'bg-emerald-500/15 border-emerald-500/40 shadow-md ring-1 ring-emerald-500/30 text-(--foreground)'
+                          : 'bg-white/5 border-white/5 hover:border-white/20 text-(--ui-text-secondary)'
+                      ),
+                      children: [
+                        jsxs('div', {
+                          className: 'flex items-center justify-between text-[11px]',
+                          children: [
+                            jsxs('div', {
+                              className: 'flex items-center gap-1.5 truncate',
+                              children: [
+                                acc.isActive && jsx('span', { className: 'w-2 h-2 rounded-full bg-emerald-400 shrink-0 animate-pulse' }),
+                                !acc.isActive && jsx('span', { className: 'w-2 h-2 rounded-full bg-zinc-600 shrink-0' }),
+                                jsx('span', { className: cn('font-semibold truncate', isSelected ? 'text-white' : 'text-zinc-300'), children: acc.account }),
+                              ],
+                            }),
+                            jsxs('div', {
+                              className: 'flex items-center gap-1 shrink-0',
+                              children: [
+                                jsx('span', {
+                                  className: cn(
+                                    'text-[10px] px-1.5 py-0.5 rounded font-sans',
+                                    acc.isActive ? 'bg-emerald-500/20 text-emerald-300 font-medium' : 'bg-white/10 text-zinc-400'
+                                  ),
+                                  children: acc.isActive ? '当前活跃路由' : '待机轮询',
+                                }),
+                                isSelected && jsx('span', {
+                                  className: 'text-[10px] px-1.5 py-0.5 rounded font-sans bg-amber-500/20 text-amber-300 font-medium',
+                                  children: '当前展示',
+                                }),
+                              ],
+                            }),
+                          ],
+                        }),
+                        jsxs('div', {
+                          className: 'grid grid-cols-2 gap-2 pt-1.5 border-t border-white/5 text-[11px]',
+                          children: [
+                            jsxs('div', {
+                              className: 'flex flex-col gap-0.5',
+                              children: [
+                                jsxs('div', {
+                                  className: 'flex items-center justify-between',
+                                  children: [
+                                    jsx('span', { className: 'text-(--ui-text-tertiary) text-[10px]', children: '5h 滚动' }),
+                                    jsx('span', { className: cn('font-bold font-mono', getTextColor(acc.quota5h)), children: `${acc.quota5h}%` }),
+                                  ],
+                                }),
+                                jsxs('div', {
+                                  className: 'flex items-center gap-1 text-[9.5px] text-(--ui-text-quaternary) truncate',
+                                  title: `5h 重置时间: ${acc.reset5h || '--'}`,
+                                  children: [
+                                    jsx('span', { children: '⏳' }),
+                                    jsx('span', { className: 'truncate', children: formatResetTime(acc.reset5h, formatMode) }),
+                                  ],
+                                }),
+                              ],
+                            }),
+                            jsxs('div', {
+                              className: 'flex flex-col gap-0.5 border-l border-white/5 pl-2',
+                              children: [
+                                jsxs('div', {
+                                  className: 'flex items-center justify-between',
+                                  children: [
+                                    jsx('span', { className: 'text-(--ui-text-tertiary) text-[10px]', children: '周总配额' }),
+                                    jsx('span', { className: cn('font-bold font-mono', getTextColor(acc.quotaWeekly)), children: `${acc.quotaWeekly}%` }),
+                                  ],
+                                }),
+                                jsxs('div', {
+                                  className: 'flex items-center gap-1 text-[9.5px] text-(--ui-text-quaternary) truncate',
+                                  title: `周额度重置时间: ${acc.resetWeekly || '--'}`,
+                                  children: [
+                                    jsx('span', { children: '⏳' }),
+                                    jsx('span', { className: 'truncate', children: formatResetTime(acc.resetWeekly, formatMode) }),
+                                  ],
+                                }),
+                              ],
+                            }),
+                          ],
+                        }),
+                      ],
+                    })
+                  }),
+                }),
+              ],
+            }),
+
+          // 核心两列指标：5h 与 每周总配额
+          jsxs('div', {
+            className: 'grid grid-cols-1 md:grid-cols-2 gap-4',
+            children: [
+              // 5 小时卡
+              jsxs('div', {
+                className: 'p-4 rounded-xl bg-black/20 border border-white/5 flex flex-col gap-3',
+                children: [
+                  jsxs('div', {
+                    className: 'flex items-center justify-between',
+                    children: [
+                      jsxs('div', {
+                        className: 'flex items-center gap-2',
+                        children: [
+                          jsx('span', { className: 'text-xs text-(--ui-text-secondary) font-medium', children: 'Gemini 5h 滚动额度' }),
+                          !viewingAccount.isActive &&
+                            jsx('span', {
+                              className: 'text-[10px] font-mono px-1.5 py-0.2 rounded bg-amber-500/15 text-amber-300',
+                              children: '待机预览',
+                            }),
+                        ],
+                      }),
+                      jsxs('span', {
+                        className: cn('font-mono text-2xl font-bold tracking-tight', getTextColor(viewingAccount.quota5h != null ? viewingAccount.quota5h : data.quota5h)),
+                        children: [(viewingAccount.quota5h != null ? viewingAccount.quota5h : data.quota5h) != null ? (viewingAccount.quota5h != null ? viewingAccount.quota5h : data.quota5h) : 100, '%'],
+                      }),
+                    ],
+                  }),
+                  jsx('div', {
+                    className: 'h-2 w-full rounded-full bg-white/10 overflow-hidden',
+                    children: jsx('div', {
+                      className: cn('h-full rounded-full transition-all duration-500', getProgressColor(viewingAccount.quota5h != null ? viewingAccount.quota5h : data.quota5h)),
+                      style: { width: `${Math.min(100, Math.max(0, viewingAccount.quota5h != null ? viewingAccount.quota5h : (data.quota5h || 100)))}%` },
+                    }),
+                  }),
+                  jsxs('div', {
+                    className: 'flex items-center justify-between text-xs text-(--ui-text-tertiary)',
+                    children: [
+                      jsx('span', { children: '⏳ 重置时间' }),
+                      jsx('button', {
+                        type: 'button',
+                        onClick: toggleFormat,
+                        className: 'font-mono text-zinc-300 hover:text-white transition-colors cursor-pointer',
+                        title: '点击切换 相对倒计时 / 绝对具体时刻',
+                        children: formatResetTime(viewingAccount.reset5h || data.reset5h, formatMode),
+                      }),
+                    ],
+                  }),
+                ],
+              }),
+
+              // 每周总配额卡
+              jsxs('div', {
+                className: 'p-4 rounded-xl bg-black/20 border border-white/5 flex flex-col gap-3',
+                children: [
+                  jsxs('div', {
+                    className: 'flex items-center justify-between',
+                    children: [
+                      jsxs('div', {
+                        className: 'flex items-center gap-2',
+                        children: [
+                          jsx('span', { className: 'text-xs text-(--ui-text-secondary) font-medium', children: 'Gemini 每周总配额' }),
+                          !viewingAccount.isActive &&
+                            jsx('span', {
+                              className: 'text-[10px] font-mono px-1.5 py-0.2 rounded bg-amber-500/15 text-amber-300',
+                              children: '待机预览',
+                            }),
+                        ],
+                      }),
+                      jsxs('span', {
+                        className: cn('font-mono text-2xl font-bold tracking-tight', getTextColor(viewingAccount.quotaWeekly != null ? viewingAccount.quotaWeekly : data.quotaWeekly)),
+                        children: [(viewingAccount.quotaWeekly != null ? viewingAccount.quotaWeekly : data.quotaWeekly) != null ? (viewingAccount.quotaWeekly != null ? viewingAccount.quotaWeekly : data.quotaWeekly) : 100, '%'],
+                      }),
+                    ],
+                  }),
+                  jsx('div', {
+                    className: 'h-2 w-full rounded-full bg-white/10 overflow-hidden',
+                    children: jsx('div', {
+                      className: cn('h-full rounded-full transition-all duration-500', getProgressColor(viewingAccount.quotaWeekly != null ? viewingAccount.quotaWeekly : data.quotaWeekly)),
+                      style: { width: `${Math.min(100, Math.max(0, viewingAccount.quotaWeekly != null ? viewingAccount.quotaWeekly : (data.quotaWeekly || 100)))}%` },
+                    }),
+                  }),
+                  jsxs('div', {
+                    className: 'flex items-center justify-between text-xs text-(--ui-text-tertiary)',
+                    children: [
+                      jsx('span', { children: '⏳ 周期完全刷新' }),
+                      jsx('button', {
+                        type: 'button',
+                        onClick: toggleFormat,
+                        className: 'font-mono text-zinc-300 hover:text-white transition-colors cursor-pointer',
+                        title: '点击切换 相对倒计时 / 绝对具体时刻',
+                        children: formatResetTime(viewingAccount.resetWeekly || data.resetWeekly, formatMode),
+                      }),
+                    ],
+                  }),
+                ],
+              }),
+            ],
+          }),
+
+          // 3P 协同模型池
+          (viewingAccount.claudeQuota5h != null || data.claude5h != null) &&
+            jsxs('div', {
+              className: 'p-3 rounded-xl bg-white/5 border border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs',
+              children: [
+                jsxs('div', {
+                  className: 'flex items-center gap-2',
+                  children: [
+                    jsx('span', { className: 'text-(--ui-text-secondary) font-medium', children: '3P (Claude/GPT) 协同通道' }),
+                    jsx('span', { className: 'text-[10px] text-(--ui-text-tertiary)', children: '(按 Pro 订阅共享配额)' }),
+                  ],
+                }),
+                jsxs('div', {
+                  className: 'flex items-center gap-3 font-mono font-medium',
+                  children: [
+                    jsxs('span', { className: 'text-emerald-400', children: ['5h 额度: ', viewingAccount.claudeQuota5h != null ? viewingAccount.claudeQuota5h : data.claude5h, '%'] }),
+                    jsx('span', { className: 'text-white/20', children: '|' }),
+                    jsxs('span', { className: 'text-emerald-400', children: ['周额度: ', viewingAccount.claudeQuotaWeekly != null ? viewingAccount.claudeQuotaWeekly : data.claudeWeekly, '%'] }),
+                  ],
+                }),
+              ],
+            }),
+        ],
+      }),
+
+      // 主卡片 2：WorkBuddy (workbuddy2api 本地网关)
+      jsxs('div', {
+        className: 'rounded-2xl border border-(--ui-stroke-secondary) bg-(--ui-bg-elevated) p-6 shadow-xl flex flex-col gap-4',
+        children: [
+          jsxs('div', {
+            className: 'flex flex-col sm:flex-row sm:items-center justify-between gap-2',
+            children: [
+              jsxs('div', {
+                className: 'flex items-center gap-3',
+                children: [
+                  jsx('div', {
+                    className: 'w-8 h-8 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-base',
+                    children: '🤖',
+                  }),
+                  jsxs('div', {
+                    children: [
+                      jsx('h2', {
+                        className: 'text-sm font-semibold text-(--foreground)',
+                        children: 'WorkBuddy (workbuddy2api 本地网关)',
+                      }),
+                      jsx('p', {
+                        className: 'text-xs font-mono text-(--ui-text-tertiary)',
+                        children: data.workbuddy.endpoint || 'http://127.0.0.1:8787/v1',
+                      }),
+                    ],
+                  }),
+                ],
+              }),
+
+              jsxs('div', {
+                className: 'flex items-center gap-2',
+                children: [
+                  jsx('span', {
+                    className: cn(
+                      'px-2.5 py-1 text-xs font-mono font-semibold rounded-lg border',
+                      data.workbuddy.status === 'online'
+                        ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                        : 'bg-zinc-800 text-zinc-400 border-white/5'
+                    ),
+                    children: data.workbuddy.statusLabel || '未启动',
+                  }),
+                ],
+              }),
+            ],
+          }),
+
+          // 积分概览行（在线且数据可得时显示）
+          data.workbuddy.status === 'online' &&
+            data.workbuddy.usage &&
+            jsxs('div', {
+              className: 'p-4 rounded-xl bg-black/20 border border-white/5 flex flex-col gap-3',
+              children: [
+                // 账号与余量
+                jsxs('div', {
+                  className: 'flex items-center justify-between',
+                  children: [
+                    jsxs('span', {
+                      className: 'text-xs text-(--ui-text-secondary) flex items-center flex-wrap gap-1',
+                      children: [
+                        '👤 当前账号: ',
+                        jsx('span', { className: 'font-mono text-(--foreground)', children: data.workbuddy.usage.nickname || '—' }),
+                        jsx('span', {
+                          className: 'px-1.5 py-0.5 text-[10px] rounded bg-white/5 text-(--ui-text-tertiary)',
+                          children: data.workbuddy.usage.isPaidUser ? '付费版' : '免费版',
+                        }),
+                        data.workbuddy.rateLimit?.rotation?.mode &&
+                          jsx('span', {
+                            className: 'px-1.5 py-0.5 text-[10px] rounded bg-purple-500/10 text-purple-400 border border-purple-500/20 font-mono',
+                            children: `🔄 ${data.workbuddy.rateLimit.rotation.mode === 'failover' ? '故障自动避让' : data.workbuddy.rateLimit.rotation.mode === 'roundrobin' ? '轮询分摊' : '单号模式'} (${data.workbuddy.rateLimit.rotation.accounts_count || 1}号)`,
+                          }),
+                        data.workbuddy.rateLimit?.rotation?.soonest_expire_day &&
+                          jsx('span', {
+                            className: 'px-1.5 py-0.5 text-[10px] rounded bg-amber-500/10 text-amber-300 border border-amber-500/20 font-mono',
+                            title: '按积分到期日分层优先调度，避免临期额度作废',
+                            children: `📅 临期优先: ${data.workbuddy.rateLimit.rotation.soonest_expire_day}`,
+                          }),
+                      ],
+                    }),
+                    jsxs('span', {
+                      className: cn('font-mono text-lg font-bold tracking-tight', getTextColor(data.workbuddy.usage.remainPercent)),
+                      children: [
+                        fmtExactCredits(data.workbuddy.usage.remain),
+                        jsx('span', { className: 'text-xs text-(--ui-text-tertiary) font-normal', children: ' / ' }),
+                        fmtExactCredits(data.workbuddy.usage.total),
+                        ' credits',
+                      ],
+                    }),
+                  ],
+                }),
+
+                // 进度条
+                jsx('div', {
+                  className: 'h-2 w-full rounded-full bg-white/10 overflow-hidden',
+                  children: jsx('div', {
+                    className: cn('h-full rounded-full transition-all duration-500', getProgressColor(data.workbuddy.usage.remainPercent)),
+                    style: { width: `${Math.min(100, Math.max(0, data.workbuddy.usage.remainPercent || 0))}%` },
+                  }),
+                }),
+
+                // 积分包明细
+                (data.workbuddy.usage.packages || []).length > 0 &&
+                  jsxs('div', {
+                    className: 'flex flex-col gap-1 pt-1 border-t border-white/5',
+                    children: [
+                      jsx('span', { className: 'text-[10px] text-(--ui-text-tertiary) pt-1', children: '积分包明细' }),
+                      ...data.workbuddy.usage.packages.map((p, i) =>
+                        jsxs('div', {
+                          className: 'flex items-center justify-between text-[11px] font-mono',
+                          children: [
+                            jsx('span', { className: 'text-(--ui-text-tertiary)', children: `包 #${i + 1} (…${String(p.code || '').slice(-6)})` }),
+                            jsxs('span', {
+                              className: cn(
+                                getTextColor(p.total > 0 ? (p.remain / p.total) * 100 : 0)
+                              ),
+                              children: [
+                                fmtExactCredits(p.remain || 0),
+                                ' / ',
+                                fmtExactCredits(p.total || 0),
+                                ` ${p.unit || 'credits'}`,
+                              ],
+                            }),
+                          ],
+                        }, i)
+                      ),
+                    ],
+                  }),
+              ],
+            }),
+
+          // 上游频率限制（腾讯 code 6004）卡片
+          data.workbuddy.rateLimit &&
+            jsxs('div', {
+              className: cn(
+                'p-4 rounded-xl border flex flex-col gap-2',
+                data.workbuddy.rateLimit.state === 'limited'
+                  ? 'bg-rose-500/5 border-rose-500/25'
+                  : data.workbuddy.rateLimit.state === 'expired'
+                    ? 'bg-amber-500/5 border-amber-500/25'
+                    : 'bg-black/20 border-white/5'
+              ),
+              children: [
+                // 降级感知：当前会话模型被静默降级时显著提示（「你以为在用 ≠ 实际在用」）
+                data.workbuddy.rateLimit.fallback &&
+                  jsxs('div', {
+                    className: 'text-[11px] leading-relaxed font-mono flex flex-col gap-1 bg-rose-500/10 p-2 rounded-lg border border-rose-500/30',
+                    children: [
+                      jsxs('span', {
+                        className: 'font-semibold text-rose-300',
+                        children: [
+                          '⚠️ 模型降级中: 请求的 ',
+                          jsx('span', { className: 'font-bold', children: data.workbuddy.rateLimit.fallback.requested }),
+                          ' 上游未授权，实际运行 ',
+                          jsx('span', { className: 'font-bold text-(--foreground)', children: data.workbuddy.rateLimit.fallback.actual }),
+                        ],
+                      }),
+                      jsx('span', { className: 'text-rose-300/70', children: `已降级 ${data.workbuddy.rateLimit.fallback.count} 次 · 最近 ${data.workbuddy.rateLimit.fallback.lastLocal} · ${data.workbuddy.rateLimit.fallback.reason}` }),
+                    ],
+                  }),
+                jsxs('div', {
+                  className: 'flex items-center justify-between',
+                  children: [
+                    jsxs('div', {
+                      className: 'flex items-center gap-1.5',
+                      children: [
+                        jsx('span', {
+                          className: 'text-xs font-semibold text-(--ui-text-secondary)',
+                          children: '上游频率限制（腾讯 code 6004）',
+                        }),
+                        data.workbuddy.rateLimit.nightFree
+                          ? jsx('span', {
+                              className: 'text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-400 border border-emerald-500/30',
+                              children: '🌙 夜间限免中 (23:00–08:00)',
+                            })
+                          : null,
+                      ],
+                    }),
+                    jsx(RateLimitRow, { rl: data.workbuddy.rateLimit }),
+                  ],
+                }),
+                data.workbuddy.rateLimit.state === 'limited' &&
+                  data.workbuddy.rateLimit.message &&
+                  jsx('div', {
+                    className: 'text-[11px] leading-relaxed text-rose-300/90 font-mono break-all',
+                    children: data.workbuddy.rateLimit.message,
+                  }),
+                (() => {
+                  const allM = data.workbuddy.rateLimit.allModels || {}
+                  const curM = data.workbuddy.rateLimit.model
+                  const others = Object.entries(allM).filter(([m, v]) => m !== curM && v.state === 'limited')
+                  if (!others.length) return null
+                  return jsxs('div', {
+                    className: 'text-[11px] text-amber-300/90 font-mono flex items-center flex-wrap gap-1.5 bg-amber-500/10 p-2 rounded-lg border border-amber-500/20',
+                    children: [
+                      jsx('span', { className: 'font-semibold', children: '⚠️ 其它受限模型:' }),
+                      ...others.map(([m, v]) => jsx('span', { key: m, className: 'px-1.5 py-0.5 rounded bg-black/30 border border-amber-500/30', children: `${m} (@${v.resetLocal || '冷却中'})` })),
+                    ],
+                  })
+                })(),
+                (() => {
+                  const obs = data.workbuddy.rateLimit.observed || {}
+                  if (!Object.keys(obs).length) return null
+                  const isToday = obs.reqsToday !== undefined
+                  const statItems = isToday
+                    ? [
+                        ['今日请求', obs.reqsToday != null ? obs.reqsToday : '—'],
+                        ['今日 tokens', obs.tokensToday != null ? `${(obs.tokensToday / 1e6).toFixed(2)}M` : '—'],
+                        ['今日 429', obs.err429_today != null ? obs.err429_today : '—'],
+                        ['最近 429', obs.last429Local || '—'],
+                      ]
+                    : [
+                        ['近 5h 请求', obs.reqs5h != null ? obs.reqs5h : '—'],
+                        ['近 5h tokens', obs.tokens5h != null ? `${(obs.tokens5h / 1e6).toFixed(2)}M` : '—'],
+                        ['近 5h 429 次数', obs.err429_5h != null ? obs.err429_5h : '—'],
+                        ['最近一次 429', obs.last429Local || '—'],
+                      ]
+                  return jsxs('div', {
+                    className: 'grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 border-t border-white/5',
+                    children: statItems.map(([label, val]) =>
+                      jsxs('div', {
+                        className: 'flex flex-col gap-0.5',
+                        children: [
+                          jsx('span', { className: 'text-[10px] text-(--ui-text-tertiary)', children: label }),
+                          jsx('span', { className: 'font-mono text-xs text-(--foreground)', children: String(val) }),
+                        ],
+                      })
+                    ),
+                  })
+                })(),
+                jsx('div', {
+                  className: 'text-[10px] text-(--ui-text-tertiary) pt-0.5',
+                  children:
+                    '腾讯未公开固定阈值：实测触发点随模型与窗口浮动（5h 请求 46~212 次、5h tokens 9.3M~20.3M 均出现过），故此处只报实测值，不推算剩余百分比。',
+                }),
+                data.workbuddy.rateLimit.source &&
+                  jsx('div', {
+                    className: 'text-[10px] text-(--ui-text-quaternary) font-mono',
+                    children: `数据源：${data.workbuddy.rateLimit.source}${data.workbuddy.rateLimit.observedAt ? ` · ${data.workbuddy.rateLimit.observedAt}` : ''}`,
+                  }),
+              ],
+            }),
+
+          jsxs('div', {
+            className: 'px-4 py-3 rounded-xl bg-black/20 border border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs',
+            children: [
+              jsx('span', {
+                className: 'text-(--ui-text-secondary)',
+                children: data.workbuddy.note || '本地反代服务待机中 (端口 8787)',
+              }),
+              jsx('span', {
+                className: 'text-[11px] text-(--ui-text-tertiary) font-mono',
+                children: data.workbuddy.rateLimit?.server?.protocols?.length === 3
+                  ? 'Tauri v2 架构 · 三协议 · 413 防护 · Vision 内联 · Codex 投影'
+                  : 'Tauri v2 架构 · 28 官方模型矩阵 · 纯净倍率',
+              }),
+            ],
+          }),
+        ],
+      }),
+
+      // 主卡片 3：显示偏好与架构规范
+      jsxs('div', {
+        className: 'rounded-2xl border border-(--ui-stroke-secondary) bg-(--ui-bg-elevated) p-6 shadow-xl flex flex-col gap-4',
+        children: [
+          jsx('h3', { className: 'text-sm font-semibold text-(--foreground)', children: '⚙️ 偏好与系统架构' }),
+          jsxs('div', {
+            className: 'grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs',
+            children: [
+              jsxs('div', {
+                className: 'p-3.5 rounded-xl bg-black/20 border border-white/5 flex items-center justify-between',
+                children: [
+                  jsxs('div', {
+                    className: 'flex flex-col gap-0.5',
+                    children: [
+                      jsx('span', { className: 'text-(--foreground) font-medium', children: '倒计时时间格式' }),
+                      jsx('span', { className: 'text-[11px] text-(--ui-text-tertiary)', children: '控制所有重置时间以相对倒计时或绝对时刻展示' }),
+                    ],
+                  }),
+                  jsx('button', {
+                    type: 'button',
+                    onClick: toggleFormat,
+                    className: 'px-2.5 py-1 rounded bg-white/10 hover:bg-white/15 text-xs font-mono text-emerald-400 cursor-pointer transition-colors',
+                    children: formatMode === 'relative' ? '相对倒计时' : '绝对时刻',
+                  }),
+                ],
+              }),
+
+              jsxs('div', {
+                className: 'p-3.5 rounded-xl bg-black/20 border border-white/5 flex items-center justify-between',
+                children: [
+                  jsxs('div', {
+                    className: 'flex flex-col gap-0.5',
+                    children: [
+                      jsx('span', { className: 'text-(--foreground) font-medium', children: '架构模式' }),
+                      jsx('span', { className: 'text-[11px] text-(--ui-text-tertiary)', children: 'FastAPI 内置用户插件路由 (/api/plugins/token-stats)' }),
+                    ],
+                  }),
+                  jsx('span', {
+                    className: 'px-2 py-0.5 rounded bg-emerald-500/10 text-[11px] font-mono text-emerald-400 border border-emerald-500/20',
+                    children: '零进程派生',
+                  }),
+                ],
+              }),
+            ],
+          }),
+          jsx('p', {
+            className: 'text-[11px] text-(--ui-text-tertiary) leading-relaxed',
+            children: '💡 提示：本插件采用 Hermes 官方内嵌插件体系，随 Hermes 桌面端后端自动启闭，不依赖外部 18088 独立微服务与计划任务。会话 Token 速率与上下文容量由 Hermes 原生状态栏托管。可在终端任意会话中输入 /quota 查看实时配额报告。',
+          }),
+        ],
+      }),
+    ],
+  })
+}
+
+// ==================== 插件注册入口 ====================
+
+export default {
+  id: ID,
+  name: 'Antigravity Quota Monitor',
+  register(ctx) {
+    pluginCtx = ctx
+
+    // 1. 状态栏右侧 Chip
+    ctx.register({
+      id: 'chip',
+      area: 'statusBar.right',
+      order: 10,
+      render: () => jsx(AntigravityQuotaChip, { ctx }),
+    })
+
+    // 2. 独立配额看板路由页面 (/quota)
+    ctx.register({
+      id: 'page',
+      area: ROUTES_AREA,
+      data: { path: '/quota' },
+      render: () => jsx(QuotaPage, { ctx }),
+    })
+
+    // 3. 左侧导航栏 Pulse 入口（默认关闭，避免与原生菜单混淆，可随时在状态栏或看板开关）
+    ctx.register({
+      id: 'nav',
+      area: SIDEBAR_NAV_AREA,
+      order: 80,
+      enabled: getStoredShowNav(ctx),
+      data: {
+        path: '/quota',
+        label: '配额',
+        codicon: 'pulse',
+      },
+    })
+
+    // 4. 命令面板 (Cmd/Ctrl + K)
+    ctx.register({
+      id: 'open',
+      area: PALETTE_AREA,
+      data: {
+        id: 'quota.open',
+        label: 'Quota: 查看模型配额看板',
+        keywords: ['quota', 'tokens', 'antigravity', 'gemini', 'workbuddy'],
+        run: () => host.navigate('/quota'),
+      },
+    })
+  },
+}

@@ -20,7 +20,11 @@ from pathlib import Path
 
 HOME = Path(__file__).resolve().parents[1]
 PLUGIN_API = HOME / "plugins" / "token-stats" / "dashboard" / "plugin_api.py"
-PLUGIN_JS = HOME / "desktop-plugins" / "token-stats" / "plugin.js"
+PLUGIN_JS = (
+    HOME / "plugins" / "token-stats" / "desktop" / "plugin.js"
+    if (HOME / "plugins" / "token-stats" / "desktop" / "plugin.js").exists()
+    else HOME / "desktop-plugins" / "token-stats" / "plugin.js"
+)
 
 
 def _load_plugin_api():
