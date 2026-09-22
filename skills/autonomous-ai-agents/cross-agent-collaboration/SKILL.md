@@ -55,5 +55,6 @@ Read a reference *only* when the task actually needs it.
 9. **CI 后台异步守护与主会话零阻塞铁律（2026-09-22 拍板）**：代码 push 后，盯 CI 任务必须置于后台（`terminal(background=True, notify=True)`），**严禁在主会话前台同步阻塞等待 CI 跑完**。在后台盯 CI 期间，主会话必须立即无缝切至与其他 AI（ChatGPT / Claude）沟通进展或提请交叉代码复核，最大化管线吞吐。
 10. **多标签页独立常驻与单页覆写禁令（2026-09-22 拍板）**：各协同平台（ChatGPT、Claude、Arena、GitHub 等）在 Edge 浏览器中必须拥有**独立的标签页**（通过 `bsk tab create --url ...` 创建，`bsk tab select` 切换）；**严禁在同一个标签页内反复改写/跳转 URL 覆盖已有会话**。在单标签页内跨域反复跳转不仅丢失已有会话 DOM 与登录态，还会大概率触发 Cloudflare 人机风控。
 11. **Cloudflare 真人验证拦截标准处置 SOP（2026-09-22 拍板）**：当遇到 Cloudflare Turnstile / 盾 / “请验证您是真人” 拦截时，**严禁盲目在 DOM / iframe 里摸索与反复试探**（自动化脚本无法伪造通过 Cloudflare 轨迹）。标准处置流程：① 检查是否可以通过 `bsk tab create` 新建独立标签页直连避开脏会话；② 若仍需人机点击，立即通过 `bsk request-help` 提示人工快速点过；③ 或立即执行多平台熔断，秒级切至 Claude AI 继续推进，杜绝原地卡死。
+12. **代理切换/网络变动导致会话中断的刷新自愈铁律（2026-09-22 拍板）**：当用户切换代理节点、更换网络或发生网络抖动时，浏览器内的长连接（WebSocket / SSE 流）会被物理中断，表现为网页提示「连接已中断。正在等待完整回复」或生成流悬停卡死。此时**标准动作是直接刷新该标签页（`location.reload()` 或重新直达当前会话 URL）**。刷新后云端（ChatGPT/Claude 等）会从后台持久化数据库中自动回填已生成的完整答复，严禁误判为未完成或在断连态下原地无休止轮询。
 
 > ZCode client 已于 2026-09-09 退役，相关观察/握手协议已删除。
