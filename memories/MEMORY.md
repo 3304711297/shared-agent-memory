@@ -4,7 +4,7 @@ gh acct 3304711297. Edge Dev + chrome-devtools MCP (connect-only) + deepwiki MCP
 §
 WorkBuddy2API (原 codebuddy2openai；仓库+工作区已改名) = 本地反代 127.0.0.1:8787/v1，OpenAI+Anthropic 双协议；Tauri v2 控制台（多账号/调度策略/积分），调度策略热读 settings.json 免重启。
 §
-Hardware: RTX 4070 Laptop 8GB + 24GB; models/runtime junctioned to D:. D:\HermesModels: MiniCPM5-2B (fast) + Qwen3.8-9B-Distill (quality) chat. Desktop-managed runtime: models auto-discovered by dir scan; spec-decode drafts/mmproj must live in models\assets\ and be prefixed `dspark-`/`mmproj`; presets.ini is auto-generated (never hand-edit); context window floor is 64K and overrides only grow. 8GB VRAM is the scarce resource — keep background GPU consumers off (OpenViking retired 09-21 for this reason).
+Hardware: 机械革命 极光X (GM6AQ7C) i7-12800HX (8C8T调优) + 满血140W RTX 4070 Laptop 8GB + 24GB DDR5-6400 CL40-40-40-77 (Custom Profile/海力士/Richtek) + 金士顿 1TB PCIe4 NVMe + HKC 240Hz/华星光电屏 + Conexant声卡 + MT7922 Wi-Fi 6E; BIOS N.1.06MRO16 (EC 1.19/CSME 16.1.30); 全量硬件台账见 topics/mechrevo-jiguangx-hardware-inventory.md; 全量固件逆向见 topics/mechrevo-jiguangx-bios-firmware-reference.md; models/runtime junctioned to D:. D:\HermesModels: MiniCPM5-2B + Qwen3.8-9B-Distill. 8GB VRAM is scarce — keep background GPU consumers off.
 §
 Memory (single source of truth): built-in MEMORY.md/USER.md inject in full every turn; the Git shared lib `shared-agent-memory` (memories/topics junction) holds long-form facts and gets grepped via search_files. NO second memory store — OpenViking retired 2026-09-21 (VRAM cost + dual-store overhead). Near the char cap: SUBTRACT, never raise the cap. CJK costs 1.10x on Gemini's tokenizer vs 1.34x o200k (cap counts chars).
 §

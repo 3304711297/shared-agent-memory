@@ -44,7 +44,17 @@ Hermes 消费 custom provider 模型清单有两条独立路径，必须都覆�
 - 猜中家族值不一定错，但新模型会静默错：实测 `deepseek-v4.1-flash` 解析 128,000（真实 1M）；未来 `deepseek-v5-*` 同样吃 128K。判定来源：抓日志 `catalog match on '<key>'` / `defaulting to 256,000`（logging handler 挂 agent.model_metadata 的 logger 即可捕获）。
 - 修复 A（Hermes 侧，逐模型显式声明）：`providers.<id>.models.<model>: {context_length: N}` — step 0c 覆盖；字典格式条目不会被模型发现机制自动覆盖。
 - 修复 B（端点侧，根治）：让 /v1/models 每项带顶层 `context_length`（或 `max_input_tokens`，1024≤值≤10,000,000 才被采纳）。实测假端点带该字段时，含全新模型名也精确命中，目录不再参与。
-- 修复 B 已在 workbuddy2api 反代落地（commit 9da98a2）：`list_models` 为每条注入顶层 `context_length`＝控制台手改值（model_settings.json 的 `context_window`）> 上游 maxInputTokens；别名行（MODEL_MAP 中映射到其他正式名的键，如 hy3/hy4/kimi-k3）已从列表剔除（只报正式名，避免同一模型多行），但作为请求侧模型名仍可用（chat 路径仍按 MODEL_MAP 映射）；改源码后需重启反代进程生效；控制台改值对新开 Hermes 会话即时生效；config.yaml per-model 覆盖会压过端点值——要跟随控制台就别写覆盖。
+- 修复 B 已在 workbuddy2api 反代落地（commit 9da98a2）：`list_models` 为每条注入顶层 `context_length`，口径 = 控制台手改值（model_settings.json 的 `context_window`）> `contextWindow.defaultLength`（prio 3）> 上游 `maxInputTokens`（prio 2）> `maxAllowedSize`（prio 1）；别名行（MODEL_MAP 中映射到其他正式名的键，如 hy3/hy4/kimi-k3）已从列表剔除（只报正式名，避免同一模型多行），但作为请求侧模型名仍可用（chat 路径仍按 MODEL_MAP 映射）；改源码后需重启反代进程生效；控制台改值对新开 Hermes 会话即时生效；config.yaml per-model 覆盖会压过端点值——要跟随控制台就别写覆盖。
+
+## 「客户端默认窗口」vs「硬上限」与最高可用统一（2026-09-23 升级）
+
+历史上上游对 1M 档模型下发 `supportedLengths:[300000, 1000000]` 及 `defaultLength: 300000`。
+- **最新统一口径（2026-09-23）**：workbuddy2api 已将窗口采集全面升级为**最高可用（Highest Available）**：
+  从 `supportedLengths`、`maxLength`、`defaultLength`、`maxInputTokens`、`maxAllowedSize` 中自动采集最大正整数，确保 12 个 1M 档模型全部自动上报 1,000,000 上下文，彻底告别 150k 早早压缩。
+- **上下文修改功能已移除**：模型管理表格只读展示最高可用上下文，编辑弹窗移除上下文修改输入框，避免手改配置造成歧义与覆盖混乱，只保留思考强度等必要参数配置。
+- **部署生效机制**：
+  - Python 内核改动直接随重启反代生效，无需重建整个 Tauri 应用。
+  - 前端 UI 变动经 `npm run tauri build` 后生效。用户自建 GUI 即可。
 
 ## 相关坑
 
