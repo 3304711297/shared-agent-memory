@@ -238,5 +238,5 @@ metadata:
 238|| :--- | :--- | :--- | :--- | :--- |
 239|| **`Secure Boot`** | `SecureBootSetup:0x000` | **`Disabled`** | `Enabled` | 关闭安全引导，支持第三方与自定义引导 |
 240|| **`VT-d`** | `SaSetup:0x07d` | **`Disabled`** | `Enabled` | 禁用北桥定向 I/O 虚拟化，杜绝 DMA 重映射对低延迟网游的中断开销 |
-241|| **`Intel (VMX) Virtualization`** | `CpuSetup:0x0b9` | **`Enabled`** | `Enabled` | **【保留开发兼容】** 硬件虚拟化保持开启，支持 WSL2/Docker 环境运行 |
-242|| **`xDCI Support` (PCH)** | `PchSetup:0x047` | **`Enabled`** | `N/A` | 南桥通用 USB 从机模式控制器（可按需关闭） |
+| **`Intel (VMX) Virtualization`** | `CpuSetup:0x0b9` | **`Enabled`** | `Enabled` | **【业务强需求保留】** 用户运行 D加密游戏虚拟机版本破解（VMware/沙盒环境），必须依赖 VT-x 硬件级虚拟化，切勿跟风电竞微延迟调优而关闭 |
+| **`xDCI Support` (PCH)** | `PchSetup:0x047` | **`Enabled`** | `N/A` | **【跟风推荐误开项】** 用户此前见网络调优教程推荐而开启（实为 USB Device Mode 从机控制器，用于宿主主机调试本机）；普通笔记本使用场景完全无用且增加南桥端点轮询，建议下次进 BIOS 改为 `Disabled` 释放南桥负担 |
