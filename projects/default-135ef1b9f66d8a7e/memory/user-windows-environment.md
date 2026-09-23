@@ -19,7 +19,7 @@ metadata:
 - **整机型号**：机械革命 极光X（MECHREVO JiguangX Series GM6AQ7C，同方模具 GM6AQ7C）
 - **处理器 (CPU)**：12th Gen Intel Core i7-12800HX（Alder Lake-HX，8P+8E 物理核心，24 线程）；当前系统/BIOS 调优设为 8 核 8 线程（关闭超线程与能效小核，优化微卡顿与 1% low 帧率）
 - **显卡 (GPU)**：NVIDIA GeForce RTX 4070 Laptop GPU（8GB GDDR6 显存）
-- **内存 (RAM)**：24GB DDR5
+- **内存 (RAM) 与时序调优**：24GB DDR5（非二进制 2x 12GB SK Hynix 颗粒，雷神/机械革命 OEM `JJ02HM002`，Richtek PMIC）；固件内设为 **Custom Profile 自定义超频档**（Ref Clock 100MHz × 64x = **DDR5-6400 MT/s**，Gear 2 模式 UCLK 1600MHz / MCLK 3200MHz），核心主时序 **CL40-40-40-77**（tCWL 38、tFAW 32、tREFI 22400、tRFC 824、tRFC2 576、tRFCpb 432、tWR 78、tRTP 18）
 - **BIOS / UEFI 固件**：AMI Aptio V（ALASKA - 1072009 / Core 5001B），版本 `N.1.06MRO16`（发布日期 2024-08-08，SMBIOS 3.6 / System BIOS 5.27）
 - **嵌入式控制器 (EC)**：版本 1.19
 - **Intel CSME (ME)**：版本 16.1.30.2361（Consumer LP/H）
@@ -53,13 +53,17 @@ metadata:
   - **NVRAM 变量数据库 (425 个活跃 NVAR 记录)**：
     - `Setup` (3,267 字节)：全局 BIOS 设置
     - `CpuSetup` (961 字节)：CPU 电源与核心参数（功耗墙 PL1/PL2/Tau 爆发调优、C-States、核心使能控制）
-    - `SaSetup` (1,400 字节)：System Agent / 显卡直连与 MUX 切换 / VT-d 虚拟化
+    - `SaSetup` (1,400 字节)：System Agent / 显卡直连与 MUX 切换 / VT-d 虚拟化 / **内存超频时序核心存储区**（Offset 0x18D Memory Profile=1 Custom、0x05 RefClock=1 100MHz、0x06 Ratio=64 6400MT/s、0x08 tCL=40、0x0E tRCD/tRP=40、0x0C tRAS=77、0x09 tCWL=38、0x0A tFAW=32、0x0F tREFI=22400、0x11 tRFC=824、0x436 tRFC2=576）
     - `PchSetup` (2,063 字节)：南桥外设、USB 控制器、HD Audio、PCIe ASPM
     - `UniWillVariable` (180 字节，347 次写入迭代)：机械革命 Control Center 专属控制变量（办公/平衡/狂暴性能模式、风扇策略曲线、电池保养阈值等）
     - `Boot0000` (Windows Boot Manager)：绑定 NVMe GUID 分区上的 `\EFI\Microsoft\Boot\bootmgfw.efi`
     - 硬件 ACPI 设备节点：键盘 RGB 控制器 `\_SB.PC00.XHCI.RHUB.HS00.CRGB` 与红外摄像头 `\_SB.PC00.XHCI.RHUB.HS01.CIR`
   - **生产 DMI 标识区 (`BSA_` @ 0x1070000)**：
     - 模具与主板代号 `GM6AQ7C`，ODM 制造代号 `weiyang 327670412`（已按安全规则脱敏移除单机序列号与 UUID）
+  - **专用 BIOS 工具链存盘与分析产物 (`D:\ai coding\tools\bios_tools\`)**：
+    - `UEFIExtract` (NE A75)：固件树全量层级解构工具，报告产物 `D:\ai coding\backup.fd.report.txt` (452KB) 与解包树 `backup.fd.dump\`
+    - `ifrextractor-rs` (v1.6.1)：Setup 模块 HII 表单反编译工具，产物 `D:\ai coding\backup.fd.setup.ifr.txt` (2.1MB，完整 251 组 Form 表单及 SaSetup/CpuSetup 变量偏移映射)
+    - `MEAnalyzer` (v1.312.0)：Intel CSE ME 16.1.30.2361 / PMC 160.2.00.1043 / PCHC 16.1.0.1014 固件分析工具
 
 ## 浏览器
 - 用户浏览器是 **Edge Dev**：`C:\Program Files (x86)\Microsoft\Edge Dev\Application\msedge.exe`（注册表 App Paths 里唯一注册的浏览器；2026-08-22 用户确认"这是我的浏览器"）
