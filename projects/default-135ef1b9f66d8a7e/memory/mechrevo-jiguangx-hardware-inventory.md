@@ -26,7 +26,7 @@ metadata:
     - L3 三级智能缓存：25.6 MB（Intel Smart Cache）
   - **频率与电压**：基准 2.30 GHz，当前实跑 4.60 GHz（46x 100MHz），核心电压约 1.209 V
   - **神经网络与语音加速单元**：**Intel GNA Scoring Accelerator**（Gaussian & Neural Accelerator 3.0，硬件 ID `PCI\VEN_8086&DEV_464F`）
-  - **当前运行调优态**：**8 核 8 线程**（BIOS 内关闭超线程 HT 与能效小核 E-cores，纯 8P 大核低微卡顿模式；Core/P-Cache 双轨锁定 -185.5 mV 负压，BIOS 彻底关闭 C-State，详见第 10 节）
+  - **当前运行调优态**：**8 核 8 线程**（BIOS 内关闭超线程 HT 与能效小核 E-cores，纯 8P 大核低微卡顿模式；Core/P-Cache 双轨锁定 -185.5 mV 负压，BIOS 彻底关闭 C-State，PL1 180W / PL2 190W 对齐 OpenRevo，详见第 10 节）
 - **北桥与内存控制器 (IMC)**：
   - **型号**：Intel Alder Lake-HX IMC（支持 VT-d、x2APIC 扩展中断控制器）
   - **PCIe 总线分配**：PCIe 5.0 x8 Port #2 正使用 @ x8（直连 AD106 独显）
@@ -179,7 +179,7 @@ metadata:
   - **Ring / Cache 频率**：锁定 **44x (4.40 GHz)**（寄存器 `CacheMinMax0 = 0x2C2C`）
 - **TPL 功耗墙与温控设定**：
   - **长时功耗限制 (PL1)**：**180.0 W**（寄存器 `PowerLimitEAX0 = 0x002385A0`）
-  - **短时爆发功耗 (PL2)**：**185.0 W**（寄存器 `PowerLimitEDX0 = 0x004285C8`，由早期 190W 收紧 5W 防瞬态冲击）
+  - **短时爆发功耗 (PL2)**：**190.0 W**（寄存器 `PowerLimitEDX0 = 0x004385F0`，恢复锁定在 190W，与 OpenRevo 控制台设定值严格对应保持一致）
   - **MMIO 功耗锁同步 (`SyncMMIO`)**：**已启用 (`SyncMMIO=1`)**（硬件强制同步 MMIO 与 MSR 功耗限制，阻止驱动/系统在后台动态篡改功耗墙）
   - **PROCHOT 温度墙**：偏移 `0x5`（标称 105℃ - 5℃ = **100℃ 温度墙**，寄存器 `PROCHOT_Offset0 = 0x5`）
 
@@ -498,7 +498,7 @@ Results71=0
 Results72=0
 CheckSum=0xDCF9F77B
 PowerLimitEAX0=0x002385A0
-PowerLimitEDX0=0x004285C8
+PowerLimitEDX0=0x004385F0
 PowerLimitEAX1=0x002385A0
 PowerLimitEDX1=0x004285F0
 PowerLimitEAX2=0x002385A0
