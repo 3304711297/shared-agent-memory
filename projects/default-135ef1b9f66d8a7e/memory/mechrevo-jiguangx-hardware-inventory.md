@@ -16,12 +16,18 @@ metadata:
 
 - **主机型号**：MECHREVO JiguangX Series GM6AQ7C（机械革命 极光X）
 - **主板 (BaseBoard)**：MECHREVO GM6AQ7C（同方模具 GM6AQ7C，版本 Standard，ODM 代号 `weiyang 327670412`）
-- **处理器 (CPU)**：第 12 代 Intel Core i7-12800HX
-  - **微架构**：Alder Lake-HX（Intel 7 工艺，B0 步进，CPUID `90672`，插槽 `U3E1`）
-  - **物理核心规格**：物理 16 核 24 线程（8P 性能核 + 8E 能效核）
-  - **缓存架构**：L2 缓存 10MB（$8 \times 1.25\text{MB}$），L3 智能缓存 25.6MB
-  - **基频与最大睿频**：基准 2.30 GHz，P核最大单核睿频 4.80 GHz
-  - **当前运行调优态**：**8 核 8 线程**（BIOS 内关闭超线程 HT 与小核 E-cores，纯 8P 大核低微卡顿模式）
+- **处理器 (CPU) 与 AI 协处理器**：
+  - 微架构：Alder Lake-HX（Intel 7 工艺，B0 步进，CPUID `90672`，插槽 `U3E1`）
+  - 物理核心规格：物理 16 核 24 线程（8P 性能核 + 8E 能效核）
+  - 缓存架构：L2 缓存 10MB（$8 \times 1.25\text{MB}$），L3 智能缓存 25.6MB
+  - 基频与最大睿频：基准 2.30 GHz，P核最大单核睿频 4.80 GHz
+  - **神经网络与语音加速单元**：**Intel GNA Scoring Accelerator**（Gaussian & Neural Accelerator 3.0，硬件 ID `PCI\VEN_8086&DEV_464F`）
+  - 当前运行调优态：**8 核 8 线程**（BIOS 内关闭超线程 HT 与小核 E-cores，纯 8P 大核低微卡顿模式）
+- **主板与芯片组拓扑 (Chipset & Topology)**：
+  - PCH 芯片组：Intel 600 系列移动平台南桥 PCH（WM690/HM670，DeviceID `7A8C`）
+  - 物理插槽与上限：2 组 DDR5 SO-DIMM 物理插槽，最大寻址支持 64GB
+  - 传感器与温控区：ACPI ThermalZone `ECTZ_0` 与 `TZ00_0`（当前物理巡检温度 ~44℃ / 3172 dK）
+  - 安全芯片状态：TPM 物理未激活 / 关闭状态（`TpmPresent: False`，BIOS 中未启用 PTT/dTPM）
 
 ---
 
