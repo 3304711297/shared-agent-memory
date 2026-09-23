@@ -125,14 +125,14 @@
     "created_by": null,
     "last_patched_at": "2026-09-19T10:43:27.390177+00:00",
     "last_reused_patch_generation": 1,
-    "last_used_at": "2026-09-22T14:55:12.749070+00:00",
-    "last_viewed_at": "2026-09-22T14:55:12.746568+00:00",
+    "last_used_at": "2026-09-23T03:24:55.995180+00:00",
+    "last_viewed_at": "2026-09-23T03:24:55.992670+00:00",
     "patch_count": 1,
     "patch_generation": 1,
     "pinned": false,
     "state": "active",
-    "use_count": 18,
-    "view_count": 18
+    "use_count": 19,
+    "view_count": 19
   },
   "bsk-compact-page-read": {
     "archived_at": null,
@@ -140,14 +140,14 @@
     "created_by": "learn",
     "last_patched_at": "2026-09-18T09:08:46.720758+00:00",
     "last_reused_patch_generation": 4,
-    "last_used_at": "2026-09-21T14:13:27.756766+00:00",
-    "last_viewed_at": "2026-09-21T14:13:27.753765+00:00",
+    "last_used_at": "2026-09-23T03:25:01.921224+00:00",
+    "last_viewed_at": "2026-09-23T03:25:01.917714+00:00",
     "patch_count": 4,
     "patch_generation": 4,
     "pinned": false,
     "state": "active",
-    "use_count": 4,
-    "view_count": 4
+    "use_count": 5,
+    "view_count": 5
   },
   "cangjie-distill": {
     "archived_at": null,
@@ -291,14 +291,14 @@
     "created_by": "agent",
     "last_patched_at": "2026-09-18T15:46:11.486857+00:00",
     "last_reused_patch_generation": 26,
-    "last_used_at": "2026-09-22T14:55:10.728307+00:00",
-    "last_viewed_at": "2026-09-22T14:55:10.725806+00:00",
+    "last_used_at": "2026-09-23T03:24:54.985275+00:00",
+    "last_viewed_at": "2026-09-23T03:24:54.981274+00:00",
     "patch_count": 26,
     "patch_generation": 26,
     "pinned": false,
     "state": "active",
-    "use_count": 70,
-    "view_count": 70
+    "use_count": 71,
+    "view_count": 71
   },
   "devin-acp-provider-maintenance": {
     "archived_at": null,
