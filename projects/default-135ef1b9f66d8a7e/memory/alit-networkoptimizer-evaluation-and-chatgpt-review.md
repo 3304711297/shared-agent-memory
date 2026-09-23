@@ -63,15 +63,19 @@ ChatGPT 高度认同 Hermes 提出的技术大方向，同时在源码级深挖�
 
 ## 三、 下游落地与工程闭环
 
-### 1. `tweakbyjie`（提交 `552ce48`）
+### 1. `tweakbyjie`（提交 `552ce48` & `0c2806f`）
 - **功能落地**：在 `Modules/GameQos.ps1` 的 `$script:CompetitiveGameProfiles` 中扩充纳入 Minecraft：
   - `@{ Name = "MinecraftJava"; Exe = "javaw.exe" }`
   - `@{ Name = "MinecraftBedrock"; Exe = "Minecraft.Windows.exe" }`
+- **上游看门雷达与文档对标**：
+  - 将 `xiaoX-bgs11/ALit-NetworkOptimizer`（跟踪 master 及 codex 新分支）登记至 `tools/upstream-sources.json`；
+  - 同步更新 `README.md` 功能目录与「上游采纳与外部依赖」表格；
 - **设计契约**：走 Windows 原生组策略注册表（`HKLM\Software\Policies\Microsoft\Windows\QoS`），路径无关匹配（适配 PCL2/HMCL 自定义 JRE 路径），持久化生效，由 `Backup.GameQos.ps1` 首次快照闭环保护；
 - **测试验证**：`tests/GameQos.Tests.ps1` 增补测试，全仓 24 个测试文件、205 项 Pester 单测全部 PASS（0 fail）；
-- **锁与覆盖**：提升 `tools/knowledge.lock.json` 指向 ysk 新提交 `9a02d86...`，跨仓 49 项 Coverage 审计 100% 全绿，GitHub Actions CI 4 任务全绿。
+- **锁与覆盖**：提升 `tools/knowledge.lock.json` 指向 ysk 最新提交，跨仓 49 项 Coverage 审计 100% 全绿，GitHub Actions CI 4 任务全绿。
 
-### 2. `youshouldknow`（提交 `9a02d86`）
+### 2. `youshouldknow`（提交 `9a02d86` & `7947cc1`）
+- **上游看门监控**：将 `xiaoX-bgs11/ALit-NetworkOptimizer`（master 分支）登记至 `tools/upstream-sources.json`；
 - **`社区降延迟调机清单辨析.md`**：新增第 6.4 节《WinDivert 内核驱动发包劫持与伪优化（伪 FEC / 伪 Backtrack）辨析》，从反作弊足迹、单向数据包轰炸、序列号空间去重与协议 ECN 清零四大维度深度解构；
 - **`Windows游戏网络QoS策略与DSCP原理.md`**：增补 Minecraft 双端策略、PHB 局域网 vs 运营商边界，以及 CUBIC vs CTCP 与 UDP 调优对象错位辨析；
 - **`Windows网络栈优化原则.md`**：新增第 4.5 节深入剖析中断节流（IM）、大包发送卸载（LSO）与环形缓冲区的系统级 DPC 开销权衡与伪回滚避坑；
