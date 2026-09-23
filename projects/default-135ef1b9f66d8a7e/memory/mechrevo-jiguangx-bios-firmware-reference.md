@@ -157,86 +157,179 @@ metadata:
 工具链常驻存盘于：`D:\ai coding\tools\bios_tools\`
 1. **`UEFIExtract.exe` (NE A75)**：工业级 UEFI 固件树解析与解包工具
 2. **`ifrextractor.exe` (v1.6.1)**：UEFI HII IFR 表单反编译工具
-3. **`MEAnalyzer\` (v1.312.0)**：Intel ME/CSME 引擎固件分析工具库
-4. **`D:\ai coding\backup.fd.setup.ifr.txt`（2.1 MB）**：全量 251 个表单的完整 BIOS 选项与 VarOffset 映射文本
-162|5. **`D:\ai coding\backup.fd.report.txt`（452 KB）**：固件全区段树状层级与校验报告
-163|6. **`D:\ai coding\backup.fd.dump\`**：全量解包出的 11,644 个固件区段与驱动文件目录树
-164|
-165|---
-166|
-167|## 十一、基于 IFR (4,192项) 与 NVRAM 真实二进制全量交叉映射的 BIOS 活跃调优全景台账
-168|
-169|通过行业标准逆向流程（`UEFIExtract` + `ifrextractor-rs`），从 `backup.fd` 的 Setup 核心模块反编译出 **4,192 个完整 Setup Questions**，并将其 `VarStore` 与 `VarOffset` 直接映射到 SPI Flash `0x1000000` 提取出的最新活跃 NVRAM 变量库（`Setup` 3267B、`CpuSetup` 961B、`SaSetup` 1400B、`PchSetup` 2063B、`SecureBootSetup` 7B），彻底还原整机实盘运行的**全部 53 项用户自定义手动调优项与核心关键设置**。
-170|
-171|### 1. CPU 核心架构、电压墙、超频锁与欠压保护 (CpuSetup 核心域)
-172|
-173|| 选项 Prompt | 变量与偏移 (VarOffset) | 当前实机运行值 | 出厂默认值 | 调优目的与机理实证 |
-174|| :--- | :--- | :--- | :--- | :--- |
-175|| **`UnderVolt Protection`** | `CpuSetup:0x381` | **`Disabled`** | `Enabled` | **【彻底解开降压保护】** 固件层直接放行 MSR 0x150，使 ThrottleStop -185.5mV 负压能够完全无阻生效 |
-176|| **`IA CEP Enable`** | `CpuSetup:0x334` | **`Disabled`** | `Enabled` | **【消除欠压软限频】** 禁用核心电流异常保护，杜绝负压时触发内部 Clock Modulation 导致的性能腰斩 |
-177|| **`GT CEP Enable`** | `CpuSetup:0x335` | **`Disabled`** | `Enabled` | 禁用核显欠压保护，避免核显 VID 检测异常干扰供电回路 |
-178|| **`CFG Lock`** | `CpuSetup:0x043` | **`Disabled`** | `Enabled` | 解开 MSR 0xE2 寄存器写保护，放行系统级电压与能耗监控 |
-179|| **`Overclocking Lock`** | `CpuSetup:0x10e` | **`Disabled`** | `Enabled` | 解除底层超频锁，允许操作系统与工具接管频率与电压调节 |
-180|| **`Tcc Offset Lock Enable`** | `CpuSetup:0x1cd` | **`Disabled`** | `Enabled` | 解除温度墙锁定，允许动态设置 PROCHOT 阈值（当前 offset 5 = 100℃） |
-181|| **`C states` (总开关)** | `CpuSetup:0x014` | **`Disabled`** | `N/A` | **【消灭 0x0A 蓝屏真凶】** 彻底禁用 CPU 深度休眠，杜绝休眠唤醒瞬间 Vdroop 导致的死机 |
-182|| **`Ring Down Bin`** | `CpuSetup:0x1e8` | **`Disabled`** | `Enabled` | **【锁定 Ring 4.4GHz 满血】** 禁用 Ring 总线降频保护，确保 L3 Cache/Ring 常驻 4.4GHz |
-183|| **`Hyper-Threading`** | `CpuSetup:0x005` | **`Disabled`** | `Enabled` | 禁用超线程（HT），8 个 P 核运行于纯物理核模式，消除线程抢占与上下文切换延迟 |
-184|| **`Per Core Disable Configuration`** | `CpuSetup:0x34c` | **`Enabled`** | `Disabled` | 物理禁用所有能效小核（E-cores），构成 **8P + 0E (8C8T)** 纯大核电竞架构 |
-185|| **`MonitorMWait`** | `CpuSetup:0x0bc` | **`Disabled`** | `Enabled` | 禁用 MWAIT 线程休眠指令，降低线程恢复响应延迟 |
-186|| **`AP threads Idle Manner`** | `CpuSetup:0x120` | **`RUN Loop`** | `MWAIT Loop` | 从属核心空闲时保持 RUN 轮询态而非 MWAIT 睡眠，消除唤醒抖动 |
-187|| **`Intel SpeedStep`** | `CpuSetup:0x009` | **`Disabled`** | `Enabled` | 禁用传统 EIST 节能降频机制 |
-188|| **`Race To Halt (RTH)`** | `CpuSetup:0x00a` | **`Disabled`** | `Enabled` | 禁用激进抢停节能，避免突发高负载下的供电阶跃冲击 |
-189|| **`Intel Speed Shift`** | `CpuSetup:0x00b` | **`Disabled`** | `Enabled` | 禁用固件级 Speed Shift 自动调度，将调频权完全移交给系统与 ThrottleStop |
-190|| **`HDC Control`** | `CpuSetup:0x04a` | **`Disabled`** | `Enabled` | 禁用硬件占空比控制器，防止 CPU 被周期性强制节流 |
-191|| **`IA ICC Unlimited Mode`** | `CpuSetup:0x346` | **`Enabled`** | `Disabled` | 解锁 IA 核心电流无限制模式，消除 VRM 限流截流 |
-192|| **`Bi-directional PROCHOT#`** | `CpuSetup:0x07a` | **`Disabled`** | `Enabled` | 禁用双向 PROCHOT，防止主板其它外设高温信号误触发 CPU 降频 |
-193|| **`Thermal Velocity Boost`** | `CpuSetup:0x2e3` | **`Disabled`** | `Enabled` | 关闭 TVB 随温动态变频，确保全核频率恒定不抖动 |
-194|| **`TVB Voltage Optimizations`** | `CpuSetup:0x2e4` | **`Disabled`** | `Enabled` | 关闭 TVB 电压优化算法，维持电压平稳输出 |
-195|| **`Enhanced Thermal Velocity Boost`**| `CpuSetup:0x378` | **`Disabled`** | `Enabled` | 彻底关停增强型 TVB |
-196|
-197|### 2. 内存超频与低延迟参数 (SaSetup 核心域)
-198|
-199|| 选项 Prompt | 变量与偏移 (VarOffset) | 当前实机运行值 | 出厂默认值 | 调优目的与机理实证 |
-200|| :--- | :--- | :--- | :--- | :--- |
-201|| **`Memory profile`** | `SaSetup:0x18d` | **`Custom Profile`** | `Default SPD` | 激活用户手动自定义内存时序配置档 |
-202|| **`Memory Reference Clock`** | `SaSetup:0x005` | **`100`** | `133` | 锁定 100MHz 基准时钟，稳定 Gear 2 模式 |
-203|| **`Memory Ratio`** | `SaSetup:0x006` | **`64`** | `N/A` | $100\text{MHz} \times 64 = \mathbf{6400\text{ MT/s}}$ 超频频率 |
-204|| **`Power Down Mode`** | `SaSetup:0x1a2` | **`No Power Down`** | `Auto` | **【已调优】** 彻底关闭 DRAM PHY 层休眠，消灭内存唤醒等待气泡，平滑 1% Low 帧 |
-205|| **`Memory Test on Warm Boot`** | `SaSetup:0x1a1` | **`Disabled`** | `Enabled` | **【已调优】** Windows 热重启跳过重复内存自检与训练，重启进系统秒开 |
-206|| **主时序 (`tCL` / `tRCD-tRP` / `tRAS`)** | `SaSetup:0x008/0e/0c`| **`40-40-77 2T`** | JEDEC 46-45-90 | 6400 下的核心读取与激活时序（`tCWL 38`、`tFAW 32`） |
-207|| **耐温副时序 (`tREFI` / `tRFC`)** | `SaSetup:0x00f/011` | **`22400 / 824`** | JEDEC 基准 | 严守 ysk 笔记本耐温基准公式（$6400 \times 3.5 = 22400$），抗 75℃ 内部积热 |
-208|| **写入恢复 (`tWR` / `tRTP`)** | `SaSetup:0x015/014` | **`78 / 18`** | JEDEC 稳态 | 严格保持 $tWR = tRTP \times 4$ 容错窗口，杜绝 IMC 校验错误 |
-209|
-210|### 3. 显示输出、GPU 链路与总线节能 (SaSetup / PchSetup)
-211|
-212|| 选项 Prompt | 变量与偏移 (VarOffset) | 当前实机运行值 | 出厂默认值 | 调优目的与机理实证 |
-213|| :--- | :--- | :--- | :--- | :--- |
-214|| **`Primary Display`** | `SaSetup:0x0b1` | **`PEG Slot`** | `HG` | 锁定独显直出（PEG），彻底绕过核显 Optimus 复制延迟 |
-215|| **`Intel Graphics Pei Display Peim`**| `SaSetup:0x039` | **`Disabled`** | `Enabled` | PEI 引导早期直接屏蔽核显初始化 |
-216|| **`Disable Turbo GT frequency`** | `SaSetup:0x040` | **`Enabled`** | `Disabled` | 禁用核显 Turbo 睿频加速，杜绝核心供电分流 |
-217|| **`PCIE Resizable BAR Support`** | `SaSetup:0x42b` | **`Enabled`** | `N/A` | 开启显存全域映射（BAR1 8192 MiB），满血 140W RTX 4070 基石 |
-218|| **`Native ASPM`** | `Setup:0x032` | **`Auto`** | `Auto` | 原生 ASPM 节能状态交给系统策略自适应管理 |
-219|| **`DMI Gen3 ASPM`** | `SaSetup:0x0ac` | **`ASPM L1`** | `ASPM L1` | CPU-PCH 间 DMI 总线在 Gen3 态启用 L1 节能 |
-220|| **`DMI Link ASPM Control`** | `PchSetup:0x517` | **`L1`** | `L1` | 南桥端 DMI 链路保持 L1 节能常驻 |
-221|| **`PCI Express Root Port 1~28 ASPM`**| `PchSetup:0x11b~136` | **`L1` (绝大多数)**| `L1` | **【南桥控温基石】** 绝大多数根端口已设为 L1，空闲网卡/SSD 自动进入节能 |
-222|| **`PCIe L1 Substates`** | `PchSetup:0x2bf~2da` | **`L1.1 & L1.2`** | `L1.1 & L1.2`| 全面启用 L1.1 与 L1.2 深阶节能子状态 |
-223|
-224|### 4. 存储、系统外设与快速引导 (Setup / PchSetup)
-225|
-226|| 选项 Prompt | 变量与偏移 (VarOffset) | 当前实机运行值 | 出厂默认值 | 调优目的与机理实证 |
-227|| :--- | :--- | :--- | :--- | :--- |
-228|| **`Enable VMD controller`** | `SaSetup:0x0f8` | **`Disabled`** | `Disabled` | 禁用 Intel VMD，原生 NVMe 直通 Windows `stornvme`，HMB 64MB 正常生效 |
-229|| **`EC Low Power Mode`** | `Setup:0x053` | **`Disabled`** | `Enabled` | 禁用嵌入式控制器（EC 1.19）休眠，提升风扇转速响应与性能档位切换灵敏度 |
-230|| **`TCSS xDCI Support`** | `SaSetup:0x0bf` | **`Disabled`** | `Disabled` | 关闭 Type-C 子系统 USB 从机端点 |
-231|| **`SATA Support`** | `Setup:0x003` | **`Last Boot Only`** | `All Devices`| 开机仅枚举上次引导过的存储设备，加速 POST 自检 |
-232|| **`USB Support`** | `Setup:0x005` | **`Partial Initial`**| `Full Initial`| 开机执行 USB 部分初始化，减少开机自检等待耗时 |
-233|| **`Network Stack Driver Support`** | `Setup:0x009` | **`Disabled`** | `Enabled` | 关闭 UEFI PXE 网络栈驱动，开机秒过网卡自检 |
-234|
-235|### 5. 安全体系与硬件虚拟化 (Security / CpuSetup)
-236|
-237|| 选项 Prompt | 变量与偏移 (VarOffset) | 当前实机运行值 | 出厂默认值 | 调优目的与机理实证 |
-238|| :--- | :--- | :--- | :--- | :--- |
-239|| **`Secure Boot`** | `SecureBootSetup:0x000` | **`Disabled`** | `Enabled` | 关闭安全引导，支持第三方与自定义引导 |
-240|| **`VT-d`** | `SaSetup:0x07d` | **`Disabled`** | `Enabled` | 禁用北桥定向 I/O 虚拟化，杜绝 DMA 重映射对低延迟网游的中断开销 |
-| **`Intel (VMX) Virtualization`** | `CpuSetup:0x0b9` | **`Enabled`** | `Enabled` | **【业务强需求保留】** 用户运行 D加密游戏虚拟机版本破解（VMware/沙盒环境），必须依赖 VT-x 硬件级虚拟化，切勿跟风电竞微延迟调优而关闭 |
-| **`xDCI Support` (PCH)** | `PchSetup:0x047` | **`Enabled`** | `N/A` | **【跟风推荐误开项】** 用户此前见网络调优教程推荐而开启（实为 USB Device Mode 从机控制器，用于宿主主机调试本机）；普通笔记本使用场景完全无用且增加南桥端点轮询，建议下次进 BIOS 改为 `Disabled` 释放南桥负担 |
+3. **`UEFIFind.exe` (NE A75)**：固件区段 GUID/文本检索工具（与 UEFIExtract 同套件）
+   - 注：早期记录的 `MEAnalyzer` 工具在本机已不存在（全盘检索 0 命中），ME/CSME 区段分析改以 `UEFIExtract` 解包 + 十六进制核对方式完成
+4. **`D:\ai coding\backup.fd.setup.ifr.txt`（2.0 MB）**：全量 251 个表单、4,192 个 Question 的完整 BIOS 选项与 VarOffset 映射文本
+5. **`D:\ai coding\backup.fd.dump\info.txt`**：UEFIExtract 生成的区段清单与固件结构信息
+6. **`D:\ai coding\backup.fd.dump\`**：全量解包固件区段目录树（10,159 个文件 / 53 MB，含 Descriptor、GbE、ME、BIOS 五大区）
+
+---
+
+## 十一、BIOS 设置项「按菜单路径」索引台账
+
+> **查找方式**：以 BIOS **真实菜单路径**为一级索引，照路径逐级点进即可定位；每行的 `变量:偏移` 是该项在 NVRAM 中的落点（IFR `VarOffset`），可直接读写核对。
+> **数据来源**：`backup.fd` Setup 模块 IFR 反编译（4,192 个 Question）与 SPI Flash `0x1000000` 处活跃 NVRAM 实值交叉映射。
+> **图例**：★ = 用户手动调校项；○ = 出厂预置或未改动（列出实盘值仅供参考）。
+> **顶层六页**（表单 `0x2710`）：`Main` / `Advanced` / `Chipset` / `Security` / `Boot` / `Save & Exit`。
+
+### 11.1 `Advanced` 页
+
+#### `Advanced → CPU Configuration`
+
+| 选项 | 落点 | 当前值 | 出厂默认 | 备注 |
+| :--- | :--- | :--- | :--- | :--- |
+| `Intel (VMX) Virtualization Technology` | `CpuSetup:0x0b9` | **`Enabled`** | `Enabled` | ○ **业务强需求**：运行 D加密游戏虚拟机破解版，依赖 VT-x，禁止关闭 |
+| `Hyper-Threading` | `CpuSetup:0x005` | **`Disabled`** | `Enabled` | ★ 纯 8 物理核，消除线程抢占延迟 |
+| `MonitorMWait` | `CpuSetup:0x0bc` | **`Disabled`** | `Enabled` | ★ 禁用 MWAIT 休眠指令 |
+| `AP threads Idle Manner` | `CpuSetup:0x120` | **`RUN Loop`** | `MWAIT Loop` | ★ 空闲核心保持轮询态 |
+| `C6DRAM` | `CpuSetup:0x114` | `Disabled` | `Enabled` | ○ 随 C-State 一并关闭 |
+| `CPU Flex Ratio Settings` | `CpuSetup:0x001` | `23` | `Disabled` | ○ |
+
+#### `Advanced → OverClocking Performance Menu`
+
+| 选项 | 落点 | 当前值 | 出厂默认 | 备注 |
+| :--- | :--- | :--- | :--- | :--- |
+| `UnderVolt Protection` | `CpuSetup:0x381` | **`Disabled`** | `Enabled` | ★ **解开降压保护**，放行 MSR 0x150，使 TS 的 -185.5 mV 生效 |
+| `CPU BCLK OC Frequency` | `CpuSetup:0x2f7` | `10024` | `Disabled` | ○ BCLK 微调（0.01 MHz 单位，约 100.24 MHz） |
+| `WDT Enable` | `PchSetup:0x024` | `Enabled` | `Disabled` | ○ |
+| `  → CEP Disable` → `IA CEP Enable` | `CpuSetup:0x334` | **`Disabled`** | `Enabled` | ★ 消除负压下的 Clock Modulation 软限频 |
+| `  → CEP Disable` → `GT CEP Enable` | `CpuSetup:0x335` | **`Disabled`** | `Enabled` | ★ 关闭核显欠压保护 |
+| `  → Processor` → `Per Core Disable Configuration` | `CpuSetup:0x34c` | **`Enabled`** | `Disabled` | ★ 关闭全部 E-core，构成 8P+0E |
+| `  → Processor` → `Core 0~7 Max Ratio` | `CpuSetup:0x2bc~0x2c3` | `47`（8 项） | `Disabled` | ○ |
+| `  → Processor` → `P-core Voltage Override` | `CpuSetup:0x1de` | `1200` | `Disabled` | ○ 1.20 V |
+| `  → Processor` → `Thermal Velocity Boost` | `CpuSetup:0x2e3` | **`Disabled`** | `Enabled` | ★ |
+| `  → Processor` → `TVB Voltage Optimizations` | `CpuSetup:0x2e4` | **`Disabled`** | `Enabled` | ★ |
+| `  → Processor` → `Enhanced Thermal Velocity Boost` | `CpuSetup:0x378` | **`Disabled`** | `Enabled` | ★ 彻底关停 TVB，定频定压 |
+| `  → Ring` → `Ring Down Bin` | `CpuSetup:0x1e8` | **`Disabled`** | `Enabled` | ★ 锁定 Ring 4.4 GHz 满血常驻 |
+| `  → Ring` → `Ring Voltage Override` | `CpuSetup:0x1ea` | `1200` | `Disabled` | ○ 1.20 V |
+| `  → VR ICCMAX Current Override` → `IA ICC Unlimited Mode` | `CpuSetup:0x346` | **`Enabled`** | `Disabled` | ★ 解除 IA 核心电流限制 |
+| `  → VR ICCMAX Current Override` → `IA ICC Max Current Limit Override` | `CpuSetup:0x347` | `800` | `Disabled` | ○ 已被 Unlimited 模式覆盖 |
+| `  → VR ICCMAX Current Override` → `GT ICC Max Current Limit Override` | `CpuSetup:0x34a` | `180` | `Disabled` | ○ |
+
+#### `Advanced → Power & Performance`
+
+| 选项 | 落点 | 当前值 | 出厂默认 | 备注 |
+| :--- | :--- | :--- | :--- | :--- |
+| `→ CPU - Power Management Control` → `Intel(R) SpeedStep(tm)` | `CpuSetup:0x009` | **`Disabled`** | `Enabled` | ★ 关 EIST |
+| `→ CPU - Power Management Control` → `Race To Halt (RTH)` | `CpuSetup:0x00a` | **`Disabled`** | `Enabled` | ★ |
+| `→ CPU - Power Management Control` → `Intel(R) Speed Shift Technology` | `CpuSetup:0x00b` | **`Disabled`** | `Enabled` | ★ 调频权交给系统与 ThrottleStop |
+| `→ CPU - Power Management Control` → `HDC Control` | `CpuSetup:0x04a` | **`Disabled`** | `Enabled` | ★ |
+| `→ CPU - Power Management Control` → `C states` | `CpuSetup:0x014` | **`Disabled`** | `Enabled` | ★ **消灭 0x0A 蓝屏**：杜绝 C0 唤醒瞬态 Vdroop |
+| `→ CPU Lock Configuration` → `CFG Lock` | `CpuSetup:0x043` | **`Disabled`** | `Enabled` | ★ 解开 MSR 0xE2 写保护 |
+| `→ CPU Lock Configuration` → `Overclocking Lock` | `CpuSetup:0x10e` | **`Disabled`** | `Enabled` | ★ |
+| `→ CPU VR Settings → Core/IA VR Settings` → `AC Loadline` | `CpuSetup:0x132` | `110` | `110` | ○ **保持出厂 1.10 mΩ，严禁跟风改 20~30**（叠 TS 负压必崩 0x0A） |
+| `→ Core/IA VR Settings` → `DC Loadline` | `CpuSetup:0x13c` | `110` | `110` | ○ |
+| `→ Core/IA VR Settings` → `Core VR Fast Vmode` | `CpuSetup:0x379` | **`Disabled`** | `Enabled` | ★ |
+| `→ CPU VR Settings → GT VR Settings` → `AC Loadline` / `DC Loadline` | `CpuSetup:0x134` / `0x13e` | `80` / `80` | `80` | ○ 核显 VR 保持出厂 |
+| `→ Config TDP Configurations` → `Power Limit 1` | `CpuSetup:0x05b` | **`180000`（180 W）** | 差异项 | ★ 用户手调 |
+| `→ Config TDP Configurations` → `Power Limit 2` | `CpuSetup:0x05f` | **`190000`（190 W）** | 差异项 | ★ 与 OpenRevo 设定值对齐 |
+| `→ Config TDP Configurations` → `Power Limit 1 Time Window` | `CpuSetup:0x063` | `128` | `0` | ○ |
+| `→ View/Configure Turbo Options` → `Power Limit 1` / `Power Limit 2` | `CpuSetup:0x017` / `0x01e` | `160000` / `170000` | 同左 | ○ 该分支为出厂值，未改 |
+| `→ Turbo Ratio Limit Options` → `P-core Turbo Ratio Limit Ratio0~7` | `CpuSetup:0x0d6~0x0dd` | `48/48/46/46/44/44/42/42` | — | ○ |
+| `→ Turbo Ratio Limit Options` → `E-core Turbo Ratio Limit Ratio0~7` | `CpuSetup:0x0f6~0x0fd` | `34/34/34/34/31/31/31/31` | — | ○ E-core 已物理关闭 |
+| `→ GT - Power Management Control` → `Disable Turbo GT frequency` | `SaSetup:0x040` | **`Enabled`** | `Disabled` | ★ 禁核显睿频，杜绝供电分流 |
+
+#### `Advanced → Thermal Configuration`
+
+| 选项 | 落点 | 当前值 | 出厂默认 | 备注 |
+| :--- | :--- | :--- | :--- | :--- |
+| `→ CPU Thermal Configuration` → `Tcc Offset Lock Enable` | `CpuSetup:0x1cd` | **`Disabled`** | `Enabled` | ★ 解除温度墙锁定 |
+| `→ CPU Thermal Configuration` → `Bi-directional PROCHOT#` | `CpuSetup:0x07a` | **`Disabled`** | `Enabled` | ★ 防外设高温误触发 CPU 降频 |
+| `→ Intel(R) Dynamic Tuning Technology Configuration` → `Intel(R) Dynamic Tuning Technology` | `Setup:0x6d1` | **`Disabled`** | `Enabled` | ★ **DTT 已彻底关闭**，不再插手功耗调度 |
+
+#### `Advanced → RC ACPI Settings`
+
+| 选项 | 落点 | 当前值 | 出厂默认 | 备注 |
+| :--- | :--- | :--- | :--- | :--- |
+| `EC Low Power Mode` | `Setup:0x053` | **`Disabled`** | `Enabled` | ★ EC（1.19）不休眠，风扇与性能档位响应更快 |
+| `Native ASPM` | `Setup:0x032` | `Auto` | `Auto` | ○ |
+| `→ PEP Constraints Configuration` → `PEP VMD` | `Setup:0x99d` | `Enabled` | `Enabled` | ○ |
+
+#### 其他 `Advanced` 子菜单
+
+| 路径与选项 | 落点 | 当前值 | 出厂默认 | 备注 |
+| :--- | :--- | :--- | :--- | :--- |
+| `→ CSM Configuration` → `Network` | `Setup:0xc7f` | `Do not launch` | `UEFI` | ○ |
+| `→ Switchable Graphics` → `Display Mode` | `Setup:0xc6d` | **`dGPU Only`** | `MsHybrid` | ★ 纯独显直连（IFR 中该表单由 Advanced 页引用，BIOS 实际入口以界面显示为准） |
+| `→ Platform Settings → VTIO` → `Firmware Hash [63:0]~[255:192]` | `Setup:0x890~0x8c8` | 全 `0` | — | ○ OEM 预置，非调优项 |
+
+### 11.2 `Chipset` 页
+
+#### `Chipset → PCH-IO Configuration`
+
+| 选项 | 落点 | 当前值 | 出厂默认 | 备注 |
+| :--- | :--- | :--- | :--- | :--- |
+| `Compatible Revision ID` | `PchSetup:0x012` | `Disabled` | `Enabled` | ○ |
+| `→ PCI Express Configuration` → `DMI Link ASPM Control` | `PchSetup:0x517` | `L1` | `L1` | ○ |
+| `→ PCI Express Configuration` → `PCI Express Root Port 1~28` → `ASPM` | `PchSetup:0x11b~0x136` | 27 项 `L1`，1 项 `Disabled`（Root Port 21 @ `0x12f`） | `L1` | ○ **南桥控温基础**（空闲网卡/SSD 自动节能） |
+| `→ PCI Express Configuration` → `PCI Express Root Port 1~28` → `L1 Substates` | `PchSetup:0x2bf~0x2da` | 全部 `L1.1 & L1.2` | `L1.1 & L1.2` | ○ |
+| `→ SATA Configuration` → `SATA Controller(s)` | `PchSetup:0x048` | `Disabled` | `Disabled` | ○ 整机无 SATA 盘，控制器整体关闭 |
+| `→ SATA Configuration` → `Mechanical Presence Switch`（Port 0~7） | `PchSetup:0x05a~0x061` | `Disabled`（8 项） | `Enabled` | ○ |
+| `→ USB Configuration` → **`xDCI Support`** | `PchSetup:0x047` | **`Enabled`** | `Disabled` | ★ **【建议改 `Disabled`】** USB OTG 从机控制器，日常无用，徒增南桥端点轮询 |
+| `→ USB Configuration` → `USB SS Physical Connector #0` / `#3` | `PchSetup:0x038` / `0x03b` | `Enabled` | `Disabled` | ○ |
+| `→ HD Audio Configuration → HD Audio DSP Features Configuration` → `Discrete BT HCI Audio Offload Link` | `PchSetup:0x80e` | `SSP #0` | `SSP #1` | ○ |
+
+#### `Chipset → System Agent (SA) Configuration`
+
+| 选项 | 落点 | 当前值 | 出厂默认 | 备注 |
+| :--- | :--- | :--- | :--- | :--- |
+| `VT-d` | `SaSetup:0x07d` | **`Disabled`** | `Enabled` | ★ 消除 DMA 重映射中断开销 |
+| `DMA Control Guarantee` | `SaSetup:0x087` | `Disabled` | `Enabled` | ○ |
+| `Above 4GB MMIO BIOS assignment` | `SaSetup:0x07e` | `Enabled` | `Enabled` | ○ ReBAR 前置条件 |
+| `→ PCI Express Configuration` → `PCIE Resizable BAR Support` | `SaSetup:0x42b` | **`Enabled`** | `Enabled` | ★ BAR1 8192 MiB 全域映射 |
+| `→ DMI/OPI Configuration` → `DMI Gen3 ASPM` | `SaSetup:0x0ac` | `ASPM L1` | `ASPM L1` | ○ |
+| `→ DMI/OPI Configuration` → `DMI ASPM` | `SaSetup:0x0ad` | **`Disabled`** | `ASPM L1` | ★ 差异项（CPU↔PCH 主链路不做 ASPM 降级） |
+| `→ DMI/OPI Configuration → DMI Advanced Menu` → `DMI Gen4 EQ Mode` | `Setup:0xbae` | `Fixed EQ` | `HW EQ` | ○ |
+| `→ DMI Advanced Menu` → `DMI Gen3/Gen4 RTCO Cpre/Cpost Lane0~7` | `Setup:0xb8e~0xbad` | 数值 3~10 | — | ○ OEM 信号完整性预置 |
+| `→ VMD setup menu` → `Enable VMD controller` | `SaSetup:0x0f8` | `Disabled` | `Disabled` | ○ 原生 NVMe 直通（`stornvme`） |
+| `→ VMD setup menu` → `Enable VMD Global Mapping` | `SaSetup:0x3e6` | `Enabled` | `Enabled` | ○ |
+| `→ Graphics Configuration` → `Primary Display` | `SaSetup:0x0b1` | **`PEG Slot`** | `HG` | ★ 独显直出 |
+| `→ Graphics Configuration` → `Intel Graphics Pei Display Peim` | `SaSetup:0x039` | **`Disabled`** | `Enabled` | ★ PEI 阶段屏蔽核显初始化 |
+| `→ Graphics Configuration` → `Share Memory Size (DVMT)` | `SaSetup:0x07a` | `254`（Auto） | `64M` | ○ |
+| `→ Memory Configuration` → `Memory Test on Warm Boot` | `SaSetup:0x1a1` | **`Disabled`** | `Enabled` | ★ 热重启跳过重复内存训练 |
+| `→ Memory Configuration` → `Power Down Mode` | `SaSetup:0x1a2` | **`No Power Down`** | `Auto` | ★ 关 DRAM PHY 休眠，消除唤醒气泡 |
+| `→ Memory Configuration` → `Fast Boot` | `SaSetup:0x18f` | `Enabled` | `Enabled` | ○ 内存快起 |
+| `→ Memory Configuration` → `Maximum Memory Frequency` | `SaSetup:0x18b` | `7000` | `Auto` | ○ 频率上限封顶 |
+| `→ SA TCSS USB Configuration` → `TCSS xDCI Support` | `SaSetup:0x0bf` | `Disabled` | `Disabled` | ○ Type-C 从机端点已关 |
+| `→ SA TCSS USB Configuration` → `USB CONNECT OVERRIDE` | `SaSetup:0x0c3` | `Disabled` | `Enabled` | ○ |
+| `→ MIPI Camera Configuration` → `Camera1` | `Setup:0x075` | `Enabled` | `Disabled` | ○ |
+
+#### `Chipset → System Agent (SA) → Memory Configuration → Memory`（内存超频子菜单，★ 全项用户手调）
+
+| 选项 | 落点 | 当前值 | 说明 |
+| :--- | :--- | :--- | :--- |
+| `Memory profile` | `SaSetup:0x18d` | `Custom Profile` | 激活自定义时序档 |
+| `Memory Reference Clock` | `SaSetup:0x005` | `100`（MHz） | 锁定 100 MHz 基准，稳定 Gear 2 |
+| `Memory Ratio` | `SaSetup:0x006` | `64` | 100 × 64 = **DDR5-6400 MT/s** |
+| `tCL` / `tRCD/tRP` / `tRAS` | `SaSetup:0x008` / `0x00e` / `0x00c` | `40` / `40` / `77` | 主时序 40-40-40-77 2T |
+| `tCWL` / `tFAW` | `SaSetup:0x009` / `0x00a` | `38` / `32` | |
+| `tREFI` | `SaSetup:0x00f` | `22400` | 严守 $6400 \times 3.5 = 22400$ 耐温基准 |
+| `tRFC` / `tRFC2` / `tRFCpb` | `SaSetup:0x011` / `0x436` / `0x434` | `824` / `576` / `432` | |
+| `tWR` / `tRTP` | `SaSetup:0x015` / `0x014` | `78` / `18` | 保持 $tWR = tRTP \times 4$ 容错窗口 |
+| `tRRD_L` / `tRRD_S` | `SaSetup:0x43a` / `0x43b` | `12` / `8` | |
+| `tWTR_L` / `tWTR_S` | `SaSetup:0x43c` / `0x43e` | `32` / `8` | |
+| `NMode` | `SaSetup:0x017` | `2` | 2T 命令速率 |
+| `Memory Voltage` / `VDDQ` / `VPP` | `SaSetup:0x003` / `0x3f5` / `0x3f7` | `1200` / `1200` / `1800` | 1.20 V VDD/VDDQ、1.80 V VPP |
+
+### 11.3 `Boot` 页
+
+| 选项 | 落点 | 当前值 | 出厂默认 | 备注 |
+| :--- | :--- | :--- | :--- | :--- |
+| `SATA Support` | `Setup:0x003` | **`Last Boot SATA Devices Only`** | `All SATA Devices` | ★ 只枚举上次引导设备，加速 POST |
+| `USB Support` | `Setup:0x005` | **`Partial Initial`** | `Full Initial` | ★ 减少开机 USB 自检耗时 |
+| `Network Stack Driver Support` | `Setup:0x009` | **`Disabled`** | `Enabled` | ★ 关 UEFI PXE 网络栈 |
+| `Fast Boot` | `Setup:0x002` | `Disabled` | `Disabled` | ○ |
+
+### 11.4 `Security` 页
+
+| 选项 | 落点 | 当前值 | 出厂默认 | 备注 |
+| :--- | :--- | :--- | :--- | :--- |
+| `→ Secure Boot` → `Secure Boot` | `SecureBootSetup:0x000` | **`Disabled`** | `Enabled` | ★ |
+| `→ Secure Boot` → `Secure Boot Mode` | `SecureBootSetup:0x001` | **`Custom`** | `Standard` | ★ |
+
+### 11.5 复现与自助查询（后续按需复查）
+
+- **工具链**：`D:\ai coding\tools\bios_tools\` → `UEFIExtract.exe`、`UEFITool.exe`、`ifrextractor.exe`
+- **产物**：`D:\ai coding\backup.fd.dump\`（全量解包 53 MB）、`D:\ai coding\backup.fd.setup.ifr.txt`（2.0 MB 全量 4,192 Question 索引，可直接按 Prompt 搜路径）
+- **活跃 NVRAM 位置**：`backup.fd` 偏移 `0x1000000` 起 `0x30000` 字节，按 `NVAR` 头 + 变量名解析（`Setup` 3267B / `CpuSetup` 961B / `SaSetup` 1400B / `PchSetup` 2063B / `SecureBootSetup` 7B）
+- **查询套路**：① 在 `ifr.txt` 搜 `Prompt: "<选项名>"` 取 `VarStoreId` / `VarOffset` / `Size` → ② 在对应变量体按偏移取字节 → ③ 用该 Question 块内的 `OneOfOption Value:` 反查显示名
