@@ -1,5 +1,8 @@
 # 会话收尾双推送铁律
 
+> 📢 **2026-09-23 全面升级至 v2.0**：见新定案卡片 [Session Archive v2 Tiered Architecture](session-archive-v2-tiered-architecture.md)。  
+> **核心变化**：已全面支持零参数自动定位当前最新活跃会话（运行 `python tools/upload_session.py` 或 `tools/archive.cmd`），无需再人肉反查 `session_id`；同时全面升级为 L0/L1/L2 结构化真源体系与纯静态 SPA 查看器（Session Studio）。
+
 **Why:** 2026-09-09 遗漏案例——一次会话收尾时只推了记忆库（shared-agent-memory main + hermes 分支），忘记归档会话转录到 shared-agent-sessions。流程与脚本都完备（`upload_session.py` 自带「先推远端、校验 HEAD==origin/main」安全闸；删除本地由用户手动，脚本不提供删除功能），纯粹是执行遗漏，把「推记忆库」误当成收尾全部。
 
 **How to apply:** 用户说「删除/结束会话」或任务全绿收尾时，**两件事都要做，缺一不可**：
