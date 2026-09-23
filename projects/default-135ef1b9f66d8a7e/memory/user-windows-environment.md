@@ -15,6 +15,19 @@ metadata:
 - Working directory: `D:\ai coding\.zcode\workspace\default`
 - Not a git repository
 
+## 硬件规格与 BIOS / 固件环境（2026-09-23 backup.fd 提取实测）
+- **整机型号**：机械革命 极光X（MECHREVO JiguangX Series GM6AQ7C，同方模具 GM6AQ7C）
+- **处理器 (CPU)**：12th Gen Intel Core i7-12800HX（Alder Lake-HX，8P+8E 物理核心，24 线程）；当前系统/BIOS 调优设为 8 核 8 线程（关闭超线程与能效小核，优化微卡顿与 1% low 帧率）
+- **显卡 (GPU)**：NVIDIA GeForce RTX 4070 Laptop GPU（8GB GDDR6 显存）
+- **内存 (RAM)**：24GB DDR5
+- **BIOS / UEFI 固件**：AMI Aptio V（ALASKA - 1072009 / Core 5001B），版本 `N.1.06MRO16`（发布日期 2024-08-08，SMBIOS 3.6 / System BIOS 5.27）
+- **嵌入式控制器 (EC)**：版本 1.19
+- **Intel CSME (ME)**：版本 16.1.30.2361（Consumer LP/H）
+- **SPI 闪存镜像结构 (`backup.fd`)**：32.00 MB 全量 SPI Flash 镜像
+  - 布局：Flash Descriptor (0x0-0xFFF) + GbE (0x1000-0x2FFF) + CSME (0x3000-0x3DCFFF, 3.85MB) + Device Exp (0x3DD000-0xFFFFFF, 12.14MB) + BIOS Region (0x1000000-0x1FFFFFF, 16.00MB)
+  - 启动契约：FIT 表位于 0x1E90100，含 Startup ACM 与 3 组微码（CPUID 0x90672 / 0xb0671 / 0xb06f2，覆盖 12/13/14 代 HX 移动处理器）
+  - 数据持久化：双 192KB 容错 NVRAM 变量区（0x1000000 / 0x1030000）+ AmiSmbios OEM DMI (`BSA_`) 数据区
+
 ## 浏览器
 - 用户浏览器是 **Edge Dev**：`C:\Program Files (x86)\Microsoft\Edge Dev\Application\msedge.exe`（注册表 App Paths 里唯一注册的浏览器；2026-08-22 用户确认"这是我的浏览器"）
 - **未安装 Google Chrome**：chrome-devtools MCP 默认找 stable 版 chrome.exe 找不到、启动即报错——需要浏览器自动化时须改用 Edge Dev（或给 MCP 显式配 executablePath）
