@@ -136,7 +136,7 @@ metadata:
 
 ## 八、BIOS Setup IFR 菜单表单体系（47 组 HII Formsets / 251 组 Form）
 
-由 `ifrextractor` 从主 Setup 模块反解出完整的 BIOS 菜单树（已导出至 `D:\ai coding\backup.fd.setup.ifr.txt`，2.1 MB）：
+由 `ifrextractor` 从主 Setup 模块反解出完整的 BIOS 菜单树（2,549 个 OneOf / 4,192 个 Question；本机落盘副本已于 2026-09-23 清理，可用 U 盘工具包的 `fw2ifr.bat` 按 §11.5 一键复现）：
 - `OverClocking Performance Menu` (`Form 0x2887`)：底层核心超频入口
 - `Memory Configuration` (`Form 0x27AC`) & `Memory Overclocking Menu` (`Form 0x27AE`)：内存频率、倍频、主副时序手动调节菜单
 - `Memory Training Algorithms` (`Form 0x27B9`)：内存开机训练算法开关
@@ -154,15 +154,13 @@ metadata:
 
 ## 十、专用 BIOS 工具链与本地持久化产物清单
 
-工具链常驻存盘于：`D:\ai coding\tools\bios_tools\`
+**现行工具链 = U 盘随身工具包**：`E:\download\机械革命\bios tools\`（`bin\` 四件套 + `fw2ifr.bat` 一键脚本，详见 §11.5）。本机 `D:\ai coding\tools\bios_tools\` 副本已于 2026-09-23 按用户指示清理。
 1. **`UEFIExtract.exe` (NE A75)**：工业级 UEFI 固件树解析与解包工具
 2. **`ifrextractor.exe` (v1.6.1)**：UEFI HII IFR 表单反编译工具
 3. **`UEFIFind.exe` (NE A75)**：固件区段 GUID/文本检索工具（与 UEFIExtract 同套件）
    - 注：早期记录的 `MEAnalyzer` 工具在本机已不存在（全盘检索 0 命中），ME/CSME 区段分析改以 `UEFIExtract` 解包 + 十六进制核对方式完成
-4. **`D:\ai coding\backup.fd.setup.ifr.txt`（2.0 MB）**：全量 251 个表单、4,192 个 Question 的完整 BIOS 选项与 VarOffset 映射文本
-5. **`D:\ai coding\backup.fd.dump\info.txt`**：UEFIExtract 生成的区段清单与固件结构信息
-6. **`D:\ai coding\backup.fd.dump\`**：全量解包固件区段目录树（10,159 个文件 / 53 MB，含 Descriptor、GbE、ME、BIOS 五大区）
-7. **固件基线镜像**：现行 = `C:\1、备份原版本bios\backup.fd`（用户自 BIOS 内导出，含 `xDCI=Disabled`）；历史 = `D:\ai coding\backup.fd`（本目录产物均由该代解包）。两代校验值与核查方法见 **§11.6**。
+4. **分析产物（按需重建）**：IFR 文本（2,102,970 B；2,549 个 OneOf / 4,192 个 Question）与解包树（10,159 文件 / 53 MB）原落盘于 `D:\ai coding\`，**2026-09-23 一并清理**；把固件拖到 `fw2ifr.bat` 上约 3 秒即可重建（实测产出与原基准逐字节一致）
+5. **固件基线镜像**：现行（含 `xDCI=Disabled`，`886e22cf…18cbd4cc`）= U 盘 `E:\download\机械革命\aq升级极光pro完整整合包\最新bios包括修改过的设置\backup.fd`（2026-09-23 哈希核验）；历史（`cd394339…14a76370`）同日清理。两代差异结论与核查方法见 **§11.6**。
 
 ---
 
@@ -330,9 +328,9 @@ metadata:
 
 ### 11.5 复现与自助查询（后续按需复查）
 
-- **工具链**：`D:\ai coding\tools\bios_tools\` → `UEFIExtract.exe` / `UEFIFind.exe` / `UEFITool.exe`（均为 NE **A75**，2026-07-10）+ `ifrextractor.exe`（**1.6.1**，2026-03-11），四项 SHA-256 已与上游发行包逐一核对
+- **本机工具链**：`D:\ai coding\tools\bios_tools\` 已于 2026-09-23 清理（用户指示，U 盘已有同版本全套），现以 U 盘工具包为唯一常备；既有版本记录：`UEFIExtract.exe` / `UEFIFind.exe` / `UEFITool.exe`（均为 NE **A75**，2026-07-10）+ `ifrextractor.exe`（**1.6.1**，2026-03-11），四项 SHA-256 曾与上游发行包逐一核对
 - **随身工具包（U 盘）**：`E:\download\机械革命\bios tools\` —— `bin\` 为解压好的同版本四件套；**`fw2ifr.bat`** 拖入固件即全自动（UEFIExtract dump → 定位 Setup 主模块 → 落 `<固件名>.setup.ifr.txt`），实测产出与本台账 2,102,970 B 基准**逐字节一致**；`ifrextractor.bat` 处理单个段文件（可选模式参数）；`工具版本.txt` 记版本台账与坑位；经典 **0.28.0** 三件套（UEFITool/UEFIPatch/UEFIReplace）留档——NE 版不含 UEFIPatch/UEFIReplace，**改固件本体仍需此套**
-- **产物**：`D:\ai coding\backup.fd.dump\`（全量解包 53 MB）、`D:\ai coding\backup.fd.setup.ifr.txt`（2,102,970 B；2,549 个 OneOf / 4,192 Question，可直接按 Prompt 搜路径）
+- **产物**：原落盘的解包树（53 MB）与 IFR 文本（2,102,970 B；2,549 个 OneOf / 4,192 Question，可直接按 Prompt 搜路径）已于 2026-09-23 清理；`fw2ifr.bat` 约 3 秒重建，产出与旧基准逐字节一致
 - **ifrextractor 坑位**：结果写在**输入文件旁**（`<输入名>.0.0.en-US.uefi.ifr.txt`）而非 stdout，屏幕上只有一行横幅；**重复运行会向同一文件追加**（跑两次 → 2.1 MB + 1.1 MB 叠加），重跑前须删旧输出。默认模式 2.1 MB 级，`verbose` 模式额外附 opcode 偏移与原始字节（3.2 MB 级）
 - **UEFIExtract 坑位**：dump **不产 `.sct` 文件**；Setup 表单段在 `<解包目录>\...\<n> Setup\1 PE32 image section\body.bin`（同一固件有两个同名 `Setup` 模块：13,664 B 的桩与 1,085,856 B 的主模块，**取体积大者**）
 - **活跃 NVRAM 位置**：`backup.fd` 偏移 `0x1000000` 起 `0x30000` 字节，按 `NVAR` 头 + 变量名解析（`Setup` 3267B / `CpuSetup` 961B / `SaSetup` 1400B / `PchSetup` 2063B / `SecureBootSetup` 7B）
@@ -342,10 +340,12 @@ metadata:
 
 **基线镜像台账**（用户自 BIOS 内备份导出的 32 MB 全片镜像）：
 
-| 代次 | 路径 | 提取时间 | SHA-256（前 8 / 后 8 位） | 关键状态 |
+| 代次 | 位置 | 提取时间 | SHA-256（前 8 / 后 8 位） | 关键状态 |
 | :--- | :--- | :--- | :--- | :--- |
-| **现行** | `C:\1、备份原版本bios\backup.fd` | 2026-09-23 14:43（重启后） | `886e22cf` … `18cbd4cc` | 含 `xDCI=Disabled`，其余 NVRAM 与上一代逐字节一致 |
-| 历史 | `D:\ai coding\backup.fd` | 2026-09-23 12:15 | `cd394339` … `14a76370` | 含 `xDCI=Enabled`（改前态） |
+| **现行** | U 盘 `…\aq升级极光pro完整整合包\最新bios包括修改过的设置\backup.fd` | 2026-09-23 14:43（重启后） | `886e22cf` … `18cbd4cc` | 含 `xDCI=Disabled`，其余 NVRAM 与上一代逐字节一致；2026-09-23 哈希复核通过 |
+| 历史 | `D:\ai coding\backup.fd`（**2026-09-23 已清理**） | 2026-09-23 12:15 | `cd394339` … `14a76370` | 含 `xDCI=Enabled`（改前态）；与现行的全部差异（7 段、单字节）已固化在下方核查法 |
+
+> **路径勘误（2026-09-23）**：早期记录的「现行 = `C:\1、备份原版本bios\backup.fd`」在本次全盘核查中**未找到**（`C:\` 根下无该目录，用户可能已移动）；权威副本为上行 U 盘路径，SHA-256 已核验一致。
 
 **核查法（已在 xDCI 一役验证成立）**：
 1. **全片字节 diff 定位写入区**：两代镜像全片仅差 7 段（5 处 NVAR 头部写入标记刷新 + 2 段尾部新增记录区），差异全部落在 NVRAM 变量区（`0x1000000` 起），BIOS 区段/DXE 模块零差异——即「只改了设置，没动固件本体」。
@@ -353,3 +353,17 @@ metadata:
 3. **追加记录 = 最新值**：AMI 采用日志式追加，改动写在**存储区尾部新记录**里；同一变量的旧副本仍在原处保留旧值（垃圾回收前并存）。**只比载荷，忽略 3 字节写入标记**——该标记会随任何写入/访问刷新，据此判断"哪个副本是新值"必错。
 4. **判定单选项改动**：把新旧载荷对齐比较，全载荷只差 1 字节 → 只动了一个选项；该字节偏移即 IFR 的 `VarOffset`（对齐自检：错位对齐会产生数百处差异，一眼可辨）。
 5. **OS 侧交叉验证**：设置项若对应 PCI/USB 功能，重启后可直接看设备树——消失/出现即生效（本例 `PCI\VEN_8086&DEV_7AE1`，服务 `ufxsynopsys`，PnP 类 `USBFunctionController`）。注意 Windows 只枚举**当前存在**的设备；历史记录留在 `HKLM\SYSTEM\CurrentControlSet\Enum\PCI`，可作"改前曾存在"的佐证。
+
+### 11.7 AMITSE 表单引用表实测（「菜单被屏蔽」的机制，2026-09-23）
+
+在本机现行镜像上解包核对（UEFIExtract 解包 → 十六进制定位 `AMITSE` 的 PE32 段 → `ifrextractor` 反编译 `Setup` 主模块取表单标题）：
+
+- **Setup FormSet GUID** = `7B59104A-C00D-4158-87FF-F04D6396A915`（小端字节序即 `4A 10 59 7B 0D C0 58 41 87 FF F0 4D 63 96 A9 15`）
+- **AMITSE 的 PE32 段**：221,280 B，解包树中形如 `<序号> AMITSE\1 PE32 image section\body.bin`
+- **表单引用表**：19 处「GUID + 2 B Form ID」表项，**32 字节一条**，分三组（11 条 / 1 条 / 6 条）：
+  - 6 条组 `0x2716`–`0x271B` ↔ 顶层表单 `0x2710` 的 6 个 `Ref`（Main / Advanced / Chipset / Security / Boot / Save & Exit）= **当前生效的可见集合**
+  - 11 条组 = 上述 6 条 + `0x2711`–`0x2715`（另一套同义菜单：Main / Advanced / Security / Boot / Exit，**无 Chipset**；固件内保留但未被引用的备用集合）
+  - 1 条组 = `0x2710`（Setup 根表单自身）
+- **两层结论**：① 菜单「被屏蔽」= 引用表不指向，而非删除——两套顶层菜单定义并存于固件；② 公开教程里的紧凑字节签名（`10 27 17 27 19 27 18 27 …`）在本机**不存在**，改动必须按 GUID + 32 字节步长在本机镜像上重新定位，绝不可照抄偏移。
+- 对外整理稿见 ysk《同方模具笔记本解锁 BIOS 全功能菜单：AMITSE 表单引用表与 AMIBCP 路线》。
+

@@ -71,10 +71,10 @@ metadata:
     - 硬件 ACPI 设备节点：键盘 RGB 控制器 `\_SB.PC00.XHCI.RHUB.HS00.CRGB` 与红外摄像头 `\_SB.PC00.XHCI.RHUB.HS01.CIR`
   - **生产 DMI 标识区 (`BSA_` @ 0x1070000)**：
     - 模具与主板代号 `GM6AQ7C`，ODM 制造代号 `weiyang 327670412`（已按安全规则脱敏移除单机序列号与 UUID）
-  - **专用 BIOS 工具链存盘与分析产物 (`D:\ai coding\tools\bios_tools\`)**：
-    - `UEFIExtract` (NE A75)：固件树全量层级解构工具，报告产物 `D:\ai coding\backup.fd.report.txt` (452KB) 与解包树 `backup.fd.dump\`
-    - `ifrextractor-rs` (v1.6.1)：Setup 模块 HII 表单反编译工具，产物 `D:\ai coding\backup.fd.setup.ifr.txt` (2.1MB，完整 251 组 Form 表单及 SaSetup/CpuSetup 变量偏移映射)
-    - `MEAnalyzer` (v1.312.0)：Intel CSE ME 16.1.30.2361 / PMC 160.2.00.1043 / PCHC 16.1.0.1014 固件分析工具
+  - **专用 BIOS 工具链（现行 = U 盘随身工具包 `E:\download\机械革命\bios tools\`：`bin\` 四件套 + `fw2ifr.bat` 一键脚本；本机 `D:\ai coding\tools\bios_tools\` 副本与全部分析产物已于 2026-09-23 清理）**：
+    - `UEFIExtract` (NE A75)：固件树全量层级解构工具；解包清单产物是 `backup.fd.dump\info.txt`（**不存在 `backup.fd.report.txt`**），解包树约 10,159 文件 / 53 MB
+    - `ifrextractor-rs` (v1.6.1)：Setup 模块 HII 表单反编译工具，产物 `backup.fd.setup.ifr.txt`（2,102,970 B；2,549 个 OneOf / 4,192 个 Question，可直接按 Prompt 搜路径），可用 `fw2ifr.bat` 一键重建
+    - 早期记录里的 `MEAnalyzer` 在本机并不存在（全盘 0 命中）；ME/CSME 区段分析改用 `UEFIExtract` 解包 + 十六进制核对
 
 ## 浏览器
 - 用户浏览器是 **Edge Dev**：`C:\Program Files (x86)\Microsoft\Edge Dev\Application\msedge.exe`（注册表 App Paths 里唯一注册的浏览器；2026-08-22 用户确认"这是我的浏览器"）
