@@ -26,7 +26,7 @@ metadata:
     - L3 三级智能缓存：25.6 MB（Intel Smart Cache）
   - **频率与电压**：基准 2.30 GHz，当前实跑 4.60 GHz（46x 100MHz），核心电压约 1.209 V
   - **神经网络与语音加速单元**：**Intel GNA Scoring Accelerator**（Gaussian & Neural Accelerator 3.0，硬件 ID `PCI\VEN_8086&DEV_464F`）
-  - **当前运行调优态**：**8 核 8 线程**（BIOS 内关闭超线程 HT 与能效小核 E-cores，纯 8P 大核低微卡顿模式；Core/P-Cache 双轨锁定 -185.5 mV 负压，BIOS 彻底关闭 C-State，PL1 180W / PL2 190W 对齐 OpenRevo，详见第 10 节）
+  - **当前运行调优态**：**8 核 8 线程**（BIOS 调优：关闭超线程 HT 与能效小核 E-cores，纯 8P 大核低微卡顿模式；固件彻底关闭 UnderVolt Protection 放行 MSR 0x150，关闭 IA/GT CEP，关闭 Ring Down Bin 锁定 4.4GHz Ring，Core/P-Cache 双轨锁定 -185.5 mV 负压，BIOS 彻底关闭 C-State，PL1 180W / PL2 190W 对齐 OpenRevo，详见第 10 节）
 - **北桥与内存控制器 (IMC)**：
   - **型号**：Intel Alder Lake-HX IMC（支持 VT-d、x2APIC 扩展中断控制器）
   - **PCIe 总线分配**：PCIe 5.0 x8 Port #2 正使用 @ x8（直连 AD106 独显）
@@ -80,6 +80,9 @@ metadata:
     - tRTP (Read To Precharge)：17T
     - tRRD (RAS To RAS)：Same Bank Group 12T / Diff Bank Group 8T
     - tWTR (Write To Read)：Same Bank Group 80T / Diff Bank Group 56T
+  - **BIOS 内存专属调优开关 (SaSetup 固件实测)**：
+    - `Power Down Mode`：**`No Power Down`**（固件关闭 DRAM PHY 掉电休眠，消除内存唤醒等待气泡）
+    - `Memory Test on Warm Boot`：**`Disabled`**（Windows 热重启跳过重复训练自检，重启秒开）
 
 ---
 
