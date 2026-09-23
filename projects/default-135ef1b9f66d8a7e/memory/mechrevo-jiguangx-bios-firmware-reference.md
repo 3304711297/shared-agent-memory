@@ -162,13 +162,14 @@ metadata:
 4. **`D:\ai coding\backup.fd.setup.ifr.txt`（2.0 MB）**：全量 251 个表单、4,192 个 Question 的完整 BIOS 选项与 VarOffset 映射文本
 5. **`D:\ai coding\backup.fd.dump\info.txt`**：UEFIExtract 生成的区段清单与固件结构信息
 6. **`D:\ai coding\backup.fd.dump\`**：全量解包固件区段目录树（10,159 个文件 / 53 MB，含 Descriptor、GbE、ME、BIOS 五大区）
+7. **固件基线镜像**：现行 = `C:\1、备份原版本bios\backup.fd`（用户自 BIOS 内导出，含 `xDCI=Disabled`）；历史 = `D:\ai coding\backup.fd`（本目录产物均由该代解包）。两代校验值与核查方法见 **§11.6**。
 
 ---
 
 ## 十一、BIOS 设置项「按菜单路径」索引台账
 
 > **查找方式**：以 BIOS **真实菜单路径**为一级索引，照路径逐级点进即可定位；每行的 `变量:偏移` 是该项在 NVRAM 中的落点（IFR `VarOffset`），可直接读写核对。
-> **数据来源**：`backup.fd` Setup 模块 IFR 反编译（4,192 个 Question）与 SPI Flash `0x1000000` 处活跃 NVRAM 实值交叉映射。
+> **数据来源**：`backup.fd` Setup 模块 IFR 反编译（4,192 个 Question）与 SPI Flash `0x1000000` 处活跃 NVRAM 实值交叉映射（**现行基准镜像见 §11.6**）。
 > **图例**：★ = 用户手动调校项；○ = 出厂预置或未改动（列出实盘值仅供参考）。
 > **顶层六页**（表单 `0x2710`）：`Main` / `Advanced` / `Chipset` / `Security` / `Boot` / `Save & Exit`。
 
@@ -265,7 +266,7 @@ metadata:
 | `→ PCI Express Configuration` → `PCI Express Root Port 1~28` → `L1 Substates` | `PchSetup:0x2bf~0x2da` | 全部 `L1.1 & L1.2` | `L1.1 & L1.2` | ○ |
 | `→ SATA Configuration` → `SATA Controller(s)` | `PchSetup:0x048` | `Disabled` | `Disabled` | ○ 整机无 SATA 盘，控制器整体关闭 |
 | `→ SATA Configuration` → `Mechanical Presence Switch`（Port 0~7） | `PchSetup:0x05a~0x061` | `Disabled`（8 项） | `Enabled` | ○ |
-| `→ USB Configuration` → **`xDCI Support`** | `PchSetup:0x047` | **`Enabled`** | `Disabled` | ★ **【建议改 `Disabled`】** USB OTG 从机控制器，日常无用，徒增南桥端点轮询 |
+| `→ USB Configuration` → **`xDCI Support`** | `PchSetup:0x047` | **`Disabled`** | `Disabled` | ★ **已改 `Disabled`（2026-09-23 实机验证）**：USB OTG 从机控制器，日常无用；新固件 NVRAM 该落点由 `0x01` 归零，重启后 `PCI\VEN_8086&DEV_7AE1`（`ufxsynopsys`）已从设备树消失 |
 | `→ USB Configuration` → `USB SS Physical Connector #0` / `#3` | `PchSetup:0x038` / `0x03b` | `Enabled` | `Disabled` | ○ |
 | `→ HD Audio Configuration → HD Audio DSP Features Configuration` → `Discrete BT HCI Audio Offload Link` | `PchSetup:0x80e` | `SSP #0` | `SSP #1` | ○ |
 
@@ -333,3 +334,19 @@ metadata:
 - **产物**：`D:\ai coding\backup.fd.dump\`（全量解包 53 MB）、`D:\ai coding\backup.fd.setup.ifr.txt`（2.0 MB 全量 4,192 Question 索引，可直接按 Prompt 搜路径）
 - **活跃 NVRAM 位置**：`backup.fd` 偏移 `0x1000000` 起 `0x30000` 字节，按 `NVAR` 头 + 变量名解析（`Setup` 3267B / `CpuSetup` 961B / `SaSetup` 1400B / `PchSetup` 2063B / `SecureBootSetup` 7B）
 - **查询套路**：① 在 `ifr.txt` 搜 `Prompt: "<选项名>"` 取 `VarStoreId` / `VarOffset` / `Size` → ② 在对应变量体按偏移取字节 → ③ 用该 Question 块内的 `OneOfOption Value:` 反查显示名
+
+### 11.6 固件基线镜像与「BIOS 改动是否落地」核查法
+
+**基线镜像台账**（用户自 BIOS 内备份导出的 32 MB 全片镜像）：
+
+| 代次 | 路径 | 提取时间 | SHA-256（前 8 / 后 8 位） | 关键状态 |
+| :--- | :--- | :--- | :--- | :--- |
+| **现行** | `C:\1、备份原版本bios\backup.fd` | 2026-09-23 14:43（重启后） | `886e22cf` … `18cbd4cc` | 含 `xDCI=Disabled`，其余 NVRAM 与上一代逐字节一致 |
+| 历史 | `D:\ai coding\backup.fd` | 2026-09-23 12:15 | `cd394339` … `14a76370` | 含 `xDCI=Enabled`（改前态） |
+
+**核查法（已在 xDCI 一役验证成立）**：
+1. **全片字节 diff 定位写入区**：两代镜像全片仅差 7 段（5 处 NVAR 头部写入标记刷新 + 2 段尾部新增记录区），差异全部落在 NVRAM 变量区（`0x1000000` 起），BIOS 区段/DXE 模块零差异——即「只改了设置，没动固件本体」。
+2. **NVAR 记录解析**：`'NVAR' + 2B 总长(LE) + 3B 写入标记 + 1B 属性 + [1B 名字段 + NUL 结尾名字] + 载荷`；名字为空（`0x00`）的记录是**数据-only 追加记录**（名字复用同名变量的首条记录），其载荷长度恰等于该变量的 VarStore 长度。
+3. **追加记录 = 最新值**：AMI 采用日志式追加，改动写在**存储区尾部新记录**里；同一变量的旧副本仍在原处保留旧值（垃圾回收前并存）。**只比载荷，忽略 3 字节写入标记**——该标记会随任何写入/访问刷新，据此判断"哪个副本是新值"必错。
+4. **判定单选项改动**：把新旧载荷对齐比较，全载荷只差 1 字节 → 只动了一个选项；该字节偏移即 IFR 的 `VarOffset`（对齐自检：错位对齐会产生数百处差异，一眼可辨）。
+5. **OS 侧交叉验证**：设置项若对应 PCI/USB 功能，重启后可直接看设备树——消失/出现即生效（本例 `PCI\VEN_8086&DEV_7AE1`，服务 `ufxsynopsys`，PnP 类 `USBFunctionController`）。注意 Windows 只枚举**当前存在**的设备；历史记录留在 `HKLM\SYSTEM\CurrentControlSet\Enum\PCI`，可作"改前曾存在"的佐证。

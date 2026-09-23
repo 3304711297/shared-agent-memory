@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-09-15T00:00:00+08:00",
+  "generatedAt": "2026-09-23T15:00:00+08:00",
   "scope": "Hermes skills/ 目录",
-  "totalSkills": 90,
+  "totalSkills": 91,
   "sources": [
     {
       "source": "Hermes Web UI 官方目录（hub/webui 安装）",
@@ -118,13 +118,14 @@
     },
     {
       "source": "自研(无 author)",
-      "count": 10,
+      "count": 11,
       "checkType": null,
       "watchStatus": "自研/无上游-免监控",
       "skills": [
         "devops/hf-model-download",
         "devops/local-llm-ops",
         "devops/local-proxy-client-diagnostics",
+        "devops/uefi-bios-firmware-analysis",
         "devops/windows-crash-diagnostics",
         "hermes-auxiliary-models",
         "hermes/hermes-custom-provider-models",
@@ -262,6 +263,6 @@
       ]
     }
   ],
-  "note": "2026-09-13 skill审计：删5项（blogwatcher由rss-feeds替代、diagnosing-probe并入systematic-debugging、mcporter由hermes-agent原生MCP覆盖、gitnexus-explorer由code-wiki替代、docker-management用户不用docker）；补3项上游增量（adversarial-WhyThisWorks、dispatching-WhenToUse、worktrees-Step0）；14项社区源frontmatter确权入库；using-superpowers描述瘦身178→~105字符。",
+  "note": "2026-09-13 skill审计：删5项（blogwatcher由rss-feeds替代、diagnosing-probe并入systematic-debugging、mcporter由hermes-agent原生MCP覆盖、gitnexus-explorer由code-wiki替代、docker-management用户不用docker）；补3项上游增量（adversarial-WhyThisWorks、dispatching-WhenToUse、worktrees-Step0）；14项社区源frontmatter确权入库；using-superpowers描述瘦身178→~105字符。 / 09-23 新增自研技能 uefi-bios-firmware-analysis（AMI Aptio V 固件解包、IFR 菜单路径映射与「改动是否落地」核查法），归入 自研(无 author) 组。",
   "watchSlimming_20260916": "看门清单 40→33 项：hermes-hub-skills / anthropic-skills / gemini-skills / ecc-skills / hermes-skills-hub / skillhub-market / colaskill-market 共 7 项技能库与市场雷达退出 capability-inventory.json。本台账中 hermes-agent 技能的 watchStatus 同步由『已在看门(hermes-hub-skills)』改指 check_skill_drift.py。superpowers / ponytail-skills / cangjie-distill 三项仍在看门（版本型检查，真实可触发），不受影响。"
 }

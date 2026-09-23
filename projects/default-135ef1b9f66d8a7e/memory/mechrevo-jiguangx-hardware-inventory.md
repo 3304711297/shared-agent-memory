@@ -29,7 +29,7 @@ metadata:
   - **当前运行调优态**：**8 核 8 线程**（BIOS 调优：关闭超线程 HT 与能效小核 E-cores，纯 8P 大核低微卡顿模式；固件彻底关闭 UnderVolt Protection 放行 MSR 0x150，关闭 IA/GT CEP，关闭 Ring Down Bin 锁定 4.4GHz Ring，Core/P-Cache 双轨锁定 -185.5 mV 负压，BIOS 彻底关闭 C-State，PL1 180W / PL2 190W 对齐 OpenRevo，详见第 10 节）
   - **虚拟化与扩展功能状态 (实机决策)**：
     - `Intel (VMX) Virtualization`：**`Enabled`**（实机常驻开启，业务强需求：运行 D加密游戏虚拟机版本破解，必须依赖 VT-x 硬件级虚拟化，不可盲目跟风微延迟调优而关闭）
-    - `xDCI Support` (PCH)：**`Enabled`**（用户跟风网络教程误开项；实为 USB Device 从机控制器（USB OTG），用于其他主机通过 USB 调试本机；日常笔记本无从机需求且徒增南桥轮询。修改路径：**BIOS → `Chipset` → `PCH-IO Configuration` → `USB Configuration` → `xDCI Support` → 改 `Disabled`**，落点 `PchSetup:0x047`）
+    - `xDCI Support` (PCH)：**`Disabled`**（用户跟风网络教程误开项；实为 USB Device 从机控制器（USB OTG），用于其他主机通过 USB 调试本机；日常笔记本无从机需求且徒增南桥轮询。**2026-09-23 已改 `Disabled` 并实机双向验证**：① 新固件 NVRAM 中该落点 `PchSetup:0x047` 由 `0x01` 归零；② 重启后 PCI 功能 `PCI\VEN_8086&DEV_7AE1`（`UFX Synopsys Controller`）已从设备树消失。修改路径：BIOS → `Chipset` → `PCH-IO Configuration` → `USB Configuration` → `xDCI Support`）
 - **北桥与内存控制器 (IMC)**：
   - **型号**：Intel Alder Lake-HX IMC（支持 VT-d、x2APIC 扩展中断控制器）
   - **PCIe 总线分配**：PCIe 5.0 x8 Port #2 正使用 @ x8（直连 AD106 独显）
