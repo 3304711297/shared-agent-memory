@@ -36,10 +36,20 @@ metadata:
       - `0xB0671` (rev `0x115`)：Raptor Lake-HX
       - `0xB06F2` (rev `0x20`)：Raptor Lake Refresh
   - **固件核心驱动层 (UEFI PEI / DXE Modules)**：
-    - 芯片组与总线：`NbPei` (北桥SA)、`SbPei` (南桥PCH)、`SmBusPei`、`PcatSingleSegmentPciCfg2Pei`、`PeiPciEnumeration`
-    - 存储与恢复：`NvmeUnlockPei`、`NvmeRecoveryPei`、`FirmwareBootMediaInfoPei`
-    - 安全可信：`PlatformVTdInfoSamplePei`、`IntelVTdPmrPei`、`TcgPlatformSetupPeiPolicy`、`AmiTxtPei`、`CryptoPei`、`TCMPEI`
-    - 同方 OEM 定制驱动：`OemOcPei` (超频支持)、`OemPanelEdidSwitchPei` (屏幕 EDID 切换)、`OemHooksPei`、`OemWorkaroundPei`、`OemACRecoveryPei`、`OemBoardPei`
+    - 固件内解压提取出 **285 个独立 DXE/SMM 驱动模块** 与 60+ PEI 核心：
+      - 芯片组与总线：`NbPei`/`NbDxe` (北桥SA)、`SbPei`/`SbDxe` (南桥PCH)、`PciBus`、`PcatSingleSegmentPciCfg2Pei`、`PeiPciEnumeration`、`RstUefiDriverSupport`
+      - 显示与直连切换：`OemDDSSupportDxe` (NVIDIA Advanced Optimus 动态直连切换)、`OemDisplayModeDxe` (MUX 开关)、`OemDgpuBoardIDDxe`、`OemColorCalibrationDxe` (出厂原色校准配置载入)、`OemPanelEdidSwitchDxe` (屏幕 EDID 动态切换)
+      - 电竞与性能控制：`OemPowerModeDxe` (办公/平衡/狂暴模式)、`OemTurboModeDxe`、`OemOcDxe`/`OemOcPei` (CPU/内存超频与电压墙调节)、`OemKbLightDxe`/`OemRgbLbDxe`/`OemUsbLightBarDxe` (键盘与机身灯带控制)、`OemQkeyDxe` (Fn 快捷键)
+      - 底层外设与供电：`CastroCovePmicNvm` (Intel Castro Cove PMIC 供电管理芯片)、`Usb4CmDxe` (USB4 连接管理器)、`UsbTypeCDxe`、`Ofbd` (AMI 在线刷新驱动)
+      - 存储与恢复：`NvmeUnlockPei`、`NvmeRecoveryPei`、`NvmeDynamicSetup`、`FirmwareBootMediaInfoPei`
+      - 安全可信：`PlatformVTdInfoSamplePei`、`IntelVTdPmrPei`、`TcgPlatformSetupPeiPolicy`、`AmiTxtPei`、`CryptoPei`、`TCMPEI` (国密 TCM 支持)
+  - **ACPI 表格架构 (85 组全量 ACPI 表)**：
+    - `DSDT` (661 KB，Rev 2，OEM: ALASKA，TableID: A M I)：整机 ACPI 硬件设备拓扑主表
+    - `SSDT` (84 组)：含 NVIDIA DDS 专有表 (`NvDDSTl`/`NvDDSN20`/`OptTabl`/`Opt2Tabl`/`OemNv2T`)、CPU HWP/C-State 调优表 (`CpuSsdt`/`ApHwp`/`Cpu0Hwp`)、雷电/Type-C 拓扑 (`TbtTypeC` 29.9KB)、16 组各步进 XHCI USB 端口映射表与 29 组 Rtd3 深度休眠表
+  - **Setup IFR 菜单表单体系 (47 组 HII Formsets)**：
+    - 固件内嵌完整二级与隐藏菜单定义：`Advanced` (52 处引用)、`Chipset` (13 处)、`Overclocking` (13 处超频/电压控制表单)、`Power & Performance`、`CPU Configuration`、`Memory Configuration`、`Thunderbolt`、`Thermal Configuration` (风扇与温控曲线)
+  - **开机图形资源 (Boot Splash / Logo)**：
+    - 内嵌 1 组 378x100 BMP 徽标与 3 组高分辨率开机背景 JPEG 画面 (1.43MB、1.00MB、1.00MB)
   - **NVRAM 变量数据库 (425 个活跃 NVAR 记录)**：
     - `Setup` (3,267 字节)：全局 BIOS 设置
     - `CpuSetup` (961 字节)：CPU 电源与核心参数（功耗墙 PL1/PL2/Tau 爆发调优、C-States、核心使能控制）
