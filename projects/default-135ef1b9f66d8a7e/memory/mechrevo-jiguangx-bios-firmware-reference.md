@@ -330,8 +330,11 @@ metadata:
 
 ### 11.5 复现与自助查询（后续按需复查）
 
-- **工具链**：`D:\ai coding\tools\bios_tools\` → `UEFIExtract.exe`、`UEFITool.exe`、`ifrextractor.exe`
-- **产物**：`D:\ai coding\backup.fd.dump\`（全量解包 53 MB）、`D:\ai coding\backup.fd.setup.ifr.txt`（2.0 MB 全量 4,192 Question 索引，可直接按 Prompt 搜路径）
+- **工具链**：`D:\ai coding\tools\bios_tools\` → `UEFIExtract.exe` / `UEFIFind.exe` / `UEFITool.exe`（均为 NE **A75**，2026-07-10）+ `ifrextractor.exe`（**1.6.1**，2026-03-11），四项 SHA-256 已与上游发行包逐一核对
+- **随身工具包（U 盘）**：`E:\download\机械革命\bios tools\` —— `bin\` 为解压好的同版本四件套；**`fw2ifr.bat`** 拖入固件即全自动（UEFIExtract dump → 定位 Setup 主模块 → 落 `<固件名>.setup.ifr.txt`），实测产出与本台账 2,102,970 B 基准**逐字节一致**；`ifrextractor.bat` 处理单个段文件（可选模式参数）；`工具版本.txt` 记版本台账与坑位；经典 **0.28.0** 三件套（UEFITool/UEFIPatch/UEFIReplace）留档——NE 版不含 UEFIPatch/UEFIReplace，**改固件本体仍需此套**
+- **产物**：`D:\ai coding\backup.fd.dump\`（全量解包 53 MB）、`D:\ai coding\backup.fd.setup.ifr.txt`（2,102,970 B；2,549 个 OneOf / 4,192 Question，可直接按 Prompt 搜路径）
+- **ifrextractor 坑位**：结果写在**输入文件旁**（`<输入名>.0.0.en-US.uefi.ifr.txt`）而非 stdout，屏幕上只有一行横幅；**重复运行会向同一文件追加**（跑两次 → 2.1 MB + 1.1 MB 叠加），重跑前须删旧输出。默认模式 2.1 MB 级，`verbose` 模式额外附 opcode 偏移与原始字节（3.2 MB 级）
+- **UEFIExtract 坑位**：dump **不产 `.sct` 文件**；Setup 表单段在 `<解包目录>\...\<n> Setup\1 PE32 image section\body.bin`（同一固件有两个同名 `Setup` 模块：13,664 B 的桩与 1,085,856 B 的主模块，**取体积大者**）
 - **活跃 NVRAM 位置**：`backup.fd` 偏移 `0x1000000` 起 `0x30000` 字节，按 `NVAR` 头 + 变量名解析（`Setup` 3267B / `CpuSetup` 961B / `SaSetup` 1400B / `PchSetup` 2063B / `SecureBootSetup` 7B）
 - **查询套路**：① 在 `ifr.txt` 搜 `Prompt: "<选项名>"` 取 `VarStoreId` / `VarOffset` / `Size` → ② 在对应变量体按偏移取字节 → ③ 用该 Question 块内的 `OneOfOption Value:` 反查显示名
 
