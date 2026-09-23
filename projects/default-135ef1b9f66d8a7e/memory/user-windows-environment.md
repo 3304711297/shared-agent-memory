@@ -23,10 +23,33 @@ metadata:
 - **BIOS / UEFI 固件**：AMI Aptio V（ALASKA - 1072009 / Core 5001B），版本 `N.1.06MRO16`（发布日期 2024-08-08，SMBIOS 3.6 / System BIOS 5.27）
 - **嵌入式控制器 (EC)**：版本 1.19
 - **Intel CSME (ME)**：版本 16.1.30.2361（Consumer LP/H）
-- **SPI 闪存镜像结构 (`backup.fd`)**：32.00 MB 全量 SPI Flash 镜像
-  - 布局：Flash Descriptor (0x0-0xFFF) + GbE (0x1000-0x2FFF) + CSME (0x3000-0x3DCFFF, 3.85MB) + Device Exp (0x3DD000-0xFFFFFF, 12.14MB) + BIOS Region (0x1000000-0x1FFFFFF, 16.00MB)
-  - 启动契约：FIT 表位于 0x1E90100，含 Startup ACM 与 3 组微码（CPUID 0x90672 / 0xb0671 / 0xb06f2，覆盖 12/13/14 代 HX 移动处理器）
-  - 数据持久化：双 192KB 容错 NVRAM 变量区（0x1000000 / 0x1030000）+ AmiSmbios OEM DMI (`BSA_`) 数据区
+- **SPI 闪存镜像结构 (`backup.fd` 32MB 全量提取分析)**：
+  - **物理布局**：
+    - `0x000000 - 0x000FFF`：Flash Descriptor (4 KB，硬件主控配置与分区基址)
+    - `0x001000 - 0x002FFF`：GbE Region (8 KB，千兆网卡配置)
+    - `0x003000 - 0x3DCFFF`：Intel CSME Region (~3.85 MB，独立安全引擎微内核)
+    - `0x3DD000 - 0x0FFFFFF`：Device Expansion Region (~12.14 MB)
+    - `0x1000000 - 0x1FFFFFF`：BIOS / UEFI 主固件区 (16.00 MB)
+  - **底层启动契约 (FIT Table @ 0x1E90100)**：
+    - 包含 Startup ACM (硬件级度量启动) 与 3 组完整 CPU 微码：
+      - `0x90672` (rev `0x2C`)：Alder Lake-HX（匹配本机 i7-12800HX）
+      - `0xB0671` (rev `0x115`)：Raptor Lake-HX
+      - `0xB06F2` (rev `0x20`)：Raptor Lake Refresh
+  - **固件核心驱动层 (UEFI PEI / DXE Modules)**：
+    - 芯片组与总线：`NbPei` (北桥SA)、`SbPei` (南桥PCH)、`SmBusPei`、`PcatSingleSegmentPciCfg2Pei`、`PeiPciEnumeration`
+    - 存储与恢复：`NvmeUnlockPei`、`NvmeRecoveryPei`、`FirmwareBootMediaInfoPei`
+    - 安全可信：`PlatformVTdInfoSamplePei`、`IntelVTdPmrPei`、`TcgPlatformSetupPeiPolicy`、`AmiTxtPei`、`CryptoPei`、`TCMPEI`
+    - 同方 OEM 定制驱动：`OemOcPei` (超频支持)、`OemPanelEdidSwitchPei` (屏幕 EDID 切换)、`OemHooksPei`、`OemWorkaroundPei`、`OemACRecoveryPei`、`OemBoardPei`
+  - **NVRAM 变量数据库 (425 个活跃 NVAR 记录)**：
+    - `Setup` (3,267 字节)：全局 BIOS 设置
+    - `CpuSetup` (961 字节)：CPU 电源与核心参数（功耗墙 PL1/PL2/Tau 爆发调优、C-States、核心使能控制）
+    - `SaSetup` (1,400 字节)：System Agent / 显卡直连与 MUX 切换 / VT-d 虚拟化
+    - `PchSetup` (2,063 字节)：南桥外设、USB 控制器、HD Audio、PCIe ASPM
+    - `UniWillVariable` (180 字节，347 次写入迭代)：机械革命 Control Center 专属控制变量（办公/平衡/狂暴性能模式、风扇策略曲线、电池保养阈值等）
+    - `Boot0000` (Windows Boot Manager)：绑定 NVMe GUID 分区上的 `\EFI\Microsoft\Boot\bootmgfw.efi`
+    - 硬件 ACPI 设备节点：键盘 RGB 控制器 `\_SB.PC00.XHCI.RHUB.HS00.CRGB` 与红外摄像头 `\_SB.PC00.XHCI.RHUB.HS01.CIR`
+  - **生产 DMI 标识区 (`BSA_` @ 0x1070000)**：
+    - 模具与主板代号 `GM6AQ7C`，ODM 制造代号 `weiyang 327670412`（已按安全规则脱敏移除单机序列号与 UUID）
 
 ## 浏览器
 - 用户浏览器是 **Edge Dev**：`C:\Program Files (x86)\Microsoft\Edge Dev\Application\msedge.exe`（注册表 App Paths 里唯一注册的浏览器；2026-08-22 用户确认"这是我的浏览器"）
