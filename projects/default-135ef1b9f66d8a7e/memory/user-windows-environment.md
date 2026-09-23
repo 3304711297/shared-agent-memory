@@ -15,11 +15,22 @@ metadata:
 - Working directory: `D:\ai coding\.zcode\workspace\default`
 - Not a git repository
 
-## 硬件规格与 BIOS / 固件环境（2026-09-23 backup.fd 提取实测）
-- **整机型号**：机械革命 极光X（MECHREVO JiguangX Series GM6AQ7C，同方模具 GM6AQ7C）
-- **处理器 (CPU)**：12th Gen Intel Core i7-12800HX（Alder Lake-HX，8P+8E 物理核心，24 线程）；当前系统/BIOS 调优设为 8 核 8 线程（关闭超线程与能效小核，优化微卡顿与 1% low 帧率）
-- **显卡 (GPU)**：NVIDIA GeForce RTX 4070 Laptop GPU（8GB GDDR6 显存）
-- **内存 (RAM) 与时序调优**：24GB DDR5（非二进制 2x 12GB SK Hynix 颗粒，雷神/机械革命 OEM `JJ02HM002`，Richtek PMIC）；固件内设为 **Custom Profile 自定义超频档**（Ref Clock 100MHz × 64x = **DDR5-6400 MT/s**，Gear 2 模式 UCLK 1600MHz / MCLK 3200MHz），核心主时序 **CL40-40-40-77**（tCWL 38、tFAW 32、tREFI 22400、tRFC 824、tRFC2 576、tRFCpb 432、tWR 78、tRTP 18）
+## 硬件规格与 BIOS / 固件环境（2026-09-23 全硬件 WMI/PCIe/EDID 探活与 backup.fd 提取）
+- **整机型号**：机械革命 极光X（MECHREVO JiguangX Series GM6AQ7C，同方模具 GM6AQ7C，版本 Standard，ODM 制造代号 `weiyang 327670412`）
+- **处理器 (CPU)**：第 12 代 Intel Core i7-12800HX（Alder Lake-HX B0，CPUID 90672，物理 16 核 24 线程：8P + 8E，10MB L2 + 25.6MB L3；当前 BIOS/系统调优设置为 **8 核 8 线程** 纯大核调优模式）
+- **显卡 (GPU)**：NVIDIA GeForce RTX 4070 Laptop GPU（AD106 核心，8GB GDDR6 显存，速率 8001MHz，**140W 满血 TGP 功耗**，Boost 3105MHz，PCIe 4.0 x8，VBIOS 95.06.15.40.63，当前 BIOS 为 **dGPU Only 纯独显直连**）
+- **内存 (RAM) 与时序调优**：**24GB DDR5**（非二进制 2x 12GB SK Hynix 海力士颗粒，雷神/机械革命 OEM `JJ02HM002`，Richtek PMIC）；固件内设为 **Custom Profile 自定义超频档**（Ref Clock 100MHz × 64x = **DDR5-6400 MT/s**，Gear 2 模式 UCLK 1600MHz / MCLK 3200MHz），核心主时序 **CL40-40-40-77 2T @ 1.20V**（tCWL 38、tFAW 32、tREFI 22400、tRFC 824、tRFC2 576、tRFCpb 432、tWR 78、tRTP 18）
+- **固态存储 (Storage)**：**KINGSTON OM8PGP41024N-A0** 1TB NVMe M.2 2280 SSD（PCIe 4.0 x4 通道，健康状态良好，C盘系统卷 150GB + D盘数据卷 802GB）
+- **显示设备 (Monitors)**：
+  - 内置屏幕：华星光电 CSOT `MNG007DA5-2` 16.0 英寸电竞屏（带出厂专有 ICC/LUT 色彩校准）
+  - 外接主力电竞屏：**HKC G24H3SClassic**（超快 IPS，当前运行在 **1920×1080 @ 240Hz 超高刷**，RGB 8-bit 全范围）
+- **声卡硬件 (Audio)**：Conexant / Synaptics CX 系列 HD Audio Codec（硬件 ID `HDAUDIO\FUNC_01&VEN_14F1&DEV_1F87`，同方子系统 `1D05142D`）
+- **网络适配器 (Network)**：
+  - 有线千兆：Realtek PCIe GbE Family Controller（RTL8168/8111 芯片，`PCI\VEN_10EC&DEV_8168`）
+  - 无线 Wi-Fi 6E：MediaTek Wi-Fi 6E MT7922 160MHz（RZ616，`PCI\VEN_14C3&DEV_7922`，驱动稳定版本 3.6.0.1427）
+  - 蓝牙：MediaTek Bluetooth Adapter（USB `04CA:3804`）
+- **电池供电 (Battery)**：OEM 锂电池组，标称/满充容量 **60,060 mWh**（约 60 Wh）
+- **触控与外设 (Input & Hubs)**：同方 I2C HID 精密触控板（`ACPI\VEN_UNIW&DEV_0001`）、全彩 RGB 背光键盘、Chicony HD 摄像头、Genesys Logic USB 3.0/2.0 高速扩展集线器
 - **BIOS / UEFI 固件**：AMI Aptio V（ALASKA - 1072009 / Core 5001B），版本 `N.1.06MRO16`（发布日期 2024-08-08，SMBIOS 3.6 / System BIOS 5.27）
 - **嵌入式控制器 (EC)**：版本 1.19
 - **Intel CSME (ME)**：版本 16.1.30.2361（Consumer LP/H）
