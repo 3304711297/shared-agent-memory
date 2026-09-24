@@ -10,12 +10,12 @@ Skills speak in actions ("dispatch a subagent", "create a todo", "read a file").
 | Create a new file | `write_file` |
 | Edit a file (targeted patch) | `patch` |
 | Run a shell command | `terminal` |
-| Search file contents | `search_files` |
-| Find files by name | `terminal` with `find` |
+| Search file contents | `search_files(pattern="...", target="content")` |
+| Find files by name | `search_files(pattern="...", target="files")` |
 | Fetch a URL / read a webpage | `web_extract(urls=[...])` |
 | Search the web | `web_search(query=...)` |
-| Dispatch a subagent | `delegate_task(goal=..., context=..., toolsets=[...], role="leaf")` |
-| Task tracking | `todo` tool |
+| Dispatch a subagent | `delegate_task(tasks=[{"goal": "...", "context": "..."}])` |
+| Task tracking | `todo_list(todos=[{"id": "...", "content": "...", "status": "..."}])` |
 | Invoke a skill | `skill_view("skill-name")` |
 
 ## Instructions file
@@ -46,11 +46,11 @@ This fallback is the same mechanism used by other harnesses without native skill
 Use `delegate_task` to spawn isolated subagents for parallel or sequential workstreams:
 
 ```
-delegate_task(goal="...", context="...", toolsets=[...], role="leaf")
+delegate_task(tasks=[{"goal": "...", "context": "..."}])
 ```
 
 If `delegate_task` is unavailable, do the work inline rather than inventing tool calls.
 
 ## Task tracking
 
-Use the `todo` tool for task tracking within a session. For multi-agent task boards, use `hermes kanban` CLI if available. Treat older `TodoWrite` references as the task-tracking action.
+Use the `todo_list` tool for task tracking within a session (`todos: [{"id": "...", "content": "...", "status": "pending|in_progress|completed"}]`). For multi-agent task boards, use `hermes kanban` CLI if available. Treat older `TodoWrite` references as the task-tracking action.

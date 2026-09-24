@@ -227,6 +227,8 @@ Pitfall: the picker shows the 快速 toggle whenever `model_supports_fast_mode()
 
 **`search_files` pattern vs glob distinction (`target='content'` vs `target='files'`):** In content mode, `pattern` is evaluated strictly as a ripgrep regular expression, NOT a shell glob. Passing glob wildcards like `*keyword*` triggers `rg: regex parse error: repetition operator missing expression` (`*` at the start has no operand). Use plain literal substrings (e.g. `keyword`) or valid regex (`.*keyword.*`). Reserve glob patterns like `*.py` exclusively for `target='files'` or the `file_glob` filter.
 
+**`search_files` pattern 以短横线 `-` 开头被 ripgrep 误判为 CLI 参数（2026-09-24 本机实测踩坑）：** 当 `pattern` 以 `-` 开头（例如搜 PowerShell 参数 `-RunModule`、命令行选项 `-NonInteractive` 时），底层 ripgrep 会直接将该模式解析为自身参数选项（如报 `Search failed: rg: unrecognized flag -R`）。**规避方案**：严禁直接传入裸 `-` 开头的字符串，改用字符类包裹首字符（如 `[-RunModule]` 或 `[-]RunModule`）、反斜杠转义或使用等价正则 `[\-]RunModule`。
+
 **`search_files` 0 命中时结果形状会变，且近似命中藏在 `warning` 里（2026-09-21 本机实测，可复现）。** 除上面的 regex-vs-glob 坑外，还有两个会让「有结果」被读成「无结果」的形状变化：
 
 | 调用形态 | 返回键 | 读 `matches` 的后果 |
