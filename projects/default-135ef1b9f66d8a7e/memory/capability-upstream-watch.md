@@ -80,6 +80,7 @@ metadata:
 
 **How to apply:**
 - **技能与看门联动铁律（2026-09-07 用户严正纠偏）**：技能变动与看门狗绝对同步——凡技能有任何新装、升级、瘦身裁撤或评估否决，第一动作必须本能同步更新 `capability-inventory.json`（基线版本、已装统计数、`notWatched` 排除说明）并推 main 跑 CI，严禁改完技能漏看门、严禁等用户提醒补漏。
+- **能力组件与技能孪生协同铁律（2026-09-24 踩坑落地）**：升级任何能力组件（CLI、MCP、插件）时，严禁只升级底层二进制/配置而遗漏配套技能。`capability-inventory.json` 已绑定 `associatedSkills`（如 `cli-bsk` 绑定 `web/browser-skill`，`chrome-devtools-mcp` 绑定 `mcp/chrome-devtools`），看门 Issue 报告自动注入告警与 3 步闭环 SOP，升级时必须同步吸收上游文档、子命令与防御规则。
 - 任何 Agent 升级/新装受监控组件后，顺手更新 capability-inventory.json 并推 main；ZCode 客户端更新后跑 watch-capability.cmd 检测内置插件换代；新增组件时在清单登记检查源。相关：[[hermes-to-zcode-capability-sync]] [[multi-branch-memory-backup]]
 
 **2026-09-07 上游 Issue 闭环跟进（scriptscat/scriptcat#1724）**：
