@@ -496,6 +496,11 @@ def lint_inventory(inv):
         if not installed or not isinstance(installed, list):
             errors.append(f"{pos}: 'installed' 必须是非空列表")
 
+        assoc = comp.get("associatedSkills")
+        if assoc is not None:
+            if not isinstance(assoc, list) or not all(isinstance(s, str) for s in assoc):
+                errors.append(f"{pos}: 'associatedSkills' 若存在必须为字符串列表")
+
     return errors
 
 
@@ -521,7 +526,10 @@ def main():
         "",
         f"> 生成时间：{now.strftime('%Y-%m-%d %H:%M')}（北京时间） · 清单：`capability-inventory.json`",
         ">",
-        "> **跟进方式**：升级对应组件后，把清单里的 `installed.version` 更新为新版本并随共享库推 `main`，本看门会在下次运行时自动收口本 Issue。",
+        "> **跟进 SOP（程序与技能孪生协同铁律）**：",
+        "> 1. 升级对应组件程序/二进制/配置；",
+        "> 2. 核对对应组件是否有联动技能（`associatedSkills`）：若有，**必须同步核查上游技能仓库是否有文档、子命令、参数或防御规则更新**并一并同步升级；",
+        "> 3. 把清单里的 `installed.version` 更新为新版本并随共享库推 `main`，本看门会在下次运行时自动收口本 Issue。",
         "",
     ]
     outdated = 0
@@ -915,6 +923,9 @@ def main():
         detail.extend(loc_status)
         if mkt_note:
             detail.append(mkt_note)
+        assoc = comp.get("associatedSkills")
+        if assoc and behind:
+            detail.append(f"- ⚠️ **孪生技能联动**：本组件关联技能 `{', '.join(assoc)}`。升级程序后**必须同步核对上游技能仓库是否有文档、子命令或 references 变更**（严禁只升程序遗漏技能！）。")
         details.append("\n".join(detail))
 
     lines.append("## 概览")

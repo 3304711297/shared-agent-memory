@@ -17,6 +17,9 @@
           "where": "Hermes config.yaml mcp_servers（钉版，含保护参数）",
           "version": "1.10.1"
         }
+      ],
+      "associatedSkills": [
+        "mcp/chrome-devtools"
       ]
     },
     {
@@ -40,6 +43,9 @@
           "sha": "5bf4e78011075bcfc0dc295f0724994cd123ee71",
           "note": "2026-09-19 升级至 v6.4.1（commit 5bf4e78）：新增 diagnosing-superpowers 技能，executing-plans 重构为 Native inline execution 模式，保留本地中文强触发词与 Astra 路由化架构不变。2026-09-22 彻底移除冗余 plugins/superpowers 插件空壳，完全由 native skills 承载。"
         }
+      ],
+      "associatedSkills": [
+        "superpowers/*"
       ]
     },
     {
@@ -157,6 +163,14 @@
           "sha": "1d95ff7d39de12d87014ea40d4e22201bddc501b",
           "note": "2026-09-15 核对：v4.9.0→v4.10.0 的 skills/ 子树逐字节未变（两侧 tree hash 均为 d15d0642），上游改动集中在 hooks/ 与 Cursor/Grok 适配器；本机按「收技法、避常驻」只用 skills、不装 plugin，故无需同步文件，仅回写基线版本与 tag 提交。"
         }
+      ],
+      "associatedSkills": [
+        "software-development/ponytail",
+        "software-development/ponytail-audit",
+        "software-development/ponytail-debt",
+        "software-development/ponytail-gain",
+        "software-development/ponytail-help",
+        "software-development/ponytail-review"
       ]
     },
     {
@@ -242,6 +256,9 @@
           "where": "Hermes skills/productivity/cangjie-distill + ZCode ~/.zcode/skills/cangjie-distill【组件已随 ZCode 拆除移除，2026-09-09】",
           "version": "2.5.0"
         }
+      ],
+      "associatedSkills": [
+        "productivity/cangjie-distill"
       ]
     },
     {
@@ -259,6 +276,9 @@
           "where": "%USERPROFILE%\\.local\\bin\\bsk.exe",
           "version": "0.3.1"
         }
+      ],
+      "associatedSkills": [
+        "web/browser-skill"
       ]
     },
     {
