@@ -17,3 +17,5 @@ Local image generation (Qwen-Image-2.1): Quality strictly over speed; fixed to f
 Session closeout dual push (v2.0): When user asks to end/delete session or all tasks complete green, MUST first run one-click archive in shared-agent-sessions ('python tools/upload_session.py' or 'tools/archive.cmd' to auto-locate session, generate L0/L1/L2 summaries and catalog, and push), THEN push shared-agent-memory (main). User manually deletes local session in desktop app; never push memory without archiving session.
 §
 CI notifications: On all-green task completion, call GitHub API (DELETE /notifications/threads/{id}) to mark related notification threads as Done.
+§
+Core instruction and memory language invariant: 'SOUL.md', 'USER.md', and 'MEMORY.md' MUST be authored and updated STRICTLY in English. Agents must NEVER introduce Chinese or mixed languages into these core instruction and memory files.
