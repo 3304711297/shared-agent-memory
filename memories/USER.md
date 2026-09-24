@@ -14,7 +14,7 @@ tweakbyjie upstream sync: Any tuning item benchmarked or adopted from a new open
 §
 Local image generation (Qwen-Image-2.1): Quality strictly over speed; fixed to full-precision bf16 trio (lossless ceiling, matching official template). Never propose GGUF or int8_convrot quantizations for speed.
 §
-Session closeout dual push (v2.0): When user asks to end/delete session or all tasks complete green, MUST first run one-click archive in shared-agent-sessions ('python tools/upload_session.py' or 'tools/archive.cmd' to auto-locate session, generate L0/L1/L2 summaries and catalog, and push), THEN push shared-agent-memory (main). User manually deletes local session in desktop app; never push memory without archiving session.
+Session closeout SOP (4-step sequence): When user says "delete/end session" or tasks complete green: 1. Audit learnings: Check if new pitfalls, root causes, or decisions need sedimentation (write topics/ or patch skills); 2. Clean residuals: Delete temporary probe/test scripts or scratch logs; 3. Archive session: Run 'python tools/upload_session.py' in shared-agent-sessions; 4. Push memory: Commit & push shared-agent-memory (main/hermes) with green CI. Only then confirm local deletion.
 §
 CI notifications: On all-green task completion, call GitHub API (DELETE /notifications/threads/{id}) to mark related notification threads as Done.
 §
