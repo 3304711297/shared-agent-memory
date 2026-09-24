@@ -1,7 +1,7 @@
 {
   "version": 2,
   "description": "本地能力组件清单（skill/mcp/plugin/工具核心的已装版本与上游源）。由 capability-upstream-watch 工作流每日比对远端源；本地源组件用 watch-capability.cmd 或任意 Agent 会话跑脚本比对。【维护铁律】升级或新装任何组件后，必须同步更新本清单并随共享库推 main，看门自动收口对应 Issue。",
-  "updatedAt": "2026-09-23T15:00:00+08:00",
+  "updatedAt": "2026-09-24T15:30:00+08:00",
   "components": [
     {
       "id": "chrome-devtools-mcp",
@@ -14,17 +14,8 @@
       ],
       "installed": [
         {
-          "where": "ZCode cli/config.json mcp.servers（钉版，含防扩展清空保护参数）【组件已随 ZCode 拆除移除，2026-09-09】",
-          "version": "1.9.0"
-        },
-        {
-          "where": "ZCode 插件 claude-plugins-official（已补保护参数）【组件已随 ZCode 拆除移除，2026-09-09】",
-          "version": "1.9.0",
-          "sha": "45f187b1e3202c9f32ddba913be5d68751c3caa3"
-        },
-        {
           "where": "Hermes config.yaml mcp_servers（钉版，含保护参数）",
-          "version": "1.9.0"
+          "version": "1.10.1"
         }
       ]
     },
@@ -266,7 +257,7 @@
       "installed": [
         {
           "where": "%USERPROFILE%\\.local\\bin\\bsk.exe",
-          "version": "0.3.0"
+          "version": "0.3.1"
         }
       ]
     },
