@@ -7,7 +7,7 @@ metadata:
   originSessionId: sess_1fbcffe3-2cf3-43db-a794-42103d6b105a
 ---
 
-用户想测 Karing 里 liangxin.xyz（59 节点，订阅 `https://liangxin.xyz/api/v1/liangxin?OwO=f71d26b69311146a74cdad980c62e354`）和搅局者（11 节点，订阅 `https://sub.jjz127ab.top/subscribe/0decc9d3b551b762595cb37ece94b977`）两组节点哪些能用 Gemini——普通节点访问 generativelanguage.googleapis.com 返回「地区不支持」。**2026-09-06 用户拍板暂停，以后再研究。**
+用户想测 Karing 里 liangxin.xyz（59 节点，订阅 `https://liangxin.xyz/api/v1/liangxin?OwO=<已脱敏>`）和搅局者（11 节点，订阅 `https://sub.jjz127ab.top/subscribe/<已脱敏>`）两组节点哪些能用 Gemini——普通节点访问 generativelanguage.googleapis.com 返回「地区不支持」。**2026-09-06 用户拍板暂停，以后再研究。**
 
 **Why:** 全量 70 节点逐个切+测太慢（每节点 >20s，总耗时 20+ 分钟），用户等不了主动叫停。
 
@@ -16,7 +16,7 @@ metadata:
 1. **判定逻辑（无需真 key）**：请求 `https://generativelanguage.googleapis.com/v1beta/models?key=test`——403 且 body 含 "location is not supported" = 地区被封；400 API_KEY_INVALID = 地区放行。看状态码即可区分。
 
 2. **Karing 内部坐标（已实测）**：
-   - Clash API：`127.0.0.1:3057`，secret `91777b8aba027172`（在 `%APPDATA%\karing\karing\service_core.json` 的 experimental.clash_api 和 service.json 里）。注意：**Karing 未连接（红叉状态）时核心进程不跑，3057/3065/3066/3067 全部不监听**，先让用户在界面点连上（绿勾）。
+   - Clash API：`127.0.0.1:3057`（secret `<已脱敏>`；本机值见 `%APPDATA%\\karing\\karing\\service_core.json` 的 experimental.clash_api，公开仓库不得入库）。注意：**Karing 未连接（红叉状态）时核心进程不跑，3057/3065/3066/3067 全部不监听**，先让用户在界面点连上（绿勾）。
    - 混合代理端口：3065(直连)/3066(proxy)/3067(规则分流，系统代理用的就是它)。日志证实 Karing 自己的测速也走 3057 的 `/proxies/{name}/delay` 接口。
    - `127.0.0.1:8614` 是 Karing GUI 心跳端口，只回固定字节，不是代理也不是 API，别浪费时间去探测。
    - Clash API 里只有 `GLOBAL`(Fallback 型) 和 `urltest_out` 两个组，**Fallback 不能 PUT 切换**——程序化切节点要自建 selector（见下）。
