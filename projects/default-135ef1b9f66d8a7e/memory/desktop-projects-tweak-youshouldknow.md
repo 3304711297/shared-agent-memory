@@ -34,7 +34,8 @@ metadata:
   1. 六大仓库（youshouldknow, tweakbyjie, make-bilibili-great-together, steamdb-chinese-plus, huggingface-chinese-plus, openrouter-chinese-plus）及个人主页 3304711297 全部完成 README 现代化重构（Badges、特性对比矩阵、极速上手、实测预览图、盘古之白排版）。
   2. ysk 升级后按严格契约自动提升 tweak 的 `knowledge.lock.json` 至 `b0bd3be`，所有仓库 CI 全绿。
   3. **tweak 发布包缺失 scripts 修复**：用户实测从 GitHub 下载 `tweakbyjie-v0.2.21.zip` 报错缺少 `scripts/preflight.ps1`。根因 `.github/workflows/ci.yml` 的 zip 打包命令漏掉了 `scripts` 目录；已修复 `ci.yml` 并向 main 提交推送 `f07e0fc`，同时本地重新打包含 `scripts/preflight.ps1` 的 zip 并用 `gh release upload --clobber` 重新覆盖 GitHub 上 `v0.2.21` 的 Release 资产。
-  4. **DISM 进程锁定目录坑**：运行 tweak 菜单 10 查询虚拟化状态时，`Get-WindowsOptionalFeature` 会在后台拉起 `DismHost.exe` 继承运行目录为 CWD 并不立即退出，导致资源管理器删除运行目录报"文件夹正在使用"；需 kill 掉该 `DismHost.exe` 即可释放。
+  4. **tweakbyjie 无人值守参数防呆与交互入口解耦（2026-09-24，v0.2.23）**：直接运行 `tweakbyjie.cmd` 或无参调用 `tweakbyjie.ps1` 报错 `[ERROR] -RunModule 不能为空；交互模式请不要传入 -NonInteractive` 并异常退出。根因此前无人值守增强中，执行层将空 `$RunModule` 校验硬断言在交互入口外侧，导致无参启动直接撞车。修复恢复无参分支默认拉起 `Show-TweakMenu`；仅当显式传入 `-NonInteractive` / `-Action` / `-AcceptDefaults` 但缺少 `-RunModule` 时才拦截退出。补齐单测并通过 v0.2.23 发版 CI。
+  5. **DISM 进程锁定目录坑**：运行 tweak 菜单 10 查询虚拟化状态时，`Get-WindowsOptionalFeature` 会在后台拉起 `DismHost.exe` 继承运行目录为 CWD 并不立即退出，导致资源管理器删除运行目录报"文件夹正在使用"；需 kill 掉该 `DismHost.exe` 即可释放。
 - 2026-09-03 新增三篇 AI 工具/软件技巧文章并双仓闭环：
   1. ysk 新增三篇实战文章：`AI浏览器自动化扩展禁用陷阱与数据恢复.md`、`hermes-agent-Windows部署与本地模型桥接实战.md`、`Windows命令行工具代理行为差异速查.md`。
   2. 修复外链并自动重新生成覆盖矩阵，front-matter-check 与 lychee link-check 均通过，CI 全绿（commit `2548e34`）。
