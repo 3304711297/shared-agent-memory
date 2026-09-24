@@ -1,7 +1,7 @@
 {
   "generatedAt": "2026-09-23T15:00:00+08:00",
   "scope": "Hermes skills/ 目录",
-  "totalSkills": 91,
+  "totalSkills": 92,
   "sources": [
     {
       "source": "Hermes Web UI 官方目录（hub/webui 安装）",
@@ -260,6 +260,15 @@
       "watchStatus": "自研/无上游-免监控",
       "skills": [
         "software-development/tauri-desktop-development"
+      ]
+    },
+    {
+      "source": "ChromeDevTools/chrome-devtools-mcp",
+      "count": 1,
+      "checkType": "npm",
+      "watchStatus": "已在看门(chrome-devtools-mcp)",
+      "skills": [
+        "mcp/chrome-devtools"
       ]
     }
   ],
