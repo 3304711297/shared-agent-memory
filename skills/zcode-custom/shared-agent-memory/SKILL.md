@@ -222,3 +222,19 @@ python scripts/check_memory_layout.py --verbose  # 列出每个 junction 及其�
 - **进程占用预检**：删除前用 `wmic process get processid,commandline` 搜目录名，确认无进程引用（尤其名字与在跑服务相关的副本，如 `easycliproxyapi`）。
 - **本次结果**：11 个副本（含 agent 自身于 09-06 留的 `sam_view`、09-05 的 `easycliproxyapi`）全部无未推送提交；3 个有脏改动的已存补丁；释放 179MB。
 
+## 能力组件与技能孪生协同铁律（Capability-Skill Co-Evolution Rule，2026-09-24 踩坑落地）
+
+**铁律：升级任何能力组件（CLI、MCP、插件、扩展）时，严禁只升级二进制/运行配置而遗漏配套技能；必须同步排查并升级孪生技能（associatedSkills）。**
+
+- **为什么**：CLI/MCP 底层程序只是执行器，而 Skill 是 Agent 的操作认知与规约约束。
+  - 实例（2026-09-24）：升级 `cli-bsk` 至 0.3.1，若漏升 `web/browser-skill`，将遗失上游 7 篇解耦 `references/` 专题文档与针对网页注入的提示词防御门禁；升级 `chrome-devtools-mcp` 至 1.10.1，若漏补 `mcp/chrome-devtools` 技能，Agent 面对新工具（如 `get_css_styles`）依然无法获知何时优先使用它，导致升级徒劳。
+- **机制保障**：
+  1. `capability-inventory.json` 已落地 `associatedSkills` 字段（如 `cli-bsk` 绑定 `web/browser-skill`，`chrome-devtools-mcp` 绑定 `mcp/chrome-devtools`）；
+  2. `check_capability_upstream.py` 在发现落后（`🔴 落后`）时会自动扫描 `associatedSkills` 并在 Issue 报告中输出显式警示：`⚠️ 孪生技能联动：本组件关联技能 [...]。升级程序后必须同步核对上游技能仓库是否有文档、子命令或 references 变更`；
+  3. `lint_inventory` 守卫强制校验 `associatedSkills` 字段格式。
+- **执行 SOP（三步闭环，缺一不可）**：
+  1. **升级程序/配置**：更新二进制、npm 包或 config.yaml 钉版，实测验证连通；
+  2. **核对并升级技能**：根据 `associatedSkills` 检索上游 Git 仓库新提交/Release，同步更新本地 SKILL.md、references/ 子文档及参数说明（同时保留本地 Astra 中文触发词与环境铁律）；
+  3. **台账与门禁收口**：同步推进 `skills-provenance.json`（确权与 watchStatus 绑定），跑通本地三门禁后推 main。
+
+
