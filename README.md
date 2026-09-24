@@ -33,7 +33,8 @@ shared-agent-memory/
 │   ├── check_hygiene.py           # 卫生扫描：本机用户名路径 / GitHub 与 AWS 凭据 / 私钥块
 │   ├── check_memory_layout.py     # 记忆库布局守卫：真源须在 main、topics junction 须可解析
 │   ├── check_capability_upstream.py  # 能力组件看门（本地解析 + 远程上游比对）
-│   └── check_skill_drift.py       # 技能漂移检查：已装技能 vs 上游同名技能
+│   ├── check_skill_drift.py       # 技能漂移检查：已装技能 vs 上游同名技能
+│   └── check_pr_merge_watch.py  # 上游 PR 合并守望：跟踪指定 PR 合并状态并托管 Issue 通知
 ├── capability-inventory.json      # 能力清单：已装技能 / 插件及其来源与版本
 ├── skills-provenance.json         # 技能来源台账：安装渠道与准入记录
 ├── watch-capability.cmd           # 本地跑能力看门（--full 强制全量上游比对）
