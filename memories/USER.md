@@ -19,3 +19,5 @@ Session closeout dual push (v2.0): When user asks to end/delete session or all t
 CI notifications: On all-green task completion, call GitHub API (DELETE /notifications/threads/{id}) to mark related notification threads as Done.
 §
 Core instruction and memory language invariant: 'SOUL.md', 'USER.md', and 'MEMORY.md' MUST be authored and updated STRICTLY in English. Agents must NEVER introduce Chinese or mixed languages into these core instruction and memory files.
+§
+Knowledge base and issue workflow: NEVER write directly to youshouldknow knowledge bases without explicit user selection/confirmation. Upstream-watch and evaluation-only GitHub Issues with no needed code changes must be summarized and closed automatically without asking.
