@@ -18,3 +18,5 @@ For every article added to [[youshouldknow-repo]], the user requires this exact 
 6. Clean up source images and temp files from both the project folder and the Desktop.
 
 **Filename rule:** never use URL-special characters (`%`, `#`, `?`) in article filenames — a file named `...跳升至100%现象解析.md` made its GitHub page fail to load ("An unexpected error occurred") because `%` starts an invalid percent-encoding in the URL. Display text/titles may keep `%`, but the filename and README link path must avoid it (e.g. rename 100% → 满电).
+
+**Local mkdocs build note:** When testing locally with `mkdocs build --strict`, `mkdocs-git-revision-date-localized-plugin` will raise a warning on newly created files ("First revision timestamp is older than last revision timestamp") because uncommitted files lack git commit logs. Always commit the new article file locally first before executing `mkdocs build --strict`.
