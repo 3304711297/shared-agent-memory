@@ -45,8 +45,9 @@ metadata:
 |---|---|---|---|
 | ① | `video_analyze` 工具 | 默认先试 | 直接调用 |
 | ② | **cpa 端点工具集路线**（本机首选 fallback） | ① 报「视频内容已被过滤」时 | `python scripts/agentic-video-cpa.py <视频>` |
-| ③ | `distill.py` Google 官方直连 | 持有有效 `GEMINI_API_KEY` 且官方模型 ID 可用 | `python scripts/distill.py <视频>` |
-| ④ | 手搓抽帧 + `vision_analyze` | 仅在 ②③ 均不可用时，且接受精度损失 | 自建，勿作为默认 |
+| ③ | **OpenRouter 免费多模态切片路线** | 用户指定不调云端 Gemini / 配额耗尽时 | `python scripts/distill_openrouter.py <视频>` |
+| ④ | `distill.py` Google 官方直连 | 持有有效 `GEMINI_API_KEY` 且官方模型 ID 可用 | `python scripts/distill.py <视频>` |
+| ⑤ | 手搓抽帧 + `vision_analyze` | 仅在上述均不可用时，且接受精度损失 | 自建，勿作为默认 |
 
 ### `video_analyze` 的失效模式（本机实测）
 
@@ -68,6 +69,30 @@ python scripts/agentic-video-cpa.py "<视频路径>" --question "这次点击触
 1. **收敛纪律必须有**：不设预算上限时模型会无限次重复放大同一区域——实测 14 轮不收敛、上下文滚到 63 万 token，仍未给结论。脚本的 `TOOL_BUDGET`（默认 8）+ 只回带最近 `KEEP_RECENT_SETS`（3）组工具结果 + 强制每轮写「已确认」笔记，三件套共同保证第 5 轮左右收口。
 2. **防幻觉锚点必须写进 SYSTEM**：低分辨率小字极易诱发先验填补。实测 `gemini-3-flash-preview` 分析本机录屏时，凭空编出 `GPT-4o` / `o1-preview` / `Llama 3.1 405B` / `0 / 2000` 等画面中**根本不存在**的 UI。SYSTEM 里必须显式禁止用常见 AI 界面先验去补全，并要求「小于 14px 的文字先放大再读」。
 3. **交叉验证仍不可省**：即使模型声称「已放大核对」，低分辨率下不同轮次仍可能给出互相矛盾的具体读数（如鼠标移动方向、最右端图标形状）。交付前用 `vision_analyze` 对**原始帧的裁剪区域**独立复核关键结论，不要直接采信单一叙述。
+
+### OpenRouter 免费多模态切片路线（Space Bunny / 视觉切片 fallback）
+
+当用户显式要求**不调用云端 Gemini**、或 Gemini 路线配额耗尽/端点故障时，可切换至 OpenRouter 免费多模态模型（默认 `stealth/space-bunny-alpha`）：
+
+```bash
+python scripts/distill_openrouter.py "<视频路径>" -o "<输出.md>"
+```
+
+**实测三大避坑铁律与工程机理（2026-09-27 实测）：**
+
+1. **`video_url` 全局余额门槛与 402 拦截**：
+   - OpenRouter 对所有模型的 `video_url`（直传视频 base64/URL）设有硬性规则：**账户必须至少有 $1.00 余额**。即便模型本身单价为 0（如 space-bunny-alpha），免费层账户直传视频依然会直接抛出 `HTTPError 402: {"error":{"message":"This request requires at least $1.00 in balance for video","code":402}}`。
+   - 此外，经由本地代理上传数兆 base64 视频容易发生 `WinError 10054` 连接重置。
+   - **破局方案**：`image_url` 在 OpenRouter 免费模型上**完全零门槛免费**！脚本自动使用 ffmpeg 抽帧生成 3 张 3x4 (12 帧/张) 的紧凑时序接触表（Contact Sheet，每张仅约 100KB），通过 `image_url` 传入，彻底绕开 402 余额限制与大包断连。
+2. **思考模型（Reasoning Models）参数三要素**：
+   - 类似 `stealth/space-bunny-alpha` 这类自带深度思考的模型，默认 `reasoning_effort: max`；
+   - 若设置了较小的 `max_tokens`（如 1500），思考 token 会耗尽全部预算导致最终 `content` 返回 `None`，引发脚本写入异常；
+   - **必配参数**：显式指定 `"reasoning": {"effort": "low"}` 限制思考预算，并放宽 `"max_tokens": 4096`；解析响应时严格做 `content = msg.get("content") or ""` 空值保护。
+3. **Hermes CLI 独立会话一键拉起**：
+   - 若主会话模型不支持多模态，可通过 Hermes CLI 直接单次拉起 openrouterfree 供应商运行任务：
+     ```bash
+     hermes chat --provider openrouterfree -m stealth/space-bunny-alpha -q "请使用多模态能力分析本地切片..." --oneshot
+     ```
 
 ### `distill.py`（Google 官方直连）的已知坑
 

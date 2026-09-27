@@ -83,7 +83,7 @@ If subtitles are disabled or missing, extract a lightweight video stream for mul
 
 4. **Multimodal Analysis**:
    Call `video_analyze(video_url="C:/.../bili_temp.mp4", question="...")` to perform holistic audio, visual UI, and slide text analysis.
-   **If `video_analyze` is unavailable or fails (e.g. 401/invalid key): do NOT hand-roll whisper/ffmpeg-frame workarounds.** Load the `agentic-video-distill` skill and run its `scripts/distill.py` on the downloaded mp4 instead — it is the designated fallback for Bilibili videos without subtitles.
+   **If `video_analyze` is unavailable or fails (e.g. 401/invalid key/402 balance limit): do NOT hand-roll whisper/ffmpeg-frame workarounds.** Load the `agentic-video-distill` skill and run its `scripts/agentic-video-cpa.py` (cpa端点) 或 `scripts/distill_openrouter.py` (OpenRouter免费多模态Space Bunny切片路线) on the downloaded mp4 instead — it is the designated fallback for Bilibili videos without subtitles.
 
 5. **Mandatory Immediate Cleanup**:
    Immediately delete temporary `.mp4` files from disk as soon as `video_analyze` returns to prevent disk bloat.
