@@ -435,6 +435,15 @@ project 值可从 `loadCodeAssist` 响应的 `cloudaicompanionProject` 字段取
 ⇒ 提建议时要把“安全风险”与“对本用户实际指标（可用/延迟/带宽）的影响”分开陈述——
    后者才是他会采纳的依据。
 
+## 换客户端的可行性判定
+
+完整方法与实测证据见 `references/client-migration-feasibility.md`（UA 决定订阅格式 / 内核协议兼容 / 发布节奏核实）。三条最常踩的结论先行：
+
+- **订阅格式由 UA 决定**：同一订阅 URL，`clash-verge`/`ClashMeta`/`FLClash` UA 拿回 Clash YAML，
+  `sing-box` UA 拿回 sing-box JSON，`mihomo`/无 UA 拿回 base64 分享链接。不要信 UA 白名单，直接用目标客户端的 UA 试一次 GET。
+- **AnyTLS+Reality 在 mihomo 系全部不可用**（必挂在 vless/vmess/trojan 上才可用 mihomo 系）。
+- **“app 提示没有新版本”多半是正式版/预发布通道语义**，不是项目停更；用 `releases.atom` / `commits.atom` 看时间定案。
+
 ## Pitfalls
 
 - **不要按字段名猜语义——去读客户端源码定案（2026-09-20 两条错报的根因）。** 两次把配置字段说错：

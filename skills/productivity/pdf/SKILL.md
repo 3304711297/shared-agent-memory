@@ -96,8 +96,20 @@ python scripts/pdf_meta.py doc.pdf --list-attachments | --extract-attachments di
 8. **Secure.** Encrypt with distinct user/owner passwords and AES-256. To remove a password you know, `--decrypt` writes an unencrypted copy.
 9. **Verify** (see below) before reporting success.
 
+## Filling a Flat PDF (no AcroForm) by Overlay
+
+Many real forms (contracts, school/HR templates) have **no form fields** — `pdf_read.py --fields` returns nothing and blanks are drawn as underscores or plain whitespace. Do NOT hand-tune coordinates by eye; derive them, then prove them with a pixel diff:
+
+1. **Locate blanks programmatically.** `pdfplumber` `extract_words()` gives every token's `x0/x1/top/bottom`; the gap after a label (`x1`) is the blank. Blank *marker rects* (`page.rects`) give exact blank widths on underscored forms.
+2. **Get the baseline, not the box.** pdfplumber `top` is a font-metric box. Take one chunk's text-space `tm[5]` via `pypdf`'s `extract_text(visitor_text=...)` (identity `cm` in these files) and derive `baseline = page_height - top - k`, where `k` is calibrated once per font size (`0.768 * size` for SimSun-class CJK). Reuse that `k` for every line of the same size so filled text shares the template's baseline.
+3. **Draw the overlay with reportlab + SimSun** (`TTFont('SimSun', r'C:\Windows\Fonts\simsun.ttc', subfontIndex=0)`), then `pypdf` `page.merge_page(overlay)` — overlay lands on top, so the original layout is untouched. Measure with `pdfmetrics.stringWidth` and auto-shrink the fill size to the available width instead of guessing.
+4. **Tight blanks: white-out + re-typeset the row.** When a value is wider than its blank (an 11-digit phone in a 43 pt gap, a 7-char major in a 20 pt gap), draw a white `rect()` over the label+blank band and redraw `label + value` at an auto-fitted size. Keep the wipe inside the line band so nothing else is lost.
+5. **Never let one draw list span two documents.** Key every entry by `(doc, page, ...)` — a shared list silently paints document A's values onto document B. This is the failure mode most likely to survive visual review.
+6. **Verify with a pixel diff, not with eyes.** Render original vs filled at `scale=4` (pypdfium2), threshold to ink masks, and assert: (a) every removed pixel lies inside a declared wipe rect, (b) all new ink rows fall inside the intended line bands, (c) `max x` of new ink is within the page/line limit. Vision models misread 8–10 pt CJK and will report both phantom overlaps and miss real ones, so treat their verdict as a hint to check, never as evidence.
+
 ## Pitfalls
 
+- **Overlay filling leaves the old blank text in the text layer.** White rects only hide glyphs; `extract_text()` still returns the template's underscores and `年 月 日`, so text search finds duplicates. Fine for print; strip the content stream only if search hygiene is required.
 - **Scanned PDFs**: empty `extract_text()` plus page images means there is no text layer. Route to `references/ocr-extraction.md`; do not fabricate text.
 - **Flattening limits**: `pdf_fill_form.py --flatten` uses pypdf's flatten support, which converts widget appearances into page content. It is reliable for plain text fields and checkboxes but can drop or misrender exotic widgets (rich text, custom appearance streams, some radio groups). Verify the flattened output visually with `vision_analyze`; for bulletproof flattening use an external renderer (e.g. Ghostscript or `pdftoppm`+reassembly) as a fallback.
 - **NeedAppearances**: after filling, viewers only render values if appearance streams exist. The fill script sets the AcroForm `NeedAppearances` flag so conforming viewers regenerate them; some minimal viewers ignore it — flatten if display fidelity matters.

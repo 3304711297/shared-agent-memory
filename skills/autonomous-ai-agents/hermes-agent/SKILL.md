@@ -84,6 +84,13 @@ $HERMES_HOME/skills/        Installed skills
 
 Profiles use `~/.hermes/profiles/<name>/` with the same layout. When a profile is active, resolve the real home from `$HERMES_HOME` — never hardcode `~/.hermes`.
 
+## Windows Terminal & pip — verified gotchas
+
+- **`$TMPDIR` is NOT exported in the bash (MSYS) session.** `cd "$TMPDIR"` silently stays put and `r'$TMPDIR/x'` expands to `/tmp/x`, which native tools often cannot resolve. Always pass an absolute scratch path: `C:/Users/<user>/AppData/Local/hermes/cache/scratch/<file>`.
+- **Default `pip install` fails when the local proxy client is down.** `HTTP_PROXY/HTTPS_PROXY/ALL_PROXY` point at `127.0.0.1:3067`; if that client is not running every index call dies with `WinError 10061`. Fix: `unset HTTP_PROXY HTTPS_PROXY ALL_PROXY && python -m pip install <pkg> -i https://pypi.tuna.tsinghua.edu.cn/simple`.
+- **Check every interpreter before installing.** The bare `python` is Hermes' own `tools/python-3.x` build; `hermes-agent/venv`, per-install venvs, and the system Python are separate. Installing into the wrong one is a silent no-op for the tool that needs the package.
+- **Native path conversion is off**: pass `C:/...` forward-slash paths to native binaries (git, rg, node, python); only bash builtins accept `/c/...`.
+
 ## Routing Table — load the reference for the task
 
 | User wants... | Load |
