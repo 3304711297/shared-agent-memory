@@ -1,7 +1,7 @@
 {
   "version": 2,
   "description": "本地能力组件清单（skill/mcp/plugin/工具核心的已装版本与上游源）。由 capability-upstream-watch 工作流每日比对远端源；本地源组件用 watch-capability.cmd 或任意 Agent 会话跑脚本比对。【维护铁律】升级或新装任何组件后，必须同步更新本清单并随共享库推 main，看门自动收口对应 Issue。",
-  "updatedAt": "2026-09-26T18:21:38+08:00",
+  "updatedAt": "2026-09-28",
   "components": [
     {
       "id": "chrome-devtools-mcp",
@@ -337,7 +337,8 @@
     "【退役口径说明 2026-09-16】以上 7 项退出后看门清单由 40 项收敛为 33 项：报告只保留与本地实装版本存在真实关联的组件（CLI / 插件 / MCP / 已装技能套件 / 本地配置守卫 / 借鉴雷达）。技能生态「有什么新东西」统一由 skill-plugin-resources.md 索引库按需回答，两项职责不再交叉。脚本中 hermes-skills-hub / skillhub-market / colaskill-market 三种 check 类型与对应解析逻辑保留在源码（SUPPORTED_CHECK_TYPES 与实现均未删），仅清单侧不再登记组件；未来若要重新纳入，补清单条目即可，无需改代码。",
     "【本地增强·执行路扩展 2026-09-16】agentic-video-distill 新增 cpa 端点工具集路线：内置 video_analyze 走主聊天模型链路，主模型不支持视频输入时报“视频内容已被过滤”；Google 官方直连路线在本机出口 SSL 不稳、模型 ID 易失配，且低阶模型会凭空编造画面内容。改为让本地反代端点（默认 127.0.0.1:18080/v1）的 gemini-3.8-flash-high 带工具集自主分析（抽帧/区域放大/音轨），新增脚本 scripts/agentic-video-cpa.py，SKILL.md 补「路线选择」表与三条设计要点（收敛预算、防幻觉锚点、交叉验证）。纯本地文件增强，该技能自研无上游，不涉及安装/卸载与版本变更，技能总数不变",
     "【评估不纳入看门 2026-09-18 用户拍板】browser-use/jev-ultrafast：浏览器 Agent 参考实现（TypeSafe Jev 决策模型 + 动态索引动作空间，MIT，2026-09-16 发布）。**判据**：按 09-16「它落后了我会不会真的去动本地」口径——本地无日常依赖（仅留一份评估克隆，且决策模型卡在 TypeSafe waitlist、端点硬编码不可换），进入看门只产生提交噪声，与已退出的市场计数型雷达同类。**知识已落地**：其编号元素表机制已移植为本地技能 bsk-compact-page-read（含 vendored snapshot.js 副本，同步判据记录在该技能正文，不依赖看门）。关联记忆见 topics/jev-ultrafast-local-integration.md 。",
-    "【自研技能 2026-09-23】uefi-bios-firmware-analysis：AMI Aptio V 固件镜像解析（UEFIExtract + IFRExtractor-RS）、IFR 菜单路径映射、NVRAM NVAR 记录解析与「BIOS 改动是否落地」核查法（镜像字节 diff + OS 侧 PnP 交叉验证）。自研工具体系、无公开上游，不纳入单独看门，已列入 protectedSkills 白名单。"
+    "【自研技能 2026-09-23】uefi-bios-firmware-analysis：AMI Aptio V 固件镜像解析（UEFIExtract + IFRExtractor-RS）、IFR 菜单路径映射、NVRAM NVAR 记录解析与「BIOS 改动是否落地」核查法（镜像字节 diff + OS 侧 PnP 交叉验证）。自研工具体系、无公开上游，不纳入单独看门，已列入 protectedSkills 白名单。",
+    "【架构与执行规范重构 2026-09-28】agentic-video-distill 与 bilibili-content 规范升级：反思外部云端 API/子脚本在实际使用中非但未省 token，反而因复杂 shell 交互和结果搬运导致更多 token 浪费的问题。正式明确：在用户未强调使用云端模型时，优先在当前会话直接使用当前模型调用 video_analyze 分析视频；且铁律强制要求结合 Whisper 本地语音转录，构建「视频画面 + Whisper 音频」双轨交叉消差闭环，彻底根除视觉小字漏检与同音术语误听。youshouldknow 仓库 watch_bilibili.py 与测试用例同步升级对齐。"
   ],
   "meta": {
     "zcodeDecommissioned": "2026-09-09: ZCode 客户端已拆除，zcode-github / zcode-bundled-plugins 组件条目移除（组件物理消失，看门无法再检查）；skills 条目中 'ZCode ~/.zcode/skills 副本' 表述已过时，Hermes 侧为唯一副本",
