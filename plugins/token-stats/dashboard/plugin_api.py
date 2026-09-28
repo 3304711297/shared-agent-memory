@@ -44,10 +44,55 @@ def _hermes_home() -> Path:
     return Path(home) if home else Path.home() / ".hermes"
 
 
+def _candidate_base_dirs() -> list[Path]:
+    """Discover potential EasyCLIProxyAPI root directories dynamically."""
+    candidates: list[Path] = []
+    standard_roots = [
+        Path(r"D:\EasyCLIProxyAPI-v0.3.8-Windows-amd64"),
+        Path(r"D:\EasyCLIProxyAPI"),
+        Path(r"D:\EasyCLIProxyAPI-v0.2.71-Windows-amd64"),
+    ]
+    for r in standard_roots:
+        if r.exists() and r not in candidates:
+            candidates.append(r)
+
+    # 动态探测 D:\ 与 C:\ 盘下匹配 EasyCLIProxyAPI 的目录（按版本与修改时间降序优先最新目录）
+    for drive in ["D:\\", "C:\\"]:
+        drive_path = Path(drive)
+        if drive_path.exists():
+            try:
+                matches = [p for p in drive_path.glob("*EasyCLIProxyAPI*") if p.is_dir()]
+                matches.sort(key=lambda p: p.stat().st_mtime, reverse=True)
+                for p in matches:
+                    if p not in candidates:
+                        candidates.append(p)
+            except Exception:
+                pass
+    return candidates
+
+
 def _auth_dir() -> Path:
     override = os.environ.get("HERMES_QUOTA_AUTH_DIR")
     if override:
         return Path(override)
+
+    # 遍历候选根目录，优先寻找同时存在且包含 antigravity-*.json 的 oauth 或 auth 子目录
+    for base in _candidate_base_dirs():
+        for sub in ("oauth", "auth"):
+            cand = base / sub
+            if cand.is_dir() and any(cand.glob("antigravity-*.json")):
+                return cand
+
+    # 降级：如果未找到包含 json 的目录，返回第一个存在的 oauth 或 auth 目录
+    for base in _candidate_base_dirs():
+        for sub in ("oauth", "auth"):
+            cand = base / sub
+            if cand.is_dir():
+                return cand
+
+    default_new = Path(r"D:\EasyCLIProxyAPI-v0.3.8-Windows-amd64\oauth")
+    if default_new.exists():
+        return default_new
     return Path(r"D:\EasyCLIProxyAPI\auth")
 
 
@@ -56,14 +101,20 @@ def _cache_file() -> Path:
 
 
 def _find_usage_db() -> Optional[Path]:
+    auth = _auth_dir()
     candidates = [
+        auth.parent / "usage-records" / "usage.db",
+        Path(r"D:\EasyCLIProxyAPI-v0.3.8-Windows-amd64\usage-records\usage.db"),
         Path(r"D:\EasyCLIProxyAPI-v0.2.71-Windows-amd64\usage-records\usage.db"),
         Path(r"D:\EasyCLIProxyAPI\usage-records\usage.db"),
-        _auth_dir().parent / "usage-records" / "usage.db",
     ]
     for c in candidates:
         if c.exists():
             return c
+    for base in _candidate_base_dirs():
+        cand = base / "usage-records" / "usage.db"
+        if cand.exists():
+            return cand
     return None
 
 

@@ -6,7 +6,7 @@ description: "查配额/额度监控时必用。token-stats内置化架构与排
 # Hermes 配额监控内置化（token-stats）
 
 ## 架构
-- 数据源：Google 官方 `daily-cloudcode-pa.googleapis.com/v1internal:retrieveUserQuotaSummary`，凭据读 `D:\EasyCLIProxyAPI\auth\antigravity-*.json`，经本地代理 127.0.0.1:3067。
+- 数据源：Google 官方 `daily-cloudcode-pa.googleapis.com/v1internal:retrieveUserQuotaSummary`，凭据自适应探测 EasyCLIProxyAPI 安装目录（自动扫描 D:\ 与 C:\ 下 `*EasyCLIProxyAPI*` 根目录及 `oauth` 与 `auth` 子目录下的 `antigravity-*.json`，向后兼容 `D:\EasyCLIProxyAPI\auth` 与环境变量 `HERMES_QUOTA_AUTH_DIR`），经本地代理 127.0.0.1:3067。
 - 服务形态：Hermes 统一插件（Unified Agent+Desktop Plugin），代码收敛在 `~/.hermes/plugins/token-stats/`：后端位于 `dashboard/plugin_api.py`（FastAPI 路由挂载在 `/api/plugins/token-stats/`），桌面端 UI 位于 `desktop/plugin.js`（由桌面端统一插件机制自动映射至 `desktop-plugins/token-stats/`，Settings -> Plugins 呈现为单一包）；并在 `__init__.py` 注册 `/quota` 会话内斜杠指令（支持 `/quota` 或 `/quota refresh`）。
 - 前端：经 `ctx.rest('/quota')` 命名空间门读取，无 CORS/固定端口依赖。支持状态栏 Chip（含 Popover）、左侧导航栏 Pulse 入口（`SIDEBAR_NAV_AREA`）、独立全景看板（`ROUTES_AREA: /quota`）与命令面板（`PALETTE_AREA`）；基于 `ctx.storage` 实现时间格式（相对/绝对）与左侧导航栏配额入口开关持久化（默认隐藏侧栏入口，避免误认为 Hermes 原生自带，用户可在状态栏 Popover 底部或看板一键启闭并热生效）。
 - 多账号与待机账号重置监控（2026-09-07 升级）：多账号凭据池在 Popover 列表和 /quota 看板卡片均直接内联展示各个账号（包括非活跃/待机轮询账号）独立的 5h 滚动与周配额重置倒计时（支持 compact 紧凑与相对/绝对格式），并支持点击任意账号卡片将核心指标大卡（进度条、绝对时刻）切换为该账号的待机聚焦预览。
@@ -45,6 +45,7 @@ description: "查配额/额度监控时必用。token-stats内置化架构与排
 - 前端 runtime 插件只许 import `@hermes/plugin-sdk` 和 react（lint 栅栏）；`ctx.rest` 需在 `register(ctx)` 时捕获 context。
 - 改 `config.yaml` 用 python yaml 读写（patch/write_file 工具拒写该文件）；改后必须抽查关键字段完整性。
 - 30s 内存缓存 + 磁盘缓存 `desktop-plugins/token-stats/direct-quota.json`；`?force=1` 穿透。
+- **EasyCLIProxyAPI 路径与凭据目录变迁适配（2026-09-28 修复）**：新版 EasyCLIProxyAPI（如 v0.3.8+）将凭据与运行日志收敛在 `oauth/` 目录（旧版为 `auth/`），且目录常携带版本后缀（如 `D:\EasyCLIProxyAPI-v0.3.8-Windows-amd64`）。插件后端现已实现根目录动态感知（扫描 `D:\`、`C:\` 根目录 `*EasyCLIProxyAPI*`，并优先提取含有有效 `antigravity-*.json` 的 `oauth`/`auth` 目录），并向后兼容环境变量 `HERMES_QUOTA_AUTH_DIR` 与传统固定路径。
 - **Windows 下 fs.watch 文件/目录死循环事件风暴（2026-09-22 踩坑排障实证）**：
   Hermes Desktop 的 `watchPreviewFile` 与 `watchDirectory`（Electron 主进程）在 Windows 上调用 Node.js 原生 `fs.watch(dir)` 时，若监控目录或其子文件发生高频文件系统变动（或与子项发生句柄竞争），会导致主线程每 2 秒接收到超 36 万次文件系统变动事件（`eventType: rename`），引发内核态 I/O 等待自旋，使得单个 CPU 核心（通常是 Core #2）被固定打满 100%（其中 75%+ 处于 Kernel/Privileged 模式，用户态仅占 ~18%）。遇到桌面端单核 100% 满载且 JS 无长任务卡顿特征时，应直接通过 V8 Inspector 检查 `process._getActiveHandles()` 中的 `FSWatcher` 句柄，关闭高频或失效的 watcher 即可瞬间自愈。
 
