@@ -81,12 +81,18 @@ If subtitles are disabled or missing, extract a lightweight video stream for mul
    # Save to scratch folder, e.g. $LOCALAPPDATA/Temp/bili_temp.mp4
    ```
 
-4. **Multimodal Analysis**:
-   Call `video_analyze(video_url="C:/.../bili_temp.mp4", question="...")` to perform holistic audio, visual UI, and slide text analysis.
-   **If `video_analyze` is unavailable or fails (e.g. 401/invalid key/402 balance limit): do NOT hand-roll whisper/ffmpeg-frame workarounds.** Load the `agentic-video-distill` skill and run its `scripts/agentic-video-cpa.py` (cpa端点) 或 `scripts/distill_openrouter.py` (OpenRouter免费多模态Space Bunny切片路线) on the downloaded mp4 instead — it is the designated fallback for Bilibili videos without subtitles.
+4. **Multimodal Analysis & Whisper Dual-Track (当前会话优先 · 视听双轨消差)**:
+   - **优先当前会话直接分析**：在用户未明确强调调用外部云端时，严禁唤起外部子脚本，直接在当前会话使用当前模型调用 `video_analyze(video_url="C:/.../bili_temp.mp4", question="...")`，提取屏幕画面事实、菜单层级与结构化结论；
+   - **强制结合 Whisper 语音转录**：使用 `ffmpeg` 从临时 mp4 提取音频并调用本地 Whisper（默认加载 `small` 模型）转录语音全文：
+     ```bash
+     ffmpeg -y -v error -i bili_temp.mp4 -vn -acodec pcm_s16le -ar 16000 bili_temp.wav
+     python -c "import whisper; model=whisper.load_model('small'); res=model.transcribe('bili_temp.wav', language='zh'); print(res['text'])"
+     ```
+   - **双轨交叉校对与消差**：将 Whisper 语音转录与 `video_analyze` 提取的画面切片逐项比对，以音频校正 OCR 辨识模糊，以画面实据纠正同音生僻术语，彻底杜绝单模态脑补与幻觉；
+   - **备选云端降级**：仅在当前主模型不支持视频输入（报“视频内容已被过滤”）或用户明确指定云端时，才调用 `agentic-video-distill` 的 cpa / OpenRouter 脚本。
 
 5. **Mandatory Immediate Cleanup**:
-   Immediately delete temporary `.mp4` files from disk as soon as `video_analyze` returns to prevent disk bloat.
+   Immediately delete temporary `.mp4` and `.wav` files from disk as soon as analysis completes to prevent disk bloat.
 
 ### 4. Subtitle-less video via frame sheets (`vision_analyze` fallback)
 

@@ -1,53 +1,53 @@
 ---
 name: agentic-video-distill
-description: "视频提炼/分析录屏时必用。Gemini代理式抽帧蒸馏省88%Token。B站无字幕视频与video_analyze失败时走本技能。Use when distilling long videos or screen recordings."
-version: 1.0.0
+description: "视频提炼/分析录屏时必用。优先当前会话直接分析视频+强制结合Whisper双轨比对避免误差。仅用户明确强调云端时走外部脚本。Use when analyzing videos."
+version: 1.1.0
 author: "Hermes & ZCode Dual-Agent Framework"
 license: MIT
 platforms: [linux, macos, windows]
 metadata:
-  tags: [video-understanding, multimodal, gemini-agentic, youtube, uefi-screencast, distillation]
-  related_skills: [bilibili-content, youtube-content, cangjie-distill]
+  tags: [video-understanding, multimodal, gemini-agentic, whisper, dual-track-verification, bilibili, youtube, distillation]
+  related_skills: [bilibili-content, youtube-content, whisper, cangjie-distill]
 ---
 
-# Agentic Video Distill (Gemini 代理式视频高密度蒸馏)
+# Agentic Video Distill (视频高密度蒸馏与双轨校对)
 
-基于 Google Gemini 的 **Agentic Video Understanding** 架构（Think → Act → Observe 服务端工具回环），实现对长视频、技术录屏、主板 UEFI/BIOS 操作教程以及公开 YouTube 视频的极限低 Token、高精度结构化蒸馏。
+基于当前会话原生多模态视频分析（`video_analyze`）与本地 **Whisper** 语音识别双轨交叉比对架构，实现对长视频、技术录屏、主板 UEFI/BIOS 操作教程以及公开网络视频的极限低 Token、零幻觉、高精度结构化蒸馏。
 
-## 架构解耦与核心机制
+## 核心设计原则与架构演进（2026-09 落地）
 
-1. **主聊模型与重活解耦**：
-   - 无论当前主会话模型是 Claude、DeepSeek、GLM 还是轻量模型，主模型无需（也无法）直接接收几百兆的原始视频流；
-   - 本技能指导当前 Agent 作为「调度官」，调用内置后台脚本委托 **Gemini 3.8 Flash** 专职执行 Agentic 视频穿透；
-   - 主模型接收后台返回的结构化 Markdown 切片，再结合用户诉求执行深度答疑、二次加工或编译进知识库。
-2. **极速抽帧与 Token 节约 88%**：
-   - **Pass by Reference**：初始仅传轻量元数据指针；
-   - **Transcript-first**：优先全文检索带时间戳字幕定位锚点；
-   - **Temporal Zooming & Adaptive FPS**：针对具体疑问区间（如 14~16秒）自适应提升至 5~10 FPS 高速抽帧，慢节奏 0.1 FPS 粗扫，按需拉取音频；
-   - 杜绝传统 1 FPS 暴力灌帧导致的 20 万+ Token 膨胀与细节注意力稀释。
+1. **优先当前会话原生分析，严禁盲目调用外部云端脚本**：
+   - **痛点与反思**：早期设计的外部云端子脚本/后台代理路线（如 `agentic-video-cpa.py` / `distill_openrouter.py`），初衷是为主会话节省上下文 Token。但在实际运行中，子脚本需要执行环境检查、多轮次 Shell 命令交互、繁琐重试与大段 Markdown 切片跨进程传输，**不仅没有节约 Token，反而因额外调用消耗了更多 Token**，且增加了网络中断与鉴权失败点。
+   - **最新铁律**：**除非用户在指令中明确强调/要求使用外部云端模型，默认一律优先在当前会话内直接使用当前模型调用 `video_analyze` 分析视频**。
+2. **强制双轨比对避免误差（video_analyze + Whisper 铁律）**：
+   - **单轨弊端**：纯视频视觉分析在遇到快速跳帧、复杂 BIOS 缩写、小字参数时容易产生先验脑补（如误读或凭空编造不存在的参数）；纯音频转录对静音操作、仅画面展示的配置路径与跑分图表无能为力；
+   - **双轨闭环**：
+     - **画面轨**：调用 `video_analyze` 精准捕获屏幕画面、拓扑架构、菜单层级、选项键值与测试曲线；
+     - **音频轨**：通过 `ffmpeg` 提取音频并调用本地 `whisper`（默认加载 `small` 模型）转录解说全貌；
+     - **交叉验证**：将画面提取要点与 Whisper 时间戳文本逐段对齐，以音频消除画面小字漏读，以画面实证纠正同音错别字，彻底消灭单模态幻觉。
 
 ---
 
 ## When to Use
 
-- 用户发送或指定本地视频文件路径（`.mp4`, `.mkv` 等）或公开 YouTube URL（`https://youtu.be/...`）；
-- B 站无字幕视频，或 `video_analyze` 不可用/调用失败（401 等）时的指定 fallback——先于任何手搓 whisper/抽帧方案；
+- 用户发送或指定本地视频文件路径（`.mp4`, `.mkv` 等）、B 站视频（BV 号/链接）或公开 YouTube URL；
 - 需要从视频中精准提取**屏幕画面证据**（如 UEFI/BIOS 菜单层级路径、拓扑结构图、代码 12 等设备管理器报错、性能跑分曲线）；
-- 需要将长视频/技术演讲高保真转化为 Markdown 学习笔记或供 `cangjie-distill` 提取方法论。
+- 需要将长视频/技术演讲高保真转化为 Markdown 学习笔记或供 `cangjie-distill` 提取方法论；
+- **执行原则**：直接使用当前会话模型 + Whisper 本地双轨流。
 
 ---
 
 ## 路线选择（先看这张表，再动手）
 
-**铁律：`video_analyze` 失败时不要立刻手搓 ffmpeg 抽帧 + 拼图。**低分辨率小字经抽帧拼接后只剩十几像素，视觉模型会互相打脸（同一区域两次读出不同文字），既烧轮次又得不出可信结论。按下列顺序走：
+**铁律：未明确强调云端时，坚决优先走「当前会话原生 + Whisper 双轨」路线。**
 
-| 优先级 | 路线 | 适用条件 | 命令 |
+| 优先级 | 路线 | 适用条件 | 操作流程 / 命令 |
 |---|---|---|---|
-| ① | `video_analyze` 工具 | 默认先试 | 直接调用 |
-| ② | **cpa 端点工具集路线**（本机首选 fallback） | ① 报「视频内容已被过滤」时 | `python scripts/agentic-video-cpa.py <视频>` |
-| ③ | **OpenRouter 免费多模态切片路线** | 用户指定不调云端 Gemini / 配额耗尽时 | `python scripts/distill_openrouter.py <视频>` |
-| ④ | `distill.py` Google 官方直连 | 持有有效 `GEMINI_API_KEY` 且官方模型 ID 可用 | `python scripts/distill.py <视频>` |
-| ⑤ | 手搓抽帧 + `vision_analyze` | 仅在上述均不可用时，且接受精度损失 | 自建，勿作为默认 |
+| **① 首选（默认）** | **当前会话直接分析 + Whisper 双轨比对** | **默认必走**（用户未强调云端时） | 1. `video_analyze(video_url=..., question=...)`<br>2. `ffmpeg` 提取音频 $\to$ `whisper` 本地转录<br>3. 视听双轨交叉核对交付 |
+| ② 备选 | **cpa 端点工具集路线** | 仅在当前主模型不支持视频输入（报「内容已被过滤」）或用户明确指定 cpa 时 | `python scripts/agentic-video-cpa.py <视频>` |
+| ③ 备选 | **OpenRouter 免费切片路线** | 用户显式指定 OpenRouter 渠道或配额告急时 | `python scripts/distill_openrouter.py <视频>` |
+| ④ 备选 | **distill.py Google 官方直连** | 用户显式要求官方直连且持有有效 Key | `python scripts/distill.py <视频>` |
+| ⑤ 保底 | 手搓抽帧 + `vision_analyze` | 仅在上述全部不可用时的终极保底 | 接触表 + 区域裁剪放大 |
 
 ### `video_analyze` 的失效模式（本机实测）
 
@@ -111,33 +111,28 @@ python scripts/distill_openrouter.py "<视频路径>" -o "<输出.md>"
 - **视频来源**：
   - 本地视频：确认为绝对路径（如 `D:/videos/uefi_test.mp4`）；
   - YouTube：确认为公开可访问链接（`https://youtu.be/...` 或 `https://www.youtube.com/watch?v=...`）；
-  - B 站视频：若是 B 站长视频，优先使用 `bilibili-content` 抓取 360p 流或字幕，亦可下载为本地临时 MP4 后调用本技能深度提炼画面。
-- **环境凭据**：
-  - 脚本自动读取环境变量 `GEMINI_API_KEY`；若未配置，提示用户传入或设置；
-  - 网络自动走本地代理 `http://127.0.0.1:3067`。
+  - B 站视频：优先使用 `bilibili-content` 抓取 360p 轻量流（`qn=16`，体积仅 5~15MB）保存至本地 scratch 临时目录（如 `$LOCALAPPDATA/Temp/bili_temp.mp4`）。
 
-### 2. 调用内置执行器（后台执行，主会话非阻塞）
+### 2. 执行双轨分析（当前会话原生 · 默认首选）
+若用户未明确指定调用外部云端，**默认一律在当前会话执行视听双轨比对**，严禁擅自唤起外部云端子脚本：
+1. **画面轨（video_analyze）**：
+   调用 `video_analyze(video_url="<本地视频绝对路径>", question="<结构化提炼提示词>")`。
+   结构化提炼提示词须涵盖：核心大纲、菜单层级路径、报错事件码/APIC ID、确切键值与操作红线。
+2. **音频轨（Whisper 本地转录）**：
+   提取音频并运行本地 Whisper（优先默认推荐 `small` 模型）：
+   ```bash
+   ffmpeg -y -v error -i "<视频路径>" -vn -acodec pcm_s16le -ar 16000 "<音频.wav>"
+   python -c "import whisper; model=whisper.load_model('small'); res=model.transcribe(r'<音频.wav>', language='zh'); print(res['text'])"
+   ```
+3. **双轨交叉校对与消差**：
+   对照 Whisper 语音转录与 `video_analyze` 提取的画面切片，以音频语义核准 OCR 画面模糊，以画面实据纠正同音生僻术语，彻底杜绝单模态脑补与幻觉。
+4. **即时清理**：
+   双轨提取完成后立即删除本地临时 `.mp4` 和 `.wav` 文件，保持环境零残留。
 
-**首选 cpa 工具集路线**（见「路线选择」表）：
-
-```bash
-python "<SKILL_DIR>/scripts/agentic-video-cpa.py" "<VIDEO_SOURCE>" -o "<OUTPUT_MD_PATH>"
-```
-
-**备选 Google 官方直连**（需有效 Key，且注意中文文件名坑）：
-
-```bash
-# 优先使用当前技能目录下的 scripts/distill.py（或 ~/.hermes/scripts/distill_gemini_video.py）
-python "<SKILL_DIR>/scripts/distill.py" "<VIDEO_SOURCE>" -o "<OUTPUT_MD_PATH>"
-```
-
-### 3. 获取输出与二次综合
-读取脚本产出的 Markdown 结构化切片：
-1. **时间线步骤与关键参数**；
-2. **屏幕画面事实证据**（确切菜单、报错代码与配置键值）；
-3. **底层原理与避坑红线**。
-
-主模型根据用户当前的特定问题，以精炼有据的语言向用户呈现最终结论。
+### 3. 备选云端脚本（仅在用户显式指定或主模型不支持视频时触发）
+- 若用户明确要求走 cpa 端点或主模型报“已被过滤”：`python "<SKILL_DIR>/scripts/agentic-video-cpa.py" "<视频>" -o "<输出.md>"`
+- 若用户明确要求 OpenRouter 渠道：`python "<SKILL_DIR>/scripts/distill_openrouter.py" "<视频>" -o "<输出.md>"`
+- 若用户明确要求官方直连且提供有效 Key：`python "<SKILL_DIR>/scripts/distill.py" "<视频>" -o "<输出.md>"`
 
 ---
 
