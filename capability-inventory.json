@@ -72,7 +72,7 @@
       "installed": [
         {
           "where": "D:\\Git（自定义路径，升级须走官方安装器锁路径流程，禁用 winget）",
-          "version": "2.55.0.windows.5"
+          "version": "2.56.0.windows.1"
         }
       ]
     },
