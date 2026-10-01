@@ -35,14 +35,14 @@
     "created_by": null,
     "last_patched_at": "2026-09-16T14:05:54.222850+00:00",
     "last_reused_patch_generation": 6,
-    "last_used_at": "2026-09-28T07:47:25.795242+00:00",
-    "last_viewed_at": "2026-09-28T07:47:25.793238+00:00",
+    "last_used_at": "2026-10-01T13:16:05.783496+00:00",
+    "last_viewed_at": "2026-10-01T13:16:05.781302+00:00",
     "patch_count": 6,
     "patch_generation": 6,
     "pinned": false,
     "state": "active",
-    "use_count": 19,
-    "view_count": 19
+    "use_count": 21,
+    "view_count": 21
   },
   "ast-grep": {
     "archived_at": null,
@@ -65,14 +65,14 @@
     "created_by": "agent",
     "last_patched_at": "2026-09-13T09:45:11.245114+00:00",
     "last_reused_patch_generation": 4,
-    "last_used_at": "2026-09-28T07:47:24.778525+00:00",
-    "last_viewed_at": "2026-09-28T07:47:24.776755+00:00",
+    "last_used_at": "2026-10-01T13:14:33.627874+00:00",
+    "last_viewed_at": "2026-10-01T13:14:32.618810+00:00",
     "patch_count": 4,
     "patch_generation": 4,
     "pinned": false,
     "state": "active",
-    "use_count": 26,
-    "view_count": 26
+    "use_count": 28,
+    "view_count": 28
   },
   "blocked-page-recovery": {
     "archived_at": null,
@@ -170,14 +170,14 @@
     "created_by": null,
     "last_patched_at": "2026-09-11T13:45:19.976983+00:00",
     "last_reused_patch_generation": 1,
-    "last_used_at": "2026-09-24T06:05:14.426835+00:00",
-    "last_viewed_at": "2026-09-24T06:05:14.424329+00:00",
+    "last_used_at": "2026-10-01T13:50:55.002336+00:00",
+    "last_viewed_at": "2026-10-01T13:50:55.000261+00:00",
     "patch_count": 1,
     "patch_generation": 1,
     "pinned": false,
     "state": "active",
-    "use_count": 5,
-    "view_count": 5
+    "use_count": 6,
+    "view_count": 6
   },
   "chrome-devtools": {
     "archived_at": null,
@@ -473,14 +473,14 @@
     "created_by": null,
     "last_patched_at": "2026-09-18T15:47:05.443332+00:00",
     "last_reused_patch_generation": 4,
-    "last_used_at": "2026-09-30T09:44:39.609525+00:00",
-    "last_viewed_at": "2026-09-30T09:44:39.607550+00:00",
+    "last_used_at": "2026-10-01T13:14:32.625258+00:00",
+    "last_viewed_at": "2026-10-01T13:14:32.623486+00:00",
     "patch_count": 4,
     "patch_generation": 4,
     "pinned": false,
     "state": "active",
-    "use_count": 86,
-    "view_count": 85
+    "use_count": 88,
+    "view_count": 87
   },
   "grill-me": {
     "archived_at": null,
@@ -939,14 +939,14 @@
     "created_by": null,
     "last_patched_at": "2026-09-20T09:41:07.233396+00:00",
     "last_reused_patch_generation": 17,
-    "last_used_at": "2026-09-29T13:23:02.046623+00:00",
-    "last_viewed_at": "2026-09-29T13:23:02.044852+00:00",
+    "last_used_at": "2026-10-01T14:02:37.859231+00:00",
+    "last_viewed_at": "2026-10-01T14:02:37.857057+00:00",
     "patch_count": 17,
     "patch_generation": 17,
     "pinned": false,
     "state": "active",
-    "use_count": 186,
-    "view_count": 186
+    "use_count": 187,
+    "view_count": 187
   },
   "simplify-code": {
     "archived_at": null,
@@ -1075,14 +1075,14 @@
     "created_by": null,
     "last_patched_at": "2026-09-21T15:26:41.904843+00:00",
     "last_reused_patch_generation": 1,
-    "last_used_at": "2026-09-24T07:15:19.173759+00:00",
-    "last_viewed_at": "2026-09-24T07:15:18.160754+00:00",
+    "last_used_at": "2026-10-01T13:14:31.173413+00:00",
+    "last_viewed_at": "2026-10-01T13:14:31.171627+00:00",
     "patch_count": 1,
     "patch_generation": 1,
     "pinned": false,
     "state": "active",
-    "use_count": 6,
-    "view_count": 6
+    "use_count": 7,
+    "view_count": 7
   },
   "using-git-worktrees": {
     "archived_at": null,
@@ -1135,14 +1135,14 @@
     "created_by": "installed",
     "last_patched_at": null,
     "last_reused_patch_generation": 0,
-    "last_used_at": "2026-09-28T08:04:57.620167+00:00",
-    "last_viewed_at": "2026-09-28T08:04:57.618397+00:00",
+    "last_used_at": "2026-10-01T13:16:04.770976+00:00",
+    "last_viewed_at": "2026-10-01T13:16:04.768412+00:00",
     "patch_count": 0,
     "patch_generation": 0,
     "pinned": false,
     "state": "active",
-    "use_count": 8,
-    "view_count": 8
+    "use_count": 9,
+    "view_count": 9
   },
   "windows-crash-diagnostics": {
     "archived_at": null,
