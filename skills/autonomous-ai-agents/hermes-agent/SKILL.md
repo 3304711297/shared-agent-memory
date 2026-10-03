@@ -220,6 +220,28 @@ Desktop model-menu「快速」= `/fast` = `agent.service_tier`, three mechanisms
 
 Pitfall: the picker shows the 快速 toggle whenever `model_supports_fast_mode()` matches the id (gpt-*/o1/o3/o4 prefixes, opus-4.8/5, grok-4.6) WITHOUT the route check, so on custom providers it renders then fails at apply time with `fast mode is not available for this model` (desktop shows「快速模式更新失败」). When a user asks what it does on a proxy-routed model: explain mechanism 1 + the route gate, and check the provider's `models:` list for a `-fast` sibling (mechanism 2) as the only working alternative.
 
+## 对话-人格 (`display.personality`) overlay 语义（2026-10-03 全链路查证）
+
+桌面端「设置 → 对话 → 人格」= `config.yaml` 的 `display.personality`，未设置 ≡ `none`。**唯一写入路径**是 `hermes_cli/personality.py:127 persist_personality()`，只原子写**名字**，源码注释明确 `never touches agent.system_prompt`。
+
+**不碰 SOUL.md / USER.md / MEMORY.md（三层都验证过）**：
+1. 写入层 —— 人格只是 `agent.ephemeral_system_prompt`，在 `agent/turn_context.py:1321-1326` 于 **API 调用时追加**到 system message 末尾（`injected at API-call time only, never cached`）。SOUL.md(slot #1)/memory/skills 全在它前面那个 cached prompt 里。
+2. 读取层 —— 三个文件只在构建 cached prompt 时加载，personality 分支不读。
+3. 内容层（唯一真实风险）—— overlay **追加在末尾**，语气类人格（hype/catgirl/uwu）位置最靠后、注意力权重最高，会**部分压制 SOUL.md 的语气**；后台记忆复盘 `agent/background_review.py:861` 明确继承 `ephemeral_system_prompt`，故写进 MEMORY.md/USER.md 的**措辞**可能带人格腔调（内容污染，非文件结构变化）。
+
+**副作用速查**：
+- **全局**：写进 config.yaml，CLI / TUI / 网关 / **cron** / 桌面共享，不是单会话。
+- **运行中拒绝**：`tui_gateway/methods_slash.py:348 _MUTATES_WHILE_RUNNING` 把 personality 与 model/compress 并列。
+- **不清历史**：`tui_gateway/agent_callbacks.py:301` 返回 `history_reset=False`，只追加一条 `role=user` pivot 标记。
+- **不破提示词缓存**：overlay 在 cached prefix **之后**追加，改它只动尾巴，前缀照常命中。
+- **未知名字只警告不崩**：`tui_gateway/server.py:2246-2252` → overlay 直接跳过。
+- **手写 `agent.system_prompt` 会被顶掉而非叠加**：`personality.py:118-124` 是 if/else，不是 merge。
+- 自定义/覆盖内置名放 `agent.personalities`（同名覆盖内置）。
+
+**与 #94486 死锁的同构关系（假设，未实证）**：人格切换与模型切换走**同一机制** —— 都往 history 塞 `role=user` pivot（`tui_gateway/server.py:1808 _is_pivot_marker` 同时认 `personality_switch` 与模型切换标记）。若遇到「桌面会话不跑」且近期动过人格，值得一并排查（标签：假设，结构同构 ≠ 已验证触发）。
+
+**结论**：持久人格写 `SOUL.md`（slot #1，跨项目稳定），`display.personality` 只当**临时模式开关**（`/personality teacher`）。强规则型 SOUL.md 保持 `none`。
+
 ## Hard Invariants (never violate, regardless of what you loaded)
 
 - **Never break prompt caching** — don't change past context, toolsets, or the system prompt mid-conversation. The only exception is context compression.

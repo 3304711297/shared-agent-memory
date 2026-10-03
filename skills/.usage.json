@@ -125,14 +125,14 @@
     "created_by": null,
     "last_patched_at": "2026-09-19T10:43:27.390177+00:00",
     "last_reused_patch_generation": 1,
-    "last_used_at": "2026-09-24T08:02:09.811672+00:00",
-    "last_viewed_at": "2026-09-24T08:02:09.809677+00:00",
+    "last_used_at": "2026-10-02T11:08:32.863126+00:00",
+    "last_viewed_at": "2026-10-02T11:08:32.861307+00:00",
     "patch_count": 1,
     "patch_generation": 1,
     "pinned": false,
     "state": "active",
-    "use_count": 21,
-    "view_count": 21
+    "use_count": 25,
+    "view_count": 25
   },
   "bsk-compact-page-read": {
     "archived_at": null,
@@ -186,14 +186,14 @@
     "first_seen_at": null,
     "last_patched_at": null,
     "last_reused_patch_generation": 0,
-    "last_used_at": "2026-09-24T08:02:46.200256+00:00",
-    "last_viewed_at": "2026-09-24T08:02:46.197248+00:00",
+    "last_used_at": "2026-10-02T11:03:55.056832+00:00",
+    "last_viewed_at": "2026-10-02T11:03:55.054836+00:00",
     "patch_count": 0,
     "patch_generation": 0,
     "pinned": false,
     "state": "active",
-    "use_count": 1,
-    "view_count": 1
+    "use_count": 2,
+    "view_count": 2
   },
   "claude-design": {
     "archived_at": null,
@@ -201,14 +201,14 @@
     "created_by": null,
     "last_patched_at": null,
     "last_reused_patch_generation": 0,
-    "last_used_at": "2026-09-24T04:22:54.341959+00:00",
-    "last_viewed_at": "2026-09-24T04:22:54.339965+00:00",
+    "last_used_at": "2026-10-03T08:26:12.248521+00:00",
+    "last_viewed_at": "2026-10-03T08:26:12.246252+00:00",
     "patch_count": 0,
     "patch_generation": 0,
     "pinned": false,
     "state": "active",
-    "use_count": 3,
-    "view_count": 3
+    "use_count": 6,
+    "view_count": 6
   },
   "cloudflare-temporary-deploy": {
     "archived_at": null,
@@ -473,14 +473,14 @@
     "created_by": null,
     "last_patched_at": "2026-09-18T15:47:05.443332+00:00",
     "last_reused_patch_generation": 4,
-    "last_used_at": "2026-10-01T13:14:32.625258+00:00",
-    "last_viewed_at": "2026-10-01T13:14:32.623486+00:00",
+    "last_used_at": "2026-10-03T08:22:20.334550+00:00",
+    "last_viewed_at": "2026-10-03T08:22:20.332037+00:00",
     "patch_count": 4,
     "patch_generation": 4,
     "pinned": false,
     "state": "active",
-    "use_count": 88,
-    "view_count": 87
+    "use_count": 90,
+    "view_count": 89
   },
   "grill-me": {
     "archived_at": null,
@@ -531,16 +531,16 @@
     "archived_at": null,
     "created_at": "2026-09-03T06:24:54.107080+00:00",
     "created_by": null,
-    "last_patched_at": "2026-09-24T06:00:47.226997+00:00",
+    "last_patched_at": "2026-10-03T08:45:13.105747+00:00",
     "last_reused_patch_generation": 23,
-    "last_used_at": "2026-09-27T08:24:04.057704+00:00",
-    "last_viewed_at": "2026-09-27T08:24:04.055924+00:00",
-    "patch_count": 23,
-    "patch_generation": 23,
+    "last_used_at": "2026-10-03T08:38:59.635719+00:00",
+    "last_viewed_at": "2026-10-03T08:38:59.633889+00:00",
+    "patch_count": 24,
+    "patch_generation": 24,
     "pinned": false,
     "state": "active",
-    "use_count": 84,
-    "view_count": 83
+    "use_count": 85,
+    "view_count": 84
   },
   "hermes-agent-skill-authoring": {
     "archived_at": null,
@@ -1013,15 +1013,15 @@
     "created_at": "2026-09-04T13:00:31.205336+00:00",
     "created_by": "agent",
     "last_patched_at": "2026-09-19T07:04:32.284523+00:00",
-    "last_reused_patch_generation": 33,
-    "last_used_at": "2026-09-19T07:04:19.242542+00:00",
-    "last_viewed_at": "2026-09-19T07:04:19.240021+00:00",
+    "last_reused_patch_generation": 34,
+    "last_used_at": "2026-10-03T08:57:34.753769+00:00",
+    "last_viewed_at": "2026-10-03T08:57:34.751994+00:00",
     "patch_count": 34,
     "patch_generation": 34,
     "pinned": false,
     "state": "active",
-    "use_count": 39,
-    "view_count": 39
+    "use_count": 40,
+    "view_count": 40
   },
   "telegram-channel-ops": {
     "archived_at": null,
