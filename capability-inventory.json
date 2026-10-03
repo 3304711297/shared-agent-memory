@@ -154,9 +154,9 @@
       "installed": [
         {
           "where": "Hermes skills/（6 项）【ZCode 副本已随 ZCode 拆除移除，2026-09-09】",
-          "version": "4.10.0",
-          "sha": "1d95ff7d39de12d87014ea40d4e22201bddc501b",
-          "note": "2026-09-15 核对：v4.9.0→v4.10.0 的 skills/ 子树逐字节未变（两侧 tree hash 均为 d15d0642），上游改动集中在 hooks/ 与 Cursor/Grok 适配器；本机按「收技法、避常驻」只用 skills、不装 plugin，故无需同步文件，仅回写基线版本与 tag 提交。"
+          "version": "4.10.3",
+          "sha": "ef8ca48fed2321ab6668b2a954f23b1af97d7f6d",
+          "note": "2026-10-03 核对：v4.10.0→v4.10.3 的 skills/ 子树逐字节未变（tree hash 保持 d15d0642），上游改动集中在 hooks/（项目模式隔离、不持久化 review）与 Codex 警告消除；本机按「收技法、避常驻」只用 skills、不装 plugin，故无需同步文件，回写基线版本与 tag 提交。"
         }
       ],
       "associatedSkills": [
