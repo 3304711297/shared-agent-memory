@@ -18,6 +18,6 @@ ZCode decommissioned 09-09; promo-token proxy relation only.
 §
 Shared memory invariant: D:\ai coding\GitRepos\shared-agent-memory MUST stay on 'main'. Checking out 'hermes' unlinks projects/ and breaks the memories/topics junction silently while git status remains clean. Self-check: 'python scripts/check_memory_layout.py' (identical scripts in truth and home).
 §
-In-house projects: Workspaces located in 'D:\ai coding\GitRepos\<name>' (e.g. tweakbyjie, workbuddy2api) — inspect local workspace before touching GitHub. workbuddy2api changes require TDD + mutation testing (N touchpoints = N explicit contract assertions).
+In-house projects: Workspaces located in 'D:\ai coding\GitRepos\<name>' (e.g. tweakbyjie, workbuddy2api) — inspect local workspace before touching GitHub. workbuddy2api changes require TDD + mutation testing. Tauri update builds: avoid rigid byte baselines (use loose floor + index-*.js hash check in exe); use ThinLTO + 16 codegen-units + input-aware frontend skip for fast rebuilds.
 §
 ComfyUI Portable: Located at D:\ai coding\ComfyUI (start via run_nvidia_gpu.bat, http://127.0.0.1:8188). Qwen-Image-2.1 uses locally merged bf16 single files (14.2G transformer + 17.5G text encoder + official repack VAE); 8GB VRAM runs at 2.8s/it via offload. Workflow in comfyui v5.2 skill.
