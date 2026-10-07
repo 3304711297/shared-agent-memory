@@ -148,7 +148,6 @@ plugins:
   enabled:
   - config-guard
   - token-stats
-  - superpowers
   disabled: []
 security:
   allow_private_urls: true
@@ -291,5 +290,3 @@ video_gen:
 platforms:
   webhook:
     enabled: true
-  qqbot:
-    enabled: false
