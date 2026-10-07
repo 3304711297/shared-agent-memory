@@ -94,3 +94,9 @@ truncated or the first paragraph only.
 `python3 scripts/feed.py read https://github.com/NousResearch/hermes-agent/releases.atom
 --limit 1` prints one entry with a `releases/tag/` link and a `[atom]` format tag;
 `discover https://simonwillison.net/` prints an `/atom/` URL.
+
+## 合并进来的能力
+
+| 需求 | 读 |
+|---|---|
+| 监控指定公司/竞品的重大新闻并产出带引用的摘要 | `references/competitor-news-monitor.md` |

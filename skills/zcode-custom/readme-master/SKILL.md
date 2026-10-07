@@ -18,3 +18,7 @@ README 编写与批量审计改进：先审计再写；多仓批量走并行子�
 
 1. 永不盲写：先审计现有 README 再动笔。
 2. 子代理自报告不是证据——独立验证每个仓的改动。
+
+## 相关
+
+- README 文案去 AI 腔 / 人味化：见技能 `chinese-copywriting` 的 `references/humanizer-playbook.md`。
