@@ -1,7 +1,7 @@
 {
   "version": 2,
   "description": "本地能力组件清单（skill/mcp/plugin/工具核心的已装版本与上游源）。由 capability-upstream-watch 工作流每日比对远端源；本地源组件用 watch-capability.cmd 或任意 Agent 会话跑脚本比对。【维护铁律】升级或新装任何组件后，必须同步更新本清单并随共享库推 main，看门自动收口对应 Issue。",
-  "updatedAt": "2026-09-28",
+  "updatedAt": "2026-10-07",
   "components": [
     {
       "id": "chrome-devtools-mcp",
@@ -345,6 +345,7 @@
   ],
   "meta": {
     "zcodeDecommissioned": "2026-09-09: ZCode 客户端已拆除，zcode-github / zcode-bundled-plugins 组件条目移除（组件物理消失，看门无法再检查）；skills 条目中 'ZCode ~/.zcode/skills 副本' 表述已过时，Hermes 侧为唯一副本",
-    "inventorySlimming_20260916": "看门收敛 40→33 项：7 个技能库/市场雷达退出（判据见 notWatched 三条【看门瘦身】【退役口径说明】）。本次仅改清单与台账，未改任何 check 逻辑。"
+    "inventorySlimming_20260916": "看门收敛 40→33 项：7 个技能库/市场雷达退出（判据见 notWatched 三条【看门瘦身】【退役口径说明】）。本次仅改清单与台账，未改任何 check 逻辑。",
+    "reinstallRestore_20261007": "重装系统后按 hermes 分支恢复 home 资产：skills 106 项、plugins(config-guard/token-stats)、desktop-plugins(config-guard/minimalist-themes/token-stats)、SOUL.md、memories、HERMES_HOME/scripts。config.yaml 已按本仓快照套回（_config_version 50）；session_reset 段因上游废弃未写；platforms.qqbot.home_channel 因脱敏未写回需人工补填。"
   }
 }

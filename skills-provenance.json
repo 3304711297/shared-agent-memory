@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-09-23T15:00:00+08:00",
+  "generatedAt": "2026-10-07T22:09:20+08:00",
   "scope": "Hermes skills/ 目录",
-  "totalSkills": 92,
+  "totalSkills": 106,
   "sources": [
     {
       "source": "Hermes Web UI 官方目录（hub/webui 安装）",
@@ -271,8 +271,29 @@
       "skills": [
         "mcp/chrome-devtools"
       ]
+    },
+    {
+      "source": "本次重装恢复新增/改造（2026-10-07）",
+      "count": 13,
+      "checkType": null,
+      "watchStatus": "本地策展：描述按中文触发词前置规范改造；合并技能由自有 references 承载",
+      "skills": [
+        "autonomous-ai-agents/claude-code",
+        "autonomous-ai-agents/codex",
+        "autonomous-ai-agents/opencode",
+        "creative/ascii-video",
+        "creative/baoyu-infographic",
+        "creative/design-md",
+        "creative/popular-web-designs",
+        "hermes/devin-acp-provider-maintenance",
+        "productivity/action-tracking-and-review",
+        "productivity/docx",
+        "productivity/powerpoint",
+        "software-development/git-history-rewrite",
+        "software-development/upstream-snapshot-drift-detection"
+      ]
     }
   ],
-  "note": "2026-09-13 skill审计：删5项（blogwatcher由rss-feeds替代、diagnosing-probe并入systematic-debugging、mcporter由hermes-agent原生MCP覆盖、gitnexus-explorer由code-wiki替代、docker-management用户不用docker）；补3项上游增量（adversarial-WhyThisWorks、dispatching-WhenToUse、worktrees-Step0）；14项社区源frontmatter确权入库；using-superpowers描述瘦身178→~105字符。 / 09-23 新增自研技能 uefi-bios-firmware-analysis（AMI Aptio V 固件解包、IFR 菜单路径映射与「改动是否落地」核查法），归入 自研(无 author) 组。 / 10-07 新增自研技能 hermes-update-troubleshooting（Hermes 桌面端更新交接链、看门狗124、真假卡死判活与还原点 WinError 5 排障），归入 自研(无 author) 组。",
+  "note": "2026-09-13 skill审计：删5项（blogwatcher由rss-feeds替代、diagnosing-probe并入systematic-debugging、mcporter由hermes-agent原生MCP覆盖、gitnexus-explorer由code-wiki替代、docker-management用户不用docker）；补3项上游增量（adversarial-WhyThisWorks、dispatching-WhenToUse、worktrees-Step0）；14项社区源frontmatter确权入库；using-superpowers描述瘦身178→~105字符。 / 09-23 新增自研技能 uefi-bios-firmware-analysis（AMI Aptio V 固件解包、IFR 菜单路径映射与「改动是否落地」核查法），归入 自研(无 author) 组。 / 10-07 新增自研技能 hermes-update-troubleshooting（Hermes 桌面端更新交接链、看门狗124、真假卡死判活与还原点 WinError 5 排障），归入 自研(无 author) 组。 2026-10-07 重装恢复：skills 总数 92 → 106；A/B 类 18 项上游技能退出（记入 .curator_suppressed）；C 类 9 项描述改造；D 类 6 项融入自有技能；三个同名技能收归 superpowers/。",
   "watchSlimming_20260916": "看门清单 40→33 项：hermes-hub-skills / anthropic-skills / gemini-skills / ecc-skills / hermes-skills-hub / skillhub-market / colaskill-market 共 7 项技能库与市场雷达退出 capability-inventory.json。本台账中 hermes-agent 技能的 watchStatus 同步由『已在看门(hermes-hub-skills)』改指 check_skill_drift.py。superpowers / ponytail-skills / cangjie-distill 三项仍在看门（版本型检查，真实可触发），不受影响。"
 }

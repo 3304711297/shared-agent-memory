@@ -13,17 +13,18 @@ metadata:
 
 | 组件 / 维度 | 当前版本与标识 | 来源 / 验证方式 |
 | :--- | :--- | :--- |
-| **Hermes Agent 版本** | `v0.21.2 (2026.9.11)` | `hermes --version` |
-| **上游 Git Commit SHA** | `afe06f21f45f476c25034c4529818d9a2f9fdf1c` (2026-09-13 19:19:36 -0700) | `git -C hermes-agent log -1` |
-| **Desktop 桌面客户端** | `v0.17.2` | `apps/desktop/package.json` |
-| **配置规范版本** | `_config_version: 44` | `config.yaml` 根字段 |
-| **Python 运行时** | `Python 3.11.16` / 内置 3.14 测试解释器 | 内部运行时依赖 |
+| **Hermes Agent 版本** | `v0.21.5+8764.g74943bb (2026.9.24)`，upstream `d02f2118` | `hermes --version` |
+| **上游 Git Commit SHA** | `74943bb889b7978f9d6ff0aa77ae442547201cc2` (2026-10-07) | `git -C hermes-agent log -1` |
+| **Desktop 桌面客户端** | 源码构建 `74943bb8`（`apps/desktop/package.json` version 为 `0.0.0`，源构建不写发行版号） | `hermes-agent-src/apps/desktop/package.json` |
+| **配置规范版本** | `_config_version: 50` | `config.yaml` 根字段 |
+| **Python 运行时** | `Python 3.14.7`（`%LOCALAPPDATA%\hermes\tools\python-3.14.7+20260901-win32-x64`） | 内部运行时依赖 |
 | **安装目录与方式** | `%LOCALAPPDATA%\hermes\hermes-agent` (Git source checkout) | 源码检出并可热更新 |
 
 > **版本演进铁律**：后续 Hermes 升级（如执行 `hermes update` 或上游拉取新 commit）时，若检测到 `_config_version` 升级或新增/废弃了配置字段，同步记忆库时必须一并刷新上方表格中的版本号与 Git SHA，并简要记录该版本下的配置变迁（Changelog diff）。
 >
 > * **2026-09-08 更新**：Hermes 上游合入 commit `520e63661c`（fix: keep command-auth model discovery lazy across config and setup）；本地配置守卫自动化触发全绿通过，启用本地插件 `config-guard`，基线配置快照同步更新。
 > * **2026-09-11 刷新**：`_config_version` 41 → **42**；上游推进至 `a3190625c0`；Desktop `v0.17.2`。配置结构发生**两处重大迁移**——① `custom_providers` 列表格式整体迁移为 `providers:` 键控结构（`radeon-cloud` / `cpa` / `workbuddy2api` 三段，详见第三节）；② 主力模型切换到 `workbuddy2api` 本地反代（`deepseek-v4.1-flash`）。新增 `security.protected_instruction_files: false`（详见第七节）。
+> * **2026-10-07 重装恢复**：`_config_version` 44 → **50**；上游推进至 `74943bb8`；Hermes `v0.21.5+8764.g74943bb`；Python 运行时 3.11.16 → 3.14.7。本机重装系统后由 `hermes` 分支恢复 home 白名单资产（skills 106 项、plugins、desktop-plugins、SOUL.md、memories、scripts），并按本协议把配置基准重新套回本地 `config.yaml`。**两处按当前版本调整**：① `session_reset` 段已废弃（`session_reset_retirement.py`：core 不再读取，改由 `hermes-session-reset-policy` 插件承接）故未写入；② `platforms.qqbot.home_channel` 因公开仓脱敏（`<REDACTED_QQ_CHAT_ID>`）**未写回**，需人工补填真实 chat_id。技能侧变动：A/B 类 18 项上游技能退出并记入 `.curator_suppressed`；C 类 9 项描述按中文触发词前置规范改造；D 类 6 项融入自有技能；`software-development/` 下三个同名技能按 `cddb3d5` 收归 `superpowers/`。
 > * **2026-09-14 刷新**：`_config_version` 42 → **44**；上游推进至 `afe06f21`；`providers:` 节点下正式登记 `devin-acp`（Devin Subscription 本地 stdio ACP 管道，覆盖 `swe` / `swe-1.6-slow` / `swe-2`）。
 
 ---
