@@ -90,3 +90,6 @@ hermes config set auxiliary.vision.model <model_name>
 ### "Reset permissions" / auto-approving everything
 See `references/security-privacy.md` — wipe the "Always allow" stores, don't touch yolo mode.
 
+### Hermes update failure, hang, or crash (Windows)
+See the dedicated skill `hermes-update-troubleshooting` (`skill_view('hermes-update-troubleshooting')`). It provides diagnosis for handoff chain breaks (window closes without relaunching), uv sync timeouts and NO_PROXY fixes, idle watchdog 124 terminations, and `[WinError 5]` DLL locks on `.previous-*` restore points.
+
