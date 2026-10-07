@@ -71,8 +71,8 @@
       ],
       "installed": [
         {
-          "where": "D:\\Git（自定义路径，升级须走官方安装器锁路径流程，禁用 winget）",
-          "version": "2.56.0.windows.1"
+          "where": "D:\\ai runtime\\PortableGit（便携版路径，升级直接解压覆盖，禁用 winget）",
+          "version": "2.56.0.windows.2"
         }
       ]
     },
@@ -154,9 +154,9 @@
       "installed": [
         {
           "where": "Hermes skills/（6 项）【ZCode 副本已随 ZCode 拆除移除，2026-09-09】",
-          "version": "4.10.3",
-          "sha": "ef8ca48fed2321ab6668b2a954f23b1af97d7f6d",
-          "note": "2026-10-03 核对：v4.10.0→v4.10.3 的 skills/ 子树逐字节未变（tree hash 保持 d15d0642），上游改动集中在 hooks/（项目模式隔离、不持久化 review）与 Codex 警告消除；本机按「收技法、避常驻」只用 skills、不装 plugin，故无需同步文件，回写基线版本与 tag 提交。"
+          "version": "4.13.0",
+          "sha": "08e952d7a8057a57ce561ff1330d093fd92eec67",
+          "note": "2026-10-07 核对：v4.10.3→v4.13.0 期间 skills/ 子树补齐 reuse 标签、编号排序输出、排除目录补全与 Codex 调用别名；已同步更新本地 6 项 skills/，回写基线版本与 tag 提交。"
         }
       ],
       "associatedSkills": [
@@ -285,7 +285,7 @@
         {
           "type": "github-commits-path",
           "repo": "mykeura/minimalist-themes-for-hermes",
-          "path": "desktop-plugins/minimalist-themes/plugin.js",
+          "path": "desktop/plugin.js",
           "radar": true,
           "note": "本地实装桌面主题插件（18款暖浅色）；监控上游插件源码新提交，有新代码改动时同步更新本地 plugin.js。"
         }
@@ -293,8 +293,8 @@
       "installed": [
         {
           "where": "%LOCALAPPDATA%/hermes/desktop-plugins/minimalist-themes/plugin.js",
-          "version": "HEAD@410fc98",
-          "sha": "410fc980451623f385be67cec88528a9e29ee3e2"
+          "version": "HEAD@630556b",
+          "sha": "630556b4513519e5d1688425dee06ef30a110c7f"
         }
       ]
     }
