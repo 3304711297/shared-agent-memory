@@ -215,7 +215,8 @@
             "ponytail-review",
             "hermes-config-baseline-and-sync-protocol",
             "agentic-video-distill",
-            "uefi-bios-firmware-analysis"
+            "uefi-bios-firmware-analysis",
+            "hermes-update-troubleshooting"
           ],
           "note": "Hermes 更新后必跑：① 用户拍板过的配置键是否仍为拍板值（上游深合并加新默认值不会冲掉叶子，但要确认没被重置）；② 桌面端更新会 stash 本地源码改动且不自动 pop；③ 核心自研技能若被误打 created_by:agent 会进入 curator 归档倒计时。Actions 上跳过，仅本地运行。",
           "gitProxy": {
@@ -339,7 +340,8 @@
     "【本地增强·执行路扩展 2026-09-16】agentic-video-distill 新增 cpa 端点工具集路线：内置 video_analyze 走主聊天模型链路，主模型不支持视频输入时报“视频内容已被过滤”；Google 官方直连路线在本机出口 SSL 不稳、模型 ID 易失配，且低阶模型会凭空编造画面内容。改为让本地反代端点（默认 127.0.0.1:18080/v1）的 gemini-3.8-flash-high 带工具集自主分析（抽帧/区域放大/音轨），新增脚本 scripts/agentic-video-cpa.py，SKILL.md 补「路线选择」表与三条设计要点（收敛预算、防幻觉锚点、交叉验证）。纯本地文件增强，该技能自研无上游，不涉及安装/卸载与版本变更，技能总数不变",
     "【评估不纳入看门 2026-09-18 用户拍板】browser-use/jev-ultrafast：浏览器 Agent 参考实现（TypeSafe Jev 决策模型 + 动态索引动作空间，MIT，2026-09-16 发布）。**判据**：按 09-16「它落后了我会不会真的去动本地」口径——本地无日常依赖（仅留一份评估克隆，且决策模型卡在 TypeSafe waitlist、端点硬编码不可换），进入看门只产生提交噪声，与已退出的市场计数型雷达同类。**知识已落地**：其编号元素表机制已移植为本地技能 bsk-compact-page-read（含 vendored snapshot.js 副本，同步判据记录在该技能正文，不依赖看门）。关联记忆见 topics/jev-ultrafast-local-integration.md 。",
     "【自研技能 2026-09-23】uefi-bios-firmware-analysis：AMI Aptio V 固件镜像解析（UEFIExtract + IFRExtractor-RS）、IFR 菜单路径映射、NVRAM NVAR 记录解析与「BIOS 改动是否落地」核查法（镜像字节 diff + OS 侧 PnP 交叉验证）。自研工具体系、无公开上游，不纳入单独看门，已列入 protectedSkills 白名单。",
-    "【架构与执行规范重构 2026-09-28】agentic-video-distill 与 bilibili-content 规范升级：反思外部云端 API/子脚本在实际使用中非但未省 token，反而因复杂 shell 交互和结果搬运导致更多 token 浪费的问题。正式明确：在用户未强调使用云端模型时，优先在当前会话直接使用当前模型调用 video_analyze 分析视频；且铁律强制要求结合 Whisper 本地语音转录，构建「视频画面 + Whisper 音频」双轨交叉消差闭环，彻底根除视觉小字漏检与同音术语误听。youshouldknow 仓库 watch_bilibili.py 与测试用例同步升级对齐。"
+    "【架构与执行规范重构 2026-09-28】agentic-video-distill 与 bilibili-content 规范升级：反思外部云端 API/子脚本在实际使用中非但未省 token，反而因复杂 shell 交互和结果搬运导致更多 token 浪费的问题。正式明确：在用户未强调使用云端模型时，优先在当前会话直接使用当前模型调用 video_analyze 分析视频；且铁律强制要求结合 Whisper 本地语音转录，构建「视频画面 + Whisper 音频」双轨交叉消差闭环，彻底根除视觉小字漏检与同音术语误听。youshouldknow 仓库 watch_bilibili.py 与测试用例同步升级对齐。",
+    "【自研技能 2026-10-07】hermes-update-troubleshooting：Hermes 桌面端更新交接链（windows.ps1）、600s/124 看门狗机制、真假卡死判活探针、NO_PROXY 强制直连排查、pm 还原点 .previous-* 占用 [WinError 5] 与 shallow 转换 git BUG 诊断。自研排障体系、无公开上游，不纳入单独看门，已列入 protectedSkills 白名单。"
   ],
   "meta": {
     "zcodeDecommissioned": "2026-09-09: ZCode 客户端已拆除，zcode-github / zcode-bundled-plugins 组件条目移除（组件物理消失，看门无法再检查）；skills 条目中 'ZCode ~/.zcode/skills 副本' 表述已过时，Hermes 侧为唯一副本",
