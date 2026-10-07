@@ -346,6 +346,7 @@
   "meta": {
     "zcodeDecommissioned": "2026-09-09: ZCode 客户端已拆除，zcode-github / zcode-bundled-plugins 组件条目移除（组件物理消失，看门无法再检查）；skills 条目中 'ZCode ~/.zcode/skills 副本' 表述已过时，Hermes 侧为唯一副本",
     "inventorySlimming_20260916": "看门收敛 40→33 项：7 个技能库/市场雷达退出（判据见 notWatched 三条【看门瘦身】【退役口径说明】）。本次仅改清单与台账，未改任何 check 逻辑。",
-    "reinstallRestore_20261007": "重装系统后按 hermes 分支恢复 home 资产：skills 106 项、plugins(config-guard/token-stats)、desktop-plugins(config-guard/minimalist-themes/token-stats)、SOUL.md、memories、HERMES_HOME/scripts。config.yaml 已按本仓快照套回（_config_version 50）；session_reset 段因上游废弃未写；platforms.qqbot.home_channel 因脱敏未写回需人工补填。"
+    "reinstallRestore_20261007": "重装系统后按 hermes 分支恢复 home 资产：skills 106 项、plugins(config-guard/token-stats)、desktop-plugins(config-guard/minimalist-themes/token-stats)、SOUL.md、memories、HERMES_HOME/scripts。配置基准快照与同步协议文档已于同日按用户要求移除（不再维护配置基准）；本地 model/provider/model_aliases/fallback_providers 亦已复位为内建默认。",
+    "baselineRemoved_20261007": "用户决定不再维护「配置基准」：hermes-config.yaml 与 hermes-config-baseline-and-sync-protocol.md 已从记忆库移除；本地 config.yaml 的 model 路由（muse-spark-1.3-contributor-free / opencode-free）因本地反代未运行且无 key_env 凭据而复位为内建默认。"
   }
 }
