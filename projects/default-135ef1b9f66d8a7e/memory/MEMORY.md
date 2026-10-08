@@ -1,4 +1,5 @@
 - [Session Archive v2 Tiered Architecture](session-archive-v2-tiered-architecture.md) — 会话归档系统升级至 v2.0：唯一历史真源 L2 messages.jsonl + OpenViking 风格 L0/L1 结构化摘要 + Session Studio 现代化纯静态 SPA 查看器（对标 OpenViking Web Studio）+ 零参数一键自动归档命令
+- [Windows 11 Feature Staging & FeatureDeck Internals](windows-11-feature-staging-and-featuredeck.md) — Windows 11 Feature Staging kernel architecture (Runtime ntdll vs Boot registry overrides), priority layering, FeatureDeck v0.1.0 ImageDefault fix (PR #1), and 26H2 Build 26300 feature verification
 - [Auto Backup Memories to GitHub](auto-backup-memories-to-github.md) — 记忆文件变动或新增后必须自动静默提交并推送 shared-agent-memory 的 main 分支（严禁等待用户提醒，无需询问用户）
 - [Karing Gemini Node Test](karing-gemini-node-test.md) — **暂停待续**：Karing 测两组订阅（liangxin 59+搅局者 11）哪些节点能用 Gemini；已验证判定逻辑（403 location not supported=封/400 key 无效=放行）、Clash API 3057 坐标、自建 sing-box selector 测试方案与环境变量残留代理两大坑，恢复时按记忆直接续
 - [Adobe MCP Authentication](adobe-mcp-authentication.md) — Adobe for creativity MCP server requires OAuth authentication; 403 errors indicate missing Authorization headers
