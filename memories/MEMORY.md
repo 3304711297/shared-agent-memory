@@ -21,3 +21,7 @@ Shared memory invariant: D:\ai coding\GitRepos\shared-agent-memory MUST stay on 
 In-house projects: Workspaces located in 'D:\ai coding\GitRepos\<name>' (e.g. tweakbyjie, workbuddy2api) — inspect local workspace before touching GitHub. workbuddy2api changes require TDD + mutation testing. Tauri update builds: avoid rigid byte baselines (use loose floor + index-*.js hash check in exe); use ThinLTO + 16 codegen-units + input-aware frontend skip for fast rebuilds.
 §
 ComfyUI Portable: Located at D:\ai coding\ComfyUI (start via run_nvidia_gpu.bat, http://127.0.0.1:8188). Qwen-Image-2.1 uses locally merged bf16 single files (14.2G transformer + 17.5G text encoder + official repack VAE); 8GB VRAM runs at 2.8s/it via offload. Workflow in comfyui v5.2 skill.
+§
+Hermes update & build: Update CLI via preflight script (warm up 20 critical files with cat-file --batch-check; bulk fetch if backlog > 1500) then 'hermes update --yes --branch main' (no --keep-stash). Desktop source at %USERPROFILE%\hermes-agent-src (2.8GB) is active desktop install & rebuild checkout ('npm --prefix apps/desktop run pack'); keep build cache intact, never delete.
+§
+Environment & Toolchain: User toolchain in D:\ai runtime (Node.js LTS, Python 3.14.8, PortableGit, uv, gh). %USERPROFILE%\.local is active (gateway-locks & python3.12 shim); never delete. ELECTRON_RUN_AS_NODE=1 leaks in WorkBuddy terminal (Electron apps exit rc=0 silently; unset first). PowerShell has no Recycle Bin (quarantine to D:\ai runtime\_quarantine\). Windows Update auto driver install disabled (SearchOrderConfig=0).

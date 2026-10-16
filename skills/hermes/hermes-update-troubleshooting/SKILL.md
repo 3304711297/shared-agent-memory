@@ -19,10 +19,7 @@ metadata:
 
 1. **桌面端点「更新」时窗口关闭是设计行为，不是崩溃**——真正的故障在于更新交接链（handoff）断裂后没有人把桌面重新拉起来，用户感知为「闪退」。
 2. **更新窗口长时间不输出 ≠ 卡死**。pull 之后的 pm/venv 阶段本身就有 8~15 分钟静默期，且子进程 stdout 是块缓冲、uv 无 TTY 不画进度条。必须先判“在跑”还是“死了”，再决定动不动手。
-3. **终端更新为首选执行路径**：为避免 GUI handoff 静默看门狗超时或关窗失联，更新首选直接在终端执行：
-   ```powershell
-   hermes update --yes --branch main --keep-stash
-   ```
+3. **终端更新为首选执行路径**：为避免 GUI handoff 静默看门狗超时或关窗失联，更新首选直接在 PowerShell 终端执行标准预检预热流水线（预热 20 个启动关键文件防 120s 超时、手动更新去除 `--keep-stash` 避免悬挂修改，并同步拉取桌面源码执行 `pack`）。详细流水线见文末 SOP。
 
 ## When to Use / 何时使用
 
@@ -42,7 +39,8 @@ metadata:
 | 项目 | 位置 |
 |------|------|
 | HERMES_HOME（数据根） | `%LOCALAPPDATA%\hermes` |
-| 代码仓库（安装根） | `%LOCALAPPDATA%\hermes\hermes-agent`（shallow clone） |
+| 代码仓库（安装根） | `%LOCALAPPDATA%\hermes\hermes-agent`（`blob:none` 部分克隆，promisor=true） |
+| 桌面源码仓库（构建根） | `%USERPROFILE%\hermes-agent-src`（完整克隆，2.8GB，含构建缓存，严禁瘦身删除） |
 | venv | `%LOCALAPPDATA%\hermes\hermes-agent\venv\Scripts\python.exe`（shim） |
 | pm 运行时 | `%LOCALAPPDATA%\hermes\installs\<installId>\pm-runtime\generations\<gen>` |
 | uv 缓存 | `%LOCALAPPDATA%\hermes\cache\uv`（**下载进度的最佳探针**） |
@@ -132,6 +130,11 @@ metadata:
    - 更新器为计算版本身份会执行 release history fetch，将浅克隆展开为完整克隆（`.git` 膨胀至 ~1.3G）。转换期间易偶发 `BUG: builtin/pack-objects.c: should_include_obj`，属一次性故障，紧接着重试即可通过。
 9. **版本号 0.21.5 → 0.21.3 不是倒退**：版本号来自本地计算写入的 `install-stamp.json`，在 shallow clone 够不到 tag 时会回退到 baseline 常量。代码是否前进通过 `git merge-base --is-ancestor <preSha> <postSha>` 验证。
 10. **依赖未完成时切忌启动桌面**：若更新中断导致依赖未装全，直接启动桌面会触发桌面自动补依赖，进而导致后端 `exited before port announcement (1)` 并击崩桌面。
+11. **`blob:none` 部分克隆与预检 120s 超时**：`hermes_cli/update_cmd_commit.py:500` 在 `git fetch` 后调用 `git cat-file --batch` 读新远端提交上的启动关键文件。因为部分克隆缺少 blob，Git 触发 lazy fetch；而 `cat-file --batch` 完全不合并请求，每次单独起子进程（冷启动达 22.6~71.4s，热态约 1.2~1.6s/对象）。一旦积压较多提交或首次未命中，必定撞死在 120s 硬编码超时上。
+12. **定向预热 20 个启动关键文件（0.07s）**：提前通过 `cat-file --batch-check` 将 `_UPDATE_CRITICAL_FILES`（20个）取到本地，耗时仅 0.07s，把冷启动移出 120s 预算外。积压提交 >1500 时（`rev-list --count HEAD..origin/main -gt 1500`，判别仅 0.05s），先用 `--refetch --filter=blob:limit=100m` 批量拉取。
+13. **手动更新严禁 `--keep-stash`**：`--keep-stash` 是桌面自动更新 handoff 专用（`leave edits parked rather than re-apply silently`），手动跑更新会把本地修改静默留在 stash 中而不还原。
+14. **桌面源码构建必须用 `npm run pack`**：`apps/desktop/package.json` 没有 `package` 命令，`npm --prefix apps/desktop run pack` 已经包含 `build && builder --dir`。禁止用分号 `;` 串联命令（会掩盖更新失败导致 CLI 与桌面端版本脱节），必须用 `$LASTEXITCODE` 校验中断。
+15. **`.git/hermes-pack-tidy.lock` 是内核锁**：进程退出自动释放，非陈旧锁文件，切勿手动删除。
 
 ## 标准排查与手动更新 SOP
 
@@ -160,12 +163,38 @@ Remove-Item "$env:LOCALAPPDATA\hermes\hermes-agent\.git\index.lock" -Force -Erro
 
 ### 3. 执行标准终端更新（推荐方式）
 
-退出所有 Hermes 桌面端与网关进程后，在终端执行：
+退出所有 Hermes 桌面端与网关进程后，在 PowerShell 终端执行完整双端预热与构建流水线：
 
 ```powershell
-# 确保网络环境健康（NO_PROXY 不含 pypi.org，UV_HTTP_TIMEOUT 充足）
+# 1. 确保网络环境健康
 $env:UV_HTTP_TIMEOUT = "300"
-hermes update --yes --branch main --keep-stash
+
+# 2. CLI 运行时更新与预检预热
+$R = "$env:LOCALAPPDATA\hermes\hermes-agent"
+git -C $R fetch --no-tags origin "+refs/heads/main:refs/remotes/origin/main"
+
+# 积压过大时才全量预热（判断只要 0.05 秒）
+if ([int](git -C $R rev-list --count HEAD..origin/main) -gt 1500) {
+    Write-Host "积压过多，全量预热中（约 3 分钟）..."
+    git -C $R fetch --no-tags --refetch --filter=blob:limit=100m origin "+refs/heads/main:refs/remotes/origin/main"
+}
+
+# 提前把预检要读的 20 个启动关键文件取到本地（全在本地时 0.07 秒）
+$crit = 'pyproject.toml','hermes_bootstrap.py','hermes_cli/_parser.py','hermes_cli/_launchers.py',
+        'hermes_cli/_early_recovery.py','hermes_cli/update_lock.py','hermes_cli/update_custody.py',
+        'hermes_cli/update_handoff.py','hermes_cli/venv_sync.py','pm/__init__.py','pm/environments.py',
+        'hermes_cli/main.py','hermes_cli/config.py','hermes_cli/__init__.py','hermes_cli/web_server.py',
+        'cli.py','run_agent.py','model_tools.py','toolsets.py','hermes_constants.py'
+($crit | ForEach-Object { "origin/main:$_" }) | git -C $R cat-file --batch-check | Out-Null
+
+hermes update --yes --branch main
+if ($LASTEXITCODE -ne 0) { throw "hermes update 失败，已中止" }
+
+# 3. 桌面端源码拉取与构建打包
+Set-Location "$env:USERPROFILE\hermes-agent-src"
+git pull
+if ($LASTEXITCODE -ne 0) { throw "git pull 失败，已中止" }
+npm --prefix apps/desktop run pack
 ```
 
 ### 4. 验证与复查

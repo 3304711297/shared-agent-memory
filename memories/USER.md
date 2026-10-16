@@ -18,8 +18,8 @@ Session closeout SOP (4-step sequence): When user says "delete/end session" or t
 §
 CI notifications: On all-green task completion, call GitHub API (DELETE /notifications/threads/{id}) to mark related notification threads as Done.
 §
-Core instruction and memory language invariant: 'SOUL.md', 'USER.md', and 'MEMORY.md' MUST be authored and updated STRICTLY in English. Agents must NEVER introduce Chinese or mixed languages into these core instruction and memory files.
+Core instruction & memory language invariant: 'SOUL.md', 'USER.md', and 'MEMORY.md' MUST be authored and maintained STRICTLY in English. Never use Chinese or mixed languages in these core files.
 §
-Knowledge base and issue workflow: NEVER write directly to youshouldknow knowledge bases without explicit user selection/confirmation. Upstream-watch and evaluation-only GitHub Issues with no needed code changes must be summarized and closed automatically without asking.
+Knowledge base & issue workflow: NEVER write to youshouldknow without explicit user confirmation. Upstream-watch and evaluation GitHub Issues without code changes must be summarized and closed automatically.
 §
-Hermes updates: Prefer CLI 'hermes update --yes --branch main --keep-stash' over desktop GUI click.
+Hermes updates: pwsh script updates CLI & Desktop: warm up 20 critical files (cat-file --batch-check) + bulk fetch if >1500 backlog, 'hermes update --yes --branch main' (no --keep-stash), then 'git pull' & 'npm --prefix apps/desktop run pack' in hermes-agent-src.

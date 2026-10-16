@@ -90,6 +90,9 @@ Profiles use `~/.hermes/profiles/<name>/` with the same layout. When a profile i
 - **Default `pip install` fails when the local proxy client is down.** `HTTP_PROXY/HTTPS_PROXY/ALL_PROXY` point at `127.0.0.1:3067`; if that client is not running every index call dies with `WinError 10061`. Fix: `unset HTTP_PROXY HTTPS_PROXY ALL_PROXY && python -m pip install <pkg> -i https://pypi.tuna.tsinghua.edu.cn/simple`.
 - **Check every interpreter before installing.** The bare `python` is Hermes' own `tools/python-3.x` build; `hermes-agent/venv`, per-install venvs, and the system Python are separate. Installing into the wrong one is a silent no-op for the tool that needs the package.
 - **Native path conversion is off**: pass `C:/...` forward-slash paths to native binaries (git, rg, node, python); only bash builtins accept `/c/...`.
+- **`ELECTRON_RUN_AS_NODE=1` leaks in WorkBuddy/terminal environment.** Starting any Electron app (e.g. Hermes Desktop) under this environment causes it to run as plain Node.js, silently exiting with `rc=0` on stdin EOF without creating windows or logs. Always `unset ELECTRON_RUN_AS_NODE` (or `Remove-Item Env:ELECTRON_RUN_AS_NODE`) before launching Electron binaries.
+- **Desktop checkout preservation**: `%USERPROFILE%\hermes-agent-src` (2.8GB) is the active Desktop Electron installation and fast rebuild checkout (`apps/desktop/release/win-unpacked/Hermes.exe`). User intentionally retains full node_modules and build cache; never propose deleting it.
+- **`~/.local/state/hermes/gateway-locks` is active**: Cross-profile gateway locks (`host-desktop-serve.json`) and `~/.local/bin/python3.12.exe` shim are live; never delete `~/.local`.
 
 ## Routing Table — load the reference for the task
 
