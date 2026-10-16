@@ -56,6 +56,9 @@ NousResearch hermes-agent v0.21.0 于 2026-09-02 23 时重装完成并验证（d
   - 修复方案：修改 `windows.ps1` 第 1609 行将 `Path.cwd()` 改为 `Path(r'''$InstallRoot''')`，避免下次后台更新再次因工作目录不一致误报。
 
 - **Hermes 端无 ZCode 式「配置静默丢弃」风险（2026-09-05 排查）**：ZCode 曾因 cli/config.json 的 provider.npm 字段触发 schema 拒绝、整份配置被静默丢弃（见 [[capability-upstream-watch]]）；对照排查 Hermes 端——config.yaml 无任何 npm 类字段，`hermes doctor` 全项通过（仅浏览器工具 2 个既有 npm 依赖漏洞与若干可选系统依赖警告，与配置校验无关）。结论：该雷区为 ZCode CLI 专属，Hermes 端无需处理。
+- **Hermes 双检出架构与更新流水线（2026-10-16 定案，详见 [[hermes-update-workflow-and-benchmarks]]）**：
+  - 运行时两检出：`%LOCALAPPDATA%\hermes\hermes-agent`（CLI 托管运行时，`blob:none` 部分克隆）与 `%USERPROFILE%\hermes-agent-src`（桌面端源码构建，2.8GB 完整克隆，严禁瘦身删除）。
+  - 更新 SOP：通过 PowerShell 预检脚本提前使用 `cat-file --batch-check` 预热 20 个启动关键文件（`_UPDATE_CRITICAL_FILES`），积压 > 1500 提交时批量 fetch；手动更新去除 `--keep-stash`；随后拉取桌面源码执行 `npm --prefix apps/desktop run pack`。
 
 **Why:** 安装两次失败均因 git/uv 不走系统代理，且坏了的旧 checkout 会被安装器整目录移走导致运行时丢失；记住这些可避免重复踩坑。
 **How to apply:** 任何 hermes 安装/更新/克隆 GitHub 的命令前先 export 代理变量；检查 hermes 状态看 logs\gateway.log 与 gateway_state.json（进程核对 tasklist）。相关：[[user-windows-environment]]

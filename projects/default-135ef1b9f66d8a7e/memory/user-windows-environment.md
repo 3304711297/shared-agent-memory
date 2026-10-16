@@ -165,3 +165,41 @@ metadata:
 - 手机 5G 移动数据热点 SSID 即 `jojo`（不是路由器）；2026-09-13 一次"开 Karing 节点后热点断连"报障，经查是网卡驱动主动断开（WLAN-AutoConfig 8003，原因"网络被驱动程序断开连接"），Karing 当时 TUN 关闭、节点健康，已洗清——下次同类报障先看事件查看器断开原因码再定责
 - 网卡高级设置（单 5GHz 手机热点、稳定优先，2026-09-13 定案）：漫游主动性=已禁用、省电=已禁用（最高性能）、发射功率=最高、首选频带=首选 5GHz（与热点频段一致）、U-APSD=禁用、唤醒类全禁、AMSDU Rx/Tx=启用、频段带宽全 Auto；802.11ax 保持，断连复现再降 802.11ac 保底
 - 蓝牙服务 **MTKBTSVC**（`C:\Windows\System32\mtkbtsvc.exe`，MediaTek Bluetooth Service Application）：本机已实测设为 `Disabled`（已禁用/未运行）；Windows 自带 `bthserv` 完全接管常规蓝牙外设（如 MCHOSE G9 PRO 等），连接与功能均正常。该服务日常无用且有社区已知的句柄泄露拖卡系统 Bug，保持禁用即可，切勿开启。
+
+## 用户独立工具链与终端环境约束（2026-10-07 / 2026-10-16 定案）
+
+### 1. 独立工具链：`D:\ai runtime`
+用户明确不再依赖任何客户端内置运行时，改用 D 盘独立工具链（已全部前置进用户级 PATH）：
+- **Node.js**: v24.21.0 LTS (`D:\ai runtime\nodejs`)
+- **Python**: 3.14.8（python-build-standalone 绿色版，`D:\ai runtime\Python`；pip 需用 `python -m pip`）
+- **Git**: PortableGit 2.56.0.windows.2 (`D:\ai runtime\PortableGit`)
+- **uv**: 0.12.23 (`D:\ai runtime\uv`)
+- **gh CLI**: 2.102.0 (`D:\ai runtime\gh\bin`，已登录账号 `3304711297`，凭证在 keyring；配额 5000/hr)
+- 环境变量：`UV_HTTP_TIMEOUT=300` 为用户级环境变量。
+- 缓存约定：`D:\ai runtime\_downloads` 用户会定期清空，暂存安装包/归档一律使用 `%TEMP%`。
+
+### 2. 用户代码仓库：`D:\ai coding\GitRepos`
+- GitHub 账号 **3304711297**，11 个自有仓库统一位于 `D:\ai coding\GitRepos\<repo>`：
+  `3304711297`、`hermes-devin-acp`、`huggingface-chinese-plus`、`make-bilibili-great-together`、`openrouter-chinese-plus`、`shared-agent-memory`、`shared-agent-sessions`（私有）、`steamdb-chinese-plus`、`tweakbyjie`、`workbuddy2api`、`youshouldknow`。
+- 网络避坑：`github.com:443` 直连易报 Connection reset（git exit 128），而 API 正常；Git 操作必须走代理 `http://127.0.0.1:3067`。
+
+### 3. WorkBuddy 与 Windows 终端规约与陷阱
+- **`ELECTRON_RUN_AS_NODE=1` 变量泄漏**：WorkBuddy 终端会泄漏此变量。在此环境下启动任何 Electron 应用（如 Hermes Desktop）会被识别为纯 Node 运行，无参数时读 stdin 立即 EOF 秒退（`rc=0`，无日志、无窗口）。启动前必须执行 `Remove-Item Env:ELECTRON_RUN_AS_NODE` 或 `env -u ELECTRON_RUN_AS_NODE`。
+- **沙箱限制**：沙箱策略拦截 `New-Object -ComObject`（WScript.Shell 等），无法用 COM 创建快捷方式（可用 `pylnk3` 或原生 Explorer 发送到桌面）。
+- **无回收站通道**：`Add-Type`、反射及 COM 均被安全策略拦截，PowerShell 无法送回收站。需要安全隔离删除时，必须移动到隔离目录（如 `D:\ai runtime\_quarantine\`）替代回收站。
+- **PowerShell 工具默认 120 秒超时**：执行耗时命令必须显式传 timeout 参数。
+- **`%USERPROFILE%\.local` 严禁删除**：
+  1. `%USERPROFILE%\.local\state\hermes\gateway-locks\` 为 Hermes 跨 profile 网关锁目录（`host-desktop-serve.json` 等实时写入）。
+  2. `~/.profile` 内含 `. "$HOME/.local/bin/env"`，提供 `.local/bin/python3.12.exe` 薄启动器（指向 `%APPDATA%\uv\python\cpython-3.12.15-...`）。
+
+### 4. 设备驱动与 Windows Update 策略（2026-10-07 实测）
+- **设备驱动状态**：
+  - `PCI\VEN_8086&DEV_7AE8`：Intel MEI 驱动绑定通过，版本 2603.9.4.0（纯 MEI 驱动，无 LMS/SOL 冗余）。
+  - `ACPI\INTC1070`：Intel HID Event Filter（驱动 2.2.2.18，正常）。
+  - `ACPI\INTC1056`：Intel Serial IO GPIO Host Controller（驱动 30.100.2531.31，正常）。
+  - `PCI\VEN_10EC&DEV_8168`：Realtek PCIe GbE 有线网卡为**人为主动禁用**（代码 22），日常走 MT7922 Wi-Fi 6E，非缺驱动。
+- **关闭 Windows Update 自动安装驱动**：
+  - `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\DriverSearching\SearchOrderConfig` = 0（从不搜索 Windows 更新）。
+  - `HKLM\SOFTWARE\Policies\Microsoft\Windows\DriverSearching\SearchOrderConfig` = 0（策略锁定）。
+  - `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Device Metadata\PreventDeviceMetadataFromNetwork` = 1。
+  - 回滚文件保存在 `%USERPROFILE%\WorkBuddy\2026-10-07-18-28-34\driver-autoinstall-rollback.reg`。
