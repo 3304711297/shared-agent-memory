@@ -1,7 +1,7 @@
 {
   "version": 2,
   "description": "本地能力组件清单（skill/mcp/plugin/工具核心的已装版本与上游源）。由 capability-upstream-watch 工作流每日比对远端源；本地源组件用 watch-capability.cmd 或任意 Agent 会话跑脚本比对。【维护铁律】升级或新装任何组件后，必须同步更新本清单并随共享库推 main，看门自动收口对应 Issue。",
-  "updatedAt": "2026-10-07",
+  "updatedAt": "2026-10-17",
   "components": [
     {
       "id": "chrome-devtools-mcp",
@@ -73,22 +73,6 @@
         {
           "where": "D:\\ai runtime\\PortableGit（便携版路径，升级直接解压覆盖，禁用 winget）",
           "version": "2.56.0.windows.2"
-        }
-      ]
-    },
-    {
-      "id": "cli-powershell",
-      "display": "系统 CLI：PowerShell 7",
-      "checks": [
-        {
-          "type": "gh-release",
-          "repo": "PowerShell/PowerShell"
-        }
-      ],
-      "installed": [
-        {
-          "where": "winget 用户级（5.1 系统内置不列入）",
-          "version": "7.6.6"
         }
       ]
     },
@@ -341,12 +325,14 @@
     "【评估不纳入看门 2026-09-18 用户拍板】browser-use/jev-ultrafast：浏览器 Agent 参考实现（TypeSafe Jev 决策模型 + 动态索引动作空间，MIT，2026-09-16 发布）。**判据**：按 09-16「它落后了我会不会真的去动本地」口径——本地无日常依赖（仅留一份评估克隆，且决策模型卡在 TypeSafe waitlist、端点硬编码不可换），进入看门只产生提交噪声，与已退出的市场计数型雷达同类。**知识已落地**：其编号元素表机制已移植为本地技能 bsk-compact-page-read（含 vendored snapshot.js 副本，同步判据记录在该技能正文，不依赖看门）。关联记忆见 topics/jev-ultrafast-local-integration.md 。",
     "【自研技能 2026-09-23】uefi-bios-firmware-analysis：AMI Aptio V 固件镜像解析（UEFIExtract + IFRExtractor-RS）、IFR 菜单路径映射、NVRAM NVAR 记录解析与「BIOS 改动是否落地」核查法（镜像字节 diff + OS 侧 PnP 交叉验证）。自研工具体系、无公开上游，不纳入单独看门，已列入 protectedSkills 白名单。",
     "【架构与执行规范重构 2026-09-28，视听规范升级 2026-10-07】agentic-video-distill 与 bilibili-content 规范优化：现代多模态模型（如 Gemini 3.8 Flash）在通过 video_analyze 接收 MP4 容器时原生同时解析视频帧与内嵌音频流，一轮调用即可完成视听一体化理解。正式确立「模型原生视听一体优先，杜绝无谓的音频二次分析」原则；Whisper 降级为按需辅助（仅在纯视觉抽帧接触表路线无音频流、或生僻专有名词存疑时按需介入）。youshouldknow 仓库 watch_bilibili.py 与 README.md 同步升级对齐。",
-    "【自研技能 2026-10-07】hermes-update-troubleshooting：Hermes 桌面端更新交接链（windows.ps1）、600s/124 看门狗机制、真假卡死判活探针、NO_PROXY 强制直连排查、pm 还原点 .previous-* 占用 [WinError 5] 与 shallow 转换 git BUG 诊断。自研排障体系、无公开上游，不纳入单独看门，已列入 protectedSkills 白名单。"
+    "【自研技能 2026-10-07】hermes-update-troubleshooting：Hermes 桌面端更新交接链（windows.ps1）、600s/124 看门狗机制、真假卡死判活探针、NO_PROXY 强制直连排查、pm 还原点 .previous-* 占用 [WinError 5] 与 shallow 转换 git BUG 诊断。自研排障体系、无公开上游，不纳入单独看门，已列入 protectedSkills 白名单。",
+    "【退役看门 2026-10-17 用户拍板】系统 CLI：PowerShell 7（cli-powershell）：系统级 Shell，日常稳定运行，由用户自行或随系统包管理器升级，不再纳入看门每日比对。"
   ],
   "meta": {
     "zcodeDecommissioned": "2026-09-09: ZCode 客户端已拆除，zcode-github / zcode-bundled-plugins 组件条目移除（组件物理消失，看门无法再检查）；skills 条目中 'ZCode ~/.zcode/skills 副本' 表述已过时，Hermes 侧为唯一副本",
     "inventorySlimming_20260916": "看门收敛 40→33 项：7 个技能库/市场雷达退出（判据见 notWatched 三条【看门瘦身】【退役口径说明】）。本次仅改清单与台账，未改任何 check 逻辑。",
     "reinstallRestore_20261007": "重装系统后按 hermes 分支恢复 home 资产：skills 106 项、plugins(config-guard/token-stats)、desktop-plugins(config-guard/minimalist-themes/token-stats)、SOUL.md、memories、HERMES_HOME/scripts。配置基准快照与同步协议文档已于同日按用户要求移除（不再维护配置基准）；本地 model/provider/model_aliases/fallback_providers 亦已复位为内建默认。",
-    "baselineRemoved_20261007": "用户决定不再维护「配置基准」：hermes-config.yaml 与 hermes-config-baseline-and-sync-protocol.md 已从记忆库移除；本地 config.yaml 的 model 路由（muse-spark-1.3-contributor-free / opencode-free）因本地反代未运行且无 key_env 凭据而复位为内建默认。"
+    "baselineRemoved_20261007": "用户决定不再维护「配置基准」：hermes-config.yaml 与 hermes-config-baseline-and-sync-protocol.md 已从记忆库移除；本地 config.yaml 的 model 路由（muse-spark-1.3-contributor-free / opencode-free）因本地反代未运行且无 key_env 凭据而复位为内建默认。",
+    "powershellWatchRetired_20261017": "PowerShell 7（cli-powershell）退役看门：系统级 Shell，日常稳定运行，由用户自行或随系统包管理器升级，不再纳入看门每日比对。"
   }
 }

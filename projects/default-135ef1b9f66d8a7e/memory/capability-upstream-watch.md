@@ -67,6 +67,7 @@ metadata:
 - **GUI「可更新」徽章与开关的完整闭环（2026-09-05 终版）**：①开关失效根因=provider.npm 配置丢弃事故（详见下条），修复后恢复；②徽章比对源是本地市场快照 + **GUI 自己的 IndexedDB 安装记录（记装机时版本，感知不到任何 GUI 之外的变更）**——手工换装后徽章误报，点 GUI「更新」可消除；③**实测 GUI「更新」会按陈旧记录降级重装**（1.8.0→1.7.0，且不读已手工更新的市场快照文件）——降级后终态=活动插件目录 1.7.0、其 plugin.json 的 args 已补保护参数并钉 `chrome-devtools-mcp@1.8.0`、孤儿 1.8.0 目录已删；后续 GUI 再提示更新时须检查是否又降级并重补参数。已向 zai-org/feedback 提交 issue #527（含配置静默丢弃/开关弹回/徽章不感知/更新降级四案）。
 - **ZCode 插件市场真源仓库（2026-09-05 用户发现）**：`zai-org/zcode-plugins`（官方内置+社区插件，17 个，CDN cdn-zcode.z.ai 是其镜像）——看门的 zcode-marketplace 检查已切换为优先拉取该仓库 raw marketplace.json、CDN 作回退；`zai-org/feedback`=官方用户反馈收集仓库（CLI 静默丢弃非法配置零诊断的行为值得去报一个）。
 - **【用户拍板 2026-09-05】hermes-agent 与 ZCode CLI 本体永久不纳入看门**（各自自带更新机制；注意 hermes-agent 仓库的 skills/ 子目录提交监控属于技能库不属于本体）；未安装的市场插件（cloudbase-skills/example-plugin/代码安全防护）也不监控，代码安全防护在两份清单均未见、来源待查。
+- **【看门收敛 2026-10-17 用户拍板】PowerShell 7 退出看门（13→12 项）**：用户拍板将系统 CLI `cli-powershell` 移出每日比对。**判据**：系统级基础 Shell，日常稳定运行，由用户自行或随 Windows 包管理器按需升级，不再纳入看门每日告警；清单已移入 `notWatched`，相关 Issue #27 闭环收口。
 - **脚本坑位**：npm scoped 包需全量 URL 编码（@ 和 /）且必须用普通 Accept 头（GitHub 专用 Accept 会 406）；GitHub API 匿名限流需带 token；工作流建 Issue 前先确保标签存在；内置插件 zip 在 CDN 上连已装版本都 404，勿再试。
 - **覆盖盲区**（清单 notWatched 同步维护）：hermes hub 技能（hermes GUI 自带提示）、http 远端 MCP（永远最新）、zcode-custom 自有 skill（无上游）。
 - **【看门收敛 2026-09-16 用户拍板】技能库/市场雷达退出看门（40→33 项）**：用户提出「这几个技能库好像没必要加入看门了，我也没从里面下过 skill」——核查确认其判断成立，且比预期更彻底：
