@@ -53,3 +53,4 @@ metadata:
 - `desktop_update_verify.py` 只在「被 import 的那个 checkout」下找 packaged app，而本机桌面是从 `%USERPROFILE%\hermes-agent-src` 构建的，install 根（`%LOCALAPPDATA%\hermes\hermes-agent`）里永远没有 `apps/desktop/release/win-unpacked`。
 - 表现差异：这次是 `verify: exit 1` + `WARNING`，而非 exit 8 + 弹窗；handoff 只记警告后**照常拉起桌面**，不阻断流程。
 - 判别：不要据此判定安装损坏。真正该核的是 exe mtime 与三方 commit 对齐（install 根 HEAD / 源码仓 HEAD / `resources/install-stamp.json` 的 commit）。详见 `hermes-update-workflow-and-benchmarks.md` 的「校验口径修正」。
+- **附带观察（未复现，标记为假设）**：exe 陈旧时，旧桌面调用新版 CLI 曾报 `hermes gateway ensure produced no result (exit 2): Run 'hermes gateway --help'`。新 CLI 中 `gateway ensure` 子命令确实存在，故推测是旧 exe 的调用参数契约与新版不符，而非子命令缺失。重建后版本对齐，不复现。
