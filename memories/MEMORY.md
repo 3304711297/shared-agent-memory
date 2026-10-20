@@ -1,4 +1,4 @@
-Model routing: gemini-3.8-flash via EasyCLIProxyAPI (127.0.0.1:18080, provider=cpa) -> Antigravity (2 accounts, priority 10 round-robin + 1h sticky). auxiliary.* stays 'auto' — never change. Mid-session switch possible (workbuddy2api 8787); read runtime metadata, never assume.
+Model routing: never hardcode a model name. Live model = session header (Model/Provider); persistent default = $HERMES_HOME/config.yaml 'model:' (default/provider/base_url). 'providers:' entries (cpa 127.0.0.1:18080, openrouter) are candidates only — verify the endpoint is listening before treating one as active. auxiliary.* stays 'auto' — never change.
 §
 gh account: 3304711297. Edge Dev + chrome-devtools MCP (connect-only) + deepwiki MCP.
 §
