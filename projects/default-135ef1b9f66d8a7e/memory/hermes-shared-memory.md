@@ -23,3 +23,10 @@ hermes-agent（[[hermes-agent-install]]）与 ZCode **共享同一份记忆库**
 - 发现 `D:\ai coding\GitRepos\shared-agent-memory` **第二克隆**（TUI 会话 20260909_115310_a7e8a4 经它提交推送 94991c1/76856db，导致真源端 push 被拒 non-fast-forward；会话经网关 tui_gateway 接入、state.db 无档案，仅 request_dump 可取证）。日常一律用 `%USERPROFILE%/.zcode/cli/memories` 真源，**严禁再用 GitRepos 副本提交**。
 - **recover SOP**：push 被拒时先 `git pull --rebase origin main` 再推（复现于 09-09，成功 e153b6b）；跨端取证顺序：GitHub events（推送账号）→ 提交是否签名（unsigned=git 客户端，web-flow=网页）→ 网关 request_dump 的 messages 反查命令路径 → reflog 判定本地从未有该提交。
 - 收口动作（09-09）：GitRepos 副本 fetch 后已与远端对齐，仅作快照不作为写入端；后续若再发现 GitRepos 副本产生新提交，按 recover SOP 回收并对齐真源。
+
+## 【10-20 实证】检出分支与行尾两条操作铁律
+
+- **仓库必须停在 `main`**：`skills/` 与 `memories/` 只存在于 `hermes` 分支，`main` 上根本没有这两个目录。为改 skill 而 `git checkout hermes` 会**静默断开 `memories/topics` junction**（`git status` 依旧 clean，看不出异常）。改完 skill 必须立即切回 `main`，并跑 `python scripts/check_memory_layout.py` 复核（期望 `real store branch: main`、`129 memory files`、`junctions under home: 5 (broken: 0)`）。
+- **工作树是 CRLF、git blob 是 LF**：向安装副本（如 `%LOCALAPPDATA%\hermes\skills\...`）同步文件时**必须 `cp` 按字节复制**。用 `sed 's/$/\r/'` 给本就 CRLF 的文件补行尾会产生双 CR（`\r\r\n`），肉眼与 `file` 都看不出来，只有 `grep -c $'\r\r'` 能抓到。
+- 改 skill 的完整闭环：`checkout hermes` → 编辑 → commit（英文 conventional）→ 带代理 `push origin hermes` → `cp` 同步安装副本 → `checkout main` → 自检脚本。
+- 本机直连 github.com / raw.githubusercontent.com 间歇可用、`api.github.com` 基本不可用，git 与 curl 均需临时带 `-c http.proxy` / `-x`。

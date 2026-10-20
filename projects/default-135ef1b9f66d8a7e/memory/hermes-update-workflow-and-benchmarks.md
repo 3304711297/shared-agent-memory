@@ -1,6 +1,6 @@
 ---
 name: hermes-update-workflow-and-benchmarks
-description: Hermes Agent 两检出双端同步与预检预热流水线：部分克隆 blob:none 延迟拉取 120s 超时机理、20 个启动关键文件定向预热实测（0.07s）、积压 >1500 提交条件全量预热、去 --keep-stash 与 desktop 源码 pack 闭环
+description: Hermes Agent 两检出双端同步与预检预热流水线：部分克隆 blob:none 延迟拉取 120s 超时机理、20 个启动关键文件定向预热实测（0.07s）、积压 >1500 提交条件全量预热、去 --keep-stash 与 desktop 源码 pack 闭环；含 pack 阶段 TypeError: fetch failed 的 Node fetch 代理陷阱与三方版本对齐校验口径
 metadata:
   node_type: memory
   type: project
@@ -72,6 +72,51 @@ Command '['git', ..., 'cat-file', 'batch']' timed out after 120 seconds
 
 ---
 
+## pack 阶段网络陷阱：裸 `TypeError: fetch failed`（2026-10-20 增补）
+
+### 现象：更新「成功」但桌面根本没重建
+
+`hermes update` 回执 `outcome: success` / exit 0，install 根与 `hermes-agent-src` 的 sha 都推进到同一提交，Fleet 版本检查也报 up to date——但 `release\win-unpacked\Hermes.exe` 的 mtime 停在两周前。
+
+判别口径：`apps/desktop/dist` 有新构建时间（说明 `npm run build` 跑过了），而 `release` 目录整体没动 → 失败点在 `npm run builder` 之后的 electron-builder 阶段，**不是** CLI 更新失败。
+
+### 根因链
+
+1. `npm run pack` → `scripts/prepare-packaging-tools.mjs` → `@electron/get.downloadElectronArtifactZip()`。
+2. 它**必然**先拉 `https://github.com/electron/electron/releases/download/v<ver>/SHASUMS256.txt` 做校验。即使 138MB 的 electron zip 已命中 `apps/desktop/build/packager/<target>/electron.zip` 或 `.cache/desktop-inputs/packager/electron/<hash>/`，这一步照样联网。
+3. 直连 github.com 超时（`UND_ERR_CONNECT_TIMEOUT`，10s）→ 拿不到校验和 → 回退重下整个 zip → 再次超时。
+4. 最终只抛出一句 `TypeError: fetch failed`，**堆栈被吞**，极易误判成代码/依赖问题。
+
+### 语义坑：Node 原生 fetch 不读代理
+
+Node 原生 `fetch`（undici）**默认不读 `HTTP_PROXY`/`HTTPS_PROXY`**。git 走自己的链路，所以典型现场是「`git pull` 成功、紧接着 `pack` 失败」——仓库没坏，是 Node 没走代理。
+
+### 解法（二选一）
+
+- **代理**：`NODE_USE_ENV_PROXY=1`（Node ≥ 24）+ 设好 `HTTP_PROXY`/`HTTPS_PROXY`。
+- **镜像**：`ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/`。无需代理；只要镜像的 `SHASUMS256.txt` 与本地缓存 zip 哈希一致就直接复用缓存，不必重下 138MB。
+
+> 实测：镜像 SHASUMS 与本地缓存 zip 的 sha256 完全相同（`25ea6cfd…`），全程零下载。
+
+### 定位手法
+
+堆栈拿不到时，用 `node --import <probe>.mjs` 注入一个包装 `globalThis.fetch` 的探针，打印失败 URL 与 `err.cause.code`。一次就能命中，不要凭「报错没堆栈」去猜依赖。
+
+### 同源的第二种表现：`hermes update --check` 的 TLS 失败会伪装成 git 错误
+
+- 真实原因：`api.github.com` 直连被重置，报 `[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol`。
+- 文案不稳定：有时被上游包装成 `Command 'git ... ls-remote --tags origin refs/tags/v<ver>' returned non-zero exit status 128`，看着像 git/仓库坏了。
+- 判别：手工跑同一条 `git ls-remote` 能过 → git 无罪，故障在 CLI 自己的 Python HTTPS 调用。带代理重跑即恢复（`✓ No newer release: ...`）。
+- 附带：`git fetch` 也可能被 schannel 打断（`failed to receive handshake, SSL/TLS connection failed`），临时用 `git -c http.proxy=http://127.0.0.1:<PORT> fetch` 拉一次即可。
+
+### 校验口径修正
+
+`desktop_update_verify.py` 只在**被 import 的那个 checkout**（install 根）下找 packaged app。桌面从 `hermes-agent-src` 构建时，install 根里永远没有 `apps/desktop/release/win-unpacked`，因此 `verify: exit 1 / The updated Desktop executable is missing` 是**双检出版本的结构性误报**（与 `hermes-desktop-update-exit8-false-negative.md` 记录的 CWD 版本同症状、不同因）。handoff 只记 `WARNING` 后照常拉起桌面，不阻断。
+
+真正该核的是**三方一致**：`install 根 HEAD` == `hermes-agent-src HEAD` == `release/win-unpacked/resources/install-stamp.json` 的 `commit`，外加 exe mtime 晚于本轮更新开始时刻。
+
+---
+
 ## 权威更新流水线脚本 (PowerShell)
 
 在 PowerShell 终端（`pwsh`）中执行以下标准化流水线：
@@ -100,13 +145,30 @@ if ($LASTEXITCODE -ne 0) { throw "hermes update 失败，已中止" }
 Set-Location "$env:USERPROFILE\hermes-agent-src"
 git pull
 if ($LASTEXITCODE -ne 0) { throw "git pull 失败，已中止" }
+
+# Node 原生 fetch 不吃代理变量；不设这三行，@electron/get 拉 SHASUMS256.txt 会直连超时
+# 最终只报一句 TypeError: fetch failed（见上文 pack 阶段网络陷阱）。无代理则改用 ELECTRON_MIRROR。
+$env:HTTP_PROXY  = "http://127.0.0.1:<PORT>"
+$env:HTTPS_PROXY = "http://127.0.0.1:<PORT>"
+$env:NODE_USE_ENV_PROXY = "1"
+
 npm --prefix apps/desktop run pack
+if ($LASTEXITCODE -ne 0) { throw "桌面打包失败，已中止（先判断是否 fetch failed 网络问题）" }
+
+# 三方对齐自检
+git -C "$env:LOCALAPPDATA\hermes\hermes-agent" rev-parse --short=8 HEAD
+git -C "$env:USERPROFILE\hermes-agent-src" rev-parse --short=8 HEAD
+(Get-Content "$env:USERPROFILE\hermes-agent-src\apps\desktop\release\win-unpacked\resources\install-stamp.json" -Raw |
+    ConvertFrom-Json).commit.Substring(0,8)
+Get-Item "$env:USERPROFILE\hermes-agent-src\apps\desktop\release\win-unpacked\Hermes.exe" |
+    Select-Object Length,LastWriteTime
 ```
 
 ### 关键细节说明
 - `$crit` 清单来源为上游 `hermes_cli/update_cmd.py` 的 `_UPDATE_CRITICAL_FILES`（20 个）。即使上游偶有增删，该预热依然保护绝大多数关键入口，不会恶化或阻塞。
 - `throw` 会立即截断批处理后续语句，`Set-Location` 不会覆盖前面的 `$LASTEXITCODE`。
 - 构建完成后，桌面快捷方式直接启动 `release\win-unpacked\Hermes.exe` 即可。
+- **打包前的三行代理环境变量不可省**：这是 2026-10-20 唯一一个「CLI 全绿但桌面没重建」的实际成因。桌面没重建时不要重启 Hermes，先看 `release` 目录 mtime。
 
-**Why:** 根治 `blob:none` 部分克隆下长期不更新导致的 120s 语法预检死锁，消除错误更新参数与冗余构建步骤，确保 CLI 运行时与桌面源码构建树严格原子同步。
-**How to apply:** 凡需更新 Hermes，严格执行上述 PowerShell 脚本；更新异常时参考本文定量指标排查 promisor 延迟拉取状态。
+**Why:** 根治 `blob:none` 部分克隆下长期不更新导致的 120s 语法预检死锁，消除错误更新参数与冗余构建步骤，确保 CLI 运行时与桌面源码构建树严格原子同步；并堵住包一层「更新成功」假象之下、由 Node fetch 不读代理导致的桌面静默不重建。
+**How to apply:** 凡需更新 Hermes，严格执行上述 PowerShell 脚本；更新异常时按现象分流——120s 超时查 promisor 延迟拉取，exit 0 但 exe 未更新查 pack 阶段网络与三方对齐。

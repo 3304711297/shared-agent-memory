@@ -45,3 +45,11 @@ metadata:
 - 09-09 更新（250 commits → `990473a79c` / v0.21.1）**再次复发同一误报**，属预期内的最后一次：hand-off 运行的是**更新前的旧脚本**（备份 ref `orphan-main-20260909-045354` 的 windows.ps1 中 `Set-InstallRootCurrentDirectory` 出现 0 次），修复代码是本次更新自己带进来的——鸡生蛋问题，无法更早生效。
 - 修复已落地并实证：更新后 `windows.ps1` L1459 在起任何子进程前先 `Set-InstallRootCurrentDirectory $InstallRoot` 钉 CWD（L1647 仍调 `Path.cwd()`，但此时 cwd 已正确指向源码根），并附 `-SelfTestWorkingDirectory` 自检模式。真身 exe（`hermes-agent\apps\desktop\release\win-unpacked\Hermes.exe`，214MB）完好，`.hermes-update-result.json` 已阅后即焚无残留。
 - **结论：此后 Windows 桌面端更新不应再出现 exit 8 误报；若再遇更新失败弹窗，先查 `desktop-update-handoff.log` 确认是否同堆栈，勿盲目重装修复。**「更新时窗口卡住」体感=桌面端先退出→更新子进程静默跑数分钟（日志批量刷新）→旧脚本误报后不自动重启 GUI，属更新管线正常形态+已知 bug 叠加，非死机。
+
+### 6. 【2026-10-20 补充】同一句报错的**另一个**成因：双检出布局
+
+上文的 exit 8 已被 CWD 修复治好，但同一句 `The updated Desktop executable is missing` 仍有第二条触发路径，**与 CWD 无关**：
+
+- `desktop_update_verify.py` 只在「被 import 的那个 checkout」下找 packaged app，而本机桌面是从 `%USERPROFILE%\hermes-agent-src` 构建的，install 根（`%LOCALAPPDATA%\hermes\hermes-agent`）里永远没有 `apps/desktop/release/win-unpacked`。
+- 表现差异：这次是 `verify: exit 1` + `WARNING`，而非 exit 8 + 弹窗；handoff 只记警告后**照常拉起桌面**，不阻断流程。
+- 判别：不要据此判定安装损坏。真正该核的是 exe mtime 与三方 commit 对齐（install 根 HEAD / 源码仓 HEAD / `resources/install-stamp.json` 的 commit）。详见 `hermes-update-workflow-and-benchmarks.md` 的「校验口径修正」。
