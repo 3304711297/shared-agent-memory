@@ -226,6 +226,9 @@ def _parse_scalar(raw):
     s = raw.strip()
     if s == "" or s.startswith("#"):
         return None
+    # Strip inline comments outside quotes
+    if not (s.startswith('"') or s.startswith("'")) and "#" in s:
+        s = s.split("#", 1)[0].strip()
     low = s.lower()
     if low in ("true", "yes"):
         return True
