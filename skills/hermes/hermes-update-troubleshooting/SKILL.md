@@ -1,7 +1,7 @@
 ---
 name: hermes-update-troubleshooting
 description: "Hermes更新失败/闪退/卡住时必用。更新交接链与看门狗排障。"
-version: 1.0.0
+version: 1.1.0
 author: Hermes Agent
 license: MIT
 platforms: [windows]
@@ -32,6 +32,8 @@ metadata:
 - 更新退出码为 `124`（被 handoff 看门狗掐死）
 - `hermes update` 报 `Unable to create '.git/shallow.lock': File exists`
 - 更新提示 `⚠ Updating from fork`（假警告）或 git pack-objects BUG
+- 更新回执 success、但桌面 exe 时间戳停在旧日期（`npm run pack` 在电子构建阶段失败）
+- `npm --prefix apps/desktop run pack` 只抛一句 `TypeError: fetch failed`、无堆栈
 - 更新完成但版本号变小（如 0.21.5 → 0.21.3），或启动时报依赖未完成
 
 ## 关键环境事实与路径
@@ -135,6 +137,21 @@ metadata:
 13. **手动更新严禁 `--keep-stash`**：`--keep-stash` 是桌面自动更新 handoff 专用（`leave edits parked rather than re-apply silently`），手动跑更新会把本地修改静默留在 stash 中而不还原。
 14. **桌面源码构建必须用 `npm run pack`**：`apps/desktop/package.json` 没有 `package` 命令，`npm --prefix apps/desktop run pack` 已经包含 `build && builder --dir`。禁止用分号 `;` 串联命令（会掩盖更新失败导致 CLI 与桌面端版本脱节），必须用 `$LASTEXITCODE` 校验中断。
 15. **`.git/hermes-pack-tidy.lock` 是内核锁**：进程退出自动释放，非陈旧锁文件，切勿手动删除。
+16. **桌面 `pack` 在 electron-builder 准备阶段报 `TypeError: fetch failed`（无堆栈）**：
+   - 触发点：`npm run pack` → `scripts/prepare-packaging-tools.mjs` → `@electron/get.downloadElectronArtifactZip()`。它**会先拉 `https://github.com/electron/electron/releases/download/v<ver>/SHASUMS256.txt` 做校验**；即使 138MB 的 electron zip 已命中 `apps/desktop/build/packager/<target>/electron.zip` 或 `.cache/desktop-inputs/packager/electron/<hash>/`，这一步照样联网。
+   - 失败链：直连 github.com 超时（`UND_ERR_CONNECT_TIMEOUT`）→ 拿不到校验和 → 回退重下整个 electron zip → 再次超时 → 最终只抛出 `TypeError: fetch failed`，堆栈被吞。极易误判成代码/依赖问题，实际是纯网络。
+   - **语义坑**：Node 原生 `fetch`（undici）**默认不读 `HTTP_PROXY`/`HTTPS_PROXY`**。git 走自己的链路，所以典型现场是「`git pull` 成功、紧接着 `pack` 失败」——不是仓库坏了，是 Node 没走代理。
+   - 解决（二选一）：① 给 Node 显式开启环境代理 `NODE_USE_ENV_PROXY=1`（Node ≥ 24）并设好 `HTTP_PROXY/HTTPS_PROXY`；② 或用镜像 `ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/`（无需代理；镜像的 SHASUMS256.txt 与本地缓存 zip 哈希一致即可直接复用缓存，不必重下 138MB）。
+   - 定位手法：堆栈拿不到时，用 `node --import <probe>.mjs` 注入 fetch 探针打印失败 URL 与 `err.cause.code`，一次命中；不要凭「报错没堆栈」去猜依赖。
+17. **`hermes update --check` 的 TLS 失败会伪装成 git 错误**：
+   - 与第 16 条同源的第二种表现：`api.github.com` 直连被重置，真实报错是 `[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol`。
+   - 文案还不稳定：有时被上游包装成 `Command 'git ... ls-remote --tags origin refs/tags/v<ver>' returned non-zero exit status 128`，看着像 git/仓库坏了，实际是 CLI 自己的 Python HTTPS 调用不通。
+   - 判别：手工跑同一条 `git ls-remote` 能过 → git 无罪，故障在 CLI 的 HTTPS。带 `HTTP_PROXY/HTTPS_PROXY` 重跑 `--check` 即恢复（`✓ No newer release: ...`）。
+   - 附带：`git fetch` 本身也可能被 schannel 打断（`failed to receive handshake, SSL/TLS connection failed`），临时用 `git -c http.proxy=http://127.0.0.1:<PROXY_PORT> fetch` 拉一次即可。
+18. **双仓库布局下 `verify: exit 1 / The updated Desktop executable is missing` 是误报**：
+   - `hermes_cli/desktop_update_verify.py` 只在「被 import 的那个 checkout」（即 install 根 `%LOCALAPPDATA%\hermes\hermes-agent`）下的 `apps/desktop/release/win-unpacked` 找打包好的 exe。
+   - 若桌面是从另一份源码仓（如 `%USERPROFILE%\hermes-agent-src`）构建的，install 根里永远没有 packaged app，这条校验必然失败。
+   - handoff 只记 `WARNING: verify: exit 1` 后照常拉起桌面，不阻断流程。**不要据此判定更新损坏**；真正要核的是 exe 的 mtime、`resources/install-stamp.json` 的 commit 与 CLI HEAD 是否三方一致。
 
 ## 标准排查与手动更新 SOP
 
@@ -194,17 +211,35 @@ if ($LASTEXITCODE -ne 0) { throw "hermes update 失败，已中止" }
 Set-Location "$env:USERPROFILE\hermes-agent-src"
 git pull
 if ($LASTEXITCODE -ne 0) { throw "git pull 失败，已中止" }
+
+# 关键：Node 原生 fetch 不吃代理变量。不设这三行，@electron/get 拉 SHASUMS256.txt
+# 会直连 github 超时，最终只报一句 TypeError: fetch failed（见深坑 16）。
+# 把 <PROXY_PORT> 换成本机代理端口；无代理则改用 ELECTRON_MIRROR 镜像。
+$env:HTTP_PROXY  = "http://127.0.0.1:<PROXY_PORT>"
+$env:HTTPS_PROXY = "http://127.0.0.1:<PROXY_PORT>"
+$env:NODE_USE_ENV_PROXY = "1"
+
 npm --prefix apps/desktop run pack
+if ($LASTEXITCODE -ne 0) { throw "桌面打包失败，已中止（先判断是否 fetch failed 的网络问题）" }
 ```
 
 ### 4. 验证与复查
 
 ```powershell
+# 网络不通时 --check 会报 TLS EOF，或被伪装成 ls-remote exit 128（见深坑 17）
+$env:HTTP_PROXY  = "http://127.0.0.1:<PROXY_PORT>"
+$env:HTTPS_PROXY = "http://127.0.0.1:<PROXY_PORT>"
 hermes update --check
-# 期望输出：✓ Already up to date.
+# 期望输出：✓ Already up to date.（或 stable 已发版、本 checkout 更新：✓ No newer release: ...）
 
-git -C "$env:LOCALAPPDATA\hermes\hermes-agent" rev-parse HEAD
-git -C "$env:LOCALAPPDATA\hermes\hermes-agent" rev-parse origin/main
-# 期望：两处 commit hash 完全一致
+# 三方 commit 必须完全一致：CLI 安装根 / 桌面源码仓 / 打包产物里的 stamp
+git -C "$env:LOCALAPPDATA\hermes\hermes-agent" rev-parse --short=8 HEAD
+git -C "$env:USERPROFILE\hermes-agent-src" rev-parse --short=8 HEAD
+(Get-Content "$env:USERPROFILE\hermes-agent-src\apps\desktop\release\win-unpacked\resources\install-stamp.json" -Raw |
+    ConvertFrom-Json).commit.Substring(0,8)
+
+# 桌面 exe 必须是本轮刚构建的（mtime 早于本轮更新 = 打包其实失败了）
+Get-Item "$env:USERPROFILE\hermes-agent-src\apps\desktop\release\win-unpacked\Hermes.exe" |
+    Select-Object Length,LastWriteTime
 ```
-验证全部通过后，即可正常启动 Hermes 桌面端。
+验证全部通过后，即可正常启动 Hermes 桌面端。若 `hermes update` 回执是 success 但 exe 时间戳没变，直接跳到深坑 16 处理打包网络问题，不要重启桌面。
