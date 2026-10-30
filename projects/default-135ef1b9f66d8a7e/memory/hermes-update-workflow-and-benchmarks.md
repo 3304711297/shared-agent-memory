@@ -172,3 +172,48 @@ Get-Item "$env:USERPROFILE\hermes-agent-src\apps\desktop\release\win-unpacked\He
 
 **Why:** 根治 `blob:none` 部分克隆下长期不更新导致的 120s 语法预检死锁，消除错误更新参数与冗余构建步骤，确保 CLI 运行时与桌面源码构建树严格原子同步；并堵住包一层「更新成功」假象之下、由 Node fetch 不读代理导致的桌面静默不重建。
 **How to apply:** 凡需更新 Hermes，严格执行上述 PowerShell 脚本；更新异常时按现象分流——120s 超时查 promisor 延迟拉取，exit 0 但 exe 未更新查 pack 阶段网络与三方对齐。
+
+---
+
+## 2026-10-30 增补：`hermes desktop --force-build` 卡在 electron npm postinstall 下载
+
+### 现象与判活
+命令停在 `node ...\node_modules\electron\install.js` 十几分钟无任何输出。实测 `%TEMP%\electron-download-*\electron-v<ver>-win32-x64.zip` 仍在增长——本例 **74 KB/s**，17 分钟只到 56 MB（总量 158 MB），进程 CPU ≈ 0。
+这是「慢」不是「死」：`hermes desktop --force-build` 的 custody job 只 `p.wait()`，**没有空闲看门狗**（看门狗 124 只存在于 `update` 的 `windows.ps1`），所以它不会被掐死，只会一直耗着。判活看临时 zip 的体积增速，别只看日志。
+
+### 根因
+`electron/install.js` → `@electron/get.downloadArtifact()` 直连 `github.com/electron/electron/releases/download/v<ver>/`。同时刻用 curl 打同一条 URL 直连可达 ~19 MB/s，说明是 **单条 TCP 被限速/挂住**，undici 又没有读超时，不会自愈，只能等或重来。
+
+### 解法：预灌 @electron/get 缓存（8 秒搞定，无需等）
+缓存路径由 `Cache.getCacheDirectory()` 决定，规则是 **URL 去掉文件名后取 sha256**：
+
+```bash
+VER=44.9.3
+CACHE="$LOCALAPPDATA/electron/Cache/$(printf '%s' \
+  "https://github.com/electron/electron/releases/download/v$VER" | sha256sum | cut -d' ' -f1)"
+mkdir -p "$CACHE"
+curl -sL -o "$CACHE/electron-v$VER-win32-x64.zip" \
+  "https://github.com/electron/electron/releases/download/v$VER/electron-v$VER-win32-x64.zip"
+sha256sum "$CACHE/electron-v$VER-win32-x64.zip"   # 必须等于 electron/checksums.json 同名字段
+```
+
+- `install.js` 默认传本地 `checksums.json`（除非设了 `electron_use_remote_checksums`），**不会去拉远端 SHASUMS256.txt**，所以离线/慢网也能靠缓存秒过。
+- 命中缓存后 `--force-build` 全程约 40 秒：解压 electron → vite build → electron-builder pack → 自动拉起桌面。
+- 校验值直接从 `node_modules/electron/checksums.json` 取，不要用镜像的哈希去比（图省事用 `ELECTRON_MIRROR` 反而容易踩版本不一致）。
+
+### 残余进程坑：重跑报 exit 2「another desktop dependency install or build is already running」
+`Stop-Process -Id` 只杀指定 PID、**不杀后代**；被打断的构建其 npm/node 子进程可能存活并继续持有
+`%LOCALAPPDATA%\hermes\locks\desktop-build-<sha256(checkout)[:24]>.lock`。
+
+- 该锁由**打开的文件句柄**持有（`hermes_cli/desktop_build_lock.py`），不是陈旧文件，进程一死 OS 自动释放——**不要删锁文件**，先确认没有 hermes/node 残留再重跑。
+- 判定锁是真被占还是已释放：Python `msvcrt.locking(f, LK_NBLCK, 1)` 试锁，成功即空闲。
+- 顺带：`hermes desktop --force-build` 构建的是 **install 根** `%LOCALAPPDATA%\hermes\hermes-agent`，不是 `%USERPROFILE%\hermes-agent-src`；两者产物路径同名，别拿错目录的 mtime 判断成败。
+
+### 收尾核验（本次实测全部通过）
+```bash
+git -C "$LOCALAPPDATA/hermes/hermes-agent" rev-parse --short=8 HEAD   # 2d2808ee
+cat  "$LOCALAPPDATA/hermes/hermes-agent/apps/desktop/release/win-unpacked/resources/install-stamp.json"
+ls -l  "$LOCALAPPDATA/hermes/hermes-agent/apps/desktop/release/win-unpacked/Hermes.exe"
+tail -25 "$LOCALAPPDATA/hermes/logs/desktop.log"   # 期望 [backend] Hermes gateway is ready / gateway-route published
+```
+stamp 的 `commit` 与 CLI HEAD 一致、exe mtime 是本轮、`desktop.log` 有 `gateway is ready` + `gateway-route ... published`，才算真起来了；三者任一不符按前面的「exe 未更新」分支处理。
