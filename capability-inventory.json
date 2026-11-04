@@ -15,8 +15,8 @@
       "installed": [
         {
           "where": "Hermes config.yaml mcp_servers（钉版，含保护参数）",
-          "version": "1.11.0",
-          "note": "2026-10-20 经 hermes config set 升级 mcp_servers.chrome-devtools.args 至 chrome-devtools-mcp@1.11.0（含 --autoConnect 与扩展保护参数）；联动核验 mcp/chrome-devtools 技能，无 breaking 参数变更。 【2026-11-04 待拍板】上游 1.12.0 已发布，本机仍 1.11.0；版本钉在 Hermes config.yaml 的 mcp_servers.chrome-devtools.args（含 --autoConnect 与扩展保护参数），属系统配置改动，按约定等用户确认后再 `hermes config set` 升级，并同步核对 mcp/chrome-devtools 技能。"
+          "version": "1.12.0",
+          "note": "2026-11-04 经 `hermes config set` 升级 mcp_servers.chrome-devtools.args 至 chrome-devtools-mcp@1.12.0，保护参数 `--autoConnect` 与 `--ignore-default-chrome-arg=--disable-extensions` 原样保留（`hermes config get` 复核为列表结构）；`cmd /c npx -y chrome-devtools-mcp@1.12.0 --version` 实测返回 1.12.0。**孪生技能联动核对**：mcp/chrome-devtools 在本机为自研技能（NousResearch/hermes-agent 无同名目录，返回 404），1.12.0 的 release notes 只有新增特性（--maxNavigationSaved / --watchConfig / 堆快照分页 / 并行工具调用 / wait_for 可见文本匹配）与修复，无工具契约或参数破坏性变更；技能文档里的 `--categoryExtensions`、`--memoryDebugging` 在 1.12.0 `--help` 中仍存在，故技能无需改动。MCP 为 lazy 启动且当前无 node 进程在跑，下次拉起即用新版（已开的会话可能仍持有旧配置，重启会话最稳）。"
         }
       ],
       "associatedSkills": [
