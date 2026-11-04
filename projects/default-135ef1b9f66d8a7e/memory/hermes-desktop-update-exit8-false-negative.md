@@ -54,3 +54,4 @@ metadata:
 - 表现差异：这次是 `verify: exit 1` + `WARNING`，而非 exit 8 + 弹窗；handoff 只记警告后**照常拉起桌面**，不阻断流程。
 - 判别：不要据此判定安装损坏。真正该核的是 exe mtime 与三方 commit 对齐（install 根 HEAD / 源码仓 HEAD / `resources/install-stamp.json` 的 commit）。详见 `hermes-update-workflow-and-benchmarks.md` 的「校验口径修正」。
 - **附带观察（未复现，标记为假设）**：exe 陈旧时，旧桌面调用新版 CLI 曾报 `hermes gateway ensure produced no result (exit 2): Run 'hermes gateway --help'`。新 CLI 中 `gateway ensure` 子命令确实存在，故推测是旧 exe 的调用参数契约与新版不符，而非子命令缺失。重建后版本对齐，不复现。
+- **2026-11-04 状态**：本机已合并为单检出（`%USERPROFILE%\hermes-agent-src` 已删除，桌面在安装根内构建），该结构性误报的触发路径随之消失；若再见 `verify: exit 1`，先查是否又出现了第二棵构建树，或安装根打包产物缺失。

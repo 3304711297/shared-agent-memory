@@ -8,16 +8,15 @@ metadata:
 
 # Hermes Agent 更新流水线与定量基准 (2026-10-16 定案)
 
-## 架构：两个独立检出双端对齐
+> **状态变更 2026-11-04（单检出）**：`%USERPROFILE%\hermes-agent-src` 独立桌面构建树已确认无用并由用户拍板删除（4.1GB，无未提交改动）。现为**单检出**：桌面端在安装根 `%LOCALAPPDATA%\hermes\hermes-agent\apps\desktop\release\win-unpacked\` 内构建，`hermes desktop` 按需构建、`hermes update` 更新后自动重建并校验（失败时报 "Desktop app build owed" 后续项）。下文「双检出」架构与三方校验口径属历史记录，脚本已按单检出改写。
 
-NousResearch/hermes-agent 在本机由两个独立的检出构成，各自跟踪官方 `main` 分支：
+## 架构：单检出（2026-11-04 起）
 
-| 检出路径 | 角色与定位 | Git 克隆形态 | 构建/运行方式 |
+| 路径 | 角色与定位 | Git 克隆形态 | 构建/运行方式 |
 |---|---|---|---|
-| `%LOCALAPPDATA%\hermes\hermes-agent` | CLI 与 Agent 托管运行时（`hermes` 核心） | `blob:none` 部分克隆（promisor=true） | 由 `hermes update` 自身维护更新与 venv |
-| `%USERPROFILE%\hermes-agent-src` | Electron 桌面端（GUI）源码构建树 | 完整克隆（full clone，无 promisor） | `npm --prefix apps/desktop run pack` 产出 `apps\desktop\release\win-unpacked\Hermes.exe` |
+| `%LOCALAPPDATA%\hermes\hermes-agent` | CLI 与 Agent 托管运行时 + Electron 桌面端 | `blob:none` 部分克隆（promisor=true） | `hermes update` 维护代码/venv 并自动重建桌面；`hermes desktop` 按需构建并启动 |
 
-**重要定位铁律**：`%USERPROFILE%\hermes-agent-src` 是当前桌面应用的原生运行与快速重建位置（2.8GB，含完整 node_modules、.cache、build、dist）。快捷方式直接指向其 `release\win-unpacked\Hermes.exe`，必须完整保留该目录与构建缓存，**严禁主动清理或提议瘦身**。
+**桌面产物真源**：`apps\desktop\release\win-unpacked\Hermes.exe`，其 `resources\install-stamp.json` 的 `commit` 必须等于安装根 HEAD。历史：曾并行维护 `%USERPROFILE%\hermes-agent-src`（4.1GB 完整克隆），2026-11-04 删除，勿重建。
 
 ---
 
@@ -142,25 +141,21 @@ $crit = 'pyproject.toml','hermes_bootstrap.py','hermes_cli/_parser.py','hermes_c
 hermes update --yes --branch main
 if ($LASTEXITCODE -ne 0) { throw "hermes update 失败，已中止" }
 
-Set-Location "$env:USERPROFILE\hermes-agent-src"
-git pull
-if ($LASTEXITCODE -ne 0) { throw "git pull 失败，已中止" }
-
+# 桌面端：单检出，就在安装根内（hermes update 已自动重建；此步为手动兜底）
 # Node 原生 fetch 不吃代理变量；不设这三行，@electron/get 拉 SHASUMS256.txt 会直连超时
 # 最终只报一句 TypeError: fetch failed（见上文 pack 阶段网络陷阱）。无代理则改用 ELECTRON_MIRROR。
 $env:HTTP_PROXY  = "http://127.0.0.1:<PORT>"
 $env:HTTPS_PROXY = "http://127.0.0.1:<PORT>"
 $env:NODE_USE_ENV_PROXY = "1"
 
-npm --prefix apps/desktop run pack
-if ($LASTEXITCODE -ne 0) { throw "桌面打包失败，已中止（先判断是否 fetch failed 网络问题）" }
+hermes desktop --build-only --force-build
+if ($LASTEXITCODE -ne 0) { throw "桌面构建失败，已中止（先判断是否 fetch failed 网络问题）" }
 
-# 三方对齐自检
+# 双边对齐自检（单检出后不再有第二棵树）
 git -C "$env:LOCALAPPDATA\hermes\hermes-agent" rev-parse --short=8 HEAD
-git -C "$env:USERPROFILE\hermes-agent-src" rev-parse --short=8 HEAD
-(Get-Content "$env:USERPROFILE\hermes-agent-src\apps\desktop\release\win-unpacked\resources\install-stamp.json" -Raw |
+(Get-Content "$env:LOCALAPPDATA\hermes\hermes-agent\apps\desktop\release\win-unpacked\resources\install-stamp.json" -Raw |
     ConvertFrom-Json).commit.Substring(0,8)
-Get-Item "$env:USERPROFILE\hermes-agent-src\apps\desktop\release\win-unpacked\Hermes.exe" |
+Get-Item "$env:LOCALAPPDATA\hermes\hermes-agent\apps\desktop\release\win-unpacked\Hermes.exe" |
     Select-Object Length,LastWriteTime
 ```
 
@@ -171,7 +166,7 @@ Get-Item "$env:USERPROFILE\hermes-agent-src\apps\desktop\release\win-unpacked\He
 - **打包前的三行代理环境变量不可省**：这是 2026-10-20 唯一一个「CLI 全绿但桌面没重建」的实际成因。桌面没重建时不要重启 Hermes，先看 `release` 目录 mtime。
 
 **Why:** 根治 `blob:none` 部分克隆下长期不更新导致的 120s 语法预检死锁，消除错误更新参数与冗余构建步骤，确保 CLI 运行时与桌面源码构建树严格原子同步；并堵住包一层「更新成功」假象之下、由 Node fetch 不读代理导致的桌面静默不重建。
-**How to apply:** 凡需更新 Hermes，严格执行上述 PowerShell 脚本；更新异常时按现象分流——120s 超时查 promisor 延迟拉取，exit 0 但 exe 未更新查 pack 阶段网络与三方对齐。
+**How to apply:** 凡需更新 Hermes，严格执行上述 PowerShell 脚本；更新异常时按现象分流——120s 超时查 promisor 延迟拉取，exit 0 但 exe 未更新查构建阶段网络与双边对齐。
 
 ---
 
@@ -207,7 +202,7 @@ sha256sum "$CACHE/electron-v$VER-win32-x64.zip"   # 必须等于 electron/checks
 
 - 该锁由**打开的文件句柄**持有（`hermes_cli/desktop_build_lock.py`），不是陈旧文件，进程一死 OS 自动释放——**不要删锁文件**，先确认没有 hermes/node 残留再重跑。
 - 判定锁是真被占还是已释放：Python `msvcrt.locking(f, LK_NBLCK, 1)` 试锁，成功即空闲。
-- 顺带：`hermes desktop --force-build` 构建的是 **install 根** `%LOCALAPPDATA%\hermes\hermes-agent`，不是 `%USERPROFILE%\hermes-agent-src`；两者产物路径同名，别拿错目录的 mtime 判断成败。
+- 顺带：`hermes desktop --force-build` 构建的是 **install 根** `%LOCALAPPDATA%\hermes\hermes-agent`，不是 `%USERPROFILE%\hermes-agent-src`；两者产物路径同名，别拿错目录的 mtime 判断成败。（历史注记：2026-11-04 起只剩安装根一棵树，本句已作废。）
 
 ### 收尾核验（本次实测全部通过）
 ```bash
