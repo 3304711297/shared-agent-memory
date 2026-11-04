@@ -1,7 +1,7 @@
 ---
 name: agentic-video-distill
-description: "视频提炼/分析录屏时必用。优先当前会话直接分析视频+强制结合Whisper双轨比对避免误差。仅用户明确强调云端时走外部脚本。Use when analyzing videos."
-version: 1.1.0
+description: "视频提炼/分析录屏时必用。当前模型原生视听一体优先，Whisper按需辅助。仅用户明确强调云端时走外部脚本。Use when analyzing videos."
+version: 1.2.0
 author: "Hermes & ZCode Dual-Agent Framework"
 license: MIT
 platforms: [linux, macos, windows]
@@ -10,21 +10,21 @@ metadata:
   related_skills: [bilibili-content, youtube-content, whisper, cangjie-distill]
 ---
 
-# Agentic Video Distill (视频高密度蒸馏与双轨校对)
+# Agentic Video Distill (视频高密度蒸馏与原生视听解析)
 
-基于当前会话原生多模态视频分析（`video_analyze`）与本地 **Whisper** 语音识别双轨交叉比对架构，实现对长视频、技术录屏、主板 UEFI/BIOS 操作教程以及公开网络视频的极限低 Token、零幻觉、高精度结构化蒸馏。
+基于当前会话原生多模态视频分析（`video_analyze`）与按需 **Whisper** 辅助架构，实现对长视频、技术录屏、主板 UEFI/BIOS 操作教程以及公开网络视频的极限低 Token、零幻觉、高精度结构化蒸馏。
 
-## 核心设计原则与架构演进（2026-09 落地）
+## 核心设计原则与架构演进（2026-10 升级）
 
 1. **优先当前会话原生分析，严禁盲目调用外部云端脚本**：
    - **痛点与反思**：早期设计的外部云端子脚本/后台代理路线（如 `agentic-video-cpa.py` / `distill_openrouter.py`），初衷是为主会话节省上下文 Token。但在实际运行中，子脚本需要执行环境检查、多轮次 Shell 命令交互、繁琐重试与大段 Markdown 切片跨进程传输，**不仅没有节约 Token，反而因额外调用消耗了更多 Token**，且增加了网络中断与鉴权失败点。
    - **最新铁律**：**除非用户在指令中明确强调/要求使用外部云端模型，默认一律优先在当前会话内直接使用当前模型调用 `video_analyze` 分析视频**。
-2. **强制双轨比对避免误差（video_analyze + Whisper 铁律）**：
-   - **单轨弊端**：纯视频视觉分析在遇到快速跳帧、复杂 BIOS 缩写、小字参数时容易产生先验脑补（如误读或凭空编造不存在的参数）；纯音频转录对静音操作、仅画面展示的配置路径与跑分图表无能为力；
-   - **双轨闭环**：
-     - **画面轨**：调用 `video_analyze` 精准捕获屏幕画面、拓扑架构、菜单层级、选项键值与测试曲线；
-     - **音频轨**：通过 `ffmpeg` 提取音频并调用本地 `whisper`（默认加载 `small` 模型）转录解说全貌；
-     - **交叉验证**：将画面提取要点与 Whisper 时间戳文本逐段对齐，以音频消除画面小字漏读，以画面实证纠正同音错别字，彻底消灭单模态幻觉。
+2. **原生视听一体优先，杜绝无谓的音频二次分析（Whisper 按需辅助）**：
+   - **底层机理**：现代多模态大模型（如当前运行的 Gemini 3.8 Flash）在通过 `video_analyze` 接收 MP4 容器时，原生在注意力层同时处理视频画面帧与内嵌音频轨。模型在识别画面 PPT/BIOS 菜单 OCR 的同时，已经完整理解了原片解说语音，一轮调用即可实现视听一体化理解；
+   - **拒绝盲目二次提取**：若当前模型已具备原生音视频能力，**严禁无条件机械执行 ffmpeg 提取 WAV + Whisper 二次转录**。避免在本地未配置 Whisper 时引发报错阻塞，更避免同一段音频被重复分析消耗成倍的算力与上下文 Token；
+   - **Whisper 的精准适用场景（按需介入）**：
+     - **纯视觉降级路**：当主模型不支持视频输入，回退到抽帧拼图/接触表（`vision_analyze`）纯画面路线时，画面完全缺失音频，此时必须结合 Whisper 提取音频作为听觉轨道补充；
+     - **生僻术语存疑**：原片背景音乐嘈杂、发音模糊或涉及极其特殊的专有硬件缩写需要文字逐字确认时，按需调用 Whisper 交叉核对。
 
 ---
 
@@ -33,25 +33,32 @@ metadata:
 - 用户发送或指定本地视频文件路径（`.mp4`, `.mkv` 等）、B 站视频（BV 号/链接）或公开 YouTube URL；
 - 需要从视频中精准提取**屏幕画面证据**（如 UEFI/BIOS 菜单层级路径、拓扑结构图、代码 12 等设备管理器报错、性能跑分曲线）；
 - 需要将长视频/技术演讲高保真转化为 Markdown 学习笔记或供 `cangjie-distill` 提取方法论；
-- **执行原则**：直接使用当前会话模型 + Whisper 本地双轨流。
+- **执行原则**：直接使用当前会话模型 `video_analyze` 原生视听解析，必要时按需辅助 Whisper。
 
 ---
 
 ## 路线选择（先看这张表，再动手）
 
-**铁律：未明确强调云端时，坚决优先走「当前会话原生 + Whisper 双轨」路线。**
+**铁律：未明确强调云端时，坚决优先走「当前会话原生视听一体」路线。**
 
 | 优先级 | 路线 | 适用条件 | 操作流程 / 命令 |
 |---|---|---|---|
-| **① 首选（默认）** | **当前会话直接分析 + Whisper 双轨比对** | **默认必走**（用户未强调云端时） | 1. `video_analyze(video_url=..., question=...)`<br>2. `ffmpeg` 提取音频 $\to$ `whisper` 本地转录<br>3. 视听双轨交叉核对交付 |
-| ② 备选 | **cpa 端点工具集路线** | 仅在当前主模型不支持视频输入（报「内容已被过滤」）或用户明确指定 cpa 时 | `python scripts/agentic-video-cpa.py <视频>` |
-| ③ 备选 | **OpenRouter 免费切片路线** | 用户显式指定 OpenRouter 渠道或配额告急时 | `python scripts/distill_openrouter.py <视频>` |
-| ④ 备选 | **distill.py Google 官方直连** | 用户显式要求官方直连且持有有效 Key | `python scripts/distill.py <视频>` |
-| ⑤ 保底 | 手搓抽帧 + `vision_analyze` | 仅在上述全部不可用时的终极保底 | 接触表 + 区域裁剪放大 |
+| **① 首选（默认）** | **当前会话原生视听一体分析** | **默认必走**（当前模型支持视频，一轮搞定视听） | `video_analyze(video_url=..., question=...)`<br>模型原生听音看画，一轮交付 |
+| ② 辅助 | **纯视觉抽帧 + Whisper 辅助补齐** | 仅在纯视觉模型（无音频能力）或生僻词疑难核对时 | 1. 接触表抽帧 `vision_analyze`<br>2. `ffmpeg` 提取音频 $\to$ `whisper` 文本补充 |
+| ③ 备选 | **cpa 端点工具集路线** | 仅在当前主模型不支持视频输入（报「内容已被过滤」）或用户明确指定 cpa 时 | `python scripts/agentic-video-cpa.py <视频>` |
+| ④ 备选 | **OpenRouter 免费切片路线** | 用户显式指定 OpenRouter 渠道或配额告急时 | `python scripts/distill_openrouter.py <视频>` |
+| ⑤ 备选 | **distill.py Google 官方直连** | 用户显式要求官方直连且持有有效 Key | `python scripts/distill.py <视频>` |
 
 ### `video_analyze` 的失效模式（本机实测）
 
 `video_analyze` 把视频交给**主聊天模型链路**，而非 `auxiliary.vision`。主模型是 deepseek-v4.1-flash 时不支持视频输入，直接返回「当前模型不支持视频输入，视频内容已被过滤」。**这与图片不同**——`vision_analyze` 走 `auxiliary.vision`（provider=auto），能正常看图，所以「图片能看」不代表「视频能看」，不要据此误判工具坏了。
+
+**两层闸门，按顺序排查（2026-11-04 实测）**：
+
+1. **体积闸（上游，不是网关配置）**：报 `413 request body size (N bytes) exceeds limit of 16777216 bytes`。16 MiB 是**上游 provider** 的硬限制，改 Hermes/网关的 50MB 上限**不生效**。视频走 base64 会膨胀 `4/3`，所以原文件必须 **≤ 12.5 MB** 才进得去；12.9 MB 的 360p 片压到 6 MB 即可通过。压法：`ffmpeg -i in.mp4 -c:v libx264 -preset veryfast -crf 32 -maxrate 110k -bufsize 220k -c:a aac -b:a 32k -ar 22050 -ac 1 out.mp4`。
+2. **模态闸（主模型）**：体积过了仍回「当前模型不支持视频解析」——这时别再折腾编码，直接走下面的 cpa 路线。
+
+> ⚠️ **cpa 脚本里的 `Authorization: Bearer <key>` 在 terminal 输出里会被脱敏成 `***`**：用 `search_files` 或 `read_file` 看到 `***` 是 Hermes 的密钥脱敏，不是文件坏了、也不是占位符。**不要因此去改脚本**（改了反而破坏）；直接用 `curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:18080/v1/models` 确认端点活着（返回 401 也算活着，说明鉴权生效），然后直接跑。
 
 ### cpa 端点工具集路线（本机首选 fallback）
 
