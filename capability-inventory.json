@@ -16,7 +16,7 @@
         {
           "where": "Hermes config.yaml mcp_servers（钉版，含保护参数）",
           "version": "1.11.0",
-          "note": "2026-10-20 经 hermes config set 升级 mcp_servers.chrome-devtools.args 至 chrome-devtools-mcp@1.11.0（含 --autoConnect 与扩展保护参数）；联动核验 mcp/chrome-devtools 技能，无 breaking 参数变更。"
+          "note": "2026-10-20 经 hermes config set 升级 mcp_servers.chrome-devtools.args 至 chrome-devtools-mcp@1.11.0（含 --autoConnect 与扩展保护参数）；联动核验 mcp/chrome-devtools 技能，无 breaking 参数变更。 【2026-11-04 待拍板】上游 1.12.0 已发布，本机仍 1.11.0；版本钉在 Hermes config.yaml 的 mcp_servers.chrome-devtools.args（含 --autoConnect 与扩展保护参数），属系统配置改动，按约定等用户确认后再 `hermes config set` 升级，并同步核对 mcp/chrome-devtools 技能。"
         }
       ],
       "associatedSkills": [
@@ -56,8 +56,8 @@
       "installed": [
         {
           "where": "MSI 机器级安装（gh auth 走 keyring）",
-          "version": "2.102.0",
-          "note": "2026-09-30 经 winget upgrade 就地升级 2.101.0→2.102.0（MSI 机器级，安装路径与 keyring 凭据不变）；升级后实测 `gh --version` = 2.102.0、`gh auth status` 正常（凭据与 token scopes 不变）。"
+          "version": "2.103.3",
+          "note": "2026-11-04 升级至 2.103.3：本机为便携版布局（<tools>/gh/bin/gh.exe，非 MSI），直接从 cli/cli 的 gh_2.103.3_windows_amd64.zip 解包覆盖 bin/gh.exe；`gh --version` 复核 2.103.3，auth（keyring）不受影响。旧版已备份至 scratch 便于回退。"
         }
       ]
     },
@@ -73,7 +73,8 @@
       "installed": [
         {
           "where": "D:\\ai runtime\\PortableGit（便携版路径，升级直接解压覆盖，禁用 winget）",
-          "version": "2.56.0.windows.2"
+          "version": "2.56.0.windows.4",
+          "note": "2026-11-04 升级至 2.56.0.windows.4：用官方 PortableGit-2.56.0.4-64-bit.7z.exe 自解压到 <tools>/PortableGit-new，验证 `git --version` 通过后再整目录换名（旧版留存为 PortableGit-2.56.0.2-backup，确认无异常后删除），全程未在 git 有推送在途时覆盖。换名后实测仓库可读（rev-parse 正常）。"
         }
       ]
     },
