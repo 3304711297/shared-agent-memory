@@ -1,7 +1,7 @@
 {
   "version": 2,
   "description": "本地能力组件清单（skill/mcp/plugin/工具核心的已装版本与上游源）。由 capability-upstream-watch 工作流每日比对远端源；本地源组件用 watch-capability.cmd 或任意 Agent 会话跑脚本比对。【维护铁律】升级或新装任何组件后，必须同步更新本清单并随共享库推 main，看门自动收口对应 Issue。",
-  "updatedAt": "2026-10-20",
+  "updatedAt": "2026-11-04",
   "components": [
     {
       "id": "chrome-devtools-mcp",
@@ -35,9 +35,9 @@
       "installed": [
         {
           "where": "Hermes skills/superpowers/ 技能库（已固化为原生技能并按 Astra 标准路由化）",
-          "version": "v7.0.0",
-          "sha": "bb92a77741419a4ab5f06e711a283343f1ada0c3",
-          "note": "2026-10-20 升级至 v7.0.0（commit bb92a77741419a4ab5f06e711a283343f1ada0c3）：brainstorming 架构重构（接入 builder-check-prompt 并替换冗余评审模板，修复 server.cjs 模板替换 bug）、requesting-code-review 与 systematic-debugging 防御性修复；保留本地中文强触发词与 Astra 路由化不变量。"
+          "version": "v7.0.2",
+          "sha": "c62ffea8267a70de07583e153544d355b6748a56",
+          "note": "2026-11-04 升级至 v7.0.2（tag commit c62ffea8267a70de07583e153544d355b6748a56，v7.0.1+v7.0.2 共 3 个提交）：按 v7.0.0→v7.0.2 的**发布增量**同步 5 项技能——brainstorming 全量重构（+153/-62）、executing-plans 瘦身（正文移出 56 行，脚本 task-start/task-done 更新）、subagent-driven-development 把内联流程拆为 8 个 references/ 与 sdd-repo 脚本、writing-skills 把 5 份根级参考迁入 references/ 并新增 bulletproofing/discovery/flowcharts、diagnosing-superpowers 模板微调。**同步方式**：以 tag 树覆盖技能目录后逐一恢复本地中文 description（三-way 校验结果：5 项与上游 v7.0.2 的差异均只剩 description 一行），本地 Astra 路由化与中文强触发词不变量全部保留。drift 报告中其余「上游大幅改写」条目属 HEAD 未发布改动，按「只跟随 tag 发布」纪律不跟。"
         }
       ],
       "associatedSkills": [
@@ -139,9 +139,9 @@
       "installed": [
         {
           "where": "Hermes skills/（6 项）【ZCode 副本已随 ZCode 拆除移除，2026-09-09】",
-          "version": "5.3.2",
-          "sha": "16352ac229eb08a9598dcae48fe9f2b342567d86",
-          "note": "2026-10-20 升级至 5.3.2（Ponytail 5 全套重构，commit 16352ac229eb08a9598dcae48fe9f2b342567d86）：升级 ponytail 核心极简规则为 Lazy senior dev mode（支持 shortcut: 标签与轻量自检断言）；ponytail-review/audit 全面升级为质量评审（Bug/Risk/Scale/Missing test/Speed/Lean 统一分类）；更新 ponytail-gain 39 任务测试基准；保留本地中文强触发词不变量。"
+          "version": "5.3.3",
+          "sha": "7801d061243d7b753bad0e0b3c057cd250b11755",
+          "note": "2026-11-04 版本推进至 5.3.3（tag commit 7801d061243d7b753bad0e0b3c057cd250b11755）：逐文件比对 v5.3.2→v5.3.3，**skills/ 目录零改动**（13 个提交全部落在 hooks/band、plugin 清单与测试），故本地 6 项技能内容无需变更，仅台账版本对齐。其中 5a5a605 给 Windows 慢启动的 hook 提到 15s 超时、5117d0e 给 codebase map 3s，属插件 hook 层，与本仓技能无关。"
         }
       ],
       "associatedSkills": [
@@ -254,9 +254,9 @@
       ],
       "installed": [
         {
-          "where": "%USERPROFILE%\\.local\\bin\\bsk.exe / D:\\ai coding\\tools\\bsk\\bsk.exe",
-          "version": "0.3.3",
-          "note": "2026-10-20 重新安装并升级至 0.3.3（放置于 D:\\ai coding\\tools\\bsk\\bsk.exe 并同步副本至 %USERPROFILE%\\.local\\bin\\bsk.exe）；支持后台标签页与画布交互，联动保持 web/browser-skill 技能不变量。"
+          "where": "%USERPROFILE%/.local/bin/bsk.exe 与 <tools>/bsk/bsk.exe 两处副本",
+          "version": "0.4.1",
+          "note": "2026-11-04 升级至 0.4.1（cli-v0.4.1，Windows x64 资产 bsk-v0.4.1-x86_64-pc-windows-msvc.zip，18441776 B）：两处副本（%USERPROFILE%/.local/bin 与 <tools>/bsk）均已替换，`bsk --version` 复核为 0.4.1；孪生技能联动：用 `bsk install-skill --harness hermes --force` 同步 web/browser-skill——上游 references 由 7 份扩到 12 份（新增 cooperation/extraction/native-dialogs/step-and-cache/video 等），正文加入「Human collaboration is automatic」；同步后恢复本地中文 description 与 **User Environment Invariant (2026-09-18)**（Edge「借用标签页前确认」必须关、「允许人工协助」保持开）两条不变量，并删除 bsk 装到 skills 根目录的重复副本与其 .bsk.lock，维持 web/ 分类布局。"
         }
       ],
       "associatedSkills": [
