@@ -36,4 +36,12 @@ docs.yml 的 deploy 原先只 `needs: build`，link-check 失败仅自己变红�
 
 继续遵循：`mkdocs build --strict` 不是完整正文链接检查；本地相对链接结构此前通过，但 lychee 外链可能因 WAF/连接中断失败，不能把 403/连接失败直接等同 404。
 
+## 2026-11-04 批次：AppX 卸载机制 + 同方模具解锁原帖补全
+
+- **Atom-Tool-Box 0.2.0（`5826a03`）**：吸收 DEBLOAT 的包层语义与验证流程，新增 `docs/系统调优与安全/Windows预装应用卸载机制-AppX用户包与预置包.md`（用户包 vs 预置包、五种回归原因、`NonRemovable` 策略、框架包边界；机制以 Microsoft Learn 文档为准，工具实现只作工程样本标注）。同版 Windows Update 策略脚本逐条看过：多项为破坏性开关，且 `*_off`/`*_on` 的实际服务 Start 值与命名相反，登记不纳入。
+- **看门归属纠偏（用户明确纠正）**：不能因为项目是「优化脚本项目」就把它移出 ysk 看门。判断标准是「是否含可沉淀的机制或工程样本」，不是项目类型。Atom-Tool-Box 保留在看门清单，基线推进到 `0.2.0`；移除 Kiwi/ALit 等条目的计划已作废。
+- **《同方模具…AMITSE 与 AMIBCP 路线》扩写**（104→419 行）：读完 WIN-RAID 原帖 416 帖，补 AMITSE 三处结构（全量 32B 表项 / 隐藏登记表 / 2B 否决名单）、#99 操作顺序、GUID 边界（AMITSE PE32 vs AMITSE/SetupData）、跨机型偏移差异、FPT 区域与身份数据、AFU 限制、保护位与 Boot Guard、写后校验、五级恢复阶梯（盲操作 / `Fn+D` / FreeDOS+CSM / Ctrl+Home 的 capsule 限制 / EFI AFU / CH341A）。
+- **校验**：front-matter、覆盖矩阵、34 项单测、`mkdocs build --strict` 全绿；docs CI run `41834285670` 四个 job 全绿，线上两页均 200。
+- **坑**：`mkdocs build --strict` 在新增文件尚未 `git add`/commit 时会因 `git-revision-date-localized` 插件报 “no git logs / First revision timestamp is older…” 而失败；先本地提交再跑构建，或临时 `enable_git_follow: false`。这不是内容问题。
+
 [[desktop-projects-tweak-youshouldknow]] [[tweak-modularization-plan]] [[youshouldknow-modular-linkage]] [[pow-file-traceability]]
