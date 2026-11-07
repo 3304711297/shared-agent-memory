@@ -60,6 +60,32 @@ metadata:
 - **仓库更名要同步记录**：`ardeyouxipianyi/workbuddy2api-intl` → `-hub`，GitHub API 会重定向
   但基线里的 `repo` 字段应更新，`name` 一并注明更名，避免"名字写 intl、repo 却是 hub"的困惑。
 
+### 2026-11-07 看门源切换：linguo → 双下游
+
+`linguo2625469/workbuddy2api-panel` 于 2026-10-21 停更，看门不再查询它（条目保留
+`archived: true` 作历史溯源，脚本跳过 API 查询、不计入待评估/查询失败）。接替的两个活跃下游：
+
+- `misakano7545/workbuddy2api-panel`（`main`）——**独立起库、非 fork**，与 linguo 无共同
+  commit，`compare` 不可用；按整仓主题评估。基线 `97d3f259`（2026-11-07）。
+- `zx-yk/workbuddy2api-panel`（`integrated`）——linguo 的直接 fork，历史连续；按
+  `73a7560e...integrated` 增量评估。基线 `568f73e1`（2026-11-06）。
+
+本轮吸收（已落地并全量测试）：
+
+1. **11140 三形态分流**：内容审核（`request illegal` / 「内容未通过安全审核」）/ 账号风控
+   （「账号存在异常行为，已被限制使用」/ `unusual activity`）/ 模型限流（`rate-limiting requests`）。
+   账号风控命中即停手、不换号，同窗 ≥2 个不同 uid 命中则全池暂停 30 分钟
+   （`RestrictionHoldMiddleware`，503 + `Retry-After` + `account_restricted_hold`）。
+   `request illegal` 仍归内容审核——本仓历史实测口径，未被下游另一条抓包口径覆盖。
+2. **国际版兜底 system 只写行为约定**：不再写 "You are a helpful assistant."，避免与客户端
+   harness 自带人设并列时被模型当外部注入。
+3. **官方 `classifyErrorDetail` 码表扩族**：14001/14002/14012/14013/14014/14019 → 额度耗尽；
+   14015/14016 → 账号态故障。10105 / 6000-6008 / 14003 语义不变；11142 列为待评估
+   （本仓无硬禁用机制）。
+
+**后续纪律**：这两个下游是「整仓主题评估」，不再只等 linguo；misakano 非 fork，基线与
+`commits/<branch>` HEAD 同源比较即可，不要拿 compare 当判据。
+
 ## 五、把"跨 Agent 协作"当作常规工位（本项目实践）
 
 除本地主控外，Arena 的 Agent Mode 承担云端副产线：在**非主分支**（本仓约定
