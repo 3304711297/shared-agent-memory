@@ -1,7 +1,7 @@
 {
   "generatedAt": "2026-10-07T22:09:20+08:00",
   "scope": "Hermes skills/ 目录",
-  "totalSkills": 106,
+  "totalSkills": 107,
   "sources": [
     {
       "source": "Hermes Web UI 官方目录（hub/webui 安装）",
@@ -291,6 +291,15 @@
         "productivity/powerpoint",
         "software-development/git-history-rewrite",
         "software-development/upstream-snapshot-drift-detection"
+      ]
+    },
+    {
+      "source": "本地自研（会话沉淀，2026-11-08）",
+      "count": 1,
+      "checkType": null,
+      "watchStatus": "本地自有：无上游，不入看门",
+      "skills": [
+        "software-development/untrusted-upstream-vetting"
       ]
     }
   ],
