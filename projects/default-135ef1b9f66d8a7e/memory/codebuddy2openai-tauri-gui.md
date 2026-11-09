@@ -179,12 +179,15 @@ metadata:
   2. 规范发布构建流水线：必须保证 `npm run build` 生成前端静态产物后，由 `npm run tauri build -- --no-bundle`（或带 `--features custom-protocol`）完成内嵌打包；
 - **全量验证**：pytest 103 项 + cargo test 29 项 + 前端 2 项共 134 项测试 100% 通过；Windows 原生 API 捕获窗口画面实证 v0.2.1 暗黑控制台正常渲染，桌面快捷方式直接恢复。
 
-**2026-11-09 托盘「退出」延迟数秒的根因（已定位，待修）**：
+**2026-11-09 托盘「退出」延迟数秒的根因与修复（已修，commit `fb0e1d5`）**：
 - **现象**：托盘右键「退出」后窗口冻结数秒才消失、进程延迟退出；同期内核曾在 15:46 启动、15:53 后无请求（`%LOCALAPPDATA%\workbuddy2api\converter.log`），退出时 `ProxyHandle` 为空。
 - **根因链**：`src-tauri/src/lib.rs` 的 `"quit"` 分支在 **Tauri 主线程同步** 调 `proxy_stop` → `ProxyHandle` 为 `None` 时走 `orphan_killer::find_and_kill_orphan` → 第一步起 `powershell -NoProfile -Command "(Get-NetTCPConnection -LocalPort <port> -State Listen).OwningProcess"`。本机实测：powershell 冷启动 **1035ms** + 该 cmdlet **844ms** ≈ **1.7s/次**；`process_info` 的 `Get-CimInstance Win32_Process` **1.2s/次**；同进程内 `Get-NetTCPConnection` 全表 Listen 枚举仅 73ms（带 -LocalPort 反而走慢路径）。端口有孤儿时：climb 每层 1.2s（最多 8 层）+ 释放轮询 10×(1.7s+500ms)，最坏 20s+。主线程被占 = 窗口不消失、不重绘。
 - **回归点**：`ea2bff8`（09-17）把 `guard=None` 时的瞬时 `Ok("not-running")` 换成孤儿清理；`7951921` 再加 Fail-Closed 逐层查询。退出路径直接复用了这个"停止按钮专用"的函数。
 - **对照**：内核在跑时走 `taskkill /F /T`（实测 33ms）+ `wait_timeout(600ms)`，通常 <1s —— 所以只有"内核没跑/已停"时才感到明显延迟。
 - **修复方向**：① 退出路径不复用带孤儿探测的 `proxy_stop`（`guard=None` 直接退，清理只留给「停止」按钮）；② 阻塞清理移出主线程，`taskkill` 只 spawn 不 `.output()` 等待（taskkill 是独立进程，父进程退出不影响它）；③ 根治：用 `GetExtendedTcpTable`（windows crate / netstat2）替代 PowerShell 查端口，彻底去掉每次 1s 的 powershell 冷启动。
+- **已落地（①+②，`fb0e1d5`）**：新增 `commands::stop_for_exit` —— 只锁本进程 `ProxyHandle`，句柄为空直接 return（不再起 shell 查端口），有句柄时 `spawn_kill_tree` 用 `spawn()` 发 `taskkill /F /T` 后立即返回（未 `.output()` 等待、未 `wait_timeout`）；托盘 `quit` 与 `CloseAction::Quit` 两处改用它。更新路径**刻意保留**同步 `proxy_stop`（更新脚本 `Wait-PortReleased` 依赖「端口先消失」，且有可见进度窗口可等）。
+- **验证**：`cargo test` 121 项全绿（新增 3 项：空句柄 <200ms 返回、已退出子进程回收句柄、运行中子进程 <300ms 返回且 taskkill 异步生效）；release 重建后启动正常。步骤 ③（换 `GetExtendedTcpTable`）仍待做 —— 它只影响「停止」按钮的响应速度，不影响退出。
+- **踩坑提示**：`cargo build --release` 时若旧 exe 正在运行，Windows 会锁文件导致链接失败；可先把 exe 改名让位（运行中进程不受影响），构建完成后再删旧文件。
 
 **Why:** 用户要求模型列表全量覆盖官方模型库，并补全 WorkBuddy 核心的倍率显示、上下文限制与思考强度调节能力。
 **How to apply:** 维护 `%USERPROFILE%\Desktop\codebuddy2openai`，后续所有跨端 Agent 配置及客户端演进均以此架构为基准。
