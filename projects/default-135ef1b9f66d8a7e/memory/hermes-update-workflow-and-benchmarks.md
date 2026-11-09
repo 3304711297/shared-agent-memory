@@ -212,3 +212,44 @@ ls -l  "$LOCALAPPDATA/hermes/hermes-agent/apps/desktop/release/win-unpacked/Herm
 tail -25 "$LOCALAPPDATA/hermes/logs/desktop.log"   # 期望 [backend] Hermes gateway is ready / gateway-route published
 ```
 stamp 的 `commit` 与 CLI HEAD 一致、exe mtime 是本轮、`desktop.log` 有 `gateway is ready` + `gateway-route ... published`，才算真起来了；三者任一不符按前面的「exe 未更新」分支处理。
+
+---
+
+## 2026-11-09 增补：SHASUMS 504 变体 + Agent 会话里的 ELECTRON_RUN_AS_NODE 假死
+
+### 现象
+桌面端「更新」弹窗：*"The update finished, but needs one more step … Run 'hermes desktop --force-build'"*。
+
+回执取证（`logs\update_receipts\update_*.json`）：`apply` / `deps` / `restart` 全 success，**唯独 `stages[name=build].outcome = failed`**，`followups` 里挂着 `desktop app build: … exited 1`，`outcome` 整体仍是 `success`。这就是「更新成功但桌面还是旧版」的标准形态。
+
+`logs\update.log` 里的真错（本次只有 3 行有效信息）：
+```
+• downloaded  label=electron progress=100%
+HTTPError: Response code 504 (Gateway Time-out) for
+  https://github.com/electron/electron/releases/download/v<ver>/SHASUMS256.txt
+  at FetchDownloader.download (@electron/get/src/FetchDownloader.ts:89)
+  at acquirePackagingTools (apps/desktop/scripts/prepare-packaging-tools.mjs:90)
+```
+与上文 2026-10-20 记录的 `TypeError: fetch failed` **同源不同形**：zip 已经下到 100%，卡死在后续的 `SHASUMS256.txt` 校验拉取（这次是代理/网关回 504，不是连接超时，所以堆栈没被吞）。**只要看到 `@electron/get` + 校验文件，一律按网络问题处理，不要怀疑代码或依赖。**
+
+判别口径（三条一起看）：
+- `git -C <install> rev-parse --short=8 HEAD` 已是新 sha
+- `release\win-unpacked\resources\install-stamp.json` 的 `commit` 还是旧 sha
+- `Hermes.exe` mtime 停在上一轮构建日
+
+### 修复
+带代理重建：`HTTP_PROXY`/`HTTPS_PROXY` + `NODE_USE_ENV_PROXY=1`（Node ≥ 24），再跑 `hermes desktop --build-only --force-build`。本次带代理 **25 秒**跑完（electron zip 命中 `.cache\desktop-inputs\packager\electron\<urlhash>\`，只补了校验文件）。收尾三验：HEAD == stamp、exe mtime 是本轮、`desktop.log` 有 `install stamp: <sha> (main) from local` + `gateway-route … published`。
+
+链路实测（同一时刻，`SHASUMS256.txt` 单文件）：直连 **连接重置 / 20s 失败**；走本机代理 **302 / ~11s**；`npmmirror` 镜像 **302 / ~1s**。直连就是不通，代理或镜像二选一。
+
+### 新坑：Agent 工具会话里启动桌面端会「静默退出、exit 0」
+从 Agent（终端工具/PowerShell 工具）里 `Start-Process` 或 `&` 启动 `Hermes.exe`，进程 **0.5 秒内退出、exit code 0、零输出、`desktop.log` 不新增一行**。极易误判成「新构建坏了」。
+
+真因：Agent 会话环境里带着 **`ELECTRON_RUN_AS_NODE=1`**，Electron 可执行文件被当成纯 Node 跑——无参启动即读 stdin，EOF 立刻退出 0。判别特征极其干净：
+- `Hermes.exe --version` 输出 **`v24.x`（Node 版本）** 而不是 Electron 版本
+- `Hermes.exe --help` 打印的是 **node 的 usage**
+
+修法：启动前 `Remove-Item Env:\ELECTRON_RUN_AS_NODE`（或子进程 env 里删掉该键），再启动即正常，首行日志 `[hermes] install stamp: <sha> (main) from local`。用 `hermes desktop --skip-build` 启动同样受此污染，因为它继承当前 shell 环境。
+
+**Why:** 把「更新回执 success 但桌面还是旧版」的三条判别口径固化成可执行检查，并把 SHASUMS 504 归入既有网络分支；同时记下 Agent 侧启动桌面端的 `ELECTRON_RUN_AS_NODE` 假死，避免把环境注入误判成构建产物损坏而回滚重建。
+**How to apply:** 见到「更新完成但需再走一步」弹窗 → 先查回执 `stages.build` 与 `update.log` 的 `@electron/get` 报错 → 带代理 `--build-only --force-build` → 三验通过后启动；Agent 里启动时先清 `ELECTRON_RUN_AS_NODE`。
