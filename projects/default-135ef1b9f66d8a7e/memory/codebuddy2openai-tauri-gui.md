@@ -186,7 +186,8 @@ metadata:
 - **对照**：内核在跑时走 `taskkill /F /T`（实测 33ms）+ `wait_timeout(600ms)`，通常 <1s —— 所以只有"内核没跑/已停"时才感到明显延迟。
 - **修复方向**：① 退出路径不复用带孤儿探测的 `proxy_stop`（`guard=None` 直接退，清理只留给「停止」按钮）；② 阻塞清理移出主线程，`taskkill` 只 spawn 不 `.output()` 等待（taskkill 是独立进程，父进程退出不影响它）；③ 根治：用 `GetExtendedTcpTable`（windows crate / netstat2）替代 PowerShell 查端口，彻底去掉每次 1s 的 powershell 冷启动。
 - **已落地（①+②，`fb0e1d5`）**：新增 `commands::stop_for_exit` —— 只锁本进程 `ProxyHandle`，句柄为空直接 return（不再起 shell 查端口），有句柄时 `spawn_kill_tree` 用 `spawn()` 发 `taskkill /F /T` 后立即返回（未 `.output()` 等待、未 `wait_timeout`）；托盘 `quit` 与 `CloseAction::Quit` 两处改用它。更新路径**刻意保留**同步 `proxy_stop`（更新脚本 `Wait-PortReleased` 依赖「端口先消失」，且有可见进度窗口可等）。
-- **验证**：`cargo test` 121 项全绿（新增 3 项：空句柄 <200ms 返回、已退出子进程回收句柄、运行中子进程 <300ms 返回且 taskkill 异步生效）；release 重建后启动正常。步骤 ③（换 `GetExtendedTcpTable`）仍待做 —— 它只影响「停止」按钮的响应速度，不影响退出。
+- **验证**：`cargo test` 121 项全绿（新增 3 项：空句柄 <200ms 返回、已退出子进程回收句柄、运行中子进程 <300ms 返回且 taskkill 异步生效）；release 重建后启动正常。
+- **步骤 ③ 已完成（`ec1f320`）**：`find_listener_pid` 改用 `GetExtendedTcpTable(TCP_TABLE_OWNER_PID_LISTENER)` 直读 TCP 表（**1734ms → <1ms**，注意 `dwLocalPort` 低 16 位是网络字节序，必须 `from_be`，否则永远匹配不到）；`process_info` 换成 `snapshot_process_table`（sysinfo 一次快照取全量 cmdline + 父 PID，**1198ms/次 → 约 20ms**）。**关键坑**：`System::refresh_processes` 的默认 kind **不含 cmd**，必须显式 `ProcessRefreshKind::nothing().with_cmd(UpdateKind::OnlyIfNotSet)`，否则 `cmd()` 恒空、孤儿判据全部落空（会漏清理真孤儿）。测试增至 124 项（新增：自建 TcpListener 反查自身 PID、空闲端口返回 None、快照含自身命令行）；release 体积 +53KB。
 - **踩坑提示**：`cargo build --release` 时若旧 exe 正在运行，Windows 会锁文件导致链接失败；可先把 exe 改名让位（运行中进程不受影响），构建完成后再删旧文件。
 
 **Why:** 用户要求模型列表全量覆盖官方模型库，并补全 WorkBuddy 核心的倍率显示、上下文限制与思考强度调节能力。
