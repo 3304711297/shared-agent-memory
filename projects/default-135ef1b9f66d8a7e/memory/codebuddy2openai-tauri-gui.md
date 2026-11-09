@@ -179,5 +179,12 @@ metadata:
   2. 规范发布构建流水线：必须保证 `npm run build` 生成前端静态产物后，由 `npm run tauri build -- --no-bundle`（或带 `--features custom-protocol`）完成内嵌打包；
 - **全量验证**：pytest 103 项 + cargo test 29 项 + 前端 2 项共 134 项测试 100% 通过；Windows 原生 API 捕获窗口画面实证 v0.2.1 暗黑控制台正常渲染，桌面快捷方式直接恢复。
 
+**2026-11-09 托盘「退出」延迟数秒的根因（已定位，待修）**：
+- **现象**：托盘右键「退出」后窗口冻结数秒才消失、进程延迟退出；同期内核曾在 15:46 启动、15:53 后无请求（`%LOCALAPPDATA%\workbuddy2api\converter.log`），退出时 `ProxyHandle` 为空。
+- **根因链**：`src-tauri/src/lib.rs` 的 `"quit"` 分支在 **Tauri 主线程同步** 调 `proxy_stop` → `ProxyHandle` 为 `None` 时走 `orphan_killer::find_and_kill_orphan` → 第一步起 `powershell -NoProfile -Command "(Get-NetTCPConnection -LocalPort <port> -State Listen).OwningProcess"`。本机实测：powershell 冷启动 **1035ms** + 该 cmdlet **844ms** ≈ **1.7s/次**；`process_info` 的 `Get-CimInstance Win32_Process` **1.2s/次**；同进程内 `Get-NetTCPConnection` 全表 Listen 枚举仅 73ms（带 -LocalPort 反而走慢路径）。端口有孤儿时：climb 每层 1.2s（最多 8 层）+ 释放轮询 10×(1.7s+500ms)，最坏 20s+。主线程被占 = 窗口不消失、不重绘。
+- **回归点**：`ea2bff8`（09-17）把 `guard=None` 时的瞬时 `Ok("not-running")` 换成孤儿清理；`7951921` 再加 Fail-Closed 逐层查询。退出路径直接复用了这个"停止按钮专用"的函数。
+- **对照**：内核在跑时走 `taskkill /F /T`（实测 33ms）+ `wait_timeout(600ms)`，通常 <1s —— 所以只有"内核没跑/已停"时才感到明显延迟。
+- **修复方向**：① 退出路径不复用带孤儿探测的 `proxy_stop`（`guard=None` 直接退，清理只留给「停止」按钮）；② 阻塞清理移出主线程，`taskkill` 只 spawn 不 `.output()` 等待（taskkill 是独立进程，父进程退出不影响它）；③ 根治：用 `GetExtendedTcpTable`（windows crate / netstat2）替代 PowerShell 查端口，彻底去掉每次 1s 的 powershell 冷启动。
+
 **Why:** 用户要求模型列表全量覆盖官方模型库，并补全 WorkBuddy 核心的倍率显示、上下文限制与思考强度调节能力。
 **How to apply:** 维护 `%USERPROFILE%\Desktop\codebuddy2openai`，后续所有跨端 Agent 配置及客户端演进均以此架构为基准。
