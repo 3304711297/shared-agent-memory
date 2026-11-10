@@ -1,7 +1,7 @@
 {
   "version": 2,
   "description": "本地能力组件清单（skill/mcp/plugin/工具核心的已装版本与上游源）。由 capability-upstream-watch 工作流每日比对远端源；本地源组件用 watch-capability.cmd 或任意 Agent 会话跑脚本比对。【维护铁律】升级或新装任何组件后，必须同步更新本清单并随共享库推 main，看门自动收口对应 Issue。",
-  "updatedAt": "2026-11-04",
+  "updatedAt": "2026-11-10",
   "components": [
     {
       "id": "chrome-devtools-mcp",
@@ -310,7 +310,8 @@
     "【架构与执行规范重构 2026-09-28，视听规范升级 2026-10-07】agentic-video-distill 与 bilibili-content 规范优化：现代多模态模型（如 Gemini 3.8 Flash）在通过 video_analyze 接收 MP4 容器时原生同时解析视频帧与内嵌音频流，一轮调用即可完成视听一体化理解。正式确立「模型原生视听一体优先，杜绝无谓的音频二次分析」原则；Whisper 降级为按需辅助（仅在纯视觉抽帧接触表路线无音频流、或生僻专有名词存疑时按需介入）。youshouldknow 仓库 watch_bilibili.py 与 README.md 同步升级对齐。",
     "【自研技能 2026-10-07】hermes-update-troubleshooting：Hermes 桌面端更新交接链（windows.ps1）、600s/124 看门狗机制、真假卡死判活探针、NO_PROXY 强制直连排查、pm 还原点 .previous-* 占用 [WinError 5] 与 shallow 转换 git BUG 诊断。自研排障体系、无公开上游，不纳入单独看门，已列入 protectedSkills 白名单。",
     "【退役看门 2026-10-17 用户拍板】系统 CLI：PowerShell 7（cli-powershell）：系统级 Shell，日常稳定运行，由用户自行或随系统包管理器升级，不再纳入看门每日比对。",
-    "【组件已卸载·退役看门 2026-11-04 用户拍板】Hermes 桌面插件 minimalist-themes（dp-minimalist-themes / mykeura/minimalist-themes-for-hermes）：用户不再使用该主题插件，plugin.js 已从 %LOCALAPPDATA%/hermes/desktop-plugins/minimalist-themes 物理移除（隔离备份于本机 _quarantine，插件本体 sha256 ab72d5b7…），对应组件条目已从 components 移除，不再每日比对上游提交。如需恢复：从 Hermes 插件目录重装后重新登记看门条目。"
+    "【组件已卸载·退役看门 2026-11-04 用户拍板】Hermes 桌面插件 minimalist-themes（dp-minimalist-themes / mykeura/minimalist-themes-for-hermes）：用户不再使用该主题插件，plugin.js 已从 %LOCALAPPDATA%/hermes/desktop-plugins/minimalist-themes 物理移除（隔离备份于本机 _quarantine，插件本体 sha256 ab72d5b7…），对应组件条目已从 components 移除，不再每日比对上游提交。如需恢复：从 Hermes 插件目录重装后重新登记看门条目。",
+    "【技能已删除·上游淘汰 2026-11-10】docx / xlsx / powerpoint：上游 hermes-agent/skills/productivity 已不再发布这三项（现仅 microsoft-office v2.0.0，内含全部 docx/pptx/xlsx scripts 与 tests，且脚本比本地三件套更新）。删除前核对：三者在 .usage.json 中 use_count 全为 0；microsoft-office 覆盖其全部脚本与 references；目录已备份为 <scratch>/legacy-office-skills-20261110-153404.tar.gz。删除后 hermes skills list = 105 enabled（32 builtin / 73 local），并写入 .curator_suppressed 阻止 hermes update 重新播种。"
   ],
   "meta": {
     "zcodeDecommissioned": "2026-09-09: ZCode 客户端已拆除，zcode-github / zcode-bundled-plugins 组件条目移除（组件物理消失，看门无法再检查）；skills 条目中 'ZCode ~/.zcode/skills 副本' 表述已过时，Hermes 侧为唯一副本",
@@ -321,6 +322,7 @@
     "baselineRemoved_20261007": "用户决定不再维护「配置基准」：hermes-config.yaml 与 hermes-config-baseline-and-sync-protocol.md 已从记忆库移除；本地 config.yaml 的 model 路由（muse-spark-1.3-contributor-free / opencode-free）因本地反代未运行且无 key_env 凭据而复位为内建默认。",
     "powershellWatchRetired_20261017": "PowerShell 7（cli-powershell）退役看门：系统级 Shell，日常稳定运行，由用户自行或随系统包管理器升级，不再纳入看门每日比对。",
     "desktopPluginMinimalistRetired_20261104": "Minimalist Themes 桌面主题插件退役：用户不再使用，本地目录移除并按同一口径退出每日看门（组件计数 12→11）。其余桌面插件 config-guard / token-stats 不受影响。",
-    "configGuardPluginRetired_20261104": "config-guard 插件退役（2026-11-04 用户拍板）：本地 %LOCALAPPDATA%/hermes/plugins/config-guard 与 desktop-plugins/config-guard 已移除，config.yaml 的 plugins.enabled 不再列出它（剩余 security-guidance / token-stats）；删除前已备份到 <quarantine>/2026-11-04-config-guard。远端同名副本位于 shared-agent-memory 的 hermes 分支，已随 99dc761 删除（含 desktop-plugins/config-guard/plugin.js 与 tests/test_config_guard_unified.py）。**保留 hermes-config-guard 看门组件**：它是 check_capability_upstream.py 里的 local-config-guard 检查（配置键漂移 + stash 残留 + 核心技能保护），插件只是它的状态栏 UI 与 dashboard API，UI 退役不影响脚本侧检查。"
+    "configGuardPluginRetired_20261104": "config-guard 插件退役（2026-11-04 用户拍板）：本地 %LOCALAPPDATA%/hermes/plugins/config-guard 与 desktop-plugins/config-guard 已移除，config.yaml 的 plugins.enabled 不再列出它（剩余 security-guidance / token-stats）；删除前已备份到 <quarantine>/2026-11-04-config-guard。远端同名副本位于 shared-agent-memory 的 hermes 分支，已随 99dc761 删除（含 desktop-plugins/config-guard/plugin.js 与 tests/test_config_guard_unified.py）。**保留 hermes-config-guard 看门组件**：它是 check_capability_upstream.py 里的 local-config-guard 检查（配置键漂移 + stash 残留 + 核心技能保护），插件只是它的状态栏 UI 与 dashboard API，UI 退役不影响脚本侧检查。",
+    "officeSkillConsolidation_20261110": "文档技能 4→1 收敛：上游 hermes-agent/skills/productivity 仅剩 microsoft-office（v2.0.0 合并版，30 文件，脚本版本高于本地 legacy 三件套）。本地 legacy docx / xlsx / powerpoint 已删除并写入 .curator_suppressed（备份在 <scratch>/legacy-office-skills-20261110-153404.tar.gz），skills 108→105（32 builtin + 73 local，0 hub-installed）。microsoft-office 记入 skills-provenance.json 的 NousResearch/hermes-agent 源，由 check_skill_drift.py 保护，不设独立版本看门（随 hermes update 升级）。"
   }
 }
