@@ -257,8 +257,8 @@
       "installed": [
         {
           "where": "%USERPROFILE%/.local/bin/bsk.exe 与 <tools>/bsk/bsk.exe 两处副本",
-          "version": "0.4.1",
-          "note": "2026-11-04 升级至 0.4.1（cli-v0.4.1，Windows x64 资产 bsk-v0.4.1-x86_64-pc-windows-msvc.zip，18441776 B）：两处副本（%USERPROFILE%/.local/bin 与 <tools>/bsk）均已替换，`bsk --version` 复核为 0.4.1；孪生技能联动：用 `bsk install-skill --harness hermes --force` 同步 web/browser-skill——上游 references 由 7 份扩到 12 份（新增 cooperation/extraction/native-dialogs/step-and-cache/video 等），正文加入「Human collaboration is automatic」；同步后恢复本地中文 description 与 **User Environment Invariant (2026-09-18)**（Edge「借用标签页前确认」必须关、「允许人工协助」保持开）两条不变量，并删除 bsk 装到 skills 根目录的重复副本与其 .bsk.lock，维持 web/ 分类布局。"
+          "version": "0.4.2",
+          "note": "2026-11-11 升级至 0.4.2（上游 tag cli-v0.4.2，commit fbea9e8，Windows x64 资产 bsk-v0.4.2-x86_64-pc-windows-msvc.zip 7390199 B，解包 exe 19930664 B）：两处副本 %USERPROFILE%/.local/bin/bsk.exe 与 <tools>/bsk/bsk.exe 覆盖前各留存 0.4.1 可回滚副本至 scratch，覆盖后两处 sha256 一致（f2a30658…），bsk --version 实测输出 0.4.2。孪生技能联动已核对：比对上游 crates/bsk-cli/skill 在 cli-v0.4.1→cli-v0.4.2 的增量，SKILL.md 仅两处措辞更新（fill 支持 date/time、交互详情路由行补 Date/time values），references 中 cooperation / interaction-details / tabs-and-profiles 三篇有实质变更（observation_id 归属澄清、共享控制 2 秒静默与有效输入让权、frame_gaps 诊断、borrow not_found 与 confirmation_ui_unavailable 恢复指引、window resize 实测复核、console 首次读取开启上报的防重载提示等）。同步方式：bundled 技能经实测等于上游 crates 路径内容做 LF→CRLF 归一化（0.4.1 全量哈希复算吻合），故按此规则精确合并三篇 references 与 SKILL.md 两处措辞，并刷新 .bsk-source 基线哈希；完整保留本地中文 description 与 User Environment Invariant (2026-09-18) 环境铁律（借用标签页前确认须关、允许请求人工协助保持开），12 篇 references 与 web/ 分类布局不变、无 skills 根目录重复副本。判据：以字节模板唯一命中替换，改后 json.load 回读断言版本值与组件总数不变。凭据与 token scopes 不变。"
         }
       ],
       "associatedSkills": [
