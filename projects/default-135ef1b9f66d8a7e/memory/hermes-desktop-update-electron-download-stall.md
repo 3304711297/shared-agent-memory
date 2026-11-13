@@ -8,6 +8,8 @@ metadata:
 
 **Hermes 桌面更新「一直卡着」的定位与处置**（2026-11-13 实战验证，v0.23.1+1895 → +4462 期间）：
 
+> 上游追踪：2026-11-13 已提交 **NousResearch/hermes-agent#154900**（Open，无 triage 权限故未打标签）。同族既有 issue：#122478（products 阶段无续传、缓存被重下）、#151909（`ELECTRON_MIRROR` 到不了构建子进程）、#98049 / #132532（受限网络下的安装器韧性）、#124871（600s 墙钟看门误杀慢安装）。
+
 ## 症状
 
 `hermes update` 或桌面端更新跑到 `→ Preparing Node dependencies…` / 阶段 `Updating Node dependencies` 后长时间无输出、无报错，日志停在原地。更新期间网关被暂停、桌面端已退出，用户体感就是「Hermes 卡死了」。
