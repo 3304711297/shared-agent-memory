@@ -1,7 +1,7 @@
 {
   "version": 2,
   "description": "本地能力组件清单（skill/mcp/plugin/工具核心的已装版本与上游源）。由 capability-upstream-watch 工作流每日比对远端源；本地源组件用 watch-capability.cmd 或任意 Agent 会话跑脚本比对。【维护铁律】升级或新装任何组件后，必须同步更新本清单并随共享库推 main，看门自动收口对应 Issue。",
-  "updatedAt": "2026-11-13T08:20:00Z",
+  "updatedAt": "2026-11-13T08:40:00Z",
   "components": [
     {
       "id": "chrome-devtools-mcp",
@@ -258,7 +258,7 @@
         {
           "where": "%USERPROFILE%/.local/bin/bsk.exe 与 <tools>/bsk/bsk.exe 两处副本",
           "version": "0.5.0",
-          "note": "2026-11-13 升级至 0.5.0（上游 tag cli-v0.5.0，Windows x64 资产 bsk-v0.5.0-x86_64-pc-windows-msvc.zip 9017258 B，解包 exe 24648744 B）：覆盖 %USERPROFILE%/.local/bin/bsk.exe，覆盖后 sha256 与新解包一致，旧版 0.4.2 已留回滚副本（quarantine），`bsk --version` 实测 0.5.0。**孪生技能联动已核对并合并**：0.5.0 引入 open/sync/close/plan/recipe/read/ledger/view 会话模型（旧 session/navigate 仍兼容）；上游 crates/bsk-cli/skill 有 6 篇 references 实质变更（cooperation/environment/extraction/help-and-recovery/interaction-details/step-and-cache）+ 新增 recipes.md。按既有规则（bundled = 上游内容 LF→CRLF 归一化）全量覆盖 13 篇 references，SKILL.md 采用上游 0.5.0 骨架并保留本地中文 description、User Environment Invariant (2026-09-18) 与 legacy session 说明；.bsk-source 基线哈希已刷新。**待用户侧动作**：安装配套扩展 ext-v0.5.0（Edge 扩展需在浏览器内更新），并重载 browser-skill 指令。"
+          "note": "2026-11-13 升级至 0.5.0（上游 tag cli-v0.5.0，Windows x64 资产 bsk-v0.5.0-x86_64-pc-windows-msvc.zip 9017258 B，解包 exe 24648744 B）：覆盖 %USERPROFILE%/.local/bin/bsk.exe，覆盖后 sha256 与新解包一致，旧版 0.4.2 已留回滚副本（quarantine），`bsk --version` 实测 0.5.0。**孪生技能联动已核对并合并**：0.5.0 引入 open/sync/close/plan/recipe/read/ledger/view 会话模型（旧 session/navigate 仍兼容）；上游 crates/bsk-cli/skill 有 6 篇 references 实质变更（cooperation/environment/extraction/help-and-recovery/interaction-details/step-and-cache）+ 新增 recipes.md。按既有规则（bundled = 上游内容 LF→CRLF 归一化）全量覆盖 13 篇 references，SKILL.md 采用上游 0.5.0 骨架并保留本地中文 description、User Environment Invariant (2026-09-18) 与 legacy session 说明；.bsk-source 基线哈希已刷新。**待用户侧动作**：安装配套扩展 ext-v0.5.0（Edge 扩展需在浏览器内更新），并重载 browser-skill 指令。 **版本配套现状（2026-11-13 复核）**：Edge 官方商店尚未上架 0.5.0 扩展，本机当前为 CLI 0.5.0 + 扩展 0.4.x，`bsk status` 可正常拉起 daemon（protocol 1.9）但浏览器协同未经实测；近期若 browser-skill 连接/协议报错，先核对扩展版本，必要时回滚 quarantine 中的 0.4.2 副本。"
         }
       ],
       "associatedSkills": [
