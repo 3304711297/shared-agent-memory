@@ -47,6 +47,15 @@ metadata:
 1. **`ELECTRON_RUN_AS_NODE=1`**：在 Electron 宿主（WorkBuddy / 各类 Electron IDE）的子 shell 里直接 `Start-Process Hermes.exe`，会继承该变量，Hermes.exe **立刻以 exit 0 退出**、什么都不显示。重启桌面端前必须先 `Remove-Item Env:ELECTRON_RUN_AS_NODE`。
 2. **误报弹窗**：用过 `taskkill` 中断更新后，下一次启动桌面端会弹出「Hermes couldn't finish updating … Update failed (exit 1)」，文案还带「You're still on the previous version」。这是 `update-handoff-report.ts` 消费 `readAndConsumeHandoffResult` 读到那次被杀的 handoff 记录的兜底文案（无 stop receipt 时 `explained === null` 就套这段通用文本），**与真实状态无关**；点 Close 即可，不要点 Try again。判断真实状态只看上面三条成功判据。
 
+## 提权 ACL 授权为什么总在 junction 上报错（by design，非故障）
+
+提权跑 `hermes computer-use install --upgrade`（或其他需 UAC 的操作）时常见两条 `Not granting the current user access to <path> while elevated (...)`，来源是 `hermes_dir_acl.py` 的 `grant_user_access` / `_warn_refused`：
+
+1. **`...\hermes`：`has no trusted root to check (icacls fallback, no pywin32)`** —— 提权进程里没有 pywin32，拿不到句柄钉住目标，只能退化用 icacls 做路径检查；而它无法证明该路径下的链接仍指向 home 内，于是保守拒绝。
+2. **`...\hermes\memories`：`memories\topics ... is a junction, symlink or hard link`** —— `memories\topics` 正是指向 `shared-agent-memory\projects\default-*` 的 junction，提权授权一旦跟随，ACE 会落到 home 之外的公开仓库上，属于提权越界，设计上直接拒绝（原话：an elevated grant never follows a junction or link out of the Hermes home）。
+
+**结论：可以忽略。** 授权只为让提权期间新建的文件在降权后仍可读写；这些目录本就是当前用户所有（Owner + 继承 ACE 齐全，实测可写），且驱动装在 `%LOCALAPPDATA%\hermes\tools\cua-driver-<ver>-win32-x64`，不在 junction 路径上。同一条逻辑也是更新日志里 `Elevated ACL repair skipped <N> junction/symlink/hard-link entries` 的来源，每次提权都会出现。首次使用 `cua-driver` 会拉起 `cua-driver-uia.exe`，SmartScreen 可能弹一次确认框，属正常。
+
 ## 旁证
 
-同一轮更新里无关紧要的噪声：`Could not refresh release history … timed out after 30 seconds`（tag 历史拉取超时，只影响版本号标签显示）、`Elevated ACL repair skipped`（未提权，跳过 junction/ACL 修复）、`Windows cua-driver refresh deferred`（需 UAC，需在交互终端手动 `hermes computer-use install --upgrade`）。
+同一轮更新里无关紧要的噪声：`Could not refresh release history … timed out after 30 seconds`（tag 历史拉取超时，只影响版本号标签显示）、`Windows cua-driver refresh deferred`（需 UAC，需在交互终端手动 `hermes computer-use install --upgrade`）。
