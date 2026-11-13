@@ -1,7 +1,7 @@
 {
   "version": 2,
   "description": "本地能力组件清单（skill/mcp/plugin/工具核心的已装版本与上游源）。由 capability-upstream-watch 工作流每日比对远端源；本地源组件用 watch-capability.cmd 或任意 Agent 会话跑脚本比对。【维护铁律】升级或新装任何组件后，必须同步更新本清单并随共享库推 main，看门自动收口对应 Issue。",
-  "updatedAt": "2026-11-10",
+  "updatedAt": "2026-11-13T08:20:00Z",
   "components": [
     {
       "id": "chrome-devtools-mcp",
@@ -15,8 +15,8 @@
       "installed": [
         {
           "where": "Hermes config.yaml mcp_servers（钉版，含保护参数）",
-          "version": "1.12.0",
-          "note": "2026-11-04 经 `hermes config set` 升级 mcp_servers.chrome-devtools.args 至 chrome-devtools-mcp@1.12.0，保护参数 `--autoConnect` 与 `--ignore-default-chrome-arg=--disable-extensions` 原样保留（`hermes config get` 复核为列表结构）；`cmd /c npx -y chrome-devtools-mcp@1.12.0 --version` 实测返回 1.12.0。**孪生技能联动核对**：mcp/chrome-devtools 在本机为自研技能（NousResearch/hermes-agent 无同名目录，返回 404），1.12.0 的 release notes 只有新增特性（--maxNavigationSaved / --watchConfig / 堆快照分页 / 并行工具调用 / wait_for 可见文本匹配）与修复，无工具契约或参数破坏性变更；技能文档里的 `--categoryExtensions`、`--memoryDebugging` 在 1.12.0 `--help` 中仍存在，故技能无需改动。MCP 为 lazy 启动且当前无 node 进程在跑，下次拉起即用新版（已开的会话可能仍持有旧配置，重启会话最稳）。"
+          "version": "1.13.0",
+          "note": "2026-11-13 经 `hermes config set` 将 mcp_servers.chrome-devtools.args 升至 chrome-devtools-mcp@1.13.0，保护参数 `--autoConnect` 与 `--ignore-default-chrome-arg=--disable-extensions` 原样保留（`hermes config get` 复核为列表结构）；`npx -y chrome-devtools-mcp@1.13.0 --version` 实测返回 1.13.0。**孪生技能联动已核对**：1.13.0 新增 logpoints（BreakpointManager）、page-scoped network mocks 与上游 mock 响应，其余为修复（config UTF-8 BOM、console 循环 Error.cause、press_key/submitKey schema 校验、无请求导航的空请求列表）；无工具契约破坏性变更。mcp/chrome-devtools 技能已同步两处：去掉写死的工具数量（改由 MCP 启动时枚举，1.12.0 实测 32 个）、补充 logpoints 与 network mocks 说明。MCP 为 lazy 启动，下次拉起即用新版。"
         }
       ],
       "associatedSkills": [
@@ -56,8 +56,8 @@
       "installed": [
         {
           "where": "MSI 机器级安装（gh auth 走 keyring）",
-          "version": "2.103.3",
-          "note": "2026-11-04 升级至 2.103.3：本机为便携版布局（<tools>/gh/bin/gh.exe，非 MSI），直接从 cli/cli 的 gh_2.103.3_windows_amd64.zip 解包覆盖 bin/gh.exe；`gh --version` 复核 2.103.3，auth（keyring）不受影响。旧版已备份至 scratch 便于回退。"
+          "version": "2.104.0",
+          "note": "2026-11-13 升级至 2.104.0：本机为便携版布局（<tools>/gh/bin/gh.exe，非 MSI），从 cli/cli 的 gh_2.104.0_windows_amd64.zip（15169772 B）解包覆盖 bin/gh.exe，覆盖后 sha256 与新解包一致；旧版 2.103.3 已留回滚副本（quarantine）。`gh --version` 复核 2.104.0，`gh auth status` 复核 keyring 登录、账号与 scopes 均未受影响。"
         }
       ]
     },
@@ -73,8 +73,8 @@
       "installed": [
         {
           "where": "D:\\ai runtime\\PortableGit（便携版路径，升级直接解压覆盖，禁用 winget）",
-          "version": "2.56.0.windows.4",
-          "note": "2026-11-04 升级至 2.56.0.windows.4：用官方 PortableGit-2.56.0.4-64-bit.7z.exe 自解压到 <tools>/PortableGit-new，验证 `git --version` 通过后再整目录换名（旧版留存为 PortableGit-2.56.0.2-backup，确认无异常后删除），全程未在 git 有推送在途时覆盖。换名后实测仓库可读（rev-parse 正常）。"
+          "version": "2.56.1.windows.1",
+          "note": "2026-11-13 升级至 2.56.1.windows.1：用官方 PortableGit-2.56.1-64-bit.7z.exe（60125512 B）自解压到 <tools>/PortableGit-new，验证 `git --version` 通过后整目录换名，旧版留存为 <tools>/PortableGit-2.56.0.4-backup。换名后实测：`rev-parse` 可读仓库、全局 URL-scoped 代理配置（http/https.https://github.com.proxy）保持、`ls-remote` 经代理连通。**注意**：终端 PATH 上的 `git` 实际解析到 Hermes 自带 git-2.53.0（%LOCALAPPDATA%\\hermes\\tools\\git-2.53.0+3-win32-x64），与本看门目标的可执行文件不是同一个，本次未改动它。"
         }
       ]
     },
@@ -257,8 +257,8 @@
       "installed": [
         {
           "where": "%USERPROFILE%/.local/bin/bsk.exe 与 <tools>/bsk/bsk.exe 两处副本",
-          "version": "0.4.2",
-          "note": "2026-11-11 升级至 0.4.2（上游 tag cli-v0.4.2，commit fbea9e8，Windows x64 资产 bsk-v0.4.2-x86_64-pc-windows-msvc.zip 7390199 B，解包 exe 19930664 B）：两处副本 %USERPROFILE%/.local/bin/bsk.exe 与 <tools>/bsk/bsk.exe 覆盖前各留存 0.4.1 可回滚副本至 scratch，覆盖后两处 sha256 一致（f2a30658…），bsk --version 实测输出 0.4.2。孪生技能联动已核对：比对上游 crates/bsk-cli/skill 在 cli-v0.4.1→cli-v0.4.2 的增量，SKILL.md 仅两处措辞更新（fill 支持 date/time、交互详情路由行补 Date/time values），references 中 cooperation / interaction-details / tabs-and-profiles 三篇有实质变更（observation_id 归属澄清、共享控制 2 秒静默与有效输入让权、frame_gaps 诊断、borrow not_found 与 confirmation_ui_unavailable 恢复指引、window resize 实测复核、console 首次读取开启上报的防重载提示等）。同步方式：bundled 技能经实测等于上游 crates 路径内容做 LF→CRLF 归一化（0.4.1 全量哈希复算吻合），故按此规则精确合并三篇 references 与 SKILL.md 两处措辞，并刷新 .bsk-source 基线哈希；完整保留本地中文 description 与 User Environment Invariant (2026-09-18) 环境铁律（借用标签页前确认须关、允许请求人工协助保持开），12 篇 references 与 web/ 分类布局不变、无 skills 根目录重复副本。判据：以字节模板唯一命中替换，改后 json.load 回读断言版本值与组件总数不变。凭据与 token scopes 不变。"
+          "version": "0.5.0",
+          "note": "2026-11-13 升级至 0.5.0（上游 tag cli-v0.5.0，Windows x64 资产 bsk-v0.5.0-x86_64-pc-windows-msvc.zip 9017258 B，解包 exe 24648744 B）：覆盖 %USERPROFILE%/.local/bin/bsk.exe，覆盖后 sha256 与新解包一致，旧版 0.4.2 已留回滚副本（quarantine），`bsk --version` 实测 0.5.0。**孪生技能联动已核对并合并**：0.5.0 引入 open/sync/close/plan/recipe/read/ledger/view 会话模型（旧 session/navigate 仍兼容）；上游 crates/bsk-cli/skill 有 6 篇 references 实质变更（cooperation/environment/extraction/help-and-recovery/interaction-details/step-and-cache）+ 新增 recipes.md。按既有规则（bundled = 上游内容 LF→CRLF 归一化）全量覆盖 13 篇 references，SKILL.md 采用上游 0.5.0 骨架并保留本地中文 description、User Environment Invariant (2026-09-18) 与 legacy session 说明；.bsk-source 基线哈希已刷新。**待用户侧动作**：安装配套扩展 ext-v0.5.0（Edge 扩展需在浏览器内更新），并重载 browser-skill 指令。"
         }
       ],
       "associatedSkills": [
