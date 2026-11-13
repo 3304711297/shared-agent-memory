@@ -8,6 +8,8 @@ metadata:
 
 **Hermes 桌面更新「一直卡着」的定位与处置**（2026-11-13 实战验证，v0.23.1+1895 → +4462 期间）：
 
+> 更新指令与权威流水线脚本（含预灌缓存的 PowerShell 段）见 `hermes-update-workflow-and-benchmarks.md`，其 11-13 增补已把本篇结论并入；本篇只做故障取证。
+
 > 上游追踪：2026-11-13 已提交 **NousResearch/hermes-agent#154900**（Open，无 triage 权限故未打标签）。同族既有 issue：#122478（products 阶段无续传、缓存被重下）、#151909（`ELECTRON_MIRROR` 到不了构建子进程）、#98049 / #132532（受限网络下的安装器韧性）、#124871（600s 墙钟看门误杀慢安装）。
 
 ## 症状

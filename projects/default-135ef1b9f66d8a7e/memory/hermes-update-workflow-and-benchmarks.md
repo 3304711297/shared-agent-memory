@@ -1,6 +1,6 @@
 ---
 name: hermes-update-workflow-and-benchmarks
-description: Hermes Agent 两检出双端同步与预检预热流水线：部分克隆 blob:none 延迟拉取 120s 超时机理、20 个启动关键文件定向预热实测（0.07s）、积压 >1500 提交条件全量预热、去 --keep-stash 与 desktop 源码 pack 闭环；含 pack 阶段 TypeError: fetch failed 的 Node fetch 代理陷阱与三方版本对齐校验口径
+description: Hermes Agent 两检出双端同步与预检预热流水线：部分克隆 blob:none 延迟拉取 120s 超时机理、20 个启动关键文件定向预热实测（0.07s）、积压 >1500 提交条件全量预热、去 --keep-stash 与 desktop 源码 pack 闭环；含 pack 阶段 TypeError: fetch failed 的 Node fetch 代理陷阱与三方版本对齐校验口径；2026-11-13 增补 update 的 node 依赖阶段卡死与 @electron/get 只认 ELECTRON_GET_USE_PROXY、按 origin/main 目标版本动态预灌缓存
 metadata:
   node_type: memory
   type: project
@@ -138,6 +138,23 @@ $crit = 'pyproject.toml','hermes_bootstrap.py','hermes_cli/_parser.py','hermes_c
         'cli.py','run_agent.py','model_tools.py','toolsets.py','hermes_constants.py'
 ($crit | ForEach-Object { "origin/main:$_" }) | git -C $R cat-file --batch-check | Out-Null
 
+# ---- 预灌 @electron/get 缓存：让 update 的 node 依赖阶段不联网（2026-11-13 增补）----
+# 版本必须取 origin/main（更新目标），不能读本地旧检出的 package.json
+$ver  = (git -C $R -c http.proxy=http://127.0.0.1:<PORT> show origin/main:apps/desktop/package.json |
+         ConvertFrom-Json).devDependencies.electron
+$zip  = "electron-v$ver-win32-x64.zip"
+$base = "https://github.com/electron/electron/releases/download/v$ver"
+$key  = [BitConverter]::ToString([Security.Cryptography.SHA256]::Create().ComputeHash(
+         [Text.Encoding]::UTF8.GetBytes($base))).Replace('-','').ToLower()
+$dir  = "$env:LOCALAPPDATA\electron\Cache\$key"
+if (-not (Test-Path "$dir\$zip")) {
+    New-Item -ItemType Directory -Force $dir | Out-Null
+    curl.exe -sL --max-time 600 -x http://127.0.0.1:<PORT> -o "$dir\$zip" "$base/$zip"
+    $want = (curl.exe -sL -x http://127.0.0.1:<PORT> "$base/SHASUMS256.txt" | Select-String " $zip$").Line.Split()[0]
+    if ((Get-FileHash "$dir\$zip" -Algorithm SHA256).Hash -ne $want.ToUpper()) { throw "electron zip sha256 不匹配：$zip" }
+    Write-Host "electron 缓存已预灌并校验：$zip"
+} else { Write-Host "electron 缓存已存在：$zip（跳过下载）" }
+
 hermes update --yes --branch main
 if ($LASTEXITCODE -ne 0) { throw "hermes update 失败，已中止" }
 
@@ -253,3 +270,49 @@ HTTPError: Response code 504 (Gateway Time-out) for
 
 **Why:** 把「更新回执 success 但桌面还是旧版」的三条判别口径固化成可执行检查，并把 SHASUMS 504 归入既有网络分支；同时记下 Agent 侧启动桌面端的 `ELECTRON_RUN_AS_NODE` 假死，避免把环境注入误判成构建产物损坏而回滚重建。
 **How to apply:** 见到「更新完成但需再走一步」弹窗 → 先查回执 `stages.build` 与 `update.log` 的 `@electron/get` 报错 → 带代理 `--build-only --force-build` → 三验通过后启动；Agent 里启动时先清 `ELECTRON_RUN_AS_NODE`。
+
+---
+
+## 2026-11-13 增补：同一卡点前移到 `hermes update` 的 node 依赖阶段
+
+### 现象
+
+update 从 `9373dc1e` 拉 2556 个提交（Electron 锁版 44.9.3 → 44.10.2）时，停在 `→ Preparing Node dependencies…`（handoff 记 `stage: Updating Node dependencies`）**27 分钟**：无输出、无报错、不退出。此时网关已暂停、桌面端已退出，用户侧表现就是「Hermes 打不开了」。
+
+判活：`%TEMP%\electron-download-*\electron-v44.10.2-win32-x64.zip` 10 秒采样只从 22,044,618 涨到 22,130,470 字节（≈8.6 KB/s），27 分钟只有 22 MB / 158 MB；持有 socket 的 node 进程 CPU ≈ 0.27s。
+
+### 与 10-30 记录的关系
+
+同源（单条 TCP 被限速、undici 无读超时、不自愈），但**卡点位置与判活口径都不同**：
+
+- 10-30 是 `hermes desktop --build-only --force-build`：custody job 只 `p.wait()`，没有空闲看门狗；
+- 本次是 `hermes update` 的 deps 阶段：`hermes_cli/source_build.py` → `scripts/build/node-deps.mjs` → `electron-runtime.mjs::prepareElectronRuntime` → `electron/install.js`，**整条链没有任何 timeout**，所以同样不会被掐死，只会一直耗着。
+
+### 新根因细节：代理变量注入了却被挡在门外
+
+`@electron/get` 入口是 `if (process.env.ELECTRON_GET_USE_PROXY) initializeProxy()`——不设这个开关，`HTTP_PROXY`/`HTTPS_PROXY`/`NO_PROXY` 一概不看。桌面端更新时确实把系统代理注入给了子进程（`apps/desktop/electron/updater/system-proxy-env.ts` → `hermes_cli/update_proxy_env.py`），**恰好被这个开关挡在外面**；全仓检索 `ELECTRON_GET_USE_PROXY` 为空，Hermes 从不设置它。这也解释了为什么「系统代理明明开着」却毫无作用。
+
+三种解法任选其一：
+
+1. **预灌缓存**（首选，已并入上方权威脚本）：无副作用、不碰任何代理变量，已缓存则整段跳过。
+2. `ELECTRON_GET_USE_PROXY=1` + `HTTPS_PROXY`/`HTTP_PROXY`/`NO_PROXY`：注意 `hermes update` 重启的网关会继承这些变量（只有识别到桌面端注入标记时才自动还原）。
+3. `NODE_USE_ENV_PROXY=1`（Node ≥ 24）+ 代理变量：走 Node/undici 层，即 pack 阶段那条已记录的解法，对 `install.js` 同样有效。
+
+### 实测参考
+
+- 同一 URL 新连接：直连 **10.7 MB/s**、走本机代理 **24.4 MB/s** → 不是带宽问题而是既有连接劣化，「再等等」等不到。
+- 预灌后重跑：打印 `hermes: finishing an interrupted source update...`，deps 阶段秒过，全程（deps + TUI + Web UI + 桌面打包 + 网关重启）**4 分 53 秒**。
+- 中断方式：对更新主进程 `taskkill /F /T <pid>`（node 子进程挂 JobObject，随之一并结束）。`.hermes-update-in-progress` 与 `.git/hermes-update.lock` 按 **pid + 创建时间**判活、owner 死即失效，**不要手删**。
+
+### 收尾误报
+
+被杀掉的 handoff 会在 `logs\desktop-update-handoff.log` 留一行 `hermes update exit code: 1`，下次启动桌面端据此弹「Hermes couldn't finish updating … Update failed (exit 1) / You're still on the previous version」。这是 `update-handoff-report.ts` 在无 stop receipt 时的兜底文案（`explained === null`），与真实状态无关——先看三条成功判据（HEAD、`install-stamp.json`、exe mtime），再决定要不要理它。
+
+### 上游
+
+已提交 **NousResearch/hermes-agent#154900**（Open，无 triage 权限故未打标签）。同族：#122478（products 阶段无续传）、#151909（`ELECTRON_MIRROR` 到不了构建子进程）、#98049 / #132532（受限网络韧性）、#124871（墙钟看门误杀慢安装）。
+
+> 本篇管「怎么更新」；本次故障的逐项取证（连接归属命令、sha256 校验、提权 ACL 在 junction 上被拒的噪声）另见 `hermes-desktop-update-electron-download-stall.md`。
+
+**Why:** 把「卡死」的判别从「哪个命令」改成「哪个阶段 + 连接是否还在动」，并补上被忽略的 `ELECTRON_GET_USE_PROXY` 开关——这是系统代理开着却完全无效的直接原因。
+**How to apply:** 更新前一律先跑脚本里的预灌段（版本取 `origin/main`，不是本地旧检出）；卡住时用「临时 zip 体积增速」判活；重跑靠缓存秒过；收尾以 HEAD / stamp / exe mtime 三验为准，别被 exit 1 弹窗带偏。
