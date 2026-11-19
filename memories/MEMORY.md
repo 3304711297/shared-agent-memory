@@ -6,7 +6,7 @@ WorkBuddy2API (repo/workspace at D:\ai coding\GitRepos\workbuddy2api): Local rev
 §
 Hardware: Mechrevo Aurora X (GM6AQ7C) i7-12800HX (8C8T) + 140W RTX 4070 Laptop 8GB VRAM + 24GB DDR5-6400 + 1TB NVMe. 8GB VRAM is scarce — keep background GPU consumers off. Models/runtime junctioned to D:. Local models at D:\HermesModels (MiniCPM5-2B, Qwen3.8-9B-Distill). Full ledger: topics/mechrevo-jiguangx-hardware-inventory.md; firmware: topics/mechrevo-jiguangx-bios-firmware-reference.md.
 §
-Memory single source of truth: Built-in MEMORY.md and USER.md inject in full each turn; Git shared lib 'shared-agent-memory' (memories/topics junction) holds long-form facts searched via search_files. No second memory store (OpenViking retired 2026-09-21). Keep entries compact: subtract rather than raise cap.
+Memory single source of truth: Built-in MEMORY.md and USER.md inject in full each turn; Git shared lib 'shared-agent-memory' (memories/topics junction) holds long-form facts searched via search_files. Keep entries compact: subtract rather than raise cap.
 §
 PowerShell convention: Use 'pwsh -NoProfile' (Store alias, version-independent) + '[Console]::OutputEncoding=[System.Text.Encoding]::UTF8' for CJK.
 §
@@ -16,13 +16,13 @@ Pitfall: Desktop freeze on model switch (#94486); SOP in topics/hermes-desktop-r
 §
 Shared memory invariant: D:\ai coding\GitRepos\shared-agent-memory MUST stay on 'main'. Checking out 'hermes' unlinks projects/ and breaks the memories/topics junction silently while git status remains clean. Self-check: 'python scripts/check_memory_layout.py' (identical scripts in truth and home).
 §
-In-house projects: Workspaces located in 'D:\ai coding\GitRepos\<name>' (e.g. tweakbyjie, workbuddy2api) — inspect local workspace before touching GitHub. workbuddy2api changes require TDD + mutation testing. Tauri update builds: avoid rigid byte baselines (use loose floor + index-*.js hash check in exe); use ThinLTO + 16 codegen-units + input-aware frontend skip for fast rebuilds.
+In-house projects: Workspaces located in 'D:\ai coding\GitRepos\<name>' (e.g. tweakbyjie, workbuddy2api) — inspect local workspace before touching GitHub. workbuddy2api changes require TDD + mutation testing. Tauri update builds: avoid rigid byte baselines (use loose floor + index-*.js hash check in exe); use ThinLTO + 16 codegen-units + input-aware frontend skip for fast rebuilds. open-revo lives at D:\ai coding\open-revo (read-only build copy) and tracks upstream 'dev', never main.
 §
 ComfyUI Portable at D:\ai coding\ComfyUI (run_nvidia_gpu.bat, 127.0.0.1:8188). Qwen-Image-2.1 = local bf16 singles, 2.8s/it on 8GB via offload; workflow in comfyui skill.
 §
 Hermes update: SOP in skill hermes-update-troubleshooting; 'Desktop app build owed' -> `hermes desktop --build-only`. src deleted 2026-11-04, do not recreate.
 §
-Environment & Toolchain: Toolchain in D:\ai runtime (Node LTS, Py 3.14.8, PortableGit, uv, gh, pnpm via corepack; CARGO_HOME=D:\ai runtime\cargo with rsproxy sparse mirror). Global pnpm is 12.x while repos often pin pnpm@10.x - every pnpm command then aborts with ERR_PNPM_BAD_PM_VERSION and only `--pm-on-fail=ignore` bypasses it (env vars do not). pnpm's bash shim needed a `pwd -W` patch (MSYS mangles /d mounts into D:\d\...); `corepack enable pnpm` overwrites that patch. %USERPROFILE%\.local is active (gateway-locks & python3.12 shim); never delete. ELECTRON_RUN_AS_NODE=1 leaks in WorkBuddy terminal (Electron apps exit rc=0 silently; unset first). PowerShell has no Recycle Bin (quarantine to D:\ai runtime\_quarantine\). Windows Update auto driver install disabled (SearchOrderConfig=0).
+Environment & Toolchain: Toolchain in D:\ai runtime (Node LTS, Py 3.14.8, PortableGit, uv, gh, pnpm via corepack; CARGO_HOME=D:\ai runtime\cargo with rsproxy sparse mirror). Corepack auto-switches pnpm to a repo's pinned `packageManager` (works); ERR_PNPM_BAD_PM_VERSION appears only if COREPACK_ENABLE_PROJECT_SPEC=0 disables that switch - never export it. pnpm's bash shim needed a `pwd -W` patch (MSYS mangles /d mounts into D:\d\...); `corepack enable pnpm` overwrites that patch. %USERPROFILE%\.local is active (gateway-locks & python3.12 shim); never delete. ELECTRON_RUN_AS_NODE=1 leaks in WorkBuddy terminal (Electron apps exit rc=0 silently; unset first). PowerShell has no Recycle Bin (quarantine to D:\ai runtime\_quarantine\). Windows Update auto driver install disabled (SearchOrderConfig=0).
 §
 JDKs: Eclipse Temurin 8/16/17/21/25 at D:\JAVA\temurin-*, Azul Zulu deleted. PCL CE only accepts 4-segment java.exe FileVersion; 5-segment builds (Zulu/Corretto) get dropped and deadlock startup during Loading.
 §
