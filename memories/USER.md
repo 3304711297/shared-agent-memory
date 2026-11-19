@@ -8,7 +8,7 @@ UI preference: Micro-interactions, dark geek-IDE aesthetic. Always render intera
 §
 GUI build workflow: User builds GUI/Tauri apps (workbuddy2api) manually via 'npm run tauri build' (repo root). Agent must NEVER attempt builds, isolate dirs, or script workarounds; notify 'Ready to build' when code changes are done.
 §
-Workspace integrity: Never edit user workspace source files while the user is actively building.
+Workspace integrity: never edit user workspace source files while the user is actively building. Upstream contributions (PR/issue) must be authored from a separate clone/worktree, never from the user's build copy — leave that copy on its original branch/remotes so 'git pull' still follows the real upstream.
 §
 tweakbyjie upstream sync: Any tuning item benchmarked or adopted from a new open-source project MUST be automatically recorded into tools/upstream-sources.json and README.md upstream adoption table during the same turn, with no user reminder needed.
 §
@@ -22,4 +22,4 @@ Core instruction & memory language invariant: 'SOUL.md', 'USER.md', and 'MEMORY.
 §
 Knowledge base & issue workflow: NEVER write to youshouldknow without explicit user confirmation. Upstream-watch and evaluation GitHub Issues without code changes must be summarized and closed automatically.
 §
-Hermes updates: pwsh script updates CLI & Desktop: warm up 20 critical files (cat-file --batch-check) + bulk fetch if >1500 backlog, 'hermes update --yes --branch main' (no --keep-stash), then 'git pull' & 'npm --prefix apps/desktop run pack' in hermes-agent-src.
+Hermes updates: pwsh script: warm up 20 critical files (cat-file --batch-check) + bulk fetch if >1500 backlog, then 'hermes update --yes --branch main' (no --keep-stash); desktop rebuilds inside the install tree (no second checkout).
