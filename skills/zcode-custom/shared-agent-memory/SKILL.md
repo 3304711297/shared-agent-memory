@@ -31,6 +31,23 @@ description: "管理记忆库/存记忆时必用。shared-agent-memory真源读�
 **推送代理回退（2026-09-15 实证）**：本机对 github.com 直连会 `Recv failure: Connection was reset`，`env -u ALL_PROXY -u HTTP_PROXY -u HTTPS_PROXY git ls-remote/push` 同样失败；必须显式走本地代理 `git -c http.proxy=http://127.0.0.1:3067 push origin <branch>`。`gh` CLI 走 keyring 不受影响（`gh run list/view` 可查 CI 结果）。
 - **Hermes 专属记忆（不放共享库）**：`memories\USER.md`（用户画像常驻）、根 `memories\MEMORY.md`（系统与环境常驻索引）→ 随 hermes 分支备份
 
+**⚠️ 2026-11-19 实证：`%LOCALAPPDATA%\hermes` 已不是 git 仓库**（`git -C <home> branch` 报 `fatal: not a git repository`）。home 克隆在某次更新后消失，但 `origin/hermes` 分支仍在正常承运（607 个文件，含 `memories/MEMORY.md`、`memories/USER.md`）。所以“改完记忆 → 在 home 仓 commit/push hermes”这条老流程会直接失败。
+
+**当前正确做法（不重建 home 仓、不私自 `git init`）**：用真源仓的临时 worktree 把两个文件抄进去提交——
+
+```bash
+cd "D:/ai coding/GitRepos/shared-agent-memory" \
+  && git worktree add "D:/ai coding/_hermes-wt" hermes \
+  && cp "$LOCALAPPDATA/hermes/memories/MEMORY.md" "D:/ai coding/_hermes-wt/memories/MEMORY.md" \
+  && cp "$LOCALAPPDATA/hermes/memories/USER.md"   "D:/ai coding/_hermes-wt/memories/USER.md" \
+  && cd "D:/ai coding/_hermes-wt" && git add -A && python scripts/check_hygiene.py \
+  && git commit -m "docs(memory): sync home memory" \
+  && git -c http.proxy=http://127.0.0.1:3067 push origin hermes
+cd "D:/ai coding/GitRepos/shared-agent-memory" && git worktree remove --force "D:/ai coding/_hermes-wt"
+```
+
+判据：`git diff --stat` 只应出现这两个文件（若多出别的，说明 home 与备份已分叉，先查清再提交）。这是**唯一**被允许的 hermes 分支操作方式，仍然严禁在真源目录 `git checkout hermes`。
+
 ## 何时读取
 
 用户提到「之前 / 上次 / 记得吗 / 我们之前决定」等回溯性内容，或任务涉及用户环境、历史决策、进行中项目时：
