@@ -1,27 +1,35 @@
 ---
 name: openrevo-build-and-upstream-contribution
-description: OpenRevo 本地构建一条命令、pnpm/TTY 三处绕法，上游 PR #183 已合并与前后实测
+description: OpenRevo 更新与构建（必须显式拉 dev）、pnpm 版本协商实情、上游 PR #183 已合并
 metadata:
   type: project
 ---
 
 # OpenRevo 本地构建与上游共建
 
-**工程位置**：`D:\ai coding\open-revo`（上游 `faintonce/open-revo`，发布分支 `dev`；fork `3304711297/open-revo`）。本地仓库视为**只读构建副本**——不要在里面提交或改文件；要给上游做事另开克隆，改完把本地切回 `dev`、`origin` 指回原作者。
+**工程位置**：`D:\ai coding\open-revo`（上游 `faintonce/open-revo`，fork `3304711297/open-revo`）。本地仓库视为**只读构建副本**——不要在里面提交或改文件；要给上游做事另开克隆。
+
+**分支口径（用户明确要求）**：上游默认分支是 `main`，但本项目开发在 **`dev`**。更新必须显式拉 dev，不能靠默认分支。
 
 ## 更新 + 构建（一条命令，PowerShell）
 
 ```powershell
-cd "D:\ai coding\open-revo"; git pull --ff-only; pnpm install --frozen-lockfile --pm-on-fail=ignore; node node_modules/typescript/bin/tsc; node node_modules/vite/bin/vite.js build; node node_modules/@tauri-apps/cli/tauri.js build --no-bundle --config '{"build":{"beforeBuildCommand":""}}'
+cd "D:\ai coding\open-revo"; git pull --ff-only origin dev; pnpm install; pnpm tauri build --no-bundle
 ```
 
 产物：`src-tauri\target\release\open-revo.exe`（单文件，**不生成安装包**；用户明确不要安装包）。
 
-三处必要绕法：
+## ⚠️ pnpm 固定版本的真相（2026-11-19 实测纠正）
 
-1. `pnpm build` / `pnpm tauri build` 会被 `ERR_PNPM_BAD_PM_VERSION` 拦住（`package.json` 钉 `pnpm@10.32.1`，本机全局 12.x），所以前端直接用 node 跑 tsc/vite；`--pm-on-fail=ignore` 只对 `pnpm install` 有效，对环境变量无效。
-2. `--config '{"build":{"beforeBuildCommand":""}}'` 清空内建 `pnpm.cmd build` 钩子（前端已单独构建）。PowerShell 里必须用单引号，已实测 JSON 不被吞。
-3. tauri CLI 要求 stdin **和** stdout 都是 TTY——后台跑或把输出重定向到文件会以 `stdin is not a tty` / `stdout is not a tty` 直接 exit 1，且不打印其他信息。
+`package.json` 里 `"packageManager": "pnpm@10.32.1+sha512..."` **不是**报错原因，也**不需要**改成不固定。
+
+- corepack 作为 pnpm 启动器时会读这个字段并**自动切到 10.32.1**：干净环境实测 `pnpm install` 输出 `Done in 19.7s using pnpm v10.32.1`，随后 `pnpm build`、`pnpm tauri build --no-bundle` 全部正常。本机全局虽是 pnpm 12.x，走 corepack 时由它协商，不冲突。
+- `ERR_PNPM_BAD_PM_VERSION` 只在 **`export COREPACK_ENABLE_PROJECT_SPEC=0`** 时出现：该变量让 corepack 不再按项目切版本，于是 pnpm 12 直接运行、又因处于 corepack 下而拒绝自我切换，才硬报错。**永远不要设这个变量**——它曾被误当成"绕过版本检查"的手段，实际是制造错误的根源。
+- 另一真实但瞬时的坑：corepack 首次下载 10.32.1 可能因 IPv6 路由失败（`UND_ERR_CONNECT_TIMEOUT`，连 `2606:4700::...`），重试或 `NODE_OPTIONS=--dns-result-order=ipv4first` 即可。属网络问题，不是仓库问题，不值得向上游提 issue。
+
+## 仍然成立的坑：tauri CLI 要求 TTY
+
+`tauri build`（v2.11.4）要求 **stdin 和 stdout 都是终端**：后台运行或以 `> log 2>&1` 重定向，会以 `stdin is not a tty` / `stdout is not a tty` 立即 exit 1，且不打印其他信息。真实终端里手敲没问题；自动化则用 pty 且**不要重定向**。
 
 ## 上游贡献状态
 
@@ -37,3 +45,5 @@ cd "D:\ai coding\open-revo"; git pull --ff-only; pnpm install --frozen-lockfile 
 ## 上游 PR 的低成本做法（本次验证过）
 
 先实测基线（冷构建 / 改前端 / 改一行 Rust 三组，`CARGO_TARGET_DIR` 指到临时目录避免污染发布产物），再用环境变量 `CARGO_PROFILE_RELEASE_LTO=thin`、`_CODEGEN_UNITS=16`、`_INCREMENTAL=true` 测同一组对照，最后才动 `Cargo.toml`。这样 Issue 里有对照表、PR 里只有 3 行 diff，维护者能直接判断取舍。
+
+**教训**：给上游提 issue 前，必须先把"复现步骤"在干净环境里走一遍——本次差点就"`packageManager` 固定版本导致报错"提了一个假前提的 PR，实际是我自己导出的 `COREPACK_ENABLE_PROJECT_SPEC=0` 造成的。
