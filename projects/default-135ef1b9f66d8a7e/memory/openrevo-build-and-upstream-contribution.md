@@ -37,6 +37,7 @@ cd "D:\ai coding\open-revo"; git pull --ff-only origin dev; pnpm install; pnpm t
 - **PR #183**（2026-11-17 由 faintonce 合并进 `dev`）：`lto = "thin"` + `codegen-units = 16` + `incremental = true`；`opt-level = "z"`、`panic = "abort"`、`strip = true` 保持不变。
 - 合并后实测（0.9.8，`dev@1320a09`，该版本还叠加了 173 个 Rust 文件的重构）：冷构建 **4m31s**（原 6m21s），exe **24.98 MiB**（原 22.81 MiB，+11.6%）。+11.6% 是 thin LTO/16 CGU 的既定代价，已在 PR 里交维护者权衡。
 - 未做的可选项：Issue #182 的方案 C（4 个 `src/bin/*_probe.rs` 用 `required-features` 退出默认构建）与 `release.yml` 里两次全量编译（`--no-bundle` 那一步可省，`--bundles nsis` 本来就会产出同一个 exe）。
+- **Issue #197 / #198**（2026-11-19 提交，OPEN）：把上面两条拆成独立 issue 并附实测——#197 是 `release.yml` 两次 `tauri build`，实测第二步 `--bundles nsis` 仍会重编 app crate 并重链接 53.9s（`--bundles` 改变构建指纹，Tauri 打 bundle type 标记），建议合并为一次；#198 是 4 个探针 bin 每次都参与链接（日志末尾 804-807 单元），建议加 `required-features = ["probes"]`。两条都只提 issue 未提 PR，等维护者表态。
 
 ## 验证 exe 是否正常（不要只看体积）
 
