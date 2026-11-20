@@ -55,9 +55,9 @@
       ],
       "installed": [
         {
-          "where": "MSI 机器级安装（gh auth 走 keyring）",
-          "version": "2.104.0",
-          "note": "2026-11-13 升级至 2.104.0：本机为便携版布局（<tools>/gh/bin/gh.exe，非 MSI），从 cli/cli 的 gh_2.104.0_windows_amd64.zip（15169772 B）解包覆盖 bin/gh.exe，覆盖后 sha256 与新解包一致；旧版 2.103.3 已留回滚副本（quarantine）。`gh --version` 复核 2.104.0，`gh auth status` 复核 keyring 登录、账号与 scopes 均未受影响。"
+          "where": "便携版布局（<tools>/gh/bin/gh.exe；gh auth 走 keyring）",
+          "version": "2.105.0",
+          "note": "2026-11-20 升级至 2.105.0：从 cli/cli 的 gh_2.105.0_windows_amd64.zip（15212614 B）解包覆盖 bin/gh.exe，覆盖后 sha256 与新解包一致（77437def…）；旧版 2.104.0 的 zip 已留回滚副本（<tools>/_quarantine）。`gh --version` 复核 2.105.0，`gh auth status` 复核 keyring 登录、账号与 scopes 均未受影响。"
         }
       ]
     },
