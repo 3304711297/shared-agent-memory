@@ -26,6 +26,7 @@ cd "D:\ai coding\open-revo"; git pull --ff-only origin dev; pnpm install; pnpm t
 - corepack 作为 pnpm 启动器时会读这个字段并**自动切到 10.32.1**：干净环境实测 `pnpm install` 输出 `Done in 19.7s using pnpm v10.32.1`，随后 `pnpm build`、`pnpm tauri build --no-bundle` 全部正常。本机全局虽是 pnpm 12.x，走 corepack 时由它协商，不冲突。
 - `ERR_PNPM_BAD_PM_VERSION` 只在 **`export COREPACK_ENABLE_PROJECT_SPEC=0`** 时出现：该变量让 corepack 不再按项目切版本，于是 pnpm 12 直接运行、又因处于 corepack 下而拒绝自我切换，才硬报错。**永远不要设这个变量**——它曾被误当成"绕过版本检查"的手段，实际是制造错误的根源。
 - 另一真实但瞬时的坑：corepack 首次下载 10.32.1 可能因 IPv6 路由失败（`UND_ERR_CONNECT_TIMEOUT`，连 `2606:4700::...`），重试或 `NODE_OPTIONS=--dns-result-order=ipv4first` 即可。属网络问题，不是仓库问题，不值得向上游提 issue。
+- `pnpm install` 有时会提示“modules directory 将被删除重装，Proceed? (Y/n)”——这是 `.npmrc` 的 `node-linker=hoisted` 与现存 `node_modules` 布局不一致时的正常重建，默认 Y 就用 store 秒级重建完，不是错误。
 
 ## 仍然成立的坑：tauri CLI 要求 TTY
 
