@@ -29,3 +29,9 @@ JDKs: Eclipse Temurin 8/16/17/21/25 at D:\JAVA\temurin-*, Azul Zulu deleted. PCL
 Pitfall: never kill the proxy client (Karing/FlClash) while Windows system proxy points at it (ProxyEnable=1 -> 127.0.0.1:3067) — that severs Hermes' own upstream and freezes the session. Run karing://disconnect or set ProxyEnable=0 first, then stop/swap the client.
 §
 Hongguo desktop app (third-party): playback fails because upstream media API returns HTTP 200/0 bytes AND the V5 fallback cannot download its SDK assets (CDN 302 refused, allow_redirects=False). Copying the two shasum-verified assets into %APPDATA%\cn.guoban.desktop-companion\playback-sdk\74332 makes it play without restart. Details: topics/hongguo-desktop-playback.md; issue #1422.
+§
+workbuddy2api NSIS 安装包自 457bb70（2026-11-20）起内置内核与 CPython 3.12 运行时：src-tauri/runtime（约 94MB，.gitignore），打包前必须跑 scripts/prepare_bundle_runtime.py。v0.3.1 已发布并解包验证（4713 条负载、内置 python 可 import fastapi/uvicorn/httpx）；v0.2.1/v0.2.2/v0.3.0 三个旧安装包均缺内核，已全部下架删资产并在 Release 文本标注。
+§
+本机直连 raw.githubusercontent.com 会 DNS 失败：curl 需 `-x http://127.0.0.1:3067`；脚本内部调 curl（如 node 项目）需加 `HTTPS_PROXY=http://127.0.0.1:3067` 前缀；jsdelivr 直连会 connection reset。
+§
+youshouldknow repo (D:\ai coding\GitRepos\youshouldknow, MkDocs, main direct-push, no branch protection): its Bilibili watchdog tracks collection archives that return oldest-first, so paging on page.total is mandatory (a fixed page_size=30 silently skipped 12 videos in a 42-item collection); tracked set includes BVIDs found in any issue. link-check flaps on third-party 403/429/timeouts and skips deploy - throttle per host first, exclude+ledger second, never swap the global UA.
